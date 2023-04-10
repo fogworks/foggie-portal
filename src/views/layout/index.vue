@@ -21,7 +21,7 @@ import Welcome from "./_modules/welcome.vue";
 import DeviceDiscovery from "./_modules/deviceDiscovery.vue";
 import AdminAccount from "./_modules/adminAccount.vue";
 import { ref, markRaw, reactive, onMounted } from "vue";
-const active = ref(0);
+const active = ref(2);
 const stepList = reactive({
   tabs: [
     {
