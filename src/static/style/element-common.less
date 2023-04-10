@@ -1,0 +1,148 @@
+@import "./variable.less";
+.el-button {
+  width: 165px;
+  height: 56px;
+  border-radius: 16px;
+  // color: @light_blue;
+  font-size: 24px;
+  &.el-button--primary {
+    // background: @light_blue;
+    // color: #fff;
+    --el-button-hover-bg-color: @light_blue;
+  }
+  &.is-disabled {
+    background-color: #d8d8d8;
+    border: none;
+    &:hover {
+      background-color: #d8d8d8;
+    }
+  }
+}
+
+.el-input__wrapper {
+  height: 48px;
+  font-size: 22px;
+  color: #777;
+  background: #f2f2f2;
+  border-radius: 26px;
+}
+.el-tabs {
+  .el-tabs__active-bar {
+    background: #000;
+  }
+  .el-tabs__item {
+    margin-bottom: 10px;
+    font-size: 30px;
+    font-weight: 700;
+    color: #777;
+    &.is-active {
+      color: #000;
+    }
+  }
+}
+.el-table {
+  font-size: 20px;
+  background: var(--card-bg);
+  tr {
+    background: var(--card-bg);
+  }
+
+  .el-table__inner-wrapper::before {
+    z-index: 1;
+    background-color: #c0c0c0;
+  }
+  .el-table__cell {
+    border-bottom: 1px solid #c0c0c0 !important;
+  }
+  .cell {
+    color: #000;
+    min-height: 40px;
+    line-height: 40px;
+  }
+}
+.el-popper {
+  border-radius: 16px;
+  .el-scrollbar {
+    border-radius: inherit;
+    .el-dropdown-menu {
+      // background: rgb(242, 246, 255);
+      padding: 0;
+    }
+    .el-dropdown-menu__item {
+      justify-content: center;
+      height: 35px;
+      font-size: 16px;
+      font-weight: 700;
+      // color: #000;
+      // & + .el-dropdown-menu__item {
+      //   border-top: 1px solid #e5e7eb;
+      // }
+    }
+  }
+  .el-popper__arrow {
+    display: none;
+  }
+}
+.el-overlay {
+  background-color: var(--overlay-color);
+}
+.el-dialog {
+  z-index: 99999;
+  padding: 32px;
+  border-radius: 30px;
+  // background:@blue_gradient;
+  box-shadow: rgb(0 0 0 / 10%) 0px 0px 0px 0.5px inset;
+  backdrop-filter: blur(40px);
+  background: rgba(255, 255, 255, 0.6);
+  header,
+  > div,
+  footer {
+    padding: 0;
+  }
+  .el-dialog__header {
+    text-align: left;
+
+    .el-dialog__title {
+      font-size: 26px;
+      color: #000;
+      font-weight: 700;
+    }
+    .el-dialog__headerbtn {
+      right: 16px;
+      top: 16px;
+      .el-icon {
+        color: #000;
+        font-weight: 700;
+        font-size: 28px;
+      }
+    }
+  }
+  .el-dialog__body {
+    text-align: left;
+  }
+}
+
+.el-message-box {
+  // background: rgba(255, 255, 255, 0.6);
+  background: var(--bg-color);
+
+  border-radius: 16px;
+  .el-message-box__title {
+    color: var(--text-color);
+  }
+  .el-message-box__headerbtn {
+    .el-message-box__close {
+      color: var(--text-color);
+    }
+  }
+  .el-message-box__message {
+    color: var(--text-color);
+  }
+  .el-message-box__btns {
+    .el-button {
+      width: unset;
+      height: 30px;
+      font-size: 14px;
+    }
+  }
+}

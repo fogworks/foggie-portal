@@ -1,0 +1,41 @@
+@light_blue: #29abff;
+// @blue_gradient:linear-gradient (209.21deg, rgb(12, 39, 178) 13.57%, rgb(133, 218, 213) 98.38%);
+// @box_shadow:0px 2px 5px 0px rgb(0 0 0 / 20%);
+:root {
+  --bg-color: #f2f6ff;
+  --text-color: #000;
+  --btn-text-color: #fff;
+  --btn-gradient: linear-gradient(
+    180deg,
+    @light_blue 0%,
+    rgb(158, 236, 217) 100%
+  );
+  --liner-gradient: linear-gradient(180deg, #3913b8 0%, #75e0e6 100%);
+  --box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 0px 0.5px inset;
+  --card-bg: #f2f6ff;
+  --theme-border: none;
+  --theme-box-bg: #000;
+  --el-color-danger: #ff0000;
+  --el-button-hover-bg-color: @light_blue;
+  --text-color-777: #777;
+  --text-color-444: #444;
+  --overlay-color: rgba(0, 0, 0, 0.4);
+  --dialog-gradient-bg: linear-gradient(180deg, #e5f3ff 0%, #93baee 100%);
+}
+
+/* light主题 */
+:root.dark {
+  --bg-color: rgb(33, 33, 33);
+  --text-color: #fff;
+  --btn-text-color: #fff;
+  --card-bg: transparent;
+  --btn-gradient: linear-gradient(180deg, #000 0%, #787878 100%);
+  --liner-gradient: linear-gradient(180deg, #000 0%, #787878 100%);
+  --theme-box-bg: #f2f6ff;
+  --theme-border: 1px solid rgba(255, 255, 255, 0.5);
+  --el-color-danger: #ff0000;
+  --el-bg-color-overlay: rgb(33, 33, 33);
+  --text-color-777: #b4b4b4;
+  --text-color-444: #eee;
+  --overlay-color: rgba(0, 0, 0, 0);
+}
