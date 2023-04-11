@@ -1,0 +1,121 @@
+<template>
+  <div>
+    <p class="welcome">
+      Device Discovery
+      <svg-icon icon-class="reset" @click="refresh" class="refresh"></svg-icon>
+      <svg-icon icon-class="add" @click="addIP" class="refresh add"></svg-icon>
+    </p>
+    <ul class="deviceList">
+      <WifiSearching v-if="loading"></WifiSearching>
+      <li v-else v-for="item in deviceList.list" @click="toGuide(item)">
+        {{ item.name }}
+      </li>
+    </ul>
+    <IpForm v-model:visible="visible"></IpForm>
+  </div>
+</template>
+
+<script setup>
+import { ref, reactive, defineEmits } from "vue";
+import { useRouter } from "vue-router";
+import WifiSearching from "@/components/wifiSearching";
+import IpForm from "./ipForm";
+
+const loading = ref(false);
+const visible = ref(false);
+const router = useRouter();
+const refresh = () => {
+  loading.value = true;
+  setTimeout(() => {
+    loading.value = false;
+  }, 3000);
+};
+const addIP = () => {
+  visible.value = true;
+};
+const deviceList = reactive({
+  list: [
+    {
+      name: "xx",
+      url: "dasdas",
+    },
+  ],
+});
+const emit = defineEmits(["next"]);
+const toGuide = () => {
+  router.push({
+    name: "Welcome",
+  });
+};
+</script>
+
+<style lang="less" scoped>
+.welcome {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  font-weight: 700;
+  font-size: 24px;
+  .refresh {
+    margin-left: 10px;
+    // color: #29abff;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.5s;
+
+    &:hover {
+      // color: #f9f871;
+      transform: rotate(90deg);
+    }
+  }
+  .add {
+    font-size: 30px;
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+}
+
+.deviceList {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin: 20px;
+  padding: 0;
+  list-style: none;
+  :deep {
+    #wifi-loader {
+      margin: 100px auto;
+    }
+  }
+  li {
+    box-sizing: border-box;
+    width: 200px;
+    height: 180px;
+    margin: 20px;
+    background: rgba(251, 251, 251, 0.58);
+    border: 1px solid white;
+    box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(6px);
+    border-radius: 17px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.5s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    font-weight: bolder;
+    color: black;
+    cursor: pointer;
+    &:hover {
+      border: 1px solid black;
+      transform: scale(1.05);
+    }
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+}
+</style>

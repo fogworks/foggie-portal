@@ -1,6 +1,6 @@
 <template>
   <div class="buttons">
-    <button class="btn" v-on="$attrs">
+    <button class="btn" @click="emit('next')">
       <span></span>
       <p data-start="Start!" data-text="Start!" data-title="To Set"></p>
     </button>
@@ -9,8 +9,8 @@
 
 <script>
 export default {
-  setup() {
-    return {};
+  setup(props, { emit }) {
+    return { emit };
   },
 };
 </script>

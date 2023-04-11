@@ -1,7 +1,7 @@
 <template>
   <div class="top">
     <div class="header-left">
-      <a href="https://fogworks.io/" target="_blank">
+      <!-- <a href="https://fogworks.io/" target="_blank">
         <img
           v-if="currentTheme === 'light'"
           class="logo"
@@ -10,12 +10,12 @@
         />
         <img v-else class="logo" src="@/assets/logo-top-left-dark.png" alt="" />
       </a>
-      <span class="line" />
-      <router-link class="name-link" to="/home">
-        <img class="foggie" src="@/assets/foggie.jpg" alt="" />
-      </router-link>
+      <span class="line" /> -->
+      <!-- <router-link class="name-link" to="/home"> -->
+      <img class="foggie" src="@/assets/foggie.jpg" alt="" />
+      <!-- </router-link> -->
 
-      <div class="beta">Max Beta</div>
+      <!-- <div class="beta">Max Beta</div> -->
     </div>
   </div>
 </template>

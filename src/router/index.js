@@ -7,14 +7,19 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'index',
-      component: defineAsyncComponent(() => import(`../views/layout`)),
+      name: 'Portal',
+      component: defineAsyncComponent(() => import(`../views/portal`)),
       meta: {
-        title: 'index',
+        title: 'portal',
       },
-      children: [
-
-      ]
+    },
+    {
+      path: '/welcome',
+      name: 'Welcome',
+      component: defineAsyncComponent(() => import(`../views/welcome`)),
+      meta: {
+        title: 'welcome',
+      },
     },
     {
       path: '/*',

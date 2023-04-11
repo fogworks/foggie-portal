@@ -9,29 +9,43 @@
 </template>
 
 <script>
-import Layout from "./views/layout/index";
+// import Layout from "./views/layout/index";
 // import mainVue from './views/main/main.vue'
 export default {
   name: "App",
   components: {
-    Layout,
+    // Layout,
   },
 };
 </script>
 
 <style lang="less">
+* {
+  margin: 0;
+  padding: 0;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-width: 1200px;
-  text-align: center;
+  // text-align: left;
   color: #2c3e50;
   background: var(--bg-color);
   height: 100vh;
+  overflow-y: auto;
 }
 ::-webkit-scrollbar {
-  display: none;
+  // display: none;
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-thumb {
+  /*滚动条里面小方块*/
+
+  border-radius: 5px;
+
+  background: rgba(0, 0, 0, 0.2);
 }
 
 @font-face {
