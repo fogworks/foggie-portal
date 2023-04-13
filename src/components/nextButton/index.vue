@@ -1,5 +1,7 @@
 <template>
-  <button>Next</button>
+  <button>
+    <slot>Next</slot>
+  </button>
 </template>
 
 <script setup></script>

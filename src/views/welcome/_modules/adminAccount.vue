@@ -70,7 +70,14 @@ const rules = {
     message: "Please enter an account name",
     trigger: "blur",
   },
-  password: { required: true, validator: validatePass, trigger: "blur" },
+  password: [
+    { required: true, validator: validatePass, trigger: "blur" },
+    {
+      min: 6,
+      message: "Password length not less than 6 digits",
+      trigger: "blur",
+    },
+  ],
   checkPass: { required: true, validator: validatePass2, trigger: "blur" },
 };
 const submit = () => {
@@ -91,6 +98,10 @@ const submit = () => {
 .account-form {
   width: 500px;
   margin: 100px auto;
+  padding: 40px 30px;
+  background: #dde1e7;
+  border-radius: 10px;
+  box-shadow: -3px -3px 7px #ffffff73, 2px 2px 5px rgba(94, 104, 121, 0.288);
   :deep {
     .el-form-item__label {
       font-weight: 700;

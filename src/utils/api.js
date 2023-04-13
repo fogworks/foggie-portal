@@ -867,9 +867,8 @@ export const uploadMultipart = (params) => {
   //   }&content_type=${fileType}`;
   // }
 
-  url = `/mp/${encodeURIComponent(fileName)}?upload_id=${
-    upload_id ?? ""
-  }&content_type=${fileType}`;
+  url = `/mp/${encodeURIComponent(fileName)}?upload_id=${upload_id ?? ""
+    }&content_type=${fileType}`;
 
   let obj = {
     url: url,
@@ -892,9 +891,8 @@ export const uploadMultipart = (params) => {
 /* 大文件 断点续传 查看文件当前上传到第几段 */
 export const curUploadChunk = (params) => {
   return request({
-    url: `/mp/${encodeURIComponent(params.fileName)}?upload_id=${
-      params.upload_id
-    }`,
+    url: `/mp/${encodeURIComponent(params.fileName)}?upload_id=${params.upload_id
+      }`,
     method: "GET",
     data: data,
     headers: {
@@ -1488,3 +1486,13 @@ export const get_user_all_active_order = () => {
     method: "GET",
   });
 };
+
+// 获取套件安装状态
+export const get_kit_installation_status = (params) => {
+  return request({
+    url: `/api/oms/get_kit_installation_status`,
+    method: "GET",
+    params
+  });
+};
+

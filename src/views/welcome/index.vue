@@ -8,13 +8,13 @@
         v-show="active > 0"
         class="back"
         icon-class="portal-back"
+        @click="pre"
       ></svg-icon>
       <component
         v-for="(item, index) in stepList.tabs"
         v-show="active === index"
         :is="item.com"
         @next="next"
-        @pre="pre"
         v-model:form="form"
       ></component>
     </main>
@@ -29,7 +29,7 @@ import AdminAccount from "./_modules/adminAccount";
 import ExternalMember from "./_modules/externalMember";
 import AdvancedServices from "./_modules/advancedServices";
 import { ref, markRaw, reactive } from "vue";
-const active = ref(0);
+const active = ref(2);
 const stepList = reactive({
   tabs: [
     {
@@ -85,7 +85,7 @@ const form = reactive({
     .back {
       position: absolute;
       left: 20px;
-      top: 50%;
+      top: 280px;
       color: #29abff;
       font-size: 30px;
       cursor: pointer;
