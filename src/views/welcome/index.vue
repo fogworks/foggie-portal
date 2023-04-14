@@ -5,7 +5,7 @@
     </header>
     <main>
       <svg-icon
-        v-show="active > 0"
+        v-show="active > 0 && preShow"
         class="back"
         icon-class="portal-back"
         @click="pre"
@@ -16,6 +16,7 @@
         :is="item.com"
         @next="next"
         v-model:form="form"
+        v-model:preShow="preShow"
       ></component>
     </main>
   </div>
@@ -27,9 +28,10 @@ import Welcome from "./_modules/welcome.vue";
 // import DeviceDiscovery from "./_modules/deviceDiscovery.vue";
 import AdminAccount from "./_modules/adminAccount";
 import ExternalMember from "./_modules/externalMember";
-import AdvancedServices from "./_modules/advancedServices";
+// import AdvancedServices from "./_modules/advancedServices";
 import { ref, markRaw, reactive } from "vue";
-const active = ref(2);
+const active = ref(0);
+const preShow = ref(false);
 const stepList = reactive({
   tabs: [
     {
@@ -56,6 +58,7 @@ const stepList = reactive({
 });
 const next = () => {
   active.value = ++active.value;
+  preShow.value = true;
   console.log(active.value);
 };
 const pre = () => {
@@ -66,7 +69,7 @@ const pre = () => {
   }
 };
 const form = reactive({
-  account: "",
+  username: "",
   password: "",
   checkPass: "",
   kits: [],
@@ -76,7 +79,7 @@ const form = reactive({
 <style lang="less" scoped>
 .container {
   width: 1200px;
-  padding: 0 40px;
+  padding: 0 40px 40px;
   margin: 0 auto;
   box-sizing: border-box;
   main {
@@ -100,5 +103,17 @@ const form = reactive({
   display: flex;
   justify-content: space-between;
   gap: 40px;
+}
+</style>
+<style>
+.el-popper.is-customized {
+  /* Set padding to ensure the height is 32px */
+  padding: 6px 12px;
+  background: linear-gradient(90deg, rgb(159, 229, 151), rgb(204, 229, 129));
+}
+
+.el-popper.is-customized .el-popper__arrow::before {
+  background: linear-gradient(45deg, #b2e68d, #bce689);
+  right: 0;
 }
 </style>

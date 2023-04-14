@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p class="welcome">Administrator Account</p>
+    <p class="welcome">Modify Password</p>
     <el-form
       class="account-form"
       :model="form"
@@ -8,9 +8,6 @@
       ref="formRef"
       :rules="rules"
     >
-      <el-form-item label="Account" prop="username">
-        <el-input v-model="form.username"></el-input>
-      </el-form-item>
       <el-form-item label="Password" prop="password">
         <el-input
           type="password"
@@ -25,37 +22,13 @@
           show-password
         ></el-input>
       </el-form-item>
-      <el-form-item
-        class="check-item"
-        label="Synchronize or not"
-        prop="is_sync"
-      >
-        <el-checkbox v-model="form.is_sync" size="large" />
+      <el-form-item label="old Password" prop="old_password">
+        <el-input
+          type="password"
+          v-model="form.old_password"
+          show-password
+        ></el-input>
       </el-form-item>
-      <el-form-item label="Foggie Max name" prop="foggie_max_name">
-        <el-input v-model="form.foggie_max_name"></el-input>
-      </el-form-item>
-      <template v-if="form.is_sync">
-        <el-form-item prop="email">
-          <template #label>
-            <span>Email</span>
-            <el-tooltip
-              placement="top"
-              content="Bottom center"
-              effect="customized"
-            >
-              <svg-icon
-                icon-class="info"
-                style="color: #29abff; margin-left: 10px"
-              ></svg-icon>
-            </el-tooltip>
-          </template>
-          <el-input type="email" v-model="form.email"></el-input>
-        </el-form-item>
-        <el-form-item label="DMC Account" prop="dmc_account">
-          <el-input v-model="form.dmc_account"></el-input>
-        </el-form-item>
-      </template>
     </el-form>
     <div class="foot-btn">
       <NextButton @click="submit"></NextButton>
@@ -68,7 +41,7 @@
 <script setup>
 import { ref, reactive, defineEmits, getCurrentInstance } from "vue";
 import NextButton from "@/components/nextButton";
-import { adminRegister, adminLogin } from "@/utils/api";
+import { adminRegister, adminLogin, modifyPassword } from "@/utils/api";
 const emit = defineEmits(["next", "update:preShow"]);
 // const props = defineProps({
 //   form: Object,
@@ -76,13 +49,9 @@ const emit = defineEmits(["next", "update:preShow"]);
 // const form = reactive(props.form);
 const { proxy } = getCurrentInstance();
 const form = reactive({
-  username: "",
   password: "",
   confirmPassword: "",
-  is_sync: false,
-  email: "",
-  dmc_account: "",
-  foggie_max_name: "",
+  old_password: "",
 });
 const formRef = ref(null);
 const validatePass = (rule, value, callback) => {
@@ -106,11 +75,6 @@ const validatePass2 = (rule, value, callback) => {
   }
 };
 const rules = {
-  username: {
-    required: true,
-    message: "Please enter an account name",
-    trigger: "blur",
-  },
   password: [
     { required: true, validator: validatePass, trigger: "blur" },
     {
@@ -124,6 +88,11 @@ const rules = {
     validator: validatePass2,
     trigger: "blur",
   },
+  old_password: {
+    required: true,
+    message: "Please enter the old password",
+    trigger: "blur",
+  },
 };
 const loading = ref(false);
 const submit = () => {
@@ -131,8 +100,7 @@ const submit = () => {
   formRef.value.validate((valid) => {
     if (valid) {
       loading.value = true;
-      emit("update:preShow", false);
-      adminRegister(form)
+      modifyPassword(form)
         .then((res) => {
           proxy.$notify({
             type: "success",
@@ -144,12 +112,9 @@ const submit = () => {
             password: form.password,
           }).then((res) => {
             loading.value = false;
-            emit("next");
-            emit("update:preShow", true);
           });
         })
         .catch((err) => {
-          emit("update:preShow", false);
           loading.value = false;
         });
     }
@@ -167,9 +132,9 @@ const submit = () => {
   width: 500px;
   margin: 100px auto;
   padding: 40px 30px;
-  background: transparent;
+  background: #dde1e7;
   border-radius: 10px;
-  box-shadow: 0px 0px 9px #ffffff73, 0px 0px 5px rgba(94, 104, 121, 0.288);
+  box-shadow: -3px -3px 7px #ffffff73, 2px 2px 5px rgba(94, 104, 121, 0.288);
   :deep {
     .el-form-item__label {
       font-weight: 700;

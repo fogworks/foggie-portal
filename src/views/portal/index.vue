@@ -7,10 +7,14 @@
       <el-menu-item index="Discover">
         <span>Discover</span>
       </el-menu-item>
+      <el-menu-item index="Setting">
+        <span>Setting</span>
+      </el-menu-item>
     </el-menu>
     <div class="main">
       <Device v-show="active === 'Device'"></Device>
       <Discover v-show="active === 'Discover'"></Discover>
+      <Setting v-show="active === 'Setting'"></Setting>
     </div>
   </div>
 </template>
@@ -19,6 +23,7 @@
 import { ref } from "vue";
 import Device from "./_modules/device";
 import Discover from "./_modules/discover";
+import Setting from "./_modules/setting";
 const active = ref("Device");
 const handleSelect = (key, keyPath) => {
   console.log(key);
@@ -37,6 +42,7 @@ const handleSelect = (key, keyPath) => {
     }
   }
   .main {
+    position: relative;
     overflow-y: auto;
     height: calc(100% - 60px);
     flex: 1;
@@ -46,6 +52,14 @@ const handleSelect = (key, keyPath) => {
       rgba(174, 176, 238, 1) 0%,
       rgba(148, 187, 233, 1) 100%
     );
+    // &::before {
+    //   content: "";
+    //   position: absolute;
+    //   width: 100%;
+    //   height: 100%;
+    //   background: url("~@/assets/cool-background.png") no-repeat;
+    //   background-size: cover;
+    // }
   }
 }
 </style>

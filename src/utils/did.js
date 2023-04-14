@@ -317,11 +317,11 @@ class BuildDid {
 			// );
 			// const activeteRet = await activeteResponse.json();
 			console.log("checkVoodRet:", checkVoodRet);
-			if (checkVoodRet.data.result != 0) {
+			if (checkVoodRet.result?.data) {
 				isIpCanUse = true;
-				if (!checkVoodRet.data.activation) {
+				if (!checkVoodRet.result.data?.activation) {
 					// console.log(ip + "check-result", activeteRet);
-					g_uniqueId = String(checkVoodRet.data.device_info.mac_address);
+					g_uniqueId = String(checkVoodRet.result.data.device_info.mac_address);
 				}
 				// else {
 				//     window.location.href = `cyfs://static/reset_did.html?action=bindVood&ip=[${ip}]&accessToken=${token}`;

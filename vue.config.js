@@ -214,6 +214,11 @@ module.exports = defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      "^/v1": {
+        target: "http://154.37.16.163:9094",
+        changeOrigin: true,
+        secure: false,
+      },
     },
     // before: require('./mock/mock-server.js')
   },

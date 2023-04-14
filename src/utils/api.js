@@ -756,7 +756,7 @@ export const updateVoodGateway = (data) => {
 //检查VOOD的信息
 export const voodInfoCheck = (vpsId) => {
   return request({
-    url: `/api/vps/vood_check?vps_id=${vpsId}`,
+    url: `/v1/service/check_cyfs`,
     method: "GET",
   });
 };
@@ -1495,4 +1495,63 @@ export const get_kit_installation_status = (params) => {
     params
   });
 };
+
+// 管理员注册
+export const adminRegister = (data) => {
+  return request({
+    url: `/v1/account/register`,
+    method: "POST",
+    data
+  });
+};
+// 管理员登录
+export const adminLogin = (data) => {
+  return request({
+    url: `/v1/account/login`,
+    method: "POST",
+    data
+  });
+};
+// 管理员修改密码
+export const modifyPassword = (id) => {
+  return request({
+    url: `/v1/account/modifyPassword/${id}`,
+    method: "PUT",
+  });
+};
+// cbs服务激活
+export const deploy_cbs = (data) => {
+  return request({
+    url: `/v1/service/deploy_cbs`,
+    method: "POST",
+    data
+  });
+};
+// ipfs服务激活
+export const deploy_ipfs = (data) => {
+  return request({
+    url: `/v1/service/deploy_ipfs`,
+    method: "POST",
+    data
+  });
+};
+// cyfs服务激活
+export const deploy_cyfs = (data) => {
+  return request({
+    url: `/v1/service/deploy_cyfs`,
+    method: "POST",
+    data
+  });
+};
+// 服务状态查询
+export const get_service_info = () => {
+  return request({
+    url: `/v1/get_service_info`,
+    method: "get",
+  });
+};
+
+
+
+
 
