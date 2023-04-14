@@ -47,7 +47,7 @@
           >Retry</NextButton
         >
         <NextButton
-          v-else-if="status === 'To be installed'"
+          v-else-if="status === 'To be installed' && !isInstall"
           @click="startInstall"
           >Start Installation</NextButton
         >
@@ -224,7 +224,10 @@ const installCYFS = async (isFinish) => {
     installCYFS();
   }
 };
+const isInstall = ref(false);
 const gotoDeploy = async (item, type) => {
+  if (isInstall.value) return false;
+  isInstall.vale = true;
   count.value = 0;
   emit("update:preShow", false);
 
@@ -372,12 +375,13 @@ const getInitialState = () => {
 };
 watch(count, (val) => {
   if (val > 3) {
+    isInstall.value = false;
     clearInterval(cbsTimer);
     clearInterval(ipfsTimer);
     clearInterval(cyfsTimer);
     rate.value = 0;
     status.value = "Installation failed";
-    // resetMethod();
+    resetMethod();
   }
 });
 
