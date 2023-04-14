@@ -867,8 +867,9 @@ export const uploadMultipart = (params) => {
   //   }&content_type=${fileType}`;
   // }
 
-  url = `/mp/${encodeURIComponent(fileName)}?upload_id=${upload_id ?? ""
-    }&content_type=${fileType}`;
+  url = `/mp/${encodeURIComponent(fileName)}?upload_id=${
+    upload_id ?? ""
+  }&content_type=${fileType}`;
 
   let obj = {
     url: url,
@@ -891,8 +892,9 @@ export const uploadMultipart = (params) => {
 /* 大文件 断点续传 查看文件当前上传到第几段 */
 export const curUploadChunk = (params) => {
   return request({
-    url: `/mp/${encodeURIComponent(params.fileName)}?upload_id=${params.upload_id
-      }`,
+    url: `/mp/${encodeURIComponent(params.fileName)}?upload_id=${
+      params.upload_id
+    }`,
     method: "GET",
     data: data,
     headers: {
@@ -1492,7 +1494,7 @@ export const get_kit_installation_status = (params) => {
   return request({
     url: `/api/oms/get_kit_installation_status`,
     method: "GET",
-    params
+    params,
   });
 };
 
@@ -1501,7 +1503,7 @@ export const adminRegister = (data) => {
   return request({
     url: `/v1/account/register`,
     method: "POST",
-    data
+    data,
   });
 };
 // 管理员登录
@@ -1509,7 +1511,7 @@ export const adminLogin = (data) => {
   return request({
     url: `/v1/account/login`,
     method: "POST",
-    data
+    data,
   });
 };
 // 管理员修改密码
@@ -1524,7 +1526,7 @@ export const deploy_cbs = (data) => {
   return request({
     url: `/v1/service/deploy_cbs`,
     method: "POST",
-    data
+    data,
   });
 };
 // ipfs服务激活
@@ -1532,7 +1534,7 @@ export const deploy_ipfs = (data) => {
   return request({
     url: `/v1/service/deploy_ipfs`,
     method: "POST",
-    data
+    data,
   });
 };
 // cyfs服务激活
@@ -1540,7 +1542,7 @@ export const deploy_cyfs = (data) => {
   return request({
     url: `/v1/service/deploy_cyfs`,
     method: "POST",
-    data
+    data,
   });
 };
 // 服务状态查询
@@ -1558,8 +1560,51 @@ export const reset_vood = () => {
   });
 };
 
+//getIP
+export const getIP = () => {
+  let url = `/getIP`;
+  return request({
+    url: url,
+    method: "GET",
+  });
+};
 
+//portalPing
+export const portalPing = (data) => {
+  let url = "/portal_ping";
+  return request({
+    url: url,
+    method: "POST",
+    data: data,
+  });
+};
 
+//socket_ip
+export const socketIP = (data) => {
+  let url = "/socket_ip";
+  return request({
+    url: url,
+    method: "POST",
+    data: data,
+  });
+};
 
+//ping_url
+export const pingUrl = (data) => {
+  let url = "/get_max_info";
+  return request({
+    url: url,
+    method: "POST",
+    data,
+  });
+};
 
-
+//get_net_status
+export const getNetStatus = (data) => {
+  let url = `/get_net_status`;
+  return request({
+    url: url,
+    method: "POST",
+    data,
+  });
+};

@@ -1,10 +1,12 @@
 <template>
   <div>
+    <!-- <a href="http://154.37.16.163:9000/#/home">Foggie Max</a> -->
     <p class="welcome">
       Device Discovery
       <svg-icon icon-class="reset" @click="refresh" class="refresh"></svg-icon>
       <svg-icon icon-class="add" @click="addIP" class="refresh add"></svg-icon>
     </p>
+    <p v-if="curAddress">Your IP address:{{ curAddress }}</p>
     <ul class="deviceList">
       <WifiSearching v-if="loading"></WifiSearching>
       <li
@@ -14,7 +16,7 @@
         @click="toGuide(item)"
       >
         <span>
-          {{ item.name }}
+          {{ item.device_name }}
         </span>
       </li>
     </ul>
@@ -27,14 +29,44 @@ import { ref, reactive, defineEmits } from "vue";
 import { useRouter } from "vue-router";
 import WifiSearching from "@/components/wifiSearching";
 import IpForm from "./ipForm";
+import {
+  pingUrl,
+  getIP,
+  socketIP,
+  portalPing,
+  getNetStatus,
+} from "@/utils/api";
 
 const loading = ref(false);
 const visible = ref(false);
 const router = useRouter();
+const curAddress = ref("");
 const refresh = () => {
   loading.value = true;
   setTimeout(() => {
-    loading.value = false;
+    getIP().then((res) => {
+      curAddress.value = res?.address;
+      loading.value = false;
+    });
+    let data = {
+      url: "http://154.37.16.163:9094/",
+    };
+    pingUrl(data).then((r) => {
+      console.log("~~~~~~", r);
+    });
+    socketIP().then((rrr) => {
+      console.log("!!!!!!!!", rrr);
+      deviceList.list = rrr.data;
+    });
+    // portalPing().then((res)=>{
+    //   console.log("res++++++", res)
+    // })
+    let data1 = {
+      ip: "explorer.dmctech.io",
+    };
+    getNetStatus(data1).then((dd) => {
+      console.log("ddddddd", dd);
+    });
   }, 3000);
 };
 const addIP = () => {
@@ -42,10 +74,10 @@ const addIP = () => {
 };
 const deviceList = reactive({
   list: [
-    {
-      name: "xx",
-      url: "dasdas",
-    },
+    // {
+    //   name: "xx",
+    //   url: "dasdas",
+    // },
   ],
 });
 const emit = defineEmits(["next"]);
