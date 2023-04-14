@@ -52,13 +52,21 @@ const handleSelect = (key, keyPath) => {
       rgba(174, 176, 238, 1) 0%,
       rgba(148, 187, 233, 1) 100%
     );
-    // &::before {
+    background: url("~@/assets/cool-background.png") no-repeat;
+    background-size: cover;
+    > div {
+      z-index: 1;
+    }
+    // &::after {
     //   content: "";
     //   position: absolute;
+    //   left: 0;
+    //   top: 0;
     //   width: 100%;
     //   height: 100%;
     //   background: url("~@/assets/cool-background.png") no-repeat;
     //   background-size: cover;
+    //   z-index: 0;
     // }
   }
 }

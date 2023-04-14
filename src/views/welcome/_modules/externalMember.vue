@@ -64,6 +64,7 @@ import {
   deploy_ipfs,
   deploy_cyfs,
   get_service_info,
+  reset_vood,
 } from "@/utils/api";
 import NextButton from "@/components/nextButton";
 import { createDID, activeVOOD } from "@/utils/did.js";
@@ -92,19 +93,55 @@ const statusMap = {
   finish: "Finish",
   fail: "Installation failed",
 };
+const resetMethod = async () => {
+  return new Promise((resolve, reject) => {
+    const rest = () => {
+      reset_vood()
+        .then(async () => {
+          let isInitial = await getInitialState();
+          if (isInitial) {
+            resolve(true);
+          } else {
+            reject(false);
+          }
+        })
+        .catch(() => {
+          count.value++;
+          if (count.value > 3) {
+            reject(false);
+            return false;
+          }
+          rest();
+        });
+    };
+    rest();
+  });
+};
+let cbsTimer = "";
+let ipfsTimer = "";
+let cyfsTimer = "";
 const installCBS = async (isFinish) => {
   try {
     await deploy_cbs();
-    const cbsTimer = setInterval(timeCallback(33), 1000);
+    cbsTimer = setInterval(timeCallback(33), 1000);
     let cbsFinish = await getInstallStatus("cbs");
     if (cbsFinish) {
       clearInterval(cbsTimer);
       rate.value = 33;
       return true;
     } else {
-      installCBS();
+      // fail
+      if (count.value > 3) {
+        return false;
+      }
+      let reset = await resetMethod();
+      if (reset) installCBS();
     }
   } catch {
+    count.value++;
+    if (count.value > 3) {
+      return false;
+    }
     installCBS();
   }
   // try {
@@ -116,22 +153,30 @@ const installCBS = async (isFinish) => {
 const installIPFS = async (isFinish) => {
   try {
     await deploy_ipfs();
-    const ipfsTimer = setInterval(timeCallback(66), 1000);
+    ipfsTimer = setInterval(timeCallback(66), 1000);
     let ipfsFinish = await getInstallStatus("ipfs");
     if (ipfsFinish) {
       clearInterval(ipfsTimer);
       rate.value = 66;
       return true;
     } else {
-      installIPFS();
+      // fail
+      if (count.value > 3) {
+        return false;
+      }
+      let reset = await resetMethod();
+      if (reset) installIPFS();
     }
   } catch {
+    count.value++;
+    if (count.value > 3) return false;
     installIPFS();
   }
 };
 const installCYFS = async (isFinish) => {
   try {
     const bindInfoObj = await createDID("");
+    console.log(bindInfoObj, "bindInfoObj");
     if (bindInfoObj && bindInfoObj.g_uniqueId) {
       const index = calcIndex(bindInfoObj.g_uniqueId);
       const bind_info = {
@@ -142,7 +187,7 @@ const installCYFS = async (isFinish) => {
       };
       deploy_cyfs(bind_info)
         .then(async (res) => {
-          const cyfsTimer = setInterval(timeCallback(99), 1000);
+          cyfsTimer = setInterval(timeCallback(99), 1000);
           console.log("deploy cyfs", res);
           let cyfsFinish = await getInstallStatus("cyfs");
           if (cyfsFinish) {
@@ -150,29 +195,78 @@ const installCYFS = async (isFinish) => {
             rate.value = 100;
             // emit("update:preShow", true);
           } else {
-            installCYFS();
+            if (count.value > 3) {
+              return false;
+            }
+            let reset = await resetMethod();
+            if (reset) installCYFS();
           }
         })
         .catch(() => {
+          count.value++;
+          if (count.value > 3) {
+            return false;
+          }
           installCYFS();
         })
         .finally(() => {});
+    } else {
+      console.log("check_cyfs失败");
+      count.value++;
+      console.log("count.value", count.value);
+
+      if (count.value > 3) return false;
+      installCYFS();
     }
   } catch {
+    count.value++;
+    if (count.value > 3) return false;
     installCYFS();
   }
 };
 const gotoDeploy = async (item, type) => {
   count.value = 0;
-  status.value = "Initializing";
   emit("update:preShow", false);
-  let cbs = await installCBS();
-  if (cbs) {
-    let ipfs = await installIPFS();
-    if (ipfs) {
-      await installCYFS();
-    }
-  }
+
+  get_service_info()
+    .then(async ({ result }) => {
+      if (
+        result.cbs_state !== "pending_init" ||
+        result.ipfs_state !== "pending_init" ||
+        result.cyfs_state !== "pending_init"
+      ) {
+        status.value = "Resetting";
+        let reset = await resetMethod();
+        if (reset) {
+          status.value = "Initializing";
+
+          let cbs = await installCBS();
+          if (cbs) {
+            let ipfs = await installIPFS();
+            if (ipfs) {
+              await installCYFS();
+            }
+          }
+        }
+      } else {
+        status.value = "Initializing";
+
+        let cbs = await installCBS();
+        if (cbs) {
+          let ipfs = await installIPFS();
+          if (ipfs) {
+            await installCYFS();
+          }
+        }
+      }
+    })
+    .catch(() => {
+      count.value++;
+      if (count.value > 3) {
+        return false;
+      }
+      gotoDeploy();
+    });
 };
 
 const calcIndex = (uniqueStr) => {
@@ -240,6 +334,36 @@ const getInstallStatus = (type) => {
           }
         })
         .catch((err) => {
+          count.value++;
+          reject(false);
+        });
+    };
+    getStatus();
+  });
+};
+const getInitialState = () => {
+  return new Promise((resolve, reject) => {
+    const getStatus = () => {
+      get_service_info()
+        .then(({ result }) => {
+          if (
+            result.cbs_state !== "pending_init" ||
+            result.ipfs_state !== "pending_init" ||
+            result.cyfs_state !== "pending_init"
+          ) {
+            setTimeout(() => {
+              getStatus();
+            }, 5000);
+          } else if (
+            result.cbs_state == "pending_init" &&
+            result.ipfs_state == "pending_init" &&
+            result.cyfs_state == "pending_init"
+          ) {
+            resolve(true);
+          }
+        })
+        .catch((err) => {
+          count.value++;
           reject(false);
         });
     };
@@ -248,9 +372,15 @@ const getInstallStatus = (type) => {
 };
 watch(count, (val) => {
   if (val > 3) {
+    clearInterval(cbsTimer);
+    clearInterval(ipfsTimer);
+    clearInterval(cyfsTimer);
+    rate.value = 0;
     status.value = "Installation failed";
+    // resetMethod();
   }
 });
+
 const startInstall = async () => {
   gotoDeploy();
   // const timer = setInterval(timeCallback, 1000);
@@ -261,6 +391,7 @@ const next = async () => {
   // gotoDeploy("", "ipfs");
   // gotoDeploy("", "cyfs");
   // emit("next");
+  window.location.href = "http://154.37.16.163:9000/#/home";
 };
 </script>
 

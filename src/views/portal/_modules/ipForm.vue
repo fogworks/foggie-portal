@@ -1,6 +1,11 @@
 <template>
   <div>
-    <el-dialog width="500px" :model-value="visible" title="Add device">
+    <el-dialog
+      width="500px"
+      :before-close="cancel"
+      :model-value="visible"
+      title="Add device"
+    >
       <el-form
         class="ip-form"
         ref="ipFormRef"

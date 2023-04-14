@@ -1550,6 +1550,14 @@ export const get_service_info = () => {
     method: "get",
   });
 };
+// 服务一键重置
+export const reset_vood = () => {
+  return request({
+    url: `/v1/service/reset_vood`,
+    method: "POST",
+  });
+};
+
 
 
 

@@ -7,8 +7,15 @@
     </p>
     <ul class="deviceList">
       <WifiSearching v-if="loading"></WifiSearching>
-      <li v-else v-for="item in deviceList.list" @click="toGuide(item)">
-        {{ item.name }}
+      <li
+        class="card"
+        v-else
+        v-for="item in deviceList.list"
+        @click="toGuide(item)"
+      >
+        <span>
+          {{ item.name }}
+        </span>
       </li>
     </ul>
     <IpForm v-model:visible="visible"></IpForm>
@@ -56,6 +63,8 @@ const toGuide = () => {
   text-align: left;
   font-weight: 700;
   font-size: 24px;
+  color: #fff;
+
   .refresh {
     margin-left: 10px;
     // color: #29abff;
@@ -90,6 +99,8 @@ const toGuide = () => {
     }
   }
   li {
+    overflow: hidden;
+    position: relative;
     box-sizing: border-box;
     width: 200px;
     height: 180px;
@@ -109,12 +120,63 @@ const toGuide = () => {
     font-weight: bolder;
     color: black;
     cursor: pointer;
-    &:hover {
-      border: 1px solid black;
-      transform: scale(1.05);
+    > span {
+      z-index: 10;
     }
-    &:active {
-      transform: scale(0.95);
+    :deep {
+      .el-dropdown {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        border: none !important;
+        z-index: 10;
+      }
+    }
+    // .more {
+    //   position: absolute;
+    //   top: 10px;
+    //   right: 10px;
+    // }
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    width: 100px;
+    background-image: linear-gradient(
+      180deg,
+      rgb(0, 183, 255),
+      rgb(255, 48, 255)
+    );
+    height: 150%;
+    animation: rotBGimg 3s linear infinite;
+    transition: all 0.2s linear;
+    display: none;
+  }
+
+  @keyframes rotBGimg {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .card::after {
+    content: "";
+    position: absolute;
+    background: transparent;
+    inset: 5px;
+    border-radius: 15px;
+  }
+  .card:hover {
+    background: #fff;
+    &::before {
+      display: inline-block;
+    }
+    &::after {
+      background-color: #fff;
     }
   }
 }
