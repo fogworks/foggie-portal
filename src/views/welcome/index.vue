@@ -1,24 +1,26 @@
 <template>
-  <div class="container">
-    <header>
-      <LayoutHeader></LayoutHeader>
-    </header>
-    <main>
-      <svg-icon
-        v-show="active > 0 && preShow"
-        class="back"
-        icon-class="portal-back"
-        @click="pre"
-      ></svg-icon>
-      <component
-        v-for="(item, index) in stepList.tabs"
-        v-show="active === index"
-        :is="item.com"
-        @next="next"
-        v-model:form="form"
-        v-model:preShow="preShow"
-      ></component>
-    </main>
+  <div class="out-box">
+    <div class="container">
+      <header>
+        <LayoutHeader></LayoutHeader>
+      </header>
+      <main v-loading="loading">
+        <svg-icon
+          v-show="active > 0 && preShow"
+          class="back"
+          icon-class="portal-back"
+          @click="pre"
+        ></svg-icon>
+        <component
+          v-for="(item, index) in stepList.tabs"
+          v-show="active === index"
+          :is="item.com"
+          @next="next"
+          :hasExternalNetwork="hasExternalNetwork"
+          v-model:preShow="preShow"
+        ></component>
+      </main>
+    </div>
   </div>
 </template>
 
@@ -30,6 +32,7 @@ import AdminAccount from "./_modules/adminAccount";
 import ExternalMember from "./_modules/externalMember";
 // import AdvancedServices from "./_modules/advancedServices";
 import { ref, markRaw, reactive } from "vue";
+import { get_service_info } from "@/utils/api";
 const active = ref(0);
 const preShow = ref(false);
 const stepList = reactive({
@@ -42,10 +45,10 @@ const stepList = reactive({
     //   name: "DeviceDiscovery",
     //   com: markRaw(DeviceDiscovery),
     // },
-    {
-      name: "AdminAccount",
-      com: markRaw(AdminAccount),
-    },
+    // {
+    //   name: "AdminAccount",
+    //   com: markRaw(AdminAccount),
+    // },
     {
       name: "ExternalMember",
       com: markRaw(ExternalMember),
@@ -68,23 +71,60 @@ const pre = () => {
     active.value = --active.value;
   }
 };
-const form = reactive({
-  username: "",
-  password: "",
-  checkPass: "",
-  kits: [],
-});
+const hasExternalNetwork = ref(true);
+const loading = ref(false);
+const getServiceInfo = () => {
+  loading.value = true;
+  get_service_info()
+    .then(async ({ result }) => {
+      if (hasExternalNetwork.value) {
+        // 有外网
+        if (
+          result.cbs_state === "finish" &&
+          result.ipfs_state === "finish" &&
+          result.cyfs_state === "finish"
+        ) {
+          window.location.href = "http://localhost:8080/#/access";
+          return true;
+        }
+      } else {
+        // 无外网
+        if (result.cbs_state === "finish" && result.ipfs_state === "finish") {
+          window.location.href = "http://localhost:8080/#/access";
+          return true;
+        }
+      }
+    })
+    .catch(() => {})
+    .finally(() => {
+      loading.value = false;
+    });
+};
+getServiceInfo();
 </script>
 
 <style lang="less" scoped>
+.out-box {
+  width: 100%;
+  height: 100%;
+  background: url("~@/assets/cool-background.png") no-repeat;
+  background-size: cover;
+}
 .container {
   width: 1200px;
   padding: 0 40px 40px;
   margin: 0 auto;
   box-sizing: border-box;
+
   main {
     position: relative;
     z-index: 1;
+    :deep {
+      .el-loading-mask {
+        background: transparent;
+        z-index: 1;
+      }
+    }
     .back {
       position: absolute;
       left: 20px;

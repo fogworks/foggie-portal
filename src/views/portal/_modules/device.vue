@@ -45,6 +45,29 @@
       </li>
     </ul>
     <IPFrom v-model:visible="visible"></IPFrom>
+    <AssociatedAccount v-model:visible="accountVisible"></AssociatedAccount>
+    <el-dialog
+      class="account-dialog"
+      title="Associated account"
+      width="500px"
+      v-model="chooseAssociated"
+    >
+      <span> Is it related to Foggie account? </span>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="skip">Skip</el-button>
+          <el-button
+            type="primary"
+            @click="
+              chooseAssociated = false;
+              accountVisible = true;
+            "
+          >
+            YES
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -52,6 +75,7 @@
 import { ref, reactive, defineEmits, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import IPFrom from "./ipForm";
+import AssociatedAccount from "./associatedAccount";
 const router = useRouter();
 const { proxy } = getCurrentInstance();
 const deviceList = reactive({
@@ -63,12 +87,15 @@ const deviceList = reactive({
   ],
 });
 const visible = ref(false);
+const chooseAssociated = ref(false);
+const accountVisible = ref(false);
 const emit = defineEmits(["next"]);
 const goEdit = () => {};
 const toGuide = () => {
-  router.push({
-    name: "Welcome",
-  });
+  chooseAssociated.value = true;
+  // router.push({
+  //   name: "Welcome",
+  // });
 };
 const handleCommand = ({ flag, data }) => {
   console.log(flag, data);
@@ -92,6 +119,12 @@ const handleCommand = ({ flag, data }) => {
       })
       .catch(() => {});
   }
+};
+const skip = () => {
+  chooseAssociated.value = false;
+  router.push({
+    name: "Welcome",
+  });
 };
 const dropMenuRef = ref(null);
 const dropMenuShow = ref(false);
@@ -228,6 +261,17 @@ const showClick = () => {
     // & + .el-dropdown-menu__item {
     //   border-top: 1px solid #e5e7eb;
     // }
+  }
+}
+.account-dialog {
+  .el-dialog__body {
+    padding: 20px 0;
+    color: #000;
+  }
+  .dialog-footer {
+    .el-button {
+      border-radius: 50px;
+    }
   }
 }
 </style>
