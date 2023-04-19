@@ -19,23 +19,65 @@
       </li>
     </ul>
     <IpForm v-model:visible="visible"></IpForm>
+    <AssociatedAccount v-model:visible="accountVisible"></AssociatedAccount>
+    <el-dialog
+      class="account-dialog"
+      title="Associated account"
+      width="500px"
+      v-model="chooseAssociated"
+    >
+      <span> Is it related to Foggie account? </span>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="skip">Skip</el-button>
+          <el-button
+            type="primary"
+            @click="
+              chooseAssociated = false;
+              accountVisible = true;
+            "
+          >
+            YES
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, defineEmits } from "vue";
+import { ref, reactive, defineEmits, computed } from "vue";
 import { useRouter } from "vue-router";
 import WifiSearching from "@/components/wifiSearching";
 import IpForm from "./ipForm";
+import AssociatedAccount from "./associatedAccount";
 
 const loading = ref(false);
 const visible = ref(false);
+const chooseAssociated = ref(false);
+const accountVisible = ref(false);
 const router = useRouter();
 const refresh = () => {
   loading.value = true;
   setTimeout(() => {
     loading.value = false;
   }, 3000);
+};
+const userInfo = computed(() => store.getters.userInfo);
+const toGuide = (item) => {
+  // if (userInfo.email) {
+  // 绑定且登录
+  // const url = `http://${item.dedicatedip}:8080/#/welcome`;
+  // window.location.href = url;
+  // } else {
+  chooseAssociated.value = true;
+  // }
+};
+const skip = () => {
+  chooseAssociated.value = false;
+  router.push({
+    name: "Welcome",
+  });
 };
 const addIP = () => {
   visible.value = true;
@@ -49,11 +91,6 @@ const deviceList = reactive({
   ],
 });
 const emit = defineEmits(["next"]);
-const toGuide = () => {
-  router.push({
-    name: "Welcome",
-  });
-};
 </script>
 
 <style lang="less" scoped>

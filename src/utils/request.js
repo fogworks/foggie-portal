@@ -143,7 +143,7 @@ service.interceptors.response.use(
       } else if (code === 420) {
 
         let res = await refreshToken();
-        
+
         if (res && res.data && res.data.access_token) {
           let token = res.data.access_token;
           let type = res.data.token_type;

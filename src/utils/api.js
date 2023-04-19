@@ -1573,6 +1573,23 @@ export const bind_foggie = (data) => {
     data
   });
 };
+//  解绑 foggie 账户
+export const unbind_foggie = () => {
+  return request({
+    url: `/v1/account/unbind_foggie`,
+    method: "POST",
+  });
+};
+
+//  搜索设备
+export const search_foggie = (data) => {
+  return request({
+    url: `/api/accounts/search_foggie`,
+    method: "POST",
+    data
+  });
+};
+
 
 
 

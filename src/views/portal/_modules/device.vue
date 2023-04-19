@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p class="welcome">My device</p>
+    <p class="welcome">Device</p>
     <ul class="deviceList">
       <li
         class="card"
@@ -8,7 +8,7 @@
         @click="toGuide(item)"
       >
         <span>
-          {{ item.name }}
+          {{ item.device_name }}
         </span>
         <el-dropdown
           popper-class="more-popper"
@@ -45,7 +45,7 @@
       </li>
     </ul>
     <IPFrom v-model:visible="visible"></IPFrom>
-    <AssociatedAccount v-model:visible="accountVisible"></AssociatedAccount>
+    <!-- <AssociatedAccount v-model:visible="accountVisible"></AssociatedAccount>
     <el-dialog
       class="account-dialog"
       title="Associated account"
@@ -67,23 +67,26 @@
           </el-button>
         </span>
       </template>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, defineEmits, getCurrentInstance } from "vue";
+import { ref, reactive, computed, defineEmits, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import IPFrom from "./ipForm";
+import { search_foggie } from "@/utils/api";
 import AssociatedAccount from "./associatedAccount";
+import { useStore } from "vuex";
+const store = useStore();
 const router = useRouter();
 const { proxy } = getCurrentInstance();
 const deviceList = reactive({
   list: [
-    {
-      name: "xx",
-      url: "dasdas",
-    },
+    // {
+    //   name: "xx",
+    //   url: "dasdas",
+    // },
   ],
 });
 const visible = ref(false);
@@ -91,11 +94,15 @@ const chooseAssociated = ref(false);
 const accountVisible = ref(false);
 const emit = defineEmits(["next"]);
 const goEdit = () => {};
-const toGuide = () => {
-  chooseAssociated.value = true;
-  // router.push({
-  //   name: "Welcome",
-  // });
+const userInfo = computed(() => store.getters.userInfo);
+const toGuide = (item) => {
+  // if (userInfo.email) {
+  // 绑定且登录
+  const url = `http://${item.dedicatedip}:8080`;
+  window.location.href = url;
+  // } else {
+  // chooseAssociated.value = true;
+  // }
 };
 const handleCommand = ({ flag, data }) => {
   console.log(flag, data);
@@ -138,6 +145,11 @@ const showClick = () => {
   //   dropMenuRef.value.handleOpen();
   // }
 };
+const email = computed(() => store.getters["token/currentUser"]);
+search_foggie({ email: email.value }).then((res) => {
+  console.log(res, "res");
+  deviceList.list = res.data.filter((el) => el.device_type === "foggie_max");
+});
 </script>
 
 <style lang="less" scoped>
