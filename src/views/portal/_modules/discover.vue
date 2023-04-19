@@ -17,6 +17,7 @@
           {{ item.name }}
         </span>
       </li>
+      <li class="card" @click="addIP"></li>
     </ul>
     <IpForm v-model:visible="visible"></IpForm>
     <AssociatedAccount v-model:visible="accountVisible"></AssociatedAccount>
@@ -64,14 +65,21 @@ const refresh = () => {
   }, 3000);
 };
 const userInfo = computed(() => store.getters.userInfo);
+const detected_net = computed(() => store.getters.detected_net);
+
 const toGuide = (item) => {
   // if (userInfo.email) {
   // 绑定且登录
   // const url = `http://${item.dedicatedip}:8080/#/welcome`;
   // window.location.href = url;
   // } else {
-  chooseAssociated.value = true;
   // }
+  if (detected_net.value && !item.email && !item.bind) {
+    chooseAssociated.value = true;
+  } else {
+    const url = `http://${item.dedicatedip}:7070/#/welcome`;
+    window.location.href = url;
+  }
 };
 const skip = () => {
   chooseAssociated.value = false;

@@ -7,25 +7,26 @@
           {{ userName }}
         </div>
       </div> -->
-      <el-menu default-active="User" @select="handleSelect">
-        <el-menu-item index="User" class="user">
+      <el-menu :default-active="defaultActive" router @select="handleSelect">
+        <el-menu-item index="user" class="user">
           <svg-icon icon-class="user" @click="visible = true"></svg-icon>
           <div v-if="userName" :title="userName">
             {{ userName }}
           </div>
         </el-menu-item>
-        <el-menu-item index="Device">
+        <el-menu-item index="device" v-if="userName !== 'Login'">
           <span><svg-icon icon-class="devices"></svg-icon>Device</span>
         </el-menu-item>
-        <el-menu-item index="Discover">
+        <el-menu-item index="discover">
           <span><svg-icon icon-class="discover"></svg-icon>Discover</span>
         </el-menu-item>
       </el-menu>
     </div>
     <div class="main">
-      <User v-if="active === 'User'"></User>
+      <!-- <User v-if="active === 'User'"></User>
       <Device v-if="active === 'Device'"></Device>
-      <Discover v-if="active === 'Discover'"></Discover>
+      <Discover v-if="active === 'Discover'"></Discover> -->
+      <router-view></router-view>
     </div>
   </div>
 </template>
@@ -36,9 +37,13 @@ import Device from "./_modules/device";
 import Discover from "./_modules/discover";
 import User from "./_modules/user";
 import { useStore } from "vuex";
+import { useRoute } from "vue-router";
 const store = useStore();
 const active = ref("User");
 const visible = ref(false);
+const route = useRoute();
+console.log(route.path);
+const defaultActive = ref(route.path.slice(1, route.path.length));
 const handleSelect = (key, keyPath) => {
   console.log(key);
   active.value = key;
@@ -61,22 +66,31 @@ const userName = computed(() => store.getters["token/currentUser"] || "Login");
         align-items: center;
         font-size: 20px;
         svg {
-          margin-right: 10px;
+          margin-right: 5px;
           font-size: 30px;
           cursor: pointer;
           vertical-align: middle;
         }
         &.user {
           display: flex;
-          justify-content: flex-start;
+          flex-direction: column;
           align-items: center;
           box-sizing: border-box;
           width: 250px;
-          padding: 0 20px;
-          height: 50px;
+          padding: 10px 20px;
+          // height: 50px;
+          height: unset;
+          line-height: unset;
+          color: #fff;
+          // background: #8b49ec;
+          background: #495dd0;
+          svg {
+            margin-right: 0;
+          }
 
           div {
-            flex: 1;
+            padding: 0 10px;
+            font-size: 16px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
