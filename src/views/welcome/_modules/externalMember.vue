@@ -71,8 +71,12 @@ import { createDID, activeVOOD } from "@/utils/did.js";
 // import CircleProgress from "@/components/circleProgress";
 const emit = defineEmits(["next", "update:preShow"]);
 const props = defineProps({
-  form: Object,
+  hasExternalNetwork: {
+    type: Boolean,
+    default: true,
+  },
 });
+const { hasExternalNetwork } = toRefs(props);
 const rate = ref(0);
 const loading = ref(false);
 const finish = ref(false);
@@ -123,11 +127,14 @@ let cyfsTimer = "";
 const installCBS = async (isFinish) => {
   try {
     await deploy_cbs();
-    cbsTimer = setInterval(timeCallback(33), 1000);
+    cbsTimer = setInterval(
+      timeCallback(hasExternalNetwork.value ? 33 : 50),
+      hasExternalNetwork.value ? 1000 : 500
+    );
     let cbsFinish = await getInstallStatus("cbs");
     if (cbsFinish) {
       clearInterval(cbsTimer);
-      rate.value = 33;
+      rate.value = hasExternalNetwork.value ? 33 : 50;
       return true;
     } else {
       // fail
@@ -153,11 +160,14 @@ const installCBS = async (isFinish) => {
 const installIPFS = async (isFinish) => {
   try {
     await deploy_ipfs();
-    ipfsTimer = setInterval(timeCallback(66), 1000);
+    ipfsTimer = setInterval(
+      timeCallback(hasExternalNetwork.value ? 66 : 99),
+      hasExternalNetwork.value ? 1000 : 500
+    );
     let ipfsFinish = await getInstallStatus("ipfs");
     if (ipfsFinish) {
       clearInterval(ipfsTimer);
-      rate.value = 66;
+      rate.value = hasExternalNetwork.value ? 66 : 100;
       return true;
     } else {
       // fail
@@ -225,6 +235,28 @@ const installCYFS = async (isFinish) => {
   }
 };
 const isInstall = ref(false);
+const getNeedResetBool = (result) => {
+  if (hasExternalNetwork.value) {
+    if (
+      result.cbs_state !== "pending_init" ||
+      result.ipfs_state !== "pending_init" ||
+      result.cyfs_state !== "pending_init"
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    if (
+      result.cbs_state !== "pending_init" ||
+      result.ipfs_state !== "pending_init"
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
 const gotoDeploy = async (item, type) => {
   if (isInstall.value) return false;
   isInstall.vale = true;
@@ -233,11 +265,7 @@ const gotoDeploy = async (item, type) => {
 
   get_service_info()
     .then(async ({ result }) => {
-      if (
-        result.cbs_state !== "pending_init" ||
-        result.ipfs_state !== "pending_init" ||
-        result.cyfs_state !== "pending_init"
-      ) {
+      if (getNeedResetBool(result)) {
         status.value = "Resetting";
         let reset = await resetMethod();
         if (reset) {
@@ -246,7 +274,7 @@ const gotoDeploy = async (item, type) => {
           let cbs = await installCBS();
           if (cbs) {
             let ipfs = await installIPFS();
-            if (ipfs) {
+            if (ipfs && hasExternalNetwork.value) {
               await installCYFS();
             }
           }
@@ -257,7 +285,7 @@ const gotoDeploy = async (item, type) => {
         let cbs = await installCBS();
         if (cbs) {
           let ipfs = await installIPFS();
-          if (ipfs) {
+          if (ipfs && hasExternalNetwork.value) {
             await installCYFS();
           }
         }
@@ -349,18 +377,16 @@ const getInitialState = () => {
     const getStatus = () => {
       get_service_info()
         .then(({ result }) => {
-          if (
-            result.cbs_state !== "pending_init" ||
-            result.ipfs_state !== "pending_init" ||
-            result.cyfs_state !== "pending_init"
-          ) {
+          if (getNeedResetBool(result)) {
             setTimeout(() => {
               getStatus();
             }, 5000);
           } else if (
             result.cbs_state == "pending_init" &&
             result.ipfs_state == "pending_init" &&
-            result.cyfs_state == "pending_init"
+            (hasExternalNetwork.value
+              ? result.cyfs_state == "pending_init"
+              : true)
           ) {
             resolve(true);
           }
@@ -395,7 +421,7 @@ const next = async () => {
   // gotoDeploy("", "ipfs");
   // gotoDeploy("", "cyfs");
   // emit("next");
-  window.location.href = "http://154.37.16.163:9000/#/home";
+  window.location.href = "http://154.37.16.163:9000/#/access";
 };
 </script>
 
@@ -404,6 +430,7 @@ const next = async () => {
   font-weight: 700;
   font-size: 30px;
   text-align: center;
+  color: #fff;
 }
 .content {
   margin-top: 50px;
@@ -436,7 +463,7 @@ const next = async () => {
     margin: 40px auto;
     :deep {
       .el-progress-circle path:first-child {
-        stroke: #ddd;
+        stroke: #fff;
       }
       .el-progress-bar__innerText {
         color: #000;

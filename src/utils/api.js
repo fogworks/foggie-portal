@@ -1559,6 +1559,22 @@ export const reset_vood = () => {
     method: "POST",
   });
 };
+// 探测绑定的 foggie 账户 DMC 信息
+export const get_foggie_dmc = (data) => {
+  return request({
+    url: `/api/accounts/get_foggie_dmc`,
+    method: "POST",
+    data
+  });
+};
+//  绑定/注册 foggie 账户
+export const bind_foggie = (data) => {
+  return request({
+    url: `/v1/account/bind_foggie`,
+    method: "POST",
+    data
+  });
+};
 
 //getIP
 export const getIP = () => {

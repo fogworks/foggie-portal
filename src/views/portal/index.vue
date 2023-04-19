@@ -1,44 +1,88 @@
 <template>
   <div class="portal-main">
-    <el-menu default-active="Device" @select="handleSelect">
-      <el-menu-item index="Device">
-        <span>My device</span>
-      </el-menu-item>
-      <el-menu-item index="Discover">
-        <span>Discover</span>
-      </el-menu-item>
-      <el-menu-item index="Setting">
-        <span>Setting</span>
-      </el-menu-item>
-    </el-menu>
+    <div>
+      <!-- <div class="user">
+        <svg-icon icon-class="user" @click="visible = true"></svg-icon>
+        <div v-if="userName" :title="userName">
+          {{ userName }}
+        </div>
+      </div> -->
+      <el-menu default-active="User" @select="handleSelect">
+        <el-menu-item index="User" class="user">
+          <svg-icon icon-class="user" @click="visible = true"></svg-icon>
+          <div v-if="userName" :title="userName">
+            {{ userName }}
+          </div>
+        </el-menu-item>
+        <el-menu-item index="Device">
+          <span><svg-icon icon-class="devices"></svg-icon>Device</span>
+        </el-menu-item>
+        <el-menu-item index="Discover">
+          <span><svg-icon icon-class="discover"></svg-icon>Discover</span>
+        </el-menu-item>
+      </el-menu>
+    </div>
     <div class="main">
-      <Device v-show="active === 'Device'"></Device>
-      <Discover v-show="active === 'Discover'"></Discover>
-      <Setting v-show="active === 'Setting'"></Setting>
+      <User v-if="active === 'User'"></User>
+      <Device v-if="active === 'Device'"></Device>
+      <Discover v-if="active === 'Discover'"></Discover>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import Device from "./_modules/device";
 import Discover from "./_modules/discover";
-import Setting from "./_modules/setting";
-const active = ref("Device");
+import User from "./_modules/user";
+import { useStore } from "vuex";
+const store = useStore();
+const active = ref("User");
+const visible = ref(false);
 const handleSelect = (key, keyPath) => {
   console.log(key);
   active.value = key;
 };
+const userName = computed(() => store.getters["token/currentUser"] || "Login");
 </script>
 
 <style lang="less" scoped>
 .portal-main {
   display: flex;
   height: 100%;
+
   :deep {
     .el-menu {
-      width: 150px;
+      width: 250px;
       background-color: #f2f6ff;
+      .el-menu-item {
+        display: flex;
+        text-align: left;
+        align-items: center;
+        font-size: 20px;
+        svg {
+          margin-right: 10px;
+          font-size: 30px;
+          cursor: pointer;
+          vertical-align: middle;
+        }
+        &.user {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          box-sizing: border-box;
+          width: 250px;
+          padding: 0 20px;
+          height: 50px;
+
+          div {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+        }
+      }
     }
   }
   .main {
