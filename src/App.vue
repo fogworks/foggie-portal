@@ -8,15 +8,30 @@
   <!-- <Layout></Layout> -->
 </template>
 
-<script>
-// import Layout from "./views/layout/index";
-// import mainVue from './views/main/main.vue'
-export default {
-  name: "App",
-  components: {
-    // Layout,
-  },
+<script setup>
+import { user } from "@/utils/api.js";
+import { useStore } from "vuex";
+const store = useStore();
+const initFoggieDate = async () => {
+  // get is have net
+
+  // let data = {
+  //   pn: 1,
+  //   ps: 50,
+  // };
+  let data = await user();
+  console.log(data, "data");
+  if (data) {
+    store.dispatch("setUserInfo", {
+      ...data.data,
+    });
+  }
+
+  // if (oodData && oodData.data && oodData.data.length > 0) {
+  //   currentOODItem.value.data = oodData.data[0];
+  // }
 };
+initFoggieDate();
 </script>
 
 <style lang="less">

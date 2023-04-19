@@ -26,9 +26,12 @@
     </el-form>
     <div class="info-box" v-else>
       <el-descriptions :column="3" size="large" border>
-        <!-- <template #extra>
-          <el-button type="primary">Logout</el-button>
-        </template> -->
+        <template #extra>
+          <el-button type="default" @click="unbindVisible = true"
+            >Unbind</el-button
+          >
+          <el-button type="primary" @click="logout">Logout</el-button>
+        </template>
         <el-descriptions-item label="Email">
           {{ userInfo.email }}
         </el-descriptions-item>
@@ -40,6 +43,18 @@
 
     <!-- <el-button @click="emit('next')">Next</el-button> -->
   </div>
+  <el-dialog
+    class="unbind-dialog"
+    title="Unbinding"
+    v-model="unbindVisible"
+    width="400px"
+  >
+    <span> Are you sure you want to unbind the account </span>
+    <template #footer>
+      <el-button @click="unbindVisible = false">NO</el-button>
+      <el-button type="primary" @click="unbind">YES</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
@@ -53,10 +68,12 @@ import {
   toRefs,
 } from "vue";
 import NextButton from "@/components/nextButton";
-import { login, get_foggie_dmc, user } from "@/utils/api";
+import { login, get_foggie_dmc, user, unbind_foggie } from "@/utils/api";
 import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 const bcryptjs = require("bcryptjs");
 const store = useStore();
+const router = useRouter();
 const isNew = ref(false); //是否是新用户
 // const form = reactive(props.form);
 const { proxy } = getCurrentInstance();
@@ -65,11 +82,9 @@ const form = reactive({
   email: "",
 });
 const formRef = ref(null);
+const unbindVisible = ref(false);
 const needLogin = ref(true);
-const userInfo = reactive({
-  dmc: "",
-  email: "",
-});
+const userInfo = computed(() => store.getters.userInfo);
 const validatePass = (rule, value, callback) => {
   if (value === "") {
     callback(new Error("Please input the password"));
@@ -97,9 +112,7 @@ const getUserInfo = () => {
   loading.value = true;
   user()
     .then(({ data }) => {
-      console.log(data);
-      userInfo.email = data.email;
-      userInfo.dmc = data.dmc;
+      store.dispatch("setUserInfo", data);
       needLogin.value = false;
       loading.value = false;
     })
@@ -146,13 +159,24 @@ const submit = () => {
               message: "Successfully Login",
               position: "bottom-left",
             });
-            loading.value = false;
+            getUserInfo();
           }
         })
         .catch(() => {
           loading.value = false;
         });
     }
+  });
+};
+const logout = () => {
+  store.dispatch("token/logout");
+  store.dispatch("setUserInfo", {});
+  getUserInfo();
+};
+const unbind = () => {
+  unbindVisible.value = false;
+  unbind_foggie().then((res) => {
+    logout();
   });
 };
 </script>
@@ -235,5 +259,12 @@ const submit = () => {
 .info-box {
   width: 500px;
   margin: 0 auto;
+}
+</style>
+<style lang="less">
+.unbind-dialog {
+  .el-dialog__body {
+    margin: 20px 0;
+  }
 }
 </style>
