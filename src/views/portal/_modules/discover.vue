@@ -127,11 +127,11 @@ const addIP = () => {
 };
 const deviceList = reactive({
   list: [
-    {
-      device_name: "xx",
-      dedicatedip: "dasdas",
-      device_id: "xxxxxxxxxxxxxx",
-    },
+    // {
+    //   device_name: "xx",
+    //   dedicatedip: "dasdas",
+    //   device_id: "xxxxxxxxxxxxxx",
+    // },
   ],
 });
 const emit = defineEmits(["next"]);
