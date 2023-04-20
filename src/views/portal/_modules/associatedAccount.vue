@@ -183,7 +183,9 @@ const submit = () => {
       let postData = {
         email: form.email,
         password: hashPwd,
-        
+        dmc_account: form.dmc_account,
+        foggie_max_name: form.foggie_max_name,
+        bind: true,
       };
       if (isNew.value || form.dmc_account) {
         bind_foggie(postData)
