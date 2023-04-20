@@ -81,8 +81,9 @@ const refresh = () => {
 };
 const userInfo = computed(() => store.getters.userInfo);
 const detected_net = computed(() => store.getters.detected_net);
-
+let currentItem = {};
 const toGuide = (item) => {
+  currentItem = item;
   // if (userInfo.email) {
   // 绑定且登录
   // const url = `http://${item.dedicatedip}:8080/#/welcome`;
@@ -98,9 +99,11 @@ const toGuide = (item) => {
 };
 const skip = () => {
   chooseAssociated.value = false;
-  router.push({
-    name: "Welcome",
-  });
+  const url = `http://${currentItem.ipadreess}:9001/#/welcome`;
+  window.location.href = url;
+  // router.push({
+  //   name: "Welcome",
+  // });
 };
 const copyLink = (text) => {
   var input = document.createElement("input"); // 创建input对象
