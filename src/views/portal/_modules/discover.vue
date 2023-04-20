@@ -4,22 +4,35 @@
     <p class="welcome">
       Device Discovery
       <svg-icon icon-class="reset" @click="refresh" class="refresh"></svg-icon>
-      <svg-icon icon-class="add" @click="addIP" class="refresh add"></svg-icon>
+      <!-- <svg-icon icon-class="add" @click="addIP" class="refresh add"></svg-icon> -->
     </p>
     <p v-if="curAddress" class="p-address">Your IP address:{{ curAddress }}</p>
     <ul class="deviceList">
       <WifiSearching v-if="loading"></WifiSearching>
-      <li
-        class="card"
-        v-else
-        v-for="item in deviceList.list"
-        @click="toGuide(item)"
-      >
-        <span>
-          {{ item.device_name }}
-        </span>
-      </li>
-      <li class="card" @click="addIP"></li>
+      <template v-else>
+        <li class="card" v-for="item in deviceList.list" @click="toGuide(item)">
+          <div class="item">
+            <span>{{ item.device_type ? "Name: " : "IP: " }}</span>
+            <span>
+              {{ item.device_type ? item.device_name : item.dedicatedip }}
+            </span>
+          </div>
+          <div class="item">
+            <span>Device ID: &nbsp;</span>
+            <span>
+              {{ handleID(item.device_id) }}
+            </span>
+            <svg-icon
+              icon-class="copy"
+              class="copy-icon"
+              @click.stop="copyLink(item.device_id)"
+            ></svg-icon>
+          </div>
+        </li>
+        <li class="card add" @click="addIP">
+          <svg-icon icon-class="add-bold"></svg-icon>
+        </li>
+      </template>
     </ul>
     <IpForm v-model:visible="visible"></IpForm>
     <AssociatedAccount v-model:visible="accountVisible"></AssociatedAccount>
@@ -61,13 +74,13 @@ import {
   getNetStatus,
 } from "@/utils/api";
 import AssociatedAccount from "./associatedAccount";
-
+import { useStore } from "vuex";
 const loading = ref(false);
 const visible = ref(false);
 const chooseAssociated = ref(false);
 const accountVisible = ref(false);
 const router = useRouter();
-const curAddress = ref("");
+const store = useStore();
 const refresh = () => {
   loading.value = true;
   setTimeout(() => {
@@ -119,15 +132,36 @@ const skip = () => {
     name: "Welcome",
   });
 };
+const copyLink = (text) => {
+  var input = document.createElement("input"); // 创建input对象
+  input.value = text; // 设置复制内容
+  document.body.appendChild(input); // 添加临时实例
+  input.select(); // 选择实例内容
+  document.execCommand("Copy"); // 执行复制
+  document.body.removeChild(input); // 删除临时实例
+  // let str = `Copying  ${type} successful!`;
+  // this.$message.success(str);
+  proxy.$notify({
+    message: "Copy succeeded",
+    type: "success",
+    position: "bottom-left",
+  });
+};
+const handleID = (str) => {
+  return (
+    str.substring(0, 3) + "..." + str.substring(str.length - 3, str.length)
+  );
+};
 const addIP = () => {
   visible.value = true;
 };
 const deviceList = reactive({
   list: [
-    // {
-    //   name: "xx",
-    //   url: "dasdas",
-    // },
+    {
+      device_name: "xx",
+      dedicatedip: "dasdas",
+      device_id: "xxxxxxxxxxxxxx",
+    },
   ],
 });
 const emit = defineEmits(["next"]);
@@ -188,24 +222,40 @@ const emit = defineEmits(["next"]);
     overflow: hidden;
     position: relative;
     box-sizing: border-box;
-    width: 200px;
-    height: 180px;
+    width: 240px;
+    height: 220px;
     margin: 20px;
+    padding: 0 25px;
     background: rgba(251, 251, 251, 0.58);
-    border: 1px solid white;
-    box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.22);
+    border: 5px solid white;
+    box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.22);
     backdrop-filter: blur(6px);
     border-radius: 17px;
     text-align: center;
     cursor: pointer;
     transition: all 0.5s;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
     justify-content: center;
     user-select: none;
     font-weight: bolder;
-    color: black;
+    color: #3f3c3c;
     cursor: pointer;
+    .item {
+      display: flex;
+      max-width: 100%;
+      justify-content: center;
+      flex-direction: row;
+      font-weight: 500;
+      svg {
+        font-size: 20px;
+        &:hover {
+          color: #29abff;
+          transform: scale(1.2);
+        }
+      }
+    }
     > span {
       z-index: 10;
     }
@@ -224,45 +274,25 @@ const emit = defineEmits(["next"]);
     //   right: 10px;
     // }
   }
-  .card::before {
-    content: "";
-    position: absolute;
-    width: 100px;
-    background-image: linear-gradient(
-      180deg,
-      rgb(0, 183, 255),
-      rgb(255, 48, 255)
-    );
-    height: 150%;
-    animation: rotBGimg 3s linear infinite;
-    transition: all 0.2s linear;
-    display: none;
-  }
-
-  @keyframes rotBGimg {
-    from {
-      transform: rotate(0deg);
-    }
-
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  .card::after {
-    content: "";
-    position: absolute;
-    background: transparent;
-    inset: 5px;
-    border-radius: 15px;
-  }
   .card:hover {
-    background: #fff;
+    // background: #fff;
+    transform: translateY(-5px);
+    transition: all 0.5s;
     &::before {
       display: inline-block;
     }
     &::after {
-      background-color: #fff;
+      // background-color: #fff;
+    }
+  }
+  .add {
+    align-items: center;
+    &::before,
+    &::after {
+      content: unset;
+    }
+    svg {
+      font-size: 50px;
     }
   }
 }

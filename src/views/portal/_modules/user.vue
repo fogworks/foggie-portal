@@ -53,7 +53,7 @@
           <!-- <el-button type="danger" @click="unbindVisible = true"
             >Unbind</el-button
           > -->
-          <el-button type="primary" @click="logout">Logout</el-button>
+          <el-button type="primary" @click="logout">Switch Accounts</el-button>
         </div>
       </div>
     </div>
