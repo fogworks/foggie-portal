@@ -14,7 +14,7 @@
           <div class="item">
             <span>{{ item.device_type ? "Name: " : "IP: " }}</span>
             <span>
-              {{ item.device_type ? item.device_name : item.dedicatedip }}
+              {{ item.device_type ? item.device_name : item.ipaddress }}
             </span>
           </div>
           <div class="item">
@@ -34,7 +34,7 @@
         </li>
       </template>
     </ul>
-    <IpForm v-model:visible="visible"></IpForm>
+    <IpForm v-model:visible="visible" @getMax="getMax"></IpForm>
     <AssociatedAccount v-model:visible="accountVisible"></AssociatedAccount>
     <el-dialog
       class="account-dialog"
@@ -82,6 +82,7 @@ const accountVisible = ref(false);
 const router = useRouter();
 const store = useStore();
 const { proxy } = getCurrentInstance();
+const curAddress = ref("");
 const refresh = () => {
   loading.value = true;
   setTimeout(() => {
@@ -89,15 +90,28 @@ const refresh = () => {
       curAddress.value = res?.address;
       loading.value = false;
     });
-    let data = {
-      url: "http://154.37.16.163:9094/",
-    };
-    pingUrl(data).then((r) => {
-      console.log("~~~~~~", r);
-    });
-    socketIP().then((rrr) => {
-      console.log("!!!!!!!!", rrr);
-      deviceList.list = rrr.data;
+    // let data = {
+    //   url: "http://154.37.16.163:9094/",
+    // };
+    // pingUrl(data).then((r) => {
+    //   console.log("~~~~~~", r);
+    // });
+    socketIP().then((res) => {
+      console.log("!!!!!!!!", res);
+      let rrr = res.data;
+      loading.value = false;
+      for (let i = 0; i < rrr.length; i++) {
+        let flag = true;
+        for (let j = 0; j < deviceList.list.length; j++) {
+          if (rrr[i].ipaddress === deviceList.list[j].ipaddress) {
+            flag = false;
+          }
+        }
+        if (flag) {
+          deviceList.list.push(rrr[0]);
+        }
+      }
+      // deviceList.list = rrr.data;
     });
     // portalPing().then((res)=>{
     //   console.log("res++++++", res)
@@ -116,14 +130,14 @@ const detected_net = computed(() => store.getters.detected_net);
 const toGuide = (item) => {
   // if (userInfo.email) {
   // 绑定且登录
-  // const url = `http://${item.dedicatedip}:8080/#/welcome`;
+  // const url = `http://${item.ipaddress}:8080/#/welcome`;
   // window.location.href = url;
   // } else {
   // }
   if (detected_net.value && !item.email && !item.bind) {
     chooseAssociated.value = true;
   } else {
-    const url = `http://${item.dedicatedip}:7070/#/welcome`;
+    const url = `http://${item.ipaddress}:7070/#/welcome`;
     window.location.href = url;
   }
 };
@@ -158,13 +172,36 @@ const addIP = () => {
 };
 const deviceList = reactive({
   list: [
-    {
-      device_name: "xx",
-      dedicatedip: "dasdas",
-      device_id: "xxxxxxxxxxxxxx",
-    },
+    // {
+    //   device_name: "xx",
+    //   ipaddress: "dasdas",
+    //   device_id: "xxxxxxxxxxxxxx",
+    // },
   ],
 });
+const getMax = (data) => {
+  let flag = true;
+  for (let i = 0; i < deviceList.list.length; i++) {
+    if (data.ipaddress === deviceList.list[i].ipaddress) {
+      flag = false;
+      break;
+    }
+  }
+  if (flag) {
+    deviceList.list.push(data);
+    proxy.$notify({
+      message: "The device is added successfully",
+      type: "success",
+      position: "bottom-left",
+    });
+  } else {
+    proxy.$notify({
+      message: "Device already exists",
+      type: "warning",
+      position: "bottom-left",
+    });
+  }
+};
 const emit = defineEmits(["next"]);
 </script>
 

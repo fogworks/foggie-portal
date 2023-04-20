@@ -13,9 +13,9 @@
         :rules="rules"
         label-width="60px"
       >
-        <el-form-item label="name" prop="name">
+        <!-- <el-form-item label="name" prop="name">
           <el-input v-model="form.name"></el-input>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="ip" prop="ip">
           <el-input v-model="form.ip"></el-input>
         </el-form-item>
@@ -37,6 +37,7 @@ import {
   toRefs,
   getCurrentInstance,
 } from "vue";
+import { getNetStatus, pingUrl } from "@/utils/api";
 const props = defineProps({
   visible: {
     type: Boolean,
@@ -89,25 +90,39 @@ function ping(ip, timeout, success, callback) {
 const confirm = () => {
   ipFormRef.value.validate((valid) => {
     if (valid) {
-      ping(
-        form.ip,
-        1000,
-        () => {
-          // 成功
-          proxy.$notify({
-            type: "success",
-            message: "Successfully added",
-          });
-          emit("update:visible", false);
-        },
-        () => {
-          proxy.$notify({
-            type: "error",
-            message: "This network is inaccessible",
-          });
-        }
-      );
+      let data = {
+        url: `http://${form.ip}:9094/`,
+      };
+      // getNetStatus(data).then((dd) => {
+      //   console.log("aaaaaaaaa", dd);
+      // });
+      pingUrl(data).then((r) => {
+        console.log("~~~~~~", r);
+        emit("getMax", r.result);
+        cancel();
+      });
     }
+
+    // if (valid) {
+    //   ping(
+    //     form.ip,
+    //     1000,
+    //     () => {
+    //       // 成功
+    //       proxy.$notify({
+    //         type: "success",
+    //         message: "Successfully added",
+    //       });
+    //       emit("update:visible", false);
+    //     },
+    //     () => {
+    //       proxy.$notify({
+    //         type: "error",
+    //         message: "This network is inaccessible",
+    //       });
+    //     }
+    //   );
+    // }
   });
 };
 const cancel = () => {

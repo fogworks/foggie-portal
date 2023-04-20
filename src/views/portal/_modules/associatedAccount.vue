@@ -183,6 +183,7 @@ const submit = () => {
       let postData = {
         email: form.email,
         password: hashPwd,
+        
       };
       if (isNew.value || form.dmc_account) {
         bind_foggie(postData)
