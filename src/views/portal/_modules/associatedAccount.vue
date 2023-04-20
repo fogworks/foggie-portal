@@ -2,11 +2,11 @@
   <div>
     <el-dialog
       :before-close="cancel"
-      :title="isLogin ? 'Login' : 'Associated Account'"
+      :title="'Associated Account'"
       width="700px"
       :model-value="visible"
     >
-      <div class="title-btn" v-if="!isLogin">
+      <div class="title-btn">
         <el-button type="primary" text @click="changeType">{{
           tipTitle
         }}</el-button>
@@ -40,31 +40,29 @@
           ></el-input>
         </el-form-item>
 
-        <template v-if="!isLogin">
-          <el-form-item
-            v-if="showDMC || (isNew && !isLogin)"
-            label="DMC Account"
-            prop="dmc_account"
-          >
-            <el-input type="text" v-model="form.dmc_account"></el-input>
+        <el-form-item
+          v-if="showDMC || isNew"
+          label="DMC Account"
+          prop="dmc_account"
+        >
+          <el-input type="text" v-model="form.dmc_account"></el-input>
+        </el-form-item>
+        <el-form-item
+          class="check-item"
+          label="Modify MAX name?"
+          prop="is_sync"
+        >
+          <el-checkbox v-model="form.is_sync" size="large" />
+        </el-form-item>
+        <template v-if="form.is_sync">
+          <el-form-item label="Foggie Max name" prop="foggie_max_name">
+            <el-input v-model="form.foggie_max_name"></el-input>
           </el-form-item>
-          <el-form-item
-            class="check-item"
-            label="Modify MAX name?"
-            prop="is_sync"
-          >
-            <el-checkbox v-model="form.is_sync" size="large" />
-          </el-form-item>
-          <template v-if="form.is_sync">
-            <el-form-item label="Foggie Max name" prop="foggie_max_name">
-              <el-input v-model="form.foggie_max_name"></el-input>
-            </el-form-item>
-          </template>
         </template>
       </el-form>
       <div class="foot-btn">
         <el-button :loading="loading" type="primary" @click="submit">
-          {{ isLogin && !isNew ? "Login" : "Submit" }}
+          Submit
         </el-button>
       </div>
     </el-dialog>
@@ -89,16 +87,14 @@ import {
   login,
   get_foggie_dmc,
   bind_foggie,
+  detected_net,
 } from "@/utils/api";
 import { useStore } from "vuex";
+import axios from "axios";
 const bcryptjs = require("bcryptjs");
 const emit = defineEmits(["next", "update:visible", "update:preShow"]);
 const props = defineProps({
   visible: Boolean,
-  isLogin: {
-    type: Boolean,
-    default: false,
-  },
 });
 const store = useStore();
 const isNew = ref(false); //是否是新用户
@@ -110,7 +106,7 @@ const tipTitle = computed(() => {
   }
 });
 // const form = reactive(props.form);
-const { visible, isLogin } = toRefs(props);
+const { visible } = toRefs(props);
 const { proxy } = getCurrentInstance();
 const form = reactive({
   password: "",
@@ -191,13 +187,37 @@ const submit = () => {
       if (isNew.value || form.dmc_account) {
         bind_foggie(postData)
           .then((res) => {
-            loading.value = false;
-            formRef.value.resetFields();
-            emit("update:visible", false);
             proxy.$notify({
               type: "success",
               message: "Successfully associated",
               position: "bottom-left",
+            });
+            login(postData).then((res) => {
+              if (res.next_step === "captcha") {
+                // that.getCaptcha();
+                // that.showCaptcha = true;
+              } else if (res && res.data) {
+                let data = res.data;
+                let token = data.token_type + " " + data.access_token;
+                let refresh_token = data.token_type + " " + data.refresh_token;
+                let user_id = data.user_id;
+                window.localStorage.setItem("user_id", user_id);
+                window.localStorage.setItem("refresh_token", refresh_token);
+                let userInfo = {
+                  username: form.email,
+                  token: token, //res.token
+                  user_id: user_id,
+                };
+                store.dispatch("token/login", userInfo);
+                loading.value = false;
+                formRef.value.resetFields();
+                emit("update:visible", false);
+                proxy.$notify({
+                  type: "success",
+                  message: "Login succeeded",
+                  position: "bottom-left",
+                });
+              }
             });
           })
           .catch(() => {
@@ -208,38 +228,6 @@ const submit = () => {
             });
             loading.value = false;
           });
-      } else if (isLogin.value) {
-        login(postData)
-          .then((res) => {
-            if (res.next_step === "captcha") {
-              // that.getCaptcha();
-              // that.showCaptcha = true;
-            } else if (res && res.data) {
-              let data = res.data;
-              let token = data.token_type + " " + data.access_token;
-              let refresh_token = data.token_type + " " + data.refresh_token;
-              let user_id = data.user_id;
-              window.localStorage.setItem("user_id", user_id);
-              window.localStorage.setItem("refresh_token", refresh_token);
-              let userInfo = {
-                username: form.email,
-                token: token, //res.token
-                user_id: user_id,
-              };
-              store.dispatch("token/login", userInfo);
-              formRef.value.resetFields();
-              emit("update:visible", false);
-              proxy.$notify({
-                type: "success",
-                message: "Successfully Login",
-                position: "bottom-left",
-              });
-              loading.value = false;
-            }
-          })
-          .catch(() => {
-            loading.value = false;
-          });
       } else {
         login(postData)
           .then((res) => {
@@ -248,21 +236,32 @@ const submit = () => {
               // that.showCaptcha = true;
             } else if (res && res.data) {
               let data = res.data;
-              let token = data.token_type + " " + data.access_token;
+              // let token = data.token_type + " " + data.access_token;
               let refresh_token = data.token_type + " " + data.refresh_token;
-              let user_id = data.user_id;
-              window.localStorage.setItem("user_id", user_id);
-              window.localStorage.setItem("refresh_token", refresh_token);
-              let userInfo = {
-                username: form.email,
-                token: token, //res.token
-                user_id: user_id,
-              };
-              store.dispatch("token/login", userInfo);
-              get_foggie_dmc({ email: form.email })
+              // let user_id = data.user_id;
+              // window.localStorage.setItem("user_id", user_id);
+              // window.localStorage.setItem("refresh_token", refresh_token);
+              // let userInfo = {
+              //   username: form.email,
+              //   token: token, //res.token
+              //   user_id: user_id,
+              // };
+              // store.dispatch("token/login", userInfo);
+              axios({
+                method: "post",
+                url: "/api/accounts/get_foggie_dmc",
+                data: {
+                  email: form.email,
+                },
+                headers: {
+                  Authorization: refresh_token,
+                  "Content-Type": "application/json",
+                },
+              })
                 .then((res) => {
+                  console.log(res, "resresresres");
                   // 获取钱包信息
-                  if (!res.data.dmc_account && !form.dmc_account) {
+                  if (!res.data.data.dmc_account) {
                     proxy.$notify({
                       type: "info",
                       message: "Please fill in the DMC Account",
@@ -271,15 +270,13 @@ const submit = () => {
                     loading.value = false;
                     showDMC.value = true;
                   } else {
-                    if (res.data?.dmc_account) {
-                      form.dmc_account = res.data.dmc_account;
-                    }
+                    form.dmc_account = res.data.data.dmc_account;
                     loading.value = false;
                     showDMC.value = true;
                     // 绑定
                   }
                 })
-                .catch(() => {
+                .catch((err) => {
                   proxy.$notify({
                     type: "error",
                     message: "Information acquisition failed",
@@ -293,27 +290,6 @@ const submit = () => {
             loading.value = false;
           });
       }
-
-      // adminRegister(form)
-      //   .then((res) => {
-      //     proxy.$notify({
-      //       type: "success",
-      //       message: "Created successfully",
-      //       position: "bottom-left",
-      //     });
-      //     adminLogin({
-      //       username: form.username,
-      //       password: form.password,
-      //     }).then((res) => {
-      //       loading.value = false;
-      //       emit("next");
-      //       emit("update:preShow", true);
-      //     });
-      //   })
-      //   .catch((err) => {
-      //     emit("update:preShow", false);
-      //     loading.value = false;
-      //   });
     }
   });
 };

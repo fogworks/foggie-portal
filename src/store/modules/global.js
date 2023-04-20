@@ -2,9 +2,8 @@
 export default {
   state: {
     theme: window.localStorage.getItem("theme") || '',
-    userInfo: {
-
-    },
+    userInfo: {},
+    detected_net: false,
   },
   mutations: {
     SET_THEME: (state, theme) => {
@@ -14,6 +13,9 @@ export default {
     SET_userInfo: (state, data) => {
       state.userInfo = data;
     },
+    SET_Detected_net: (state, bool) => {
+      state.detected_net = bool;
+    },
   },
   actions: {
     setTheme({ commit }, theme) {
@@ -22,9 +24,13 @@ export default {
     setUserInfo({ commit }, data) {
       commit("SET_userInfo", data);
     },
+    setDetected_net({ commit }, bool) {
+      commit("SET_Detected_net", bool);
+    },
   },
   getters: {
     userInfo: (state) => state.userInfo,
     theme: (state) => state.theme,
+    detected_net: (state) => state.detected_net,
   },
 };

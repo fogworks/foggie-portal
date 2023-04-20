@@ -9,7 +9,7 @@
 </template>
 
 <script setup>
-import { user } from "@/utils/api.js";
+import { user, detected_net } from "@/utils/api.js";
 import { useStore } from "vuex";
 const store = useStore();
 const initFoggieDate = async () => {
@@ -19,6 +19,13 @@ const initFoggieDate = async () => {
   //   pn: 1,
   //   ps: 50,
   // };
+  detected_net.then((res) => {
+    if (res.result.detected_net) {
+      store.dispatch("setDetected_net", true);
+    } else {
+      store.dispatch("setDetected_net", false);
+    }
+  });
   let data = await user();
   console.log(data, "data");
   if (data) {

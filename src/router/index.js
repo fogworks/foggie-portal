@@ -16,6 +16,33 @@ const router = createRouter({
       meta: {
         title: "portal",
       },
+      redirect: 'User',
+      children: [
+        {
+          path: 'user',
+          name: 'User',
+          component: defineAsyncComponent(() => import(`../views/portal/_modules/user`)),
+          meta: {
+            title: 'user',
+          },
+        },
+        {
+          path: 'device',
+          name: 'Device',
+          component: defineAsyncComponent(() => import(`../views/portal/_modules/device`)),
+          meta: {
+            title: 'device',
+          },
+        },
+        {
+          path: 'discover',
+          name: 'Discover',
+          component: defineAsyncComponent(() => import(`../views/portal/_modules/discover`)),
+          meta: {
+            title: 'discover',
+          },
+        },
+      ]
     },
     {
       path: "/welcome",

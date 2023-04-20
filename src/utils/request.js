@@ -133,7 +133,7 @@ service.interceptors.response.use(
         // removeToken();
         // removeAccessToken();
         // router.push("/login");
-        router.push("/login");
+        router.push("/user");
         // Message({
         //   message: res.error || "Error",
         //   type: "error",
@@ -187,14 +187,14 @@ service.interceptors.response.use(
         //   type: "error",
         //   duration: 5 * 1000,
         // });
-        return Promise.resolve(res);
+        return Promise.reject(res);
         // return;
       }
     }
     if (response.status === 401 || response.status === 403) {
       //   removeToken();
       //   removeAccessToken();
-      router.push("/login");
+      router.push("/user");
       return;
     }
     if (response.status === 400) {

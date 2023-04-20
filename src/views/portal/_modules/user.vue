@@ -20,12 +20,12 @@
       </el-form-item>
       <div class="foot-btn">
         <el-button :loading="loading" type="primary" @click="submit">
-          {{ isLogin && !isNew ? "Login" : "Submit" }}
+          {{ "Login" }}
         </el-button>
       </div>
     </el-form>
     <div class="info-box" v-else>
-      <el-descriptions :column="3" size="large" border>
+      <!-- <el-descriptions :column="3" size="large" border>
         <template #extra>
           <el-button type="default" @click="unbindVisible = true"
             >Unbind</el-button
@@ -38,7 +38,24 @@
         <el-descriptions-item label="DMC">
           {{ userInfo.dmc }}
         </el-descriptions-item>
-      </el-descriptions>
+      </el-descriptions> -->
+
+      <div class="info-content">
+        <div class="info-item">
+          <div>Email</div>
+          <div>{{ userInfo.email }}</div>
+        </div>
+        <div class="info-item">
+          <div>DMC</div>
+          <div>{{ userInfo.dmc }}</div>
+        </div>
+        <div class="foot-btn">
+          <!-- <el-button type="danger" @click="unbindVisible = true"
+            >Unbind</el-button
+          > -->
+          <el-button type="primary" @click="logout">Logout</el-button>
+        </div>
+      </div>
     </div>
 
     <!-- <el-button @click="emit('next')">Next</el-button> -->
@@ -196,20 +213,6 @@ const unbind = () => {
   font-size: 30px;
   text-align: center;
 }
-.title-btn {
-  margin-top: 20px;
-  text-align: center;
-  :deep {
-    .el-button {
-      background: transparent !important;
-
-      &:hover {
-        background: transparent;
-        transform: scale(1.1);
-      }
-    }
-  }
-}
 .account-form {
   width: 500px;
   margin: 0 auto;
@@ -259,6 +262,26 @@ const unbind = () => {
 .info-box {
   width: 500px;
   margin: 0 auto;
+  .info-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 20px;
+    .info-item {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      margin-bottom: 10px;
+      div:first-child {
+        width: 50px;
+        margin-right: 10px;
+        text-align: left;
+        font-weight: 700;
+      }
+    }
+    .foot-btn {
+      text-align: center;
+    }
+  }
 }
 </style>
 <style lang="less">

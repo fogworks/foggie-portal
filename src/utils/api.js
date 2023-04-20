@@ -1591,6 +1591,14 @@ export const search_foggie = (data) => {
     data
   });
 };
+//  探测设备是否可以外网访问
+export const detected_net = () => {
+  return request({
+    url: `/v1/detected_net`,
+    method: "GET",
+  });
+};
+
 
 
 //getIP

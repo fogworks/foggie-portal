@@ -148,7 +148,7 @@ const showClick = () => {
 const email = computed(() => store.getters["token/currentUser"]);
 search_foggie({ email: email.value }).then((res) => {
   console.log(res, "res");
-  deviceList.list = res.data.filter((el) => el.device_type === "foggie_max");
+  deviceList.list = res.data;
 });
 </script>
 
