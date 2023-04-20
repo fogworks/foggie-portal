@@ -62,7 +62,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, defineEmits, computed } from "vue";
+import { ref, reactive, defineEmits, computed, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import WifiSearching from "@/components/wifiSearching";
 import IpForm from "./ipForm";
@@ -81,6 +81,7 @@ const chooseAssociated = ref(false);
 const accountVisible = ref(false);
 const router = useRouter();
 const store = useStore();
+const { proxy } = getCurrentInstance();
 const refresh = () => {
   loading.value = true;
   setTimeout(() => {
