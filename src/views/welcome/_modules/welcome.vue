@@ -1,7 +1,7 @@
 <template>
   <div>
     <p class="welcome">Welcome</p>
-    <img src="@/assets/welcome-asset.jpg" alt="" />
+    <img src="@/assets/welcome-asset.png" alt="" />
     <p>
       <HoverButton @next="next"></HoverButton>
     </p>

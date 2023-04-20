@@ -2,15 +2,34 @@
   <div>
     <p class="welcome">Device</p>
     <ul class="deviceList">
+      <WifiSearching v-if="loading"></WifiSearching>
       <li
-        class="card"
+        v-else
+        :class="['card', item.device_type === 'foggie_max' ? 'max' : 'foggie']"
         v-for="(item, index) in deviceList.list"
         @click="toGuide(item)"
       >
-        <span>
-          {{ item.device_name }}
-        </span>
-        <el-dropdown
+        <div class="item">
+          <span>{{ item.device_type ? "" : "IP: " }}</span>
+          <span :title="item.device_type ? item.device_name : item.dedicatedip">
+            {{ item.device_type ? item.device_name : item.dedicatedip }}
+          </span>
+        </div>
+
+        <div class="item">
+          <span>Device ID: &nbsp;</span>
+          <span>
+            {{ handleID(item.device_id) }}
+          </span>
+          <svg-icon
+            icon-class="copy"
+            class="copy-icon"
+            @click.stop="copyLink(item.device_id)"
+          ></svg-icon>
+        </div>
+        <template v-if="!item.device_type"> </template>
+
+        <!-- <el-dropdown
           popper-class="more-popper"
           @visible-change="visibleChange"
           @command="handleCommand"
@@ -41,42 +60,20 @@
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
-        </el-dropdown>
+        </el-dropdown> -->
       </li>
     </ul>
+
     <IPFrom v-model:visible="visible"></IPFrom>
-    <!-- <AssociatedAccount v-model:visible="accountVisible"></AssociatedAccount>
-    <el-dialog
-      class="account-dialog"
-      title="Associated account"
-      width="500px"
-      v-model="chooseAssociated"
-    >
-      <span> Is it related to Foggie account? </span>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="skip">Skip</el-button>
-          <el-button
-            type="primary"
-            @click="
-              chooseAssociated = false;
-              accountVisible = true;
-            "
-          >
-            YES
-          </el-button>
-        </span>
-      </template>
-    </el-dialog> -->
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, defineEmits, getCurrentInstance } from "vue";
+import WifiSearching from "@/components/wifiSearching";
 import { useRouter } from "vue-router";
 import IPFrom from "./ipForm";
 import { search_foggie } from "@/utils/api";
-import AssociatedAccount from "./associatedAccount";
 import { useStore } from "vuex";
 const store = useStore();
 const router = useRouter();
@@ -90,19 +87,41 @@ const deviceList = reactive({
   ],
 });
 const visible = ref(false);
-const chooseAssociated = ref(false);
-const accountVisible = ref(false);
 const emit = defineEmits(["next"]);
-const goEdit = () => {};
-const userInfo = computed(() => store.getters.userInfo);
 const toGuide = (item) => {
+  if (item.device_type === "foggie_max") {
+    const url = `http://${item.dedicatedip}:8080`;
+    window.location.href = url;
+  } else {
+    const url = `https://foggie.fogworks.io/#/fogworks`;
+    window.location.href = url;
+  }
   // if (userInfo.email) {
   // 绑定且登录
-  const url = `http://${item.dedicatedip}:8080`;
-  window.location.href = url;
+
   // } else {
   // chooseAssociated.value = true;
   // }
+};
+const copyLink = (text) => {
+  var input = document.createElement("input"); // 创建input对象
+  input.value = text; // 设置复制内容
+  document.body.appendChild(input); // 添加临时实例
+  input.select(); // 选择实例内容
+  document.execCommand("Copy"); // 执行复制
+  document.body.removeChild(input); // 删除临时实例
+  // let str = `Copying  ${type} successful!`;
+  // this.$message.success(str);
+  proxy.$notify({
+    message: "Copy succeeded",
+    type: "success",
+    position: "bottom-left",
+  });
+};
+const handleID = (str) => {
+  return (
+    str.substring(0, 3) + "..." + str.substring(str.length - 3, str.length)
+  );
 };
 const handleCommand = ({ flag, data }) => {
   console.log(flag, data);
@@ -127,14 +146,9 @@ const handleCommand = ({ flag, data }) => {
       .catch(() => {});
   }
 };
-const skip = () => {
-  chooseAssociated.value = false;
-  router.push({
-    name: "Welcome",
-  });
-};
 const dropMenuRef = ref(null);
 const dropMenuShow = ref(false);
+const loading = ref(false);
 const visibleChange = (val) => {
   dropMenuShow.value = val;
 };
@@ -146,10 +160,19 @@ const showClick = () => {
   // }
 };
 const email = computed(() => store.getters["token/currentUser"]);
-search_foggie({ email: email.value }).then((res) => {
-  console.log(res, "res");
-  deviceList.list = res.data;
-});
+const search = () => {
+  loading.value = true;
+  search_foggie({ email: email.value })
+    .then((res) => {
+      console.log(res, "res");
+      deviceList.list = res.data;
+      loading.value = false;
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+};
+search();
 </script>
 
 <style lang="less" scoped>
@@ -170,30 +193,59 @@ search_foggie({ email: email.value }).then((res) => {
   margin: 20px;
   padding: 0;
   list-style: none;
+  :deep {
+    #wifi-loader {
+      margin: 100px auto;
+    }
+  }
   li {
     overflow: hidden;
     position: relative;
     box-sizing: border-box;
-    width: 200px;
-    height: 180px;
+    width: 240px;
+    height: 220px;
     margin: 20px;
+    padding: 0 25px;
     background: rgba(251, 251, 251, 0.58);
-    border: 1px solid white;
-    box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.22);
+    border: 5px solid white;
+    box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.22);
     backdrop-filter: blur(6px);
     border-radius: 17px;
     text-align: center;
     cursor: pointer;
     transition: all 0.5s;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
     justify-content: center;
     user-select: none;
     font-weight: bolder;
-    color: black;
+    color: #3f3c3c;
+    // color: #093aed;
     cursor: pointer;
-    > span {
+    span {
+      display: inline-block;
       z-index: 10;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .item {
+      display: flex;
+      justify-content: center;
+      flex-direction: row;
+      max-width: 100%;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      svg {
+        font-size: 20px;
+        &:hover {
+          color: #29abff;
+          transform: scale(1.2);
+        }
+      }
     }
     :deep {
       .el-dropdown {
@@ -210,48 +262,72 @@ search_foggie({ email: email.value }).then((res) => {
     //   right: 10px;
     // }
   }
-  .card::before {
-    content: "";
-    position: absolute;
-    width: 100px;
-    background-image: linear-gradient(
-      180deg,
-      rgb(0, 183, 255),
-      rgb(255, 48, 255)
-    );
-    height: 150%;
-    animation: rotBGimg 3s linear infinite;
-    transition: all 0.2s linear;
-    display: none;
-  }
+  // .card::before {
+  //   content: "";
+  //   position: absolute;
+  //   width: 100px;
+  //   background-image: linear-gradient(
+  //     180deg,
+  //     rgb(0, 183, 255),
+  //     rgb(255, 48, 255)
+  //   );
+  //   height: 150%;
+  //   animation: rotBGimg 3s linear infinite;
+  //   transition: all 0.2s linear;
+  //   display: none;
+  // }
 
-  @keyframes rotBGimg {
-    from {
-      transform: rotate(0deg);
-    }
+  // @keyframes rotBGimg {
+  //   from {
+  //     transform: rotate(0deg);
+  //   }
 
-    to {
-      transform: rotate(360deg);
-    }
-  }
+  //   to {
+  //     transform: rotate(360deg);
+  //   }
+  // }
 
-  .card::after {
-    content: "";
-    position: absolute;
-    background: transparent;
-    inset: 5px;
-    border-radius: 15px;
-  }
+  // .card::after {
+  //   content: "";
+  //   position: absolute;
+  //   background: transparent;
+  //   inset: 5px;
+  //   border-radius: 15px;
+  // }
   .card:hover {
-    background: #fff;
+    // background: #fff;
     transform: translateY(-5px);
-    transition: all 0.5s ease-in-out;
+    transition: all 0.5s;
     &::before {
       display: inline-block;
     }
     &::after {
-      background-color: #fff;
+      // background-color: #fff;
     }
+  }
+  .foggie {
+    position: relative;
+    &::before {
+      content: "";
+      display: block;
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("~@/assets/logo-dog.svg") no-repeat;
+      background-size: 140px;
+      background-position: center;
+      opacity: 0.2;
+      z-index: -1;
+    }
+  }
+  .max {
+    // border: 5px solid transparent;
+    // background: linear-gradient(315deg, #03a9f4, #ff0058);
+    // &::before {
+    //   content: "";
+    //   position: absolute;
+    // }
   }
 }
 </style>

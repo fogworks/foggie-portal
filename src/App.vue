@@ -19,7 +19,7 @@ const initFoggieDate = async () => {
   //   pn: 1,
   //   ps: 50,
   // };
-  detected_net.then((res) => {
+  detected_net().then((res) => {
     if (res.result.detected_net) {
       store.dispatch("setDetected_net", true);
     } else {

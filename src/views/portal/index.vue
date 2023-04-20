@@ -1,15 +1,9 @@
 <template>
   <div class="portal-main">
     <div>
-      <!-- <div class="user">
-        <svg-icon icon-class="user" @click="visible = true"></svg-icon>
-        <div v-if="userName" :title="userName">
-          {{ userName }}
-        </div>
-      </div> -->
-      <el-menu :default-active="defaultActive" router @select="handleSelect">
+      <el-menu :default-active="defaultActive" router>
         <el-menu-item index="user" class="user">
-          <svg-icon icon-class="user" @click="visible = true"></svg-icon>
+          <svg-icon icon-class="user"></svg-icon>
           <div v-if="userName" :title="userName">
             {{ userName }}
           </div>
@@ -33,21 +27,12 @@
 
 <script setup>
 import { ref, computed } from "vue";
-import Device from "./_modules/device";
-import Discover from "./_modules/discover";
-import User from "./_modules/user";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
 const store = useStore();
-const active = ref("User");
-const visible = ref(false);
 const route = useRoute();
-console.log(route.path);
 const defaultActive = ref(route.path.slice(1, route.path.length));
-const handleSelect = (key, keyPath) => {
-  console.log(key);
-  active.value = key;
-};
+
 const userName = computed(() => store.getters["token/currentUser"] || "Login");
 </script>
 
@@ -55,10 +40,13 @@ const userName = computed(() => store.getters["token/currentUser"] || "Login");
 .portal-main {
   display: flex;
   height: 100%;
+  background: url("~@/assets/cool-background.png") no-repeat;
+  background-size: cover;
 
   :deep {
     .el-menu {
       width: 250px;
+      height: 100%;
       background-color: #f2f6ff;
       .el-menu-item {
         display: flex;
@@ -66,7 +54,7 @@ const userName = computed(() => store.getters["token/currentUser"] || "Login");
         align-items: center;
         font-size: 20px;
         svg {
-          margin-right: 5px;
+          margin-right: 15px;
           font-size: 30px;
           cursor: pointer;
           vertical-align: middle;
@@ -84,6 +72,12 @@ const userName = computed(() => store.getters["token/currentUser"] || "Login");
           color: #fff;
           // background: #8b49ec;
           background: #495dd0;
+          // background: rgb(28, 42, 237);
+          // background: linear-gradient(
+          //   93deg,
+          //   rgba(28, 42, 237, 1) 0%,
+          //   rgba(126, 12, 247, 1) 52%
+          // );
           svg {
             margin-right: 0;
           }
@@ -105,13 +99,12 @@ const userName = computed(() => store.getters["token/currentUser"] || "Login");
     height: calc(100% - 60px);
     flex: 1;
     padding: 30px;
-    background: linear-gradient(
-      220deg,
-      rgba(174, 176, 238, 1) 0%,
-      rgba(148, 187, 233, 1) 100%
-    );
-    background: url("~@/assets/cool-background.png") no-repeat;
-    background-size: cover;
+    // background: linear-gradient(
+    //   220deg,
+    //   rgba(174, 176, 238, 1) 0%,
+    //   rgba(148, 187, 233, 1) 100%
+    // );
+
     > div {
       z-index: 1;
     }
