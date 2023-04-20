@@ -6,7 +6,7 @@
       <svg-icon icon-class="reset" @click="refresh" class="refresh"></svg-icon>
       <svg-icon icon-class="add" @click="addIP" class="refresh add"></svg-icon>
     </p>
-    <p v-if="curAddress">Your IP address:{{ curAddress }}</p>
+    <p v-if="curAddress" class="p-address">Your IP address:{{ curAddress }}</p>
     <ul class="deviceList">
       <WifiSearching v-if="loading"></WifiSearching>
       <li
@@ -160,6 +160,15 @@ const emit = defineEmits(["next"]);
       transform: scale(1.1);
     }
   }
+}
+.p-address {
+  display: flex;
+  margin-top: 15px;
+  align-items: center;
+  text-align: left;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
 }
 
 .deviceList {
