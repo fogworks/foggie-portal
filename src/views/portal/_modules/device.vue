@@ -90,7 +90,7 @@ const visible = ref(false);
 const emit = defineEmits(["next"]);
 const toGuide = (item) => {
   if (item.device_type === "foggie_max") {
-    const url = `http://${item.dedicatedip}:8080`;
+    const url = `http://${item.dedicatedip}:9001`;
     window.location.href = url;
   } else {
     const url = `https://foggie.fogworks.io/#/fogworks`;

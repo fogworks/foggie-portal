@@ -138,7 +138,7 @@ const toGuide = (item) => {
   if (detected_net.value && !item.email && !item.bind) {
     chooseAssociated.value = true;
   } else {
-    const url = `http://${item.ipaddress}:7070/#/welcome`;
+    const url = `http://${item.ipaddress}:9001/#/welcome`;
     window.location.href = url;
   }
 };
