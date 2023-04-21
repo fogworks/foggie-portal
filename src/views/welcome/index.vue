@@ -84,13 +84,13 @@ const getServiceInfo = () => {
           result.ipfs_state === "finish" &&
           result.cyfs_state === "finish"
         ) {
-          window.location.href = "http://localhost:8080/#/access";
+          window.location.href = "http://154.37.16.163:9000/#/access";
           return true;
         }
       } else {
         // 无外网
         if (result.cbs_state === "finish" && result.ipfs_state === "finish") {
-          window.location.href = "http://localhost:8080/#/access";
+          window.location.href = "http://154.37.16.163:9000/#/access";
           return true;
         }
       }

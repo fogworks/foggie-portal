@@ -1,32 +1,45 @@
-const { defineConfig } = require('@vue/cli-service')
-const path = require("path")
-const port = process.env.port || process.env.npm_config_port || 7070; // dev port
+const { defineConfig } = require("@vue/cli-service");
+const path = require("path");
+const port = process.env.port || process.env.npm_config_port || 9001; // dev port
+
+require("events").EventEmitter.defaultMaxListeners = 0;
+
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 module.exports = defineConfig({
   transpileDependencies: true,
-  chainWebpack: config => {
+  configureWebpack: {
+    resolve: {
+      alias: {},
+      fallback: {
+        //其他的如果不启用可以用 keyname :false，例如：crypto:false,
+        crypto: require.resolve("crypto-browserify"),
+        stream: require.resolve("stream-browserify"),
+      },
+    },
+    plugins: [new NodePolyfillPlugin()],
+  },
+  chainWebpack: (config) => {
     config.module
-      .rule('svg')
-      .exclude
-      .add(path.resolve(__dirname, 'src/svg-icons'))
-      .end()
+      .rule("svg")
+      .exclude.add(path.resolve(__dirname, "src/svg-icons"))
+      .end();
     // 配置svg图标的加载器
     config.module
-      .rule('svg-icons')
+      .rule("svg-icons")
       .test(/.svg$/)
-      .include
-      .add(path.resolve(__dirname, 'src/svg-icons'))
+      .include.add(path.resolve(__dirname, "src/svg-icons"))
       .end()
-      .use('svg-sprite-loader')
-      .loader('svg-sprite-loader')
+      .use("svg-sprite-loader")
+      .loader("svg-sprite-loader")
       .options({
-        symbolId: 'icon-[name]'
-      })
+        symbolId: "icon-[name]",
+      });
   },
   pluginOptions: {
     "style-resources-loader": {
       preProcessor: "less",
-      patterns: [path.resolve(__dirname, "./src/static/style/common.less")]
-    }
+      patterns: [path.resolve(__dirname, "./src/static/style/common.less")],
+    },
   },
   lintOnSave: true,
   devServer: {
@@ -99,8 +112,8 @@ module.exports = defineConfig({
         changeOrigin: true,
         secure: false,
         pathRewrite: {
-          '^/upload': ''//代理的路径
-        }
+          "^/upload": "", //代理的路径
+        },
       },
       "^/x": {
         target: "http://154.31.41.36:880",
@@ -219,10 +232,35 @@ module.exports = defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      "/getIP": {
+        target: "http://127.0.0.1:3001",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/portal_ping": {
+        target: "http://127.0.0.1:3001",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/socket_ip": {
+        target: "http://127.0.0.1:3001",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/get_max_info": {
+        target: "http://127.0.0.1:3001",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/get_net_status": {
+        target: "http://127.0.0.1:3001",
+        changeOrigin: true,
+        secure: false,
+      },
     },
     // before: require('./mock/mock-server.js')
   },
-})
+});
 
 // module.exports = { //多页面打包
 //   pages: {

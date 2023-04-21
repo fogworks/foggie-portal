@@ -1,10 +1,12 @@
 <template>
   <div>
+    <!-- <a href="http://154.37.16.163:9000/#/home">Foggie Max</a> -->
     <p class="welcome">
       Device Discovery
       <svg-icon icon-class="reset" @click="refresh" class="refresh"></svg-icon>
       <!-- <svg-icon icon-class="add" @click="addIP" class="refresh add"></svg-icon> -->
     </p>
+    <p v-if="curAddress" class="p-address">Your IP address:{{ curAddress }}</p>
     <ul class="deviceList">
       <WifiSearching v-if="loading"></WifiSearching>
       <template v-else>
@@ -12,7 +14,7 @@
           <div class="item">
             <span>{{ item.device_type ? "Name: " : "IP: " }}</span>
             <span>
-              {{ item.device_type ? item.device_name : item.dedicatedip }}
+              {{ item.device_type ? item.device_name : item.ipaddress }}
             </span>
           </div>
           <div class="item">
@@ -32,7 +34,7 @@
         </li>
       </template>
     </ul>
-    <IpForm v-model:visible="visible"></IpForm>
+    <IpForm v-model:visible="visible" @getMax="getMax"></IpForm>
     <AssociatedAccount v-model:visible="accountVisible"></AssociatedAccount>
     <el-dialog
       class="account-dialog"
@@ -64,6 +66,13 @@ import { ref, reactive, defineEmits, computed, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
 import WifiSearching from "@/components/wifiSearching";
 import IpForm from "./ipForm";
+import {
+  pingUrl,
+  getIP,
+  socketIP,
+  portalPing,
+  getNetStatus,
+} from "@/utils/api";
 import AssociatedAccount from "./associatedAccount";
 import { useStore } from "vuex";
 const loading = ref(false);
@@ -73,10 +82,46 @@ const accountVisible = ref(false);
 const router = useRouter();
 const store = useStore();
 const { proxy } = getCurrentInstance();
+const curAddress = ref("");
 const refresh = () => {
   loading.value = true;
   setTimeout(() => {
-    loading.value = false;
+    getIP().then((res) => {
+      curAddress.value = res?.address;
+      loading.value = false;
+    });
+    // let data = {
+    //   url: "http://154.37.16.163:9094/",
+    // };
+    // pingUrl(data).then((r) => {
+    //   console.log("~~~~~~", r);
+    // });
+    socketIP().then((res) => {
+      console.log("!!!!!!!!", res);
+      let rrr = res.data;
+      loading.value = false;
+      for (let i = 0; i < rrr.length; i++) {
+        let flag = true;
+        for (let j = 0; j < deviceList.list.length; j++) {
+          if (rrr[i].ipaddress === deviceList.list[j].ipaddress) {
+            flag = false;
+          }
+        }
+        if (flag) {
+          deviceList.list.push(rrr[0]);
+        }
+      }
+      // deviceList.list = rrr.data;
+    });
+    // portalPing().then((res)=>{
+    //   console.log("res++++++", res)
+    // })
+    let data1 = {
+      ip: "explorer.dmctech.io",
+    };
+    getNetStatus(data1).then((dd) => {
+      console.log("ddddddd", dd);
+    });
   }, 3000);
 };
 const userInfo = computed(() => store.getters.userInfo);
@@ -86,14 +131,14 @@ const toGuide = (item) => {
   currentItem = item;
   // if (userInfo.email) {
   // 绑定且登录
-  // const url = `http://${item.dedicatedip}:8080/#/welcome`;
+  // const url = `http://${item.ipaddress}:8080/#/welcome`;
   // window.location.href = url;
   // } else {
   // }
   if (detected_net.value && !item.email && !item.bind) {
     chooseAssociated.value = true;
   } else {
-    const url = `http://${item.dedicatedip}:7070/#/welcome`;
+    const url = `http://${item.ipaddress}:9001/#/welcome`;
     window.location.href = url;
   }
 };
@@ -132,11 +177,34 @@ const deviceList = reactive({
   list: [
     // {
     //   device_name: "xx",
-    //   dedicatedip: "dasdas",
+    //   ipaddress: "dasdas",
     //   device_id: "xxxxxxxxxxxxxx",
     // },
   ],
 });
+const getMax = (data) => {
+  let flag = true;
+  for (let i = 0; i < deviceList.list.length; i++) {
+    if (data.ipaddress === deviceList.list[i].ipaddress) {
+      flag = false;
+      break;
+    }
+  }
+  if (flag) {
+    deviceList.list.push(data);
+    proxy.$notify({
+      message: "The device is added successfully",
+      type: "success",
+      position: "bottom-left",
+    });
+  } else {
+    proxy.$notify({
+      message: "Device already exists",
+      type: "warning",
+      position: "bottom-left",
+    });
+  }
+};
 const emit = defineEmits(["next"]);
 </script>
 
@@ -167,6 +235,15 @@ const emit = defineEmits(["next"]);
       transform: scale(1.1);
     }
   }
+}
+.p-address {
+  display: flex;
+  margin-top: 15px;
+  align-items: center;
+  text-align: left;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
 }
 
 .deviceList {
