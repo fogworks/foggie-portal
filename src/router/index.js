@@ -38,6 +38,15 @@ const router = createRouter({
             title: 'discover',
           },
         },
+        {
+          path: 'appWindow',
+          name: 'AppWindow',
+          component: defineAsyncComponent(() => import(`../views/appWindow`)),
+          meta: {
+            title: 'appWindow',
+          },
+        },
+
       ]
     },
     {

@@ -1,13 +1,82 @@
 <template>
   <div class="top">
     <div class="header-left">
-      <img
-        v-if="currentTheme === 'light'"
-        class="logo"
-        src="@/assets/logo-top-left.png"
-        alt=""
-      />
-      <img v-else class="logo" src="@/assets/logo-top-left-dark.png" alt="" />
+      <a href="https://fogworks.io/" target="_blank">
+        <img
+          v-if="currentTheme === 'light'"
+          class="logo"
+          src="@/assets/logo-top-left.png"
+          alt=""
+        />
+        <img v-else class="logo" src="@/assets/logo-top-left-dark.png" alt="" />
+      </a>
+      <span class="line" />
+      <router-link class="name-link" to="/home">
+        <img class="foggie" src="@/assets/foggie.jpg" alt="" />
+      </router-link>
+
+      <div class="beta">Max Beta</div>
+    </div>
+    <div class="header-right">
+      <!-- <img v-if="userName" src="@/assets/user.png" alt="" /> -->
+      <el-dropdown
+        ref="logoutRef"
+        v-if="userName"
+        trigger="click"
+        @command="userCommand"
+        @visible-change="LogoutVisibleChange"
+      >
+        <div>
+          <img src="@/assets/user.png" alt="" />
+        </div>
+        <template #dropdown>
+          <el-dropdown-menu class="logout-dropdown">
+            <el-dropdown-item command="setting">Set Up</el-dropdown-item>
+            <!-- <el-dropdown-item command="logout">Logout</el-dropdown-item> -->
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+      <div v-if="userName && accessible" class="user-info">
+        <div
+          class="user-name"
+          :title="userName"
+          @click="logoutShow ? logoutRef.handleClose() : logoutRef.handleOpen()"
+        >
+          {{ userName }}
+        </div>
+        <!-- <el-dropdown trigger="click" @command="userCommand">
+          <template #dropdown>
+            <el-dropdown-menu class="logout-dropdown">
+              <el-dropdown-item command="logout">Logout</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown> -->
+        <div class="free">Max</div>
+      </div>
+      <div
+        class="theme"
+        @click="handleThemeChange(currentTheme === 'light' ? 'dark' : 'light')"
+      >
+        <el-icon class="light" v-if="currentTheme === 'light' || ''"
+          ><Sunny
+        /></el-icon>
+        <el-icon class="dark" v-else><Moon /></el-icon>
+      </div>
+      <!-- <div class="language">
+        <el-dropdown trigger="click" @command="handleCommand">
+          <svg-icon icon-class="language" class="language-icon"></svg-icon>
+          <template #dropdown>
+            <el-dropdown-menu class="lan-dropdown">
+              <el-dropdown-item
+                v-for="item in lanList"
+                :class="{ 'is-active': currentLanguage === item }"
+                :command="item"
+                >{{ item }}</el-dropdown-item
+              >
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div> -->
     </div>
   </div>
 </template>

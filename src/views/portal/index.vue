@@ -20,7 +20,11 @@
       <!-- <User v-if="active === 'User'"></User>
       <Device v-if="active === 'Device'"></Device>
       <Discover v-if="active === 'Discover'"></Discover> -->
-      <router-view></router-view>
+      <router-view v-slot="{ Component }">
+        <keep-alive include="AppWindow">
+          <component :is="Component"></component>
+        </keep-alive>
+      </router-view>
     </div>
   </div>
 </template>

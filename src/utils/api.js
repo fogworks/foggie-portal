@@ -1550,13 +1550,7 @@ export const get_service_info = () => {
     method: "get",
   });
 };
-// 服务一键重置
-export const reset_vood = () => {
-  return request({
-    url: `/v1/service/reset_vood`,
-    method: "POST",
-  });
-};
+
 // 探测绑定的 foggie 账户 DMC 信息
 export const get_foggie_dmc = (data) => {
   return request({
@@ -1587,6 +1581,61 @@ export const search_foggie = (data) => {
     url: `/api/accounts/search_foggie`,
     method: "POST",
     data
+  });
+};
+
+// 修改访问密码
+export const modify_access_password = (data) => {
+  return request({
+    url: `/v1/account/modify_access_password`,
+    method: "POST",
+    data
+  });
+};
+// 访问密码是否存在监测
+export const check_access_pass = () => {
+  return request({
+    url: `/v1/account/check_access_pass`,
+    method: "GET",
+  });
+};
+// 访问密码设置
+export const access_pass = (data) => {
+  return request({
+    url: `/v1/account/access_pass`,
+    method: "POST",
+    data
+  });
+};
+// 访问密码登录
+export const access_pass_login = (data) => {
+  return request({
+    url: `/v1/account/access_pass_login`,
+    method: "POST",
+    data
+  });
+};
+// IPFS 服务开启/关闭
+export const op_ipfs = (data) => {
+  return request({
+    url: `/v1/service/op_ipfs`,
+    method: "POST",
+    data
+  });
+};
+// cyFS 服务开启/关闭
+export const op_cyfs = (data) => {
+  return request({
+    url: `/v1/service/op_cyfs`,
+    method: "POST",
+    data
+  });
+};
+// 服务一键重置
+export const reset_vood = () => {
+  return request({
+    url: `/v1/service/reset_vood`,
+    method: "POST",
   });
 };
 //  探测设备是否可以外网访问

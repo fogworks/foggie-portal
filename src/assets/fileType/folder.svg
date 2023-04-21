@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="13px" viewBox="0 0 16 13" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.2 (72643) - https://sketchapp.com -->
+    <title>Shape</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="file-list-" transform="translate(-244.000000, -278.000000)" fill="#FDB813" fill-rule="nonzero">
+            <g id="content" transform="translate(200.000000, 63.000000)">
+                <g id="table" transform="translate(0.000000, 108.000000)">
+                    <g id="Group-6-Copy" transform="translate(0.000000, 105.000000)">
+                        <path d="M58.5,15.0000028 L45.5,15.0000028 C44.6715088,15.0000028 44,14.3283719 44,13.5000028 L44,3.50000277 C44,2.67163365 44.6715088,2.00000277 45.5,2.00000277 L49.8000488,2.00000277 C50.0585938,1.99939243 50.307251,2.09961215 50.493042,2.27954377 L52.1999512,3.91650668 C52.2253418,3.9418973 52.2480469,3.9698514 52.2674561,4.00000277 L58.5,4.00000277 C59.3284912,4.00000277 60,4.67163365 60,5.50000277 L60,13.5000028 C60,14.3283719 59.3283691,15.0000028 58.5,15.0000028 Z" id="Shape"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

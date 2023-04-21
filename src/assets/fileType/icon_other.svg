@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 46.1 (44463) - http://www.bohemiancoding.com/sketch -->
+    <title>ic_24</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Desktop" transform="translate(-445.000000, -256.000000)">
+            <g id="Group-Copy" transform="translate(265.000000, 244.000000)">
+                <g id="Icon-other" transform="translate(168.000000, 0.000000)">
+                    <g id="path" transform="translate(13.000000, 12.000000)">
+                        <path d="M1.9125,1.33226763e-15 C0.8625,1.33226763e-15 0,0.8625 0,1.9125 L0,22.0875 C0,23.1375 0.8625,24 1.9125,24 L19.0875,24 C20.1375,24 21,23.1375 21,22.0875 L21,7.6125 L13.9125,0 L1.9125,0 L1.9125,1.33226763e-15 Z" id="Shape" fill="#8199AF"></path>
+                        <path d="M21,7.65 L21,8.025 L16.2,8.025 C16.2,8.025 13.8375,7.5375 13.875,5.475 C13.875,5.475 13.9875,7.65 16.1625,7.65 L21,7.65 Z" id="Shape" fill="#000000" opacity="0.2"></path>
+                        <path d="M13.9125,0 L13.9125,5.475 C13.9125,6.075 14.325,7.65 16.2,7.65 L21,7.65 L13.9125,0 Z" id="Shape" fill="#FFFFFF" opacity="0.5"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
