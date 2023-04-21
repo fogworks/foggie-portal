@@ -48,6 +48,7 @@ const router = createRouter({
           component: defineAsyncComponent(() => import(`../views/appWindow`)),
           meta: {
             title: 'appWindow',
+            keepAlive: true
           },
         },
 

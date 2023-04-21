@@ -624,7 +624,7 @@ export const oodhealthVood = () => {
 
 //VOOD总容量和健康度信息获取
 export const getActivationVood = (data) => {
-  let url = `/api/vps/get_activation_vood?pn=${data.pn}&ps=${data.ps}`;
+  let url = `/v1/get_service_info`;
   return request({
     url: url,
     method: "GET",
@@ -867,9 +867,8 @@ export const uploadMultipart = (params) => {
   //   }&content_type=${fileType}`;
   // }
 
-  url = `/mp/${encodeURIComponent(fileName)}?upload_id=${
-    upload_id ?? ""
-  }&content_type=${fileType}`;
+  url = `/mp/${encodeURIComponent(fileName)}?upload_id=${upload_id ?? ""
+    }&content_type=${fileType}`;
 
   let obj = {
     url: url,
@@ -892,9 +891,8 @@ export const uploadMultipart = (params) => {
 /* 大文件 断点续传 查看文件当前上传到第几段 */
 export const curUploadChunk = (params) => {
   return request({
-    url: `/mp/${encodeURIComponent(params.fileName)}?upload_id=${
-      params.upload_id
-    }`,
+    url: `/mp/${encodeURIComponent(params.fileName)}?upload_id=${params.upload_id
+      }`,
     method: "GET",
     data: data,
     headers: {

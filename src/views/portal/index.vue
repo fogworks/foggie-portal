@@ -21,8 +21,9 @@
       <Device v-if="active === 'Device'"></Device>
       <Discover v-if="active === 'Discover'"></Discover> -->
       <router-view v-slot="{ Component }">
-        <keep-alive include="AppWindow">
-          <component :is="Component"></component>
+        <component :is="Component" v-if="!$route.meta.keepAlive"></component>
+        <keep-alive>
+          <component :is="Component" v-if="$route.meta.keepAlive"></component>
         </keep-alive>
       </router-view>
     </div>

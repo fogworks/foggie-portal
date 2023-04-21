@@ -1,21 +1,30 @@
 <template>
   <div class="container">
-    <header>
+    <!-- <header>
       <LayoutHeader></LayoutHeader>
-    </header>
+    </header> -->
     <main>
-      <Home :haveNet="haveNet"></Home>
+      <Access v-if="!accessible" v-model:accessible="accessible"></Access>
+      <div v-else>
+        <div class="top-title">
+          <span>
+            {{ deviceData.data.device_name }}
+          </span>
+        </div>
+        <MaxHome :haveNet="haveNet"></MaxHome>
+      </div>
     </main>
-    <footer>
+    <!-- <footer>
       <LayoutFooter></LayoutFooter>
-    </footer>
+    </footer> -->
   </div>
 </template>
 
 <script>
-import LayoutHeader from "./layoutHeader";
-import LayoutFooter from "./layoutFooter";
-import Home from "../home";
+// import LayoutHeader from "./layoutHeader";
+// import LayoutFooter from "./layoutFooter";
+import MaxHome from "../home";
+import Access from "./access";
 import { useStore } from "vuex";
 // import mainVue from './views/main/main.vue'
 import {
@@ -24,16 +33,22 @@ import {
   getActivationVood,
   detected_net,
 } from "@/utils/api.js";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, toRefs } from "vue";
 export default {
   name: "FoggieMax",
   components: {
-    LayoutHeader,
-    LayoutFooter,
+    MaxHome,
+    Access,
+    // LayoutHeader,
+    // LayoutFooter,
   },
-  setup() {
+  props: {
+    deviceData: { data: {} },
+  },
+  setup(props) {
+    const { deviceData } = toRefs(props);
     const store = useStore();
-
+    const accessible = ref(false);
     const currentOODItem = ref({
       data: {
         device_id: "",
@@ -128,6 +143,8 @@ export default {
       currentOODItem,
       showTopUpload,
       haveNet,
+      accessible,
+      deviceData,
       closeUploadBox,
       toggleToUpload,
       showShareBox,
@@ -144,6 +161,20 @@ export default {
   box-sizing: border-box;
   main {
     z-index: 1;
+  }
+  .top-title {
+    margin: 20px;
+    font-size: 30px;
+    text-align: left;
+    font-weight: 700;
+    text-align: left;
+    span {
+      background: linear-gradient(to right, #3913b8 0%, #75e0e6 100%);
+      background-clip: text;
+      text-fill-color: transparent;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
   }
 }
 .top-between {

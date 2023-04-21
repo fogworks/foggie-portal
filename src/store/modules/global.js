@@ -4,6 +4,7 @@ export default {
     theme: window.localStorage.getItem("theme") || '',
     userInfo: {},
     detected_net: false,
+    deviceList: []
   },
   mutations: {
     SET_THEME: (state, theme) => {
@@ -16,6 +17,9 @@ export default {
     SET_Detected_net: (state, bool) => {
       state.detected_net = bool;
     },
+    SET_DeviceList: (state, data) => {
+      state.deviceList = data;
+    },
   },
   actions: {
     setTheme({ commit }, theme) {
@@ -27,10 +31,14 @@ export default {
     setDetected_net({ commit }, bool) {
       commit("SET_Detected_net", bool);
     },
+    setDeviceList({ commit }, data) {
+      commit("SET_DeviceList", data);
+    },
   },
   getters: {
     userInfo: (state) => state.userInfo,
     theme: (state) => state.theme,
     detected_net: (state) => state.detected_net,
+    deviceList: (state) => state.deviceList,
   },
 };

@@ -165,6 +165,8 @@ export default {
   }
   .dashboard-item {
     align-items: center;
+    justify-content: center;
+    text-align: center;
     .dashboard-name {
       margin-top: 5px;
       margin-bottom: 5px;

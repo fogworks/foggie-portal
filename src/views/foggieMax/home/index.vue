@@ -70,11 +70,11 @@ export default {
     const initFoggieDate = async () => {
       // get is have net
 
-      // let data = {
-      //   pn: 1,
-      //   ps: 50,
-      // };
-      let oodData = await getActivationVood();
+      let data = {
+        pn: 1,
+        ps: 50,
+      };
+      let oodData = await getActivationVood(data);
       currentOODItem.value.data = oodData.result;
       console.log(oodData.result, "oodData.result");
       store.dispatch("setCurrentOODItem", {

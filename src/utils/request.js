@@ -93,6 +93,11 @@ service.interceptors.request.use(
         config.headers["Content-Type"] = "multipart/form-data";
         config.headers["Content-Md5"] = config.MD5;
       }
+      if (config.url.indexOf("/v1") > -1) {
+        let access_token = window.localStorage.getItem("access_token");
+        config.headers["Authorization"] = access_token;
+
+      }
     }
     return config;
   },

@@ -102,7 +102,7 @@
           <template #default="{ row }">
             <router-link
               class="name-link"
-              to="detail"
+              to="user"
               @click.prevent="toDetail(row)"
             >
               <div class="name-img">
@@ -291,8 +291,7 @@ import ShareDialog from "./shareDialog";
 import PinDialog from "./pinDialog";
 import PinTaskList from "./pinTaskList";
 import PinFormDialog from "./pinFormDialog";
-import { getfilesize } from "@/utils/util.js";
-import { transferTime } from "@/utils/util.js";
+import { getfilesize, transferTime } from "@/utils/util.js";
 import router from "@/router";
 import { useStore } from "vuex";
 const { proxy } = getCurrentInstance();
@@ -793,7 +792,7 @@ const toDetail = (item) => {
     emits("currentPrefix", breadcrumbList.prefix);
   } else {
     localStorage.setItem("detail", JSON.stringify(item));
-    router.push("/detail");
+    // router.push("/detail");
   }
 };
 const doSearch = async () => {
@@ -850,7 +849,7 @@ defineExpose({ doSearch });
 }
 .card-box {
   width: 100%;
-  margin: 24px 0 100px 0;
+  margin: 24px 0 50px 0;
   .card-box();
   color: #000;
   background: var(--card-bg);
