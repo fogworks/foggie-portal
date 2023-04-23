@@ -625,7 +625,7 @@ export const oodhealthVood = () => {
 
 //VOOD总容量和健康度信息获取
 export const getActivationVood = (data) => {
-  let url = `/api/vps/get_activation_vood?pn=${data.pn}&ps=${data.ps}`;
+  let url = `/v1/get_service_info`;
   return request({
     url: url,
     method: "GET",
@@ -868,9 +868,8 @@ export const uploadMultipart = (params) => {
   //   }&content_type=${fileType}`;
   // }
 
-  url = `/mp/${encodeURIComponent(fileName)}?upload_id=${
-    upload_id ?? ""
-  }&content_type=${fileType}`;
+  url = `/mp/${encodeURIComponent(fileName)}?upload_id=${upload_id ?? ""
+    }&content_type=${fileType}`;
 
   let obj = {
     url: url,
@@ -893,9 +892,8 @@ export const uploadMultipart = (params) => {
 /* 大文件 断点续传 查看文件当前上传到第几段 */
 export const curUploadChunk = (params) => {
   return request({
-    url: `/mp/${encodeURIComponent(params.fileName)}?upload_id=${
-      params.upload_id
-    }`,
+    url: `/mp/${encodeURIComponent(params.fileName)}?upload_id=${params.upload_id
+      }`,
     method: "GET",
     data: data,
     headers: {
@@ -1553,13 +1551,7 @@ export const get_service_info = () => {
     method: "get",
   });
 };
-// 服务一键重置
-export const reset_vood = () => {
-  return request({
-    url: `/v1/service/reset_vood`,
-    method: "POST",
-  });
-};
+
 // 探测绑定的 foggie 账户 DMC 信息
 export const get_foggie_dmc = (data) => {
   return request({
@@ -1590,6 +1582,61 @@ export const search_foggie = (data) => {
     url: `/api/accounts/search_foggie`,
     method: "POST",
     data
+  });
+};
+
+// 修改访问密码
+export const modify_access_password = (data) => {
+  return request({
+    url: `/v1/account/modify_access_password`,
+    method: "POST",
+    data
+  });
+};
+// 访问密码是否存在监测
+export const check_access_pass = () => {
+  return request({
+    url: `/v1/account/check_access_pass`,
+    method: "GET",
+  });
+};
+// 访问密码设置
+export const access_pass = (data) => {
+  return request({
+    url: `/v1/account/access_pass`,
+    method: "POST",
+    data
+  });
+};
+// 访问密码登录
+export const access_pass_login = (data) => {
+  return request({
+    url: `/v1/account/access_pass_login`,
+    method: "POST",
+    data
+  });
+};
+// IPFS 服务开启/关闭
+export const op_ipfs = (data) => {
+  return request({
+    url: `/v1/service/op_ipfs`,
+    method: "POST",
+    data
+  });
+};
+// cyFS 服务开启/关闭
+export const op_cyfs = (data) => {
+  return request({
+    url: `/v1/service/op_cyfs`,
+    method: "POST",
+    data
+  });
+};
+// 服务一键重置
+export const reset_vood = () => {
+  return request({
+    url: `/v1/service/reset_vood`,
+    method: "POST",
   });
 };
 //  探测设备是否可以外网访问

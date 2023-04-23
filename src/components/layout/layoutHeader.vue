@@ -1,21 +1,13 @@
 <template>
   <div class="top">
     <div class="header-left">
-      <!-- <a href="https://fogworks.io/" target="_blank">
-        <img
-          v-if="currentTheme === 'light'"
-          class="logo"
-          src="@/assets/logo-top-left.png"
-          alt=""
-        />
-        <img v-else class="logo" src="@/assets/logo-top-left-dark.png" alt="" />
-      </a>
-      <span class="line" /> -->
-      <!-- <router-link class="name-link" to="/home"> -->
-      <img class="foggie" src="@/assets/foggie.jpg" alt="" />
-      <!-- </router-link> -->
-
-      <!-- <div class="beta">Max Beta</div> -->
+      <img
+        v-if="currentTheme === 'light'"
+        class="logo"
+        src="@/assets/logo-top-left.png"
+        alt=""
+      />
+      <img v-else class="logo" src="@/assets/logo-top-left-dark.png" alt="" />
     </div>
   </div>
 </template>
@@ -33,6 +25,9 @@ export default {
     const logoutRef = ref(null);
     const userName = computed(() => {
       return store.getters["token/currentUser"];
+    });
+    const accessible = computed(() => {
+      return store.getters.accessible;
     });
     const LogoutVisibleChange = (val) => {
       logoutShow.value = val;
@@ -68,12 +63,17 @@ export default {
       if (command === "logout") {
         store.dispatch("token/logout");
         router.push("/login");
+      } else if (command === "setting") {
+        router.push({
+          name: "Setting",
+        });
       }
     }
 
     getTimeState();
     return {
       userName,
+      accessible,
       currentLanguage,
       handleCommand,
       lanList,

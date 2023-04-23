@@ -39,6 +39,16 @@ const router = createRouter({
             title: 'discover',
           },
         },
+        {
+          path: 'appWindow',
+          name: 'AppWindow',
+          component: defineAsyncComponent(() => import(`../views/appWindow`)),
+          meta: {
+            title: 'appWindow',
+            keepAlive: true
+          },
+        },
+
       ]
     },
     {
@@ -50,48 +60,16 @@ const router = createRouter({
       },
     },
     {
-      path: '/Alltemplate',
-      name: 'Alltemplate',
-      redirect: '/Alltemplate/Home',
-      component: defineAsyncComponent(() => import(`../views/Alltemplate/Alltemplate.vue`)),
-      children: [
-        {
-          path: 'Home',
-          name: 'Home',
-          component: () => defineAsyncComponent(() => import(`@/views/Alltemplate/Home/Home.vue`)),
-          meta: { title: '首页', headerRoute: 'Home' }
-        },
-        {
-          path: 'Orders',
-          name: 'Orders',
-          component: () => defineAsyncComponent(() => import(`@/views/Alltemplate/Orders/orders.vue`)),
-          meta: { title: '订单', headerRoute: 'Orders' }
-        },
-        {
-          path: 'MyFiles',
-          name: 'MyFiles',
-          component: () => defineAsyncComponent(() => import(`@/views/Alltemplate/MyFiles/myFiles.vue`)),
-          meta: { title: 'myFiles', headerRoute: 'Orders' }
-        },
-
-        {
-          path: 'Storage',
-          name: 'Storage',
-          component: () => defineAsyncComponent(() => import(`@/views/Alltemplate/Storage/Storage.vue`)),
-          meta: { title: '存储空间', headerRoute: 'Storage' }
-        },
-
-      ]
+      path: "/detailFog",
+      name: "DetailFog",
+      component: defineAsyncComponent(() => import(`../views/fogDetail`)),
+      meta: {
+        title: "detailFog",
+      },
     },
     {
-      path: '/loginBox',
-      name: 'loginBox',
-      component: defineAsyncComponent(() => import(`@/views/loginBox.vue`)),
-    },
-
-    {
-      path: '/*',
-      redirect: '/login',
+      path: "/*",
+      redirect: "/",
     },
   ]
 })

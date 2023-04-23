@@ -10,11 +10,20 @@ export default {
     activeIndex: "",
     theme: "",
     ChainId: "",
+    deviceList: [],
+    currentOODItem: {
+      data: {
+        device_id: "",
+      },
+    },
   },
   mutations: {
     SET_THEME: (state, theme) => {
       state.theme = theme;
       window.localStorage.setItem("theme", theme);
+    },
+    SET_currentOODItem: (state, data) => {
+      state.currentOODItem = data;
     },
     SET_userInfo: (state, data) => {
       state.userInfo = data;
@@ -34,6 +43,10 @@ export default {
     setActiveIndex: (state, data) => {
       state.activeIndex = data;
     },
+    SET_DeviceList: (state, data) => {
+      state.deviceList = data;
+    },
+
   },
   actions: {
     setTheme({ commit }, theme) {
@@ -50,6 +63,12 @@ export default {
       const res = await savePassword({ password: password });
       commit("SAVE_PASSWORD", res.data);
     },
+    setDeviceList({ commit }, data) {
+      commit("SET_DeviceList", data);
+    },
+    setCurrentOODItem({ commit }, data) {
+      commit("SET_currentOODItem", data);
+    },
   },
   getters: {
     userInfo: (state) => state.userInfo,
@@ -58,5 +77,7 @@ export default {
     activeIndex: (state) => state.activeIndex,
     ChainId: (state) => state.ChainId,
     Password: (state) => state.Password,
+    deviceList: (state) => state.deviceList,
+    currentOODItem: (state) => state.currentOODItem,
   },
 };

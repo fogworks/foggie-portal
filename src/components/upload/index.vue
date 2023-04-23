@@ -1,7 +1,7 @@
 <template>
   <div class="upload_dialog" @click="closeUploadBox">
     <!-- my_top_upload -->
-    <div class="upload_dialog_wrap vood_dialog_wrap" @click.stop="">
+    <div class="upload_dialog_wrap vood_dialog_wrap" @click.stop="innerClick">
       <div>
         <!-- my_top_uploadText my_top_uploadTitle -->
         <div class="upload_dialog_title">Publish</div>
@@ -12,91 +12,79 @@
         </div>
         <div class="my_top_uploadText">
           The OOD you have chosen is:
-          456
+          {{ currentOODItem.data.device_id }} ({{
+            currentOODItem.data.dedicatedip
+          }})
         </div>
       </div>
-      <uploader style="position: relative" ref="uploader" class="uploader-app" :multiple='true' :options="options"
-        :auto-start="false" :file-status-text="fileStatusText" @files-added="onFilesAdded" @file-added="onFileAdded">
+      <uploader
+        style="position: relative"
+        v-loading="loading"
+        element-loading-text="loading..."
+        element-loading-spinner="el-icon-loading"
+        element-loading-background="rgba(0,0,0, 0.25)"
+        ref="uploader"
+        class="uploader-app"
+        :options="options"
+        :auto-start="false"
+        :file-status-text="fileStatusText"
+        @files-added="onFilesAdded"
+        @file-added="onFileAdded"
+      >
         <uploader-unsupport />
         <uploader-drop>
-          <uploader-btn class="uploader-btn" :single="true">Select File</uploader-btn>
-          <uploader-btn class="uploader-btn" :directory="true" :single="true">Select a folder</uploader-btn>
+          <div style="width: 100%">
+            Drop file here or click on the button below
+          </div>
+          <uploader-btn :single="true">
+            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+            Select File
+          </uploader-btn>
+          <uploader-btn :directory="true" :single="true">
+            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+            Select a folder
+          </uploader-btn>
         </uploader-drop>
       </uploader>
-
-      <teplate v-for="(uploadList, key) in uploadFileList" :key="key" style="height: 100%;">
-        <fileList @fileShare="fileShare" @fileDetail="fileDetail" :orderID="key" v-model:uploadLists="uploadFileList[key]"
-          v-show="key == orderId">
-        </fileList>
-      </teplate>
-
-
-
-      <!-- <div class="uploader-list" v-if="isEmpty">
-        <ul>
-          <li>
-            <div class="uploader-file-info head-info">
-              <div class="uploader-file-name">File Name</div>
-              <div class="uploader-file-prefix">Upload Path</div>
-              <div class="uploader-file-size">File Size</div>
-              <div class="uploader-file-status">Upload Status</div>
-              <div class="uploader-file-actions">Operate</div>
-            </div>
-          </li>
-
-        </ul>
-      </div> -->
-
-
-
-
+      <fileList
+        :isPin="isPin"
+        @fileShare="fileShare"
+        @fileDetail="fileDetail"
+      ></fileList>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, reactive, onMounted, toRefs, readonly, provide, computed } from "vue";
+import { ref, reactive, onMounted, toRefs } from "vue";
 import fileList from "../upload/fileList.vue";
 import uploader from "vue-simple-uploader";
 import { useStore } from "vuex";
-
-
-import { APIClient, } from "@/pb/node_grpc_web_pb";
-
+import { UploadLookVersion } from "@/utils/api.js";
+import { ElNotification } from "element-plus";
 export default {
-  name: "DashBoard",
+  name: "UploadIndex",
   components: { fileList },
-
+  props: {
+    currentOODItem: {
+      type: Object,
+      default: () => {},
+    },
+    oodId: {
+      type: String,
+      default: "",
+    },
+    currentPath: {
+      type: String,
+      default: "",
+    },
+  },
   setup(props, { emit }) {
-
-
-    const currentPath = ref('')
-
-    const FILE_SIZE = readonly(1024 * 1024 * 1024 * 2);
     const store = useStore();
-    const orderId = computed(() => store.state.upload.orderId)
-
-    const isEmpty = computed(() => {
-      if (JSON.stringify(store.state.upload.uploadFileList) == '{}') {
-        return true
-      } else {
-        return false
-      }
-    })
-    const uploadFileList = computed(() => store.state.upload.uploadFileList)
-
     const options = ref({
       simultaneousUploads: 5,
-
-      chunkSize: 1024 * 1024 * 5,
-      forceChunkSize: true // 是否强制每个块都小于 chunkSize
     });
-    const client = new APIClient('http://154.31.34.194:9007')
-    // window.client = client
-    provide('client', readonly(client))
-
-
-
+    const { currentOODItem, oodId, currentPath } = toRefs(props);
     const alertTitle = ref("");
     const fileStatusText = ref({
       success: () => "Upload Success",
@@ -104,43 +92,103 @@ export default {
       uploading: () => "Uploading...",
       paused: () => "Paused...",
       waiting: () => "Waiting...",
-      md5: () => "Calculating file hash value...",
+      md5: () => "Calculating hash...",
       CID: () => "Calculate CID...",
     });
     const fileList = ref([]);
-
-
-
-
+    const isChunk = ref(true);
+    const isGateway = ref(true);
+    const loading = ref(false);
+    const isIPFS = ref(true);
+    const isCYFS = ref(true);
+    const loadNumber = ref(0);
+    const isPin = ref(false);
+    const loadPing = (device_id, isTrue) => {
+      if (loadNumber.value > 3) {
+        return;
+      } else {
+        loadNumber.value++;
+      }
+      if (!isTrue) {
+        isGateway.value = false;
+      }
+      UploadLookVersion(device_id, isTrue)
+        .then((res) => {
+          if (res.version && res.version.split(".")[0] >= 1) {
+            isChunk.value = true;
+          } else {
+            isChunk.value = false;
+          }
+          isCYFS.value = res.cyfs;
+          isIPFS.value = res.ipfs;
+          loading.value = false;
+          alertTitle.value = `Total capacity ${
+            currentOODItem.value.data.total_disk_size <= 50 ? 50 : 100
+          }GB,The maximum recommended upload space is ${
+            currentOODItem.value.data.total_disk_size
+          }GB。`;
+          //   this.$message({
+          //     message: this.alertTitle,
+          //     showClose: true,
+          //     duration: 3000,
+          //     type: "success",
+          //   });
+        })
+        .catch(() => {
+          if (loadNumber.value >= 3) {
+            loadPing(device_id, false);
+          } else {
+            loadPing(device_id, true);
+          }
+        });
+    };
+    const FILE_SIZE = ref(1024 * 1024 * 1024 * 2);
     const onFileAdded = (file) => {
       if (file.size === 0) return;
       if (file.size > FILE_SIZE) {
-        ElMessage({
-          message: "The maximum upload size of a single file should not exceed 2GB.",
-          type: "warning",
-          duration: 3000,
-        })
+        // this.$message({
+        //   message: "The maximum upload size of a single file should not exceed 2GB.",
+        //   type: "warning",
+        //   duration: 3000,
+        // });
+        ElNotification({
+          type: "info",
+          message:
+            "he maximum upload size of a single file should not exceed 2GB.",
+          position: "bottom-left",
+        });
         return;
       }
 
-      file.orderId = orderId.value
-
-
-
       let directory = file.file.webkitRelativePath;
       let directoryPath = directory.substr(0, directory.lastIndexOf("/") + 1);
+
       let target = "";
+      let device_id = currentOODItem.value.data.device_id;
+      target = `/object`;
+      file.isGateway = isGateway.value;
+      file.isChunk = isChunk;
+
+      file.dedicatedip = currentOODItem.value.data.dedicatedip;
+      file.device_id = device_id;
+
+      file.isCYFS = isCYFS.value;
+      file.isIPFS = isIPFS.value;
       file.paused = false;
       file.rootPath = currentPath.value;
-
       file.urlPath = target;
+      file.urlPrefix = directoryPath
+        ? currentPath.value + directoryPath
+        : currentPath.value || "/";
+      file.urlFileName = directoryPath
+        ? currentPath.value + directoryPath + file.name
+        : currentPath.value + file.name;
 
-      file.urlPrefix = directoryPath ? currentPath.value + directoryPath : currentPath.value || "/";
-      file.urlFileName = directoryPath ? currentPath.value + directoryPath + file.name : currentPath.value + file.name;
-      let list = store.state.upload.uploadFileList[orderId.value] ?? []
-
-      list.unshift(file);
-      store.commit("upload/setFileList", list);
+      let list = store.state.upload.uploadFileList;
+      let arr = [];
+      arr = list.slice(0);
+      arr.unshift(file);
+      store.dispatch("upload/setFileList", arr);
     };
     const onFileProgress = (rootFile, file, chunk) => {
       console.log(rootFile, file, chunk, "aaa");
@@ -156,56 +204,60 @@ export default {
       emit("fileShare", item);
     };
     const fileDetail = (file) => {
-      // window.localStorage.setItem(
-      //   "voodItem",
-      //   JSON.stringify(currentOODItem.value.data)
-      // );
+      window.localStorage.setItem(
+        "voodItem",
+        JSON.stringify(currentOODItem.value.data)
+      );
       // emit("closeUploadBox");
     };
-
-    const closeUploadBox = () => {
-
-      store.commit('upload/closeUpload')
-
+    const initUploadData = () => {
+      // loadPing(currentOODItem.value.data.device_id, true);
     };
-    onMounted(() => {
-
-    })
-
-
+    const closeUploadBox = () => {
+      emit("closeUploadBox");
+    };
+    const innerClick = () => {};
+    onMounted(initUploadData);
     return {
       FILE_SIZE,
       alertTitle,
       fileStatusText,
       fileList,
-      options,
-      isEmpty,
-      uploadFileList,
-      orderId,
+      isChunk,
+      isGateway,
+      loading,
+      isIPFS,
+      isCYFS,
+      loadNumber,
+      isPin,
+      currentOODItem,
+      loadPing,
       onFileAdded,
       onFileProgress,
       onFilesAdded,
       onFileSuccess,
       fileShare,
       fileDetail,
+      initUploadData,
       closeUploadBox,
-
+      innerClick,
     };
   },
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="less" scoped>
 .upload_dialog {
   position: fixed;
   width: 100vw;
   height: 100%;
   top: 0;
   left: 0;
+  // background: #272735e3;
   z-index: 2000;
   background-color: rgba(0, 0, 0, 0.4);
-  -webkit-backdrop-filter: blur(20px) saturate(100%);
-  backdrop-filter: blur(20px) saturate(100%);
+  // -webkit-backdrop-filter: blur(20px) saturate(100%);
+  // backdrop-filter: blur(20px) saturate(100%);
 
   .upload_dialog_wrap {
     position: fixed;
@@ -228,21 +280,18 @@ export default {
     color: #000;
     backdrop-filter: blur(40px);
     background: rgba(255, 255, 255, 0.6);
-
     .upload_dialog_title {
       text-align: center;
       font-size: 26px;
       height: 60px;
       line-height: 60px;
     }
-
     .upload_dialog_tips {
       font-size: 12px;
       // transform: scale(0.8);
       text-align: left;
       // text-indent: 20px;
     }
-
     .upload_dialog_currentood {
       font-size: 14px;
       height: 50px;
@@ -252,7 +301,6 @@ export default {
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
     .upload_dialog_content {
       padding: 1.875rem 0;
       background: rgba(255, 255, 255, 0.1);
@@ -263,10 +311,8 @@ export default {
       text-align: center;
       margin-top: 20px;
     }
-
     .dialog_close_wrap {
       position: relative;
-
       .dialog_close_icon {
         position: absolute;
         top: -36px;
@@ -275,9 +321,11 @@ export default {
         height: 36px;
         -webkit-box-pack: center;
         place-content: center;
-        background: linear-gradient(1turn,
-            rgba(99, 106, 150, 0.4),
-            rgba(182, 186, 214, 0.5));
+        background: linear-gradient(
+          1turn,
+          rgba(99, 106, 150, 0.4),
+          rgba(182, 186, 214, 0.5)
+        );
         box-sizing: border-box;
         box-shadow: 0 20px 40px rgb(0 0 0 / 15%),
           inset 0 0 0 0.5px hsl(0deg 0% 100% / 30%);
@@ -288,42 +336,36 @@ export default {
         display: flex;
         justify-content: center;
         align-items: center;
-
         &:hover {
           transform: scale(1.1);
         }
       }
-
       .dialog_close {
         position: absolute;
       }
     }
   }
-
   .vood_dialog_wrap {
     min-width: 700px;
+    // min-width: 1200px;
     width: 60%;
     height: 80%;
     top: 10%;
     left: 20%;
     padding: 20px;
-
-    ::v-deep {
+    overflow-y: auto;
+    :deep {
       .uploader-list {
-        min-height: 440px;
-
-        overflow: auto;
-        overflow-x: hidden;
-        overflow-y: auto;
-
+        // max-height: 440px;
+        // overflow: auto;
+        // overflow-x: hidden;
+        // overflow-y: auto;
         .head-info {
           font-size: 18px;
-
-          >div {
+          > div {
             color: #000;
           }
         }
-
         .uploader-file-name,
         .uploader-file-size {
           text-align: left;
@@ -331,7 +373,6 @@ export default {
       }
     }
   }
-
   .uploader-drop {
     display: flex;
     justify-content: center;
@@ -342,30 +383,40 @@ export default {
     padding: 10px 0;
     border-radius: 16px;
     text-align: center;
+    .drop-title {
+    }
   }
-
-
+  .uploader-btn {
+    min-width: 90px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    font-size: 16px;
+    // background: var(--btn-gradient);
+    color: #004aff;
+    border: none;
+    transition: all 1s;
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
   .uploader-file-progress {
     // background: #7378e24f;
   }
-
   .el-table,
   .el-table tr,
   .el-table th.el-table__cell {
     background: transparent;
   }
-
   .el-table--border::after,
   .el-table--group::after,
   .el-table::before {
     background: transparent;
   }
-
   .el-table td.el-table__cell {
     border-color: #494646;
   }
-
-  .el-table--enable-row-hover .el-table__body tr:hover>td.el-table__cell {
+  .el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
     background-color: #4b525c;
     background-color: #4b525c;
     background: #f8f8f8;
@@ -374,23 +425,23 @@ export default {
     cursor: pointer;
     color: #000;
   }
-
-  .el-table--enable-row-hover .el-table__body tr:hover>td.el-table__cell .cell {
+  .el-table--enable-row-hover
+    .el-table__body
+    tr:hover
+    > td.el-table__cell
+    .cell {
     color: #000;
   }
-
-  .el-table th.el-table__cell>.cell,
+  .el-table th.el-table__cell > .cell,
   .el-table__body-wrapper .cell {
     color: #03040a;
     color: #fff;
     white-space: nowrap;
   }
-
   .el-table {
     margin-bottom: 30px;
   }
 }
-
 .uploader-app {
   /* width: 780px; */
   box-sizing: border-box;
@@ -408,20 +459,24 @@ export default {
 }
 
 .uploader-app .uploader-btn {
-  min-width: 90px;
-  height: 30px;
-  line-height: 30px;
-  text-align: center;
-  font-size: 16px;
-  // background: var(--btn-gradient);
-  color: #004aff;
-  border: none;
-  transition: all 1s;
+  display: flex;
+  align-items: center;
   margin: 0 20px;
+  z-index: 999;
+  // display: inline-block;
+  position: relative;
+  padding: 4px 8px;
+  /* line-height: 1.4; */
+  color: #dcd9d9;
+  // border: 1px solid #d9d3d3 !important;
+  cursor: pointer;
+  border-radius: 16px;
+  background: none;
+  outline: none;
+  // background: @light_blue;
+  // background: var(--btn-gradient);
 
-  &:hover {
-    transform: scale(1.1);
-  }
+  color: #004aff;
 }
 
 .uploader-example {
@@ -437,7 +492,7 @@ export default {
 }
 
 .uploader-example .uploader-btn {
-  margin: 0 20px;
+  margin-right: 4px;
 }
 
 .my_top_upload {
@@ -459,11 +514,22 @@ export default {
   box-sizing: border-box;
   box-shadow: 0 2px 8px 0 rgb(0 0 0 / 16%);
   box-shadow: 0 0 10px #c7b9b9;
+
+  /* z-index: 9999;
+  border: 1px solid #e2e2e2; */
 }
 
-
+.uploader-file-progress {
+  /* background: linear-gradient(
+    171deg,
+    #272eef 0%,
+    #207ee4 42%,
+    #e392ff 100%
+  ) !important; */
+}
 
 .uploader-file-info {
+  /* background: #3591f2 !important; */
   color: #000;
 }
 
@@ -483,6 +549,7 @@ export default {
 .my_top_uploadText {
   color: #000;
   font-size: 14px;
+  // height: 30px;
   text-indent: 20px;
   text-align: left;
 }
@@ -494,35 +561,17 @@ export default {
   line-height: 50px;
 }
 
-.my_top_uploadText>label {
+.my_top_uploadText > label {
   font-size: 16px;
   position: absolute;
   left: 0;
   color: #fff;
 }
 
-.my_top_uploadText>label .el-checkbox__input {
+.my_top_uploadText > label .el-checkbox__input {
   padding: 0;
   position: relative;
   display: inline-block;
   width: 16px;
-}
-
-.uploader-list {
-  overflow: auto;
-  overflow-x: hidden;
-  overflow-y: auto;
-  position: relative;
-  overflow-y: scroll;
-  max-height: calc(80vh - 280px);
-  padding: 20px 0px;
-  margin-left: 20px;
-  margin-right: 20px;
-}
-
-.uploader-list>ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
 }
 </style>

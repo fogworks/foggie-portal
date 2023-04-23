@@ -5,6 +5,7 @@
       :before-close="cancel"
       :model-value="visible"
       title="Add device"
+      class="ip-dialog"
     >
       <el-form
         class="ip-form"
@@ -137,6 +138,17 @@ const cancel = () => {
     .el-form-item__label {
       color: #000;
     }
+  }
+}
+</style>
+<style lang="less">
+.ip-dialog {
+  .el-button {
+    min-width: 80px;
+    width: unset;
+    height: 40px;
+    font-size: 16px;
+    border-radius: 50px;
   }
 }
 </style>

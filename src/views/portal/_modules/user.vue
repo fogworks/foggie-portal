@@ -255,6 +255,9 @@ const unbind = () => {
   justify-content: center;
   :deep {
     .el-button {
+      min-width: 100px;
+      width: unset;
+      font-size: 16px;
       border-radius: 50px;
     }
   }

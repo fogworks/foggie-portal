@@ -35,6 +35,7 @@ initFoggieDate();
   -moz-osx-font-smoothing: grayscale;
   min-width: 1200px;
   // text-align: left;
+  text-align: center;
   color: #2c3e50;
   background: var(--bg-color);
   height: 100vh;

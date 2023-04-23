@@ -69,3 +69,30 @@ export default {
 };
 </script>
 
+<style lang="less" scoped>
+.ripple-ink {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  .ink {
+    width: 0;
+    height: 0;
+    position: absolute;
+    border-radius: 50%;
+    background-color: currentColor;
+    transform: scale(0);
+    transition: transform 0.6s ease-out, opacity 0.6s ease-out;
+    &.is-holding {
+      opacity: 0.4;
+      transform: scale(1);
+      &.is-done {
+        opacity: 0;
+      }
+    }
+  }
+}
+</style>

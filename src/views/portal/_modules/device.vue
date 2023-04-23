@@ -89,13 +89,22 @@ const deviceList = reactive({
 const visible = ref(false);
 const emit = defineEmits(["next"]);
 const toGuide = (item) => {
-  if (item.device_type === "foggie_max") {
-    const url = `http://${item.dedicatedip}:9001`;
-    window.location.href = url;
-  } else {
-    const url = `https://foggie.fogworks.io/#/fogworks`;
-    window.location.href = url;
-  }
+  console.log(item, "item");
+  router.push({
+    name: "AppWindow",
+    params: item,
+  });
+  // if (item.device_type === "foggie_max") {
+  //   router.push({
+  //     name: "AppWindow",
+  //   });
+  //   const url = `http://${item.dedicatedip}:8080`;
+  //   window.location.href = url;
+  // } else {
+  //   const url = `https://foggie.fogworks.io/#/fogworks`;
+  //   window.location.href = url;
+  // }
+
   // if (userInfo.email) {
   // 绑定且登录
 
@@ -166,6 +175,7 @@ const search = () => {
     .then((res) => {
       console.log(res, "res");
       deviceList.list = res.data;
+      store.dispatch("setDeviceList", res.data);
       loading.value = false;
     })
     .finally(() => {
