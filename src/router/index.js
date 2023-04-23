@@ -63,6 +63,14 @@ const router = createRouter({
       },
     },
     {
+      path: "/detailFog",
+      name: "DetailFog",
+      component: defineAsyncComponent(() => import(`../views/fogDetail`)),
+      meta: {
+        title: "detailFog",
+      },
+    },
+    {
       path: "/*",
       redirect: "/",
     },

@@ -260,6 +260,11 @@
     v-model:visible="syncDialog"
     :currentOODItem="currentOODItem"
   ></PinFormDialog>
+  <DetailDialog
+    v-if="detailShow"
+    v-model:visible="detailShow"
+    :detailData="detailData"
+  ></DetailDialog>
 </template>
 
 <script setup>
@@ -274,6 +279,7 @@ import {
   toRefs,
   nextTick,
   computed,
+  inject,
 } from "vue";
 import {
   oodFileList,
@@ -291,6 +297,7 @@ import ShareDialog from "./shareDialog";
 import PinDialog from "./pinDialog";
 import PinTaskList from "./pinTaskList";
 import PinFormDialog from "./pinFormDialog";
+import DetailDialog from "./detailDialog";
 import { getfilesize, transferTime } from "@/utils/util.js";
 import router from "@/router";
 import { useStore } from "vuex";
@@ -299,6 +306,8 @@ const emits = defineEmits(["toggleToUpload", "currentPrefix"]);
 const keyWord = ref("");
 const tableLoading = ref(false);
 const showShareDialog = ref(false);
+const detailShow = ref(false);
+const deviceData = inject("deviceData");
 
 const props = defineProps({
   currentOODItem: Object,
@@ -462,16 +471,18 @@ const initFileData = async (data) => {
       isSystemImg,
       canShare: data[i].pubkey ? true : false,
     };
+    data[i] = item;
     getCidShare(device_id.value, data[i].cid);
-    tableData.data.push(item);
-    tableLoading.value = false;
-    if (activeSort.value) {
-      const target = sortList.find((el) => el.key == activeSort.value);
-      const { prop, order, key } = target;
-      nextTick(() => {
-        tableSort({ prop, order, key });
-      });
-    }
+  }
+  tableData.data = data;
+
+  tableLoading.value = false;
+  if (activeSort.value) {
+    const target = sortList.find((el) => el.key == activeSort.value);
+    const { prop, order, key } = target;
+    nextTick(() => {
+      tableSort({ prop, order, key });
+    });
   }
 };
 const sortChange = ({ column, prop, order }) => {
@@ -639,7 +650,7 @@ const doShare = async (item) => {
     let _key = encodeURIComponent(key);
     let data = await shareLink(device_id.value, _key);
     let meta = data.meta;
-    let httpStr = `${location.origin}/#/detailFog?pubkey=${meta.pubkey}&name=${item.key}&isFolder=${isFolder}`;
+    let httpStr = `http://${deviceData.dedicatedip}/#/detailFog?pubkey=${meta.pubkey}&name=${item.key}&isFolder=${isFolder}`;
     let cyfsStr = item.file_id
       ? `cyfs://o/${ood_id_cyfs.value}/${meta.file_id}`
       : "";
@@ -784,6 +795,7 @@ const copyLink = (text) => {
     position: "bottom-left",
   });
 };
+const detailData = reactive({ data: {} });
 const toDetail = (item) => {
   localStorage.setItem("currentOODItem", JSON.stringify(currentOODItem.value));
   if (item.type === "application/x-directory") {
@@ -791,7 +803,9 @@ const toDetail = (item) => {
     breadcrumbList.prefix = item.name.split("/");
     emits("currentPrefix", breadcrumbList.prefix);
   } else {
-    localStorage.setItem("detail", JSON.stringify(item));
+    detailData.data = item;
+    detailShow.value = true;
+    // localStorage.setItem("detail", JSON.stringify(item));
     // router.push("/detail");
   }
 };

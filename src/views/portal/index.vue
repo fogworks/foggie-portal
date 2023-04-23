@@ -104,6 +104,7 @@ const userName = computed(() => store.getters["token/currentUser"] || "Login");
     height: calc(100% - 60px);
     flex: 1;
     padding: 30px;
+    padding-right: 0;
     // background: linear-gradient(
     //   220deg,
     //   rgba(174, 176, 238, 1) 0%,

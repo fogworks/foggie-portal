@@ -1,16 +1,23 @@
 <template>
   <div class="app-window">
-    <div class="app-left" v-if="deviceData.data.device_id">
-      <FoggieMax :deviceData="deviceData"></FoggieMax>
-    </div>
+    <template v-for="item in totalActiveDevice.data">
+      <div class="app-left">
+        <FoggieMax :deviceData="item"></FoggieMax>
+      </div>
+    </template>
+
     <div class="app-right" v-loading="loading">
-      <DeviceList :deviceList="deviceList" @clickItem="clickItem"></DeviceList>
+      <DeviceList
+        @clickItem="clickItem"
+        @cancelItem="cancelItem"
+        :totalActiveDevice="totalActiveDevice"
+      ></DeviceList>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, reactive, onMounted } from "vue";
+import { computed, ref, reactive, onMounted, provide } from "vue";
 import { useStore } from "vuex";
 import FoggieMax from "@/views/foggieMax/layout";
 import DeviceList from "./deviceList";
@@ -20,7 +27,6 @@ import { useRoute } from "vue-router";
 const store = useStore();
 const route = useRoute();
 
-const deviceList = computed(() => store.getters.deviceList);
 const email = computed(() => store.getters["token/currentUser"]);
 const loading = ref(false);
 const search = () => {
@@ -39,8 +45,32 @@ search();
 const deviceData = reactive({
   data: {},
 });
+let totalActiveDevice = reactive({
+  data: [],
+});
 const clickItem = (data) => {
-  deviceData.data = data;
+  console.log("clickItem");
+  let target = totalActiveDevice.data.find(
+    (el) => el.device_id === data.device_id
+  );
+  if (!target && totalActiveDevice.data.length < 4) {
+    totalActiveDevice.data.push(data);
+    deviceData.data = data;
+  } else {
+    deviceData.data = data;
+  }
+};
+const cancelItem = (data) => {
+  console.log("cancelItem");
+  let target = totalActiveDevice.data.find(
+    (el) => el.device_id === data.device_id
+  );
+  if (target) {
+    totalActiveDevice.data = totalActiveDevice.data.filter(
+      (el) => el.device_id !== data.device_id
+    );
+    deviceData.data = {};
+  }
 };
 onMounted(() => {
   deviceData.data = route.params;
@@ -51,6 +81,7 @@ onMounted(() => {
 .app-window {
   position: relative;
   height: 100%;
+  overflow-y: auto;
   // display: flex;
   // justify-content: space-between;
   .app-left {
@@ -60,20 +91,23 @@ onMounted(() => {
     height: 100%;
     padding: 30px;
     background: var(--bg-color);
-    margin-right: 200px;
+    margin-right: 300px;
     border-radius: 20px;
+    & + .app-left {
+      margin-top: 40px;
+    }
   }
   .app-right {
-    overflow-x: visible;
-    overflow-y: auto;
+    // overflow-x: visible;
+    // overflow-y: auto;
     box-sizing: border-box;
-    height: calc(100% - 55px);
+    height: calc(100% - 60px);
     width: 210px;
-    padding: 0 10px;
+    // padding: 0 10px;
     // float: right;
     position: fixed;
-    top: 25px;
-    right: 10px;
+    top: 30px;
+    right: 20px;
     :deep {
       .el-loading-mask {
         background-color: transparent;

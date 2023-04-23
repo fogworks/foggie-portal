@@ -7,11 +7,13 @@
       <Access v-if="!accessible" v-model:accessible="accessible"></Access>
       <div v-else>
         <div class="top-title">
-          <span>
-            {{ deviceData.data.device_name }}
+          <span @click="isInSetup = false">
+            {{ deviceData.device_name }}
           </span>
+          <svg-icon icon-class="setup" class="setup" @click="toSet"></svg-icon>
         </div>
-        <MaxHome :haveNet="haveNet"></MaxHome>
+        <MaxHome v-if="!isInSetup" :haveNet="haveNet"></MaxHome>
+        <Setting v-else></Setting>
       </div>
     </main>
     <!-- <footer>
@@ -25,6 +27,7 @@
 // import LayoutFooter from "./layoutFooter";
 import MaxHome from "../home";
 import Access from "./access";
+import Setting from "../setting";
 import { useStore } from "vuex";
 // import mainVue from './views/main/main.vue'
 import {
@@ -33,20 +36,26 @@ import {
   getActivationVood,
   detected_net,
 } from "@/utils/api.js";
-import { ref, onMounted, toRefs } from "vue";
+import { ref, onMounted, reactive, provide, toRefs, inject } from "vue";
 export default {
   name: "FoggieMax",
   components: {
     MaxHome,
     Access,
+    Setting,
     // LayoutHeader,
     // LayoutFooter,
   },
   props: {
-    deviceData: { data: {} },
+    deviceData: {
+      type: Object,
+      default: {},
+    },
   },
+
   setup(props) {
-    const { deviceData } = toRefs(props);
+    const deviceData = reactive(props.deviceData);
+    provide("deviceData", deviceData);
     const store = useStore();
     const accessible = ref(false);
     const currentOODItem = ref({
@@ -54,11 +63,9 @@ export default {
         device_id: "",
       },
     });
-    const closeUploadBox = () => {
-      showTopUpload.value = false;
-    };
+
     const haveNet = ref(false);
-    const showTopUpload = ref(false);
+    const isInSetup = ref(false);
     const initFoggieDate = async () => {
       detected_net().then((res) => {
         if (res.result.detected_net) {
@@ -67,12 +74,12 @@ export default {
           haveNet.value = true;
         }
       });
-      let data = {
-        pn: 1,
-        ps: 50,
-      };
-      let oodData = await getActivationVood(data);
-      currentOODItem.value.data = oodData.result;
+      // let data = {
+      //   pn: 1,
+      //   ps: 50,
+      // };
+      // let oodData = await getActivationVood(data);
+      // currentOODItem.value.data = oodData.result;
       // if (oodData && oodData.data && oodData.data.length > 0) {
       //   currentOODItem.value.data = oodData.data[0];
       // }
@@ -80,74 +87,17 @@ export default {
     onMounted(() => {
       initFoggieDate();
     });
-    const toggleToUpload = () => {
-      showTopUpload.value = !showTopUpload.value;
+    const toSet = () => {
+      isInSetup.value = !isInSetup.value;
     };
-    const showShareBox = async (item) => {
-      let key = "";
-      if (item) {
-        key = item.name;
-        let ood_id = currentOODItem.value.data.device_id;
-        let data = {
-          key: item.pubkey,
-          is_pin: false,
-          new_path: item.name,
-        };
-        if (item.isIPFS) {
-          await pIN(data);
-        }
-      }
-      // else if (this.UploadShowList.length) {
-      //   key = this.UploadShowList[0].name;
-      // }
-      if (key) {
-        let user = window.sessionStorage.getItem("walletUser");
-        let ood_id = currentOODItem.value.data.device_id;
-        let _key = encodeURIComponent(key);
-        let data = await shareLink(ood_id, _key);
-        let meta = data.meta;
 
-        let httpStr = `${location.origin}/fog/${meta.pubkey}`;
-        let cyfsStr = `cyfs://o/${ood_id}/${meta.file_id}`;
-        let ipfsStr = `ipfs://${meta.cid}`;
-
-        let shareTitle = "GO TO Share";
-        let shareContent =
-          "The more people visit your files, the more DMC you get, share it with more friends! Share information copied to clipboard!";
-        let shareCopyContent = `${user} publish ${key} to Web3` + "\n";
-        let myQrcode = window.sessionStorage.getItem("myQrcode");
-        let code = `http://foggie.fogworks.io/?pcode=${myQrcode}`;
-        let shareStr = `"The Web3 content I publish with Foggie is my digital asset and cannot be tampered with or deleted without my permission. It can also help us earn $DMC crypto rewards. Let's Web3-to-Earn together! Use my invite link ${code} to adopt a Foggie so we can all earn $DMC and grow Web3 together.Thanks!"`;
-        shareCopyContent = shareCopyContent + " " + " \n ";
-        shareCopyContent = shareCopyContent + httpStr + " \n";
-        shareCopyContent = shareCopyContent + " " + " \n ";
-        //  TODO
-        if (item.isIPFS && meta.cid) {
-          shareCopyContent = shareCopyContent + ipfsStr + " \n";
-          shareCopyContent = shareCopyContent + " " + " \n ";
-        }
-        // TODO
-        if (item.isCYFS && meta.file_id) {
-          shareCopyContent = shareCopyContent + cyfsStr + " \n";
-          shareCopyContent = shareCopyContent + " " + " \n ";
-        }
-
-        shareCopyContent = shareCopyContent + shareStr + " \n";
-        console.log(
-          "shareCopyContent",
-          `${shareTitle} ${shareContent} ${shareCopyContent}`
-        );
-      }
-    };
     return {
       currentOODItem,
-      showTopUpload,
       haveNet,
       accessible,
       deviceData,
-      closeUploadBox,
-      toggleToUpload,
-      showShareBox,
+      isInSetup,
+      toSet,
     };
   },
 };
@@ -163,7 +113,9 @@ export default {
     z-index: 1;
   }
   .top-title {
-    margin: 20px;
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
     font-size: 30px;
     text-align: left;
     font-weight: 700;
@@ -174,6 +126,15 @@ export default {
       text-fill-color: transparent;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      cursor: pointer;
+    }
+    .setup {
+      color: #29abff;
+      cursor: pointer;
+      transition: all 0.5s;
+      &:hover {
+        transform: rotate(90deg);
+      }
     }
   }
 }
