@@ -12,9 +12,9 @@
         </div>
         <div class="my_top_uploadText">
           The OOD you have chosen is:
-          {{ currentOODItem.data.device_id }} ({{
+          <!-- {{ currentOODItem.data.device_id }} ({{
             currentOODItem.data.dedicatedip
-          }})
+          }}) -->
         </div>
       </div>
       <uploader
