@@ -6,7 +6,7 @@
 
 <script setup></script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .btn {
   cursor: pointer;
   position: relative;

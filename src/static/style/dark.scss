@@ -1,0 +1,20 @@
+html.dark {
+  --bg-color: rgb(33, 33, 33);
+  --text-color: #fff;
+  --btn-text-color: #fff;
+  --card-bg: transparent;
+  --btn-gradient: linear-gradient(180deg, #000 0%, #787878 100%);
+  --liner-gradient: linear-gradient(180deg, #000 0%, #787878 100%);
+  --theme-box-bg: #f2f6ff;
+  --theme-border: 1px solid rgba(255, 255, 255, 0.5);
+  --el-color-danger: #ff0000;
+  --el-bg-color-overlay: rgb(33, 33, 33);
+  --text-color-777: #b4b4b4;
+  --text-color-444: #eee;
+  --overlay-color: rgba(0, 0, 0, 0);
+
+  .Alltemplate_boxs {
+    position: relative;
+    color: #fff;
+  }
+}

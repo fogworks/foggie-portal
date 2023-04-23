@@ -298,7 +298,7 @@ const submit = () => {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .welcome {
   font-weight: 700;
   font-size: 30px;

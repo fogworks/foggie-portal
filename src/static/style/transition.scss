@@ -1,0 +1,300 @@
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.28s;
+}
+
+.fade-enter,
+.fade-leave-active {
+  opacity: 0;
+}
+
+/* fade-transform */
+.fade-transform-leave-active,
+.fade-transform-enter-active {
+  transition: all 0.5s;
+}
+
+.fade-transform-enter {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.fade-transform-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+/* breadcrumb transition */
+.breadcrumb-enter-active,
+.breadcrumb-leave-active {
+  transition: all 0.5s;
+}
+
+.breadcrumb-enter,
+.breadcrumb-leave-active {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.breadcrumb-move {
+  transition: all 0.5s;
+}
+
+.breadcrumb-leave-active {
+  position: absolute;
+}
+
+@keyframes JBCopacity {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes izRuqW {
+  0% {
+    transform: translate(0px, -50px) rotate(-90deg);
+    border-radius: 24% 76% 35% 65% / 27% 36% 64% 73%;
+  }
+  100% {
+    transform: translate(500px, 100px) rotate(-10deg);
+    border-radius: 76% 24% 33% 67% / 68% 55% 45% 32%;
+  }
+}
+@keyframes gXnKAO {
+  0% {
+    transform: translate(-200px, 0px) rotate(-90deg);
+    border-radius: 51% 49% 58% 42% / 34% 78% 22% 66%;
+  }
+  100% {
+    transform: translate(400px, 100px) rotate(-120deg);
+    border-radius: 22% 78% 73% 27% / 67% 31% 69% 33%;
+  }
+}
+
+@keyframes bDTdTe {
+  0% {
+    backdrop-filter: blur(0px) saturate(100%);
+  }
+
+  100% {
+    backdrop-filter: blur(20px) saturate(120%);
+  }
+}
+
+@keyframes jkLqKc {
+  0% {
+    transform: translateY(-100px) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0px) scale(1);
+    opacity: 1;
+  }
+}
+
+
+
+/* 文件上传抖动效果 */
+@keyframes anim-open-don {
+  0% {
+    opacity: 0;
+    transform: matrix(0.7, 0, 0, 0.7, 0, 0);
+  }
+
+  2.083333% {
+    transform: matrix(0.75266, 0, 0, 0.76342, 0, 0);
+  }
+
+  4.166667% {
+    transform: matrix(0.81071, 0, 0, 0.84545, 0, 0);
+  }
+
+  6.25% {
+    transform: matrix(0.86808, 0, 0, 0.9286, 0, 0);
+  }
+
+  8.333333% {
+    transform: matrix(0.92038, 0, 0, 1, 0, 0);
+  }
+
+  10.416667% {
+    transform: matrix(0.96482, 0, 0, 1.05202, 0, 0);
+  }
+
+  12.5% {
+    transform: matrix(1, 0, 0, 1.08204, 0, 0);
+  }
+
+  14.583333% {
+    transform: matrix(1.02563, 0, 0, 1.09149, 0, 0);
+  }
+
+  16.666667% {
+    transform: matrix(1.04227, 0, 0, 1.08453, 0, 0);
+  }
+
+  18.75% {
+    transform: matrix(1.05102, 0, 0, 1.06666, 0, 0);
+  }
+
+  20.833333% {
+    transform: matrix(1.05334, 0, 0, 1.04355, 0, 0);
+  }
+
+  22.916667% {
+    transform: matrix(1.05078, 0, 0, 1.02012, 0, 0);
+  }
+
+  25% {
+    transform: matrix(1.04487, 0, 0, 1, 0, 0);
+  }
+
+  27.083333% {
+    transform: matrix(1.03699, 0, 0, 0.98534, 0, 0);
+  }
+
+  29.166667% {
+    transform: matrix(1.02831, 0, 0, 0.97688, 0, 0);
+  }
+
+  31.25% {
+    transform: matrix(1.01973, 0, 0, 0.97422, 0, 0);
+  }
+
+  33.333333% {
+    transform: matrix(1.01191, 0, 0, 0.97618, 0, 0);
+  }
+
+  35.416667% {
+    transform: matrix(1.00526, 0, 0, 0.98122, 0, 0);
+  }
+
+  37.5% {
+    transform: matrix(1, 0, 0, 0.98773, 0, 0);
+  }
+
+  39.583333% {
+    transform: matrix(0.99617, 0, 0, 0.99433, 0, 0);
+  }
+
+  41.666667% {
+    transform: matrix(0.99368, 0, 0, 1, 0, 0);
+  }
+
+  43.75% {
+    transform: matrix(0.99237, 0, 0, 1.00413, 0, 0);
+  }
+
+  45.833333% {
+    transform: matrix(0.99202, 0, 0, 1.00651, 0, 0);
+  }
+
+  47.916667% {
+    transform: matrix(0.99241, 0, 0, 1.00726, 0, 0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: matrix(0.99329, 0, 0, 1.00671, 0, 0);
+  }
+
+  52.083333% {
+    transform: matrix(0.99447, 0, 0, 1.00529, 0, 0);
+  }
+
+  54.166667% {
+    transform: matrix(0.99577, 0, 0, 1.00346, 0, 0);
+  }
+
+  56.25% {
+    transform: matrix(0.99705, 0, 0, 1.0016, 0, 0);
+  }
+
+  58.333333% {
+    transform: matrix(0.99822, 0, 0, 1, 0, 0);
+  }
+
+  60.416667% {
+    transform: matrix(0.99921, 0, 0, 0.99884, 0, 0);
+  }
+
+  62.5% {
+    transform: matrix(1, 0, 0, 0.99816, 0, 0);
+  }
+
+  64.583333% {
+    transform: matrix(1.00057, 0, 0, 0.99795, 0, 0);
+  }
+
+  66.666667% {
+    transform: matrix(1.00095, 0, 0, 0.99811, 0, 0);
+  }
+
+  68.75% {
+    transform: matrix(1.00114, 0, 0, 0.99851, 0, 0);
+  }
+
+  70.833333% {
+    transform: matrix(1.00119, 0, 0, 0.99903, 0, 0);
+  }
+
+  72.916667% {
+    transform: matrix(1.00114, 0, 0, 0.99955, 0, 0);
+  }
+
+  75% {
+    transform: matrix(1.001, 0, 0, 1, 0, 0);
+  }
+
+  77.083333% {
+    transform: matrix(1.00083, 0, 0, 1.00033, 0, 0);
+  }
+
+  79.166667% {
+    transform: matrix(1.00063, 0, 0, 1.00052, 0, 0);
+  }
+
+  81.25% {
+    transform: matrix(1.00044, 0, 0, 1.00058, 0, 0);
+  }
+
+  83.333333% {
+    transform: matrix(1.00027, 0, 0, 1.00053, 0, 0);
+  }
+
+  85.416667% {
+    transform: matrix(1.00012, 0, 0, 1.00042, 0, 0);
+  }
+
+  87.5% {
+    transform: matrix(1, 0, 0, 1.00027, 0, 0);
+  }
+
+  89.583333% {
+    transform: matrix(0.99991, 0, 0, 1.00013, 0, 0);
+  }
+
+  91.666667% {
+    transform: matrix(0.99986, 0, 0, 1, 0, 0);
+  }
+
+  93.75% {
+    transform: matrix(0.99983, 0, 0, 0.99991, 0, 0);
+  }
+
+  95.833333% {
+    transform: matrix(0.99982, 0, 0, 0.99985, 0, 0);
+  }
+
+  97.916667% {
+    transform: matrix(0.99983, 0, 0, 0.99984, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: matrix(1, 0, 0, 1, 0, 0);
+  }
+}

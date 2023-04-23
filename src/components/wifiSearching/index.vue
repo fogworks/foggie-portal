@@ -19,7 +19,7 @@
 
 <script setup></script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 #wifi-loader {
   --background: #62abff;
   --front-color: #4f29f0;

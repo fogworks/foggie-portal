@@ -1,0 +1,46 @@
+syntax = "proto3";
+package proto;
+option go_package = "bct.com/prox_powd/api/pow_pb";
+
+message PutObjectMKRequest {
+ string key = 1;
+ string cid = 2;
+}
+message PowHeader {
+ string peerId =1;
+ string Id = 2;
+}
+message PutObjectMKReq {
+ PowHeader header = 1;
+ PutObjectMKRequest request = 2;
+}
+message PutObjectMKOpt{
+ oneof Option{
+  PutObjectMKReq req = 1;
+  bytes chunk = 2;
+ }
+}
+message PutObjectMKResp {
+ string md5 = 1;
+ string cid = 2;
+ string root = 3;
+ int64 blocks = 4;
+}
+message CliGetMerkleRequest{
+ string  id = 1;
+ string cid = 2;
+}
+message CliMerkleInfo{
+ bytes rootBytes = 1;
+ string root = 2;
+ int32  blocks = 4;
+}
+message CliGetMerkleReply{
+ CliMerkleInfo root = 1;
+ CliMerkleInfo cidRoot = 2;
+}
+service PowService {
+ rpc GetMerkleRoot(CliGetMerkleRequest)returns(CliGetMerkleReply){}
+ rpc GetMerkleProof(CliGetMerkleRequest)returns(CliGetMerkleReply){}
+ rpc BuildMerkelLeaf(stream PutObjectMKOpt)returns(PutObjectMKResp){}
+}

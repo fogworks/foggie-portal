@@ -103,7 +103,7 @@ const getServiceInfo = () => {
 getServiceInfo();
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .out-box {
   width: 100%;
   height: 100%;

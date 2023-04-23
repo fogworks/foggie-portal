@@ -175,7 +175,7 @@ const search = () => {
 search();
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .welcome {
   display: flex;
   align-items: center;
@@ -330,8 +330,7 @@ search();
     // }
   }
 }
-</style>
-<style lang="less">
+
 .more-popper {
   background: transparent !important;
   .el-popper__arrow {

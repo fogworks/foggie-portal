@@ -1,11 +1,13 @@
 // import Cookies from "js-cookie";
 
 const TokenKey = "foggie-token";
+// const TokenKey = "FoggieV_token";
 const AccessKey = "access_token";
 const RefreshKey = "refresh_token";
 const firstKey = "is_verified";
 const orderKey = "order_data";
 const errorKey = "error";
+
 
 export function getToken() {
   window.localStorage.getItem(TokenKey);

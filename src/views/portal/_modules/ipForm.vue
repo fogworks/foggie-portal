@@ -130,7 +130,7 @@ const cancel = () => {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .ip-form {
   margin-top: 30px;
   :deep {

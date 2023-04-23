@@ -1,3 +1,40 @@
+// base color
+// $blue:#324157;
+// $light-blue:#3A71A8;
+// $red:#C03639;
+// $pink: #E65D6E;
+// $green: #30B08F;
+// $tiffany: #4AB7BD;
+// $yellow:#FEC171;
+// $panGreen: #30B08F;
+
+// // sidebar
+// $menuText:#bfcbd9;
+// $menuActiveText:#409EFF;
+// $subMenuActiveText:#f4f4f5;
+
+// $menuBg:#304156;
+// $menuHover:#263445;
+
+// $subMenuBg:#1f2d3d;
+// $subMenuHover:#001528;
+$light_blue: #29abff;
+$sideBarWidth: 236px;
+$shrinkHeader: 56px;
+
+:export {
+  // menuText: $menuText;
+  // menuActiveText: $menuActiveText;
+  // subMenuActiveText: $subMenuActiveText;
+  // menuBg: $menuBg;
+  // menuHover: $menuHover;
+  // subMenuBg: $subMenuBg;
+  // subMenuHover: $subMenuHover;
+  sideBarWidth: $sideBarWidth;
+  shrinkHeader: $shrinkHeader;
+  light_blue: $light_blue;
+}
+
 @light_blue: #29abff;
 // @blue_gradient:linear-gradient (209.21deg, rgb(12, 39, 178) 13.57%, rgb(133, 218, 213) 98.38%);
 // @box_shadow:0px 2px 5px 0px rgb(0 0 0 / 20%);
@@ -16,7 +53,7 @@
   --theme-border: none;
   --theme-box-bg: #000;
   --el-color-danger: #ff0000;
-  --el-button-hover-bg-color: @light_blue;
+  --el-button-hover-bg-color: $light_blue;
   --text-color-777: #777;
   --text-color-444: #444;
   --overlay-color: rgba(0, 0, 0, 0.4);
@@ -39,3 +76,4 @@
   --text-color-444: #eee;
   --overlay-color: rgba(0, 0, 0, 0);
 }
+

@@ -101,7 +101,7 @@ const form = reactive({
 const formRef = ref(null);
 const unbindVisible = ref(false);
 const needLogin = ref(true);
-const userInfo = computed(() => store.getters.userInfo);
+const userInfo = computed(() => store.getters['global/userInfo']);
 const validatePass = (rule, value, callback) => {
   if (value === "") {
     callback(new Error("Please input the password"));
@@ -129,7 +129,7 @@ const getUserInfo = () => {
   loading.value = true;
   user()
     .then(({ data }) => {
-      store.dispatch("setUserInfo", data);
+      store.dispatch("global/setUserInfo", data);
       needLogin.value = false;
       loading.value = false;
     })
@@ -187,7 +187,7 @@ const submit = () => {
 };
 const logout = () => {
   store.dispatch("token/logout");
-  store.dispatch("setUserInfo", {});
+  store.dispatch("global/setUserInfo", {});
   getUserInfo();
 };
 const unbind = () => {
@@ -198,7 +198,7 @@ const unbind = () => {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .box {
   padding-top: 50px;
   :deep {
@@ -283,8 +283,6 @@ const unbind = () => {
     }
   }
 }
-</style>
-<style lang="less">
 .unbind-dialog {
   .el-dialog__body {
     margin: 20px 0;

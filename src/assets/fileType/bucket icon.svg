@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="15px" height="16px" viewBox="0 0 15 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.2 (72643) - https://sketchapp.com -->
+    <title>bucket icon</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="bucket-list" transform="translate(-244.000000, -276.000000)" fill="#21A6E6" fill-rule="nonzero">
+            <g id="content" transform="translate(200.000000, 63.000000)">
+                <g id="table" transform="translate(0.000000, 108.000000)">
+                    <g id="Group-6-Copy" transform="translate(0.000000, 105.000000)">
+                        <g id="bucket-icon" transform="translate(44.000000, 0.000000)">
+                            <path d="M3.04145056,14.9923677 L0.391988193,4.0855155 C2.10162345,4.89647902 4.81652962,5.28070841 7.41370441,5.28070841 C10.0108792,5.28070841 12.7257854,4.89647902 14.4350833,4.0855155 L11.791693,14.9609952 C7.40054818,16.819397 3.98869914,15.4565465 3.04145056,14.9923677 Z" id="Path"></path>
+                            <path d="M7.41370441,-4.4408921e-15 C12.2376555,-5.63936182e-15 14.7542062,1.2802024 14.8270715,1.85604048 L14.7994097,2.00480708 C14.4866962,2.61572844 11.9846511,3.7657179 7.41370441,3.7657179 C2.84275775,3.7657179 0.34037529,2.61572844 0.0283364959,2.00480708 L0,1.85604048 C0.0728652751,1.2802024 2.58941598,-4.14127467e-15 7.41370441,-4.4408921e-15 Z" id="Path"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

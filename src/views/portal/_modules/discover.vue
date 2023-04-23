@@ -116,12 +116,12 @@ const refresh = () => {
     // portalPing().then((res)=>{
     //   console.log("res++++++", res)
     // })
-    let data1 = {
-      ip: "explorer.dmctech.io",
-    };
-    getNetStatus(data1).then((dd) => {
-      console.log("ddddddd", dd);
-    });
+    // let data1 = {
+    //   ip: "explorer.dmctech.io",
+    // };
+    // getNetStatus(data1).then((dd) => {
+    //   console.log("ddddddd", dd);
+    // });
   }, 3000);
 };
 const userInfo = computed(() => store.getters.userInfo);
@@ -208,7 +208,7 @@ const getMax = (data) => {
 const emit = defineEmits(["next"]);
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .welcome {
   display: flex;
   align-items: center;

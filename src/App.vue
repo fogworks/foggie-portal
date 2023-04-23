@@ -1,11 +1,5 @@
 <template>
-  <!-- <router-view></router-view> -->
-  <!-- <div id="app">
-    <router-view />
-  </div> -->
   <router-view />
-
-  <!-- <Layout></Layout> -->
 </template>
 
 <script setup>
@@ -13,35 +7,24 @@ import { user, detected_net } from "@/utils/api.js";
 import { useStore } from "vuex";
 const store = useStore();
 const initFoggieDate = async () => {
-  // get is have net
-
-  // let data = {
-  //   pn: 1,
-  //   ps: 50,
-  // };
   detected_net().then((res) => {
     if (res.result.detected_net) {
-      store.dispatch("setDetected_net", true);
+      store.dispatch("global/setDetected_net", true);
     } else {
-      store.dispatch("setDetected_net", false);
+      store.dispatch("global/setDetected_net", false);
     }
   });
   let data = await user();
-  console.log(data, "data");
   if (data) {
-    store.dispatch("setUserInfo", {
+    store.dispatch("global/setUserInfo", {
       ...data.data,
     });
   }
-
-  // if (oodData && oodData.data && oodData.data.length > 0) {
-  //   currentOODItem.value.data = oodData.data[0];
-  // }
 };
 initFoggieDate();
 </script>
 
-<style lang="less">
+<style lang="scss">
 * {
   margin: 0;
   padding: 0;

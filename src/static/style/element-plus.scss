@@ -1,0 +1,204 @@
+/* popper box */
+.el-popper.tabsPopover {
+  border-radius: 0.625rem;
+  border: 1px solid #757a9b !important;
+  background-color: rgba(22, 27, 36, 0.85) !important;
+  box-shadow: 0 0 4px #7e81ff !important;
+  color: #cfd3dc;
+}
+
+.popoverBox {
+  overflow: hidden;
+
+  .popoverBox_item {
+    height: 45px;
+    line-height: 45px;
+    padding: 0px 10px;
+    width: 100%;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .popoverBox_item::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 100%;
+    padding: 0.75rem 0;
+    background-image: url("@/assets/left.png");
+    background-size: 70% 50%;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+  }
+
+  .popoverBox_item:hover {
+    padding-left: 3px;
+    transform: translateX(30px);
+  }
+}
+
+.tabsPopover.el-popper.is-light .el-popper__arrow::before {
+  border: 1px solid #7e81ff;
+  background-color: rgb(22, 27, 36) !important;
+}
+
+/* 弹窗 */
+.el-overlay-message-box {
+  width: 100%;
+  -webkit-backdrop-filter: blur(20px) saturate(100%);
+  backdrop-filter: blur(20px) saturate(100%);
+  .el-message-box {
+    border: none;
+    position: relative;
+    width: 750px;
+    border-radius: 28px;
+    height: 260px;
+    transform: translateY(-50%);
+    padding: 20px;
+    background: #cbcbd51a;
+    box-shadow: inset 0 0 0 0.5px hsl(0deg 0% 100% / 30%);
+    -webkit-backdrop-filter: blur(40px);
+    backdrop-filter: blur(40px);
+    color: #fff;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px,
+      rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px,
+      rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+  }
+  .el-message-box__content,
+  .el-message-box__title {
+    color: #fff;
+  }
+  .el-message-box__btns {
+    position: absolute;
+    width: 90%;
+    bottom: 40px;
+    .el-button {
+      background: transparent;
+      color: #fff;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+    }
+    .el-button--primary {
+      background: #737ebc;
+      border: 1px solid #737ebc;
+    }
+  }
+  .el-message-box__close {
+    font-size: 18px;
+    color: #fff;
+  }
+  .el-message-box__headerbtn:focus .el-message-box__close,
+  .el-message-box__headerbtn:hover .el-message-box__close {
+    font-size: 18px;
+    color: #fff;
+    font-weight: bolder;
+  }
+}
+
+/* 表单 */
+.homeBoxHeader-left,
+.formBox {
+  .el-input {
+    .el-input__wrapper,
+    .el-range-editor.el-input__wrapper {
+      background: linear-gradient(
+        rgba(99, 106, 150, 0.4) 0%,
+        rgba(182, 186, 214, 0.25) 100%
+      );
+      border-radius: 30px;
+      box-shadow: rgb(0 0 0 / 15%) 0px 20px 40px,
+        rgb(255 255 255 / 30%) 0px 0px 0px 0.5px inset;
+      box-sizing: border-box;
+      height: 44px;
+      line-height: 44px;
+
+      font-style: normal;
+      font-weight: normal;
+      font-size: 16px;
+      line-height: 130%;
+      transition: all 1s cubic-bezier(0.075, 0.82, 0.165, 1) 0s;
+    }
+
+    .el-input__inner {
+      color: #fff;
+    }
+  }
+
+  .el-input__wrapper.is-focus {
+    outline: none;
+    box-shadow: rgb(47 184 255 / 30%) 0px 10px 40px,
+      rgb(47 184 255) 0px 0px 0px 1px inset;
+    background: linear-gradient(
+      rgba(24, 32, 79, 0.4) 0%,
+      rgba(24, 32, 79, 0.25) 100%
+    );
+  }
+
+  .el-range-editor.el-input__wrapper {
+    background: linear-gradient(
+      rgba(99, 106, 150, 0.4) 0%,
+      rgba(182, 186, 214, 0.25) 100%
+    );
+    border-radius: 30px;
+    box-shadow: rgb(0 0 0 / 15%) 0px 20px 40px,
+      rgb(255 255 255 / 30%) 0px 0px 0px 0.5px inset;
+    box-sizing: border-box;
+    height: 44px;
+    line-height: 44px;
+
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 130%;
+    transition: all 1s cubic-bezier(0.075, 0.82, 0.165, 1) 0s;
+  }
+
+  .el-icon {
+    width: 23px;
+  }
+
+  .el-icon svg {
+    width: 25px;
+    height: 25px;
+  }
+
+  .el-range-editor.is-active {
+    outline: none;
+    box-shadow: rgb(47 184 255 / 30%) 0px 10px 40px,
+      rgb(47 184 255) 0px 0px 0px 1px inset;
+    background: linear-gradient(
+      rgba(24, 32, 79, 0.4) 0%,
+      rgba(24, 32, 79, 0.25) 100%
+    );
+  }
+}
+
+
+/* 自定义下拉菜单 */
+.el-popper.custom_dropdown {
+  border-radius: 16px !important;
+
+  .el-scrollbar {
+    border-radius: inherit;
+
+    .el-dropdown-menu {
+      padding: 0 !important;
+    }
+
+    .el-dropdown-menu__item {
+      justify-content: center;
+      height: 45px !important;
+      font-size: 16px;
+      font-weight: 700;
+    }
+  }
+
+  .el-popper__arrow {
+    display: none;
+  }
+}

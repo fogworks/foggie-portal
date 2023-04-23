@@ -89,7 +89,7 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .top {
   display: flex;
   justify-content: space-between;
@@ -154,7 +154,7 @@ export default {
         width: 54px;
         font-size: 12px;
         font-weight: 700;
-        color: @light_blue;
+        color: $light_blue;
         text-align: center;
         background: #29abff33;
         border: 1px solid rgb(41 171 255);
@@ -191,7 +191,7 @@ export default {
       align-items: center;
       margin-left: 40px;
       cursor: pointer;
-      color: @light_blue;
+      color: $light_blue;
     }
     .lan-button {
       width: 36px;
@@ -210,7 +210,7 @@ export default {
       border: none !important;
     }
     &.is-active {
-      color: @light_blue;
+      color: $light_blue;
     }
   }
 }

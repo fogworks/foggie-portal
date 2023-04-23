@@ -18,7 +18,7 @@ const next = () => {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .welcome {
   margin-bottom: 10px;
   font-weight: 700;

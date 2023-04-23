@@ -1,0 +1,98 @@
+.my_login_box ::v-deep .el-input__wrapper.isfocus {
+  outline: none;
+  // padding-left: 42px;
+  box-shadow: rgb(47 184 255 / 30%) 0px 10px 40px,
+    rgb(28, 170, 241) 0px 0px 0px 1px inset;
+  padding-left: 56px;
+}
+
+.my_login_box ::v-deep .el-input__inner {
+  outline: none;
+  padding-left: 42px;
+
+  padding-left: 56px;
+}
+
+.my_login_box input:-internal-autofill-selected {
+  -webkit-text-fill-color: rgb(255, 255, 255);
+  transition: background-color 5000s ease-in-out 0s;
+  box-shadow: rgb(47 184 255 / 30%) 0px 10px 40px,
+    rgb(47 184 255) 0px 0px 0px 1px inset;
+  background: linear-gradient(
+    rgba(24, 32, 79, 0.4) 0%,
+    rgba(24, 32, 79, 0.25) 100%
+  );
+}
+
+.my_login_box ::placeholder {
+  color: "#999999";
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.my_login_box .my_login_right_input_img {
+  background: rgba(167, 162, 162, 0.2);
+  border-radius: 50%;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.my_login_box ::v-deep .el-form-item__content {
+  display: flex;
+  height: 44px;
+}
+
+
+.el-popper.tabsPopover,
+.customInput {
+  .el-input {
+    .el-input__wrapper {
+      background: linear-gradient(
+        rgba(99, 106, 150, 0.4) 0%,
+        rgba(182, 186, 214, 0.25) 100%
+      );
+      border-radius: 30px;
+      box-shadow: rgb(0 0 0 / 15%) 0px 20px 40px,
+        rgb(255 255 255 / 30%) 0px 0px 0px 0.5px inset;
+      box-sizing: border-box;
+      height: 44px;
+      line-height: 44px;
+
+      font-style: normal;
+      font-weight: normal;
+      font-size: 16px;
+      line-height: 130%;
+      transition: all 1s cubic-bezier(0.075, 0.82, 0.165, 1) 0s;
+    }
+
+    .el-input__inner {
+      color: #fff;
+    }
+  }
+
+  .el-icon {
+    width: 23px;
+  }
+
+  .el-icon svg {
+    width: 25px;
+    height: 25px;
+  }
+
+  .el-input__wrapper.is-focus {
+    outline: none;
+    box-shadow: rgb(47 184 255 / 30%) 0px 10px 40px,
+      rgb(47 184 255) 0px 0px 0px 1px inset;
+    background: linear-gradient(
+      rgba(24, 32, 79, 0.4) 0%,
+      rgba(24, 32, 79, 0.25) 100%
+    );
+  }
+}
+

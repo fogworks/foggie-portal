@@ -36,7 +36,7 @@ const defaultActive = ref(route.path.slice(1, route.path.length));
 const userName = computed(() => store.getters["token/currentUser"] || "Login");
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .portal-main {
   display: flex;
   height: 100%;

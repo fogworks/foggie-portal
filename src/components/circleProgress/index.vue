@@ -38,7 +38,7 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .circle {
   width: 300px;
   height: 300px;

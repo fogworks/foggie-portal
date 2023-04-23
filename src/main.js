@@ -2,13 +2,16 @@ import { createApp } from "vue";
 import SvgIcon from "@/components/svg-icon";
 import ElementPlus, { Table } from "element-plus";
 import "element-plus/dist/index.css";
-import "@/static/style/common.less";
 import * as echarts from "echarts";
 import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import router from "./router";
 import store from "./store";
 import uploader from "vue-simple-uploader";
+
+import 'normalize.css/normalize.css'
+import '../src/static/style/index.scss'
+
 // const fixElTableErr = (table) => {
 //   const oldResizeListener = table.methods.resizeListener;
 //   table.methods.resizeListener = function () {
@@ -26,6 +29,7 @@ import uploader from "vue-simple-uploader";
 //     return e(...arguments)
 //   }
 // }
+
 const req1 = require.context("@/svg-icons", true, /\.svg$/);
 const requireAll = (requireContext) => {
   requireContext.keys().map(requireContext);

@@ -1,26 +1,146 @@
-const express = require("express");
-
-const hostname = "localhost";
-const port = 3001;
-
+const express = require('express');
+const bodyParser = require('body-parser');
+const config = require('config');
 const app = express();
-
-// 不限制监听数量
-//  process.setMaxListeners(0)
-
-// 支持post请求，前端对象形式传递过来的，application/x-www-form-urlencoded(默认)
-const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-
-app.get("/", (req, res) => {
-  // let address = getIP();
-  // res.send(address);
-});
-
+const logger = require('./src/service/logger')('server.js');
+const multipart = require('connect-multiparty');
+var multipartMiddleware = multipart(); 
+var serverConf = config.get('serverConfig');
+var port = serverConf.get('port');
 app.listen(port, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+  logger.info(`Web server running at port:${port}/`);
 });
+
+const OrderController = require('./src/service/OrderController');
+const UserController = require('./src/service/UserController');
+const FileController = require('./src/service/FileController');
+var jsonParser = bodyParser.json();
+
+app.post('/order/outstanding_orders', jsonParser, (req, res) => {
+  var username = req.body.username;
+  var unmatchedAmount = req.body.unmatchedAmount;
+  var period = req.body.period;
+  var minPrice = req.body.minPrice;
+  var maxPrice = req.body.maxPrice;
+  res.send(OrderController.outstandingOrders(username, unmatchedAmount, period, minPrice, maxPrice));
+});
+
+app.post('/order/buy', jsonParser, (req, res) => {
+  var username = req.body.username;
+  var chainId = req.body.chainId;
+  var billId	 = req.body.billId;
+  var period = req.body.period;
+  var benchmarkPrice = req.body.benchmarkPrice;
+  var priceRange = req.body.priceRange;
+  var unmatchedAmount = req.body.unmatchedAmount;
+  var totalPrice = req.body.totalPrice;
+  
+  OrderController.buy(username, chainId, billId, period, benchmarkPrice, priceRange, unmatchedAmount, totalPrice, res);
+});
+
+app.post('/order/list', jsonParser, (req, res) => {
+  var username = req.body.username;
+  var limit = req.body.limit;
+  var pageNum = req.body.pageNum;
+  res.send(OrderController.orderList(username, pageNum, limit));
+});
+
+app.get('/order/get_chain_id', (req, res) => {
+  res.json(OrderController.getChainId());
+});
+
+app.get('/order/get_table_rows', (req, res) => {
+  res.json(OrderController.getBenchmarkPrice());
+});
+
+app.post('/order/challenge_list', jsonParser, (req, res) => {
+  var orderId = req.body.orderId;
+  var limit = req.body.limit;
+  var pageNum = req.body.pageNum;
+  OrderController.getChallengeList(orderId, pageNum, limit, res);
+});
+
+app.post('/user/encode_user_order', jsonParser, (req, res) => {
+  var orderId = req.body.orderId;
+  var password = req.body.password;
+  var username = req.body.username;
+  UserController.encodeUserOrder(orderId , password, username, res);
+});
+
+app.post('/user/validate_user_login', jsonParser, (req, res) => {
+  UserController.validateUserLogin(res);
+});
+
+app.post('/user/save_password', jsonParser, (req, res) => {
+  var password = req.body.password;
+  UserController.saveUserPassword(password, res);
+});
+
+app.post('/user/validate_password', jsonParser, (req, res) => {
+  var password = req.body.password;
+  UserController.validateUserPassword(password, res);
+});
+
+app.post('/user/reset_password', jsonParser, (req, res) => {
+  var password = req.body.password;
+  UserController.resetUserPassword(password, res);
+});
+
+// import private key
+app.post('/user/import_private_key', jsonParser, (req, res) => {
+  var privateKey = req.body.privateKey;
+  UserController.saveUserPrivateKey(privateKey, res);
+});
+
+app.post('/user/get_private_key', jsonParser, (req, res) => {
+  var password = req.body.password;
+  UserController.getUserPrivateKey(password, res);
+});
+
+app.post('/file/save', jsonParser, (req, res) => {
+  var orderId = req.body.orderId;
+  var username = req.body.username;
+  var filePath = req.body.filePath;
+  var fileSize = req.body.fileSize;
+  FileController.saveFileProp(orderId, username, filePath, fileSize, res);
+});
+
+app.post('/file/list', jsonParser, (req, res) => {
+  var orderId = req.body.orderId;
+  var username = req.body.username;
+  var pageSize = req.body.pageSize;
+  var pageNo = req.body.pageNo;
+  FileController.list(orderId, username, pageSize, pageNo, res);
+});
+
+app.post('/file/upload', multipartMiddleware, (req, res) => {
+  FileController.upload(req, res);
+});
+
+app.post('/file/create', jsonParser, (req, res) => {
+  var fileName = req.body.fileName;
+  var md5 = req.body.md5;
+  var fileType = req.body.fileType;
+  var fileSize = req.body.fileSize;
+  var orderId = req.body.orderId;
+  var token = req.body.token;
+  var peerId = req.body.peerId;
+  FileController.create(fileName, md5, fileType, fileSize, orderId, token, peerId, res);
+});
+
+app.post('/file/complete', jsonParser, (req, res) => {
+  FileController.complete(req, res);
+});
+
+app.post('/file/push_merkle', jsonParser, (req, res) => {
+  FileController.pushMerkle(req, res);
+});
+
+app.post('/file/req_challenge', jsonParser, (req, res) => {
+  FileController.reqChallenge(req, res);
+});
+
+
 
 const os = require("os").networkInterfaces();
 
@@ -42,89 +162,44 @@ function getIP() {
 }
 require("events").EventEmitter.defaultMaxListeners = 0;
 
-// const get_status = ()=>{
-//   const querystring = require("querystring");
-//   const { Curl } = require("node-libcurl");
-//   const curlTest = new Curl();
-//   const terminate = curlTest.close.bind(curlTest);
-//   curlTest.setOpt(Curl.option.URL, "explorer.dmctech.io");
-//   curlTest.setOpt(Curl.option.POST, true);
-//   curlTest.setOpt(
-//     Curl.option.POSTFIELDS,
-//     querystring.stringify({
-//       name: "section",
-//       job: "webdev",
-//     })
-//   );
-
-//   curlTest.on("end", function (statusCode, data, headers) {
-//     console.info("Status code " + statusCode);
-//     console.info("***");
-//     console.info("Our response: " + data);
-//     console.info("***");
-//     console.info("Length: " + data.length);
-//     console.info("***");
-//     // console.info("Total time taken: " + this.getInfo("TOTAL_TIME"));
-
-//     this.close();
-//     return {
-//       statusCode,
-//       data
-//     };
-//   });
-//   curlTest.on("error", terminate);
-
-//   curlTest.perform();
-// }
-
-// const re = (url)=> {
-//   let request = require('request');
-//   request(url, function(err, response, body){
-//     if(!err && response.statusCode == 200){
-//       //todoJSON.parse(body)
-//       let res = JSON.parse(body);
-//       return res;
-//     }
-//   }
-// }
 
 app.post("/get_net_status", (req, res) => {
-  let ip = req.body.ip;
-  const querystring = require("querystring");
-  const { Curl } = require("node-libcurl");
-  const curlTest = new Curl();
-  const terminate = curlTest.close.bind(curlTest);
-  console.log(Curl.option);
-  curlTest.setOpt(Curl.option.TIMEOUT, 1);
-  curlTest.setOpt(Curl.option.URL, ip);
-  curlTest.setOpt(Curl.option.POST, true);
-  curlTest.setOpt(
-    Curl.option.POSTFIELDS,
-    querystring.stringify({
-      name: "section",
-      job: "webdev",
-    })
-  );
+  // let ip = req.body.ip;
+  // const querystring = require("querystring");
+  // const { Curl } = require("node-libcurl");
+  // const curlTest = new Curl();
+  // const terminate = curlTest.close.bind(curlTest);
+  // console.log(Curl.option);
+  // curlTest.setOpt(Curl.option.TIMEOUT, 1);
+  // curlTest.setOpt(Curl.option.URL, ip);
+  // curlTest.setOpt(Curl.option.POST, true);
+  // curlTest.setOpt(
+  //   Curl.option.POSTFIELDS,
+  //   querystring.stringify({
+  //     name: "section",
+  //     job: "webdev",
+  //   })
+  // );
 
-  curlTest.on("end", function (statusCode, data, headers) {
-    console.info("Status code " + statusCode);
-    console.info("***");
-    console.info("Our response: " + data);
-    console.info("***");
-    console.info("Length: " + data.length);
-    console.info("***");
-    // console.info("Total time taken: " + this.getInfo("TOTAL_TIME"));
+  // curlTest.on("end", function (statusCode, data, headers) {
+  //   console.info("Status code " + statusCode);
+  //   console.info("***");
+  //   console.info("Our response: " + data);
+  //   console.info("***");
+  //   console.info("Length: " + data.length);
+  //   console.info("***");
+  //   // console.info("Total time taken: " + this.getInfo("TOTAL_TIME"));
 
-    this.close();
-    res.send({
-      statusCode,
-      data,
-    });
-  });
-  curlTest.on("error", () => {
-    console.log("CURL ERROR");
-  });
-  curlTest.perform();
+  //   this.close();
+  //   res.send({
+  //     statusCode,
+  //     data,
+  //   });
+  // });
+  // curlTest.on("error", () => {
+  //   console.log("CURL ERROR");
+  // });
+  // curlTest.perform();
 });
 
 app.get("/getIP", (req, res) => {
@@ -170,10 +245,6 @@ app.post("/socket_ip", async (req, res) => {
   let port1 = 9094;
   let hosts = [];
   for (let i = 1; i <= 255; i++) {
-    // let rrr = await get_max_info(ip, i);
-    // if (rrr?.result) {
-    //   hosts.push(rrr);
-    // }
 
     let request = require("request");
     request(
@@ -283,6 +354,7 @@ const socketIP1 = () => {
 };
 
 const socketIP = () => {
+  console.log('socketIPsocketIPsocketIP')
   let net = require("net");
   let Socket = net.Socket;
   //待扫描的开始网段，可换成192.168.0
@@ -312,7 +384,6 @@ const socketIP = () => {
       if (err) {
         // console.log("Not found", err);
       } else {
-        console.log("Found: +++++++++++++++", host);
         hosts.push({ host });
       }
     });
