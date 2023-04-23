@@ -1,7 +1,7 @@
 <template>
   <div class="app-window">
     <template v-for="item in totalActiveDevice.data">
-      <div class="app-left">
+      <div class="app-left" v-if="item.device_id">
         <FoggieMax :deviceData="item"></FoggieMax>
       </div>
     </template>
@@ -42,9 +42,6 @@ const search = () => {
     });
 };
 search();
-const deviceData = reactive({
-  data: {},
-});
 let totalActiveDevice = reactive({
   data: [],
 });
@@ -55,9 +52,6 @@ const clickItem = (data) => {
   );
   if (!target && totalActiveDevice.data.length < 4) {
     totalActiveDevice.data.push(data);
-    deviceData.data = data;
-  } else {
-    deviceData.data = data;
   }
 };
 const cancelItem = (data) => {
@@ -69,11 +63,12 @@ const cancelItem = (data) => {
     totalActiveDevice.data = totalActiveDevice.data.filter(
       (el) => el.device_id !== data.device_id
     );
-    deviceData.data = {};
   }
 };
 onMounted(() => {
-  deviceData.data = route.params;
+  if (totalActiveDevice.data.length < 4) {
+    totalActiveDevice.data.push(route.params);
+  }
 });
 </script>
 
@@ -102,7 +97,7 @@ onMounted(() => {
     // overflow-y: auto;
     box-sizing: border-box;
     height: calc(100% - 60px);
-    width: 210px;
+    width: 240px;
     // padding: 0 10px;
     // float: right;
     position: fixed;
