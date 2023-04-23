@@ -23,7 +23,6 @@ import FoggieMax from "@/views/foggieMax/layout";
 import DeviceList from "./deviceList";
 import { search_foggie } from "@/utils/api";
 import { useRoute } from "vue-router";
-
 const store = useStore();
 const route = useRoute();
 
@@ -67,7 +66,8 @@ const cancelItem = (data) => {
 };
 onMounted(() => {
   if (totalActiveDevice.data.length < 4) {
-    totalActiveDevice.data.push(route.params);
+    // totalActiveDevice.data.push(route.params);
+    totalActiveDevice.data.push(route.query);
   }
 });
 </script>
