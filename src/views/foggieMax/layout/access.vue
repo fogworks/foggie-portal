@@ -192,7 +192,7 @@ const submit = () => {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .access-box {
   padding: 50px;
   background-color: var(--bg-color);
@@ -240,7 +240,7 @@ const submit = () => {
   display: flex;
   justify-content: center;
   .color-box {
-    .color-box();
+    // .color-box();
     .el-button {
       position: relative;
       width: 135px;

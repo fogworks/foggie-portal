@@ -240,7 +240,7 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .detail-container {
   width: 960px;
   margin: 8px auto;
@@ -250,7 +250,7 @@ export default {
     align-items: center;
     font-size: 24px;
     font-weight: 700;
-    color: @light_blue;
+    color: $light_blue;
     text-align: left;
     svg {
       font-size: 35px;
@@ -379,7 +379,7 @@ export default {
         transition: all 2s cubic-bezier(0.075, 0.82, 0.165, 1) 0s;
         &:hover {
           & {
-            color: @light_blue;
+            color: $light_blue;
             transform: scale(1.2);
           }
         }

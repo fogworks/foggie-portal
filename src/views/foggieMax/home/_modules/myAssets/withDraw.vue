@@ -643,7 +643,8 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
+$light_blue: #29abff;
 .withdraw-form {
   margin-top: 16px;
   :deep {
@@ -677,7 +678,7 @@ export default {
       .gas-fee {
         font-size: 24px;
         font-weight: 700;
-        color: @light_blue;
+        color: $light_blue;
       }
       .gas-fee-tips {
         margin-left: 10px;
@@ -712,14 +713,14 @@ export default {
         margin-left: 16px;
         font-size: 20px;
         font-weight: 100;
-        color: @light_blue;
+        color: $light_blue;
         cursor: pointer;
       }
     }
   }
 }
 </style>
-<style lang="less">
+<style lang="scss">
 .withdraw-dialog {
   position: relative;
   backdrop-filter: blur(40px);
@@ -786,7 +787,7 @@ export default {
   .el-dialog__footer {
     text-align: center;
     .color-box {
-      .color-box();
+      // .color-box();
       display: inline-block;
       // width: 200px;
       // height: 60px;

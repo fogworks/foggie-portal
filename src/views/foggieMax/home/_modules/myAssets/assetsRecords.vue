@@ -342,7 +342,7 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .flex {
   display: flex;
 }
@@ -396,7 +396,7 @@ export default {
   }
 }
 </style>
-<style lang="less">
+<style lang="scss">
 .withdraw-dialog {
   position: relative;
   backdrop-filter: blur(40px);

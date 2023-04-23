@@ -35,7 +35,7 @@ $shrinkHeader: 56px;
   light_blue: $light_blue;
 }
 
-@light_blue: #29abff;
+$light_blue: #29abff;
 // @blue_gradient:linear-gradient (209.21deg, rgb(12, 39, 178) 13.57%, rgb(133, 218, 213) 98.38%);
 // @box_shadow:0px 2px 5px 0px rgb(0 0 0 / 20%);
 :root {
@@ -44,7 +44,7 @@ $shrinkHeader: 56px;
   --btn-text-color: #fff;
   --btn-gradient: linear-gradient(
     180deg,
-    @light_blue 0%,
+    $light_blue 0%,
     rgb(158, 236, 217) 100%
   );
   --liner-gradient: linear-gradient(180deg, #3913b8 0%, #75e0e6 100%);

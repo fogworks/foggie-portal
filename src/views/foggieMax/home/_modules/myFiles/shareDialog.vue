@@ -107,7 +107,7 @@ const copyLink = (text) => {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .share-content {
   margin-top: 20px;
   color: #000;
@@ -137,14 +137,14 @@ const copyLink = (text) => {
       color: #134975;
     }
     a {
-      color: @light_blue;
+      color: $light_blue;
       word-break: break-all;
       font-weight: 700;
     }
     .copy-icon {
       margin-left: 10px;
       vertical-align: middle;
-      color: @light_blue;
+      color: $light_blue;
       cursor: pointer;
       transition: all 0.3s;
       &:hover {
@@ -153,7 +153,7 @@ const copyLink = (text) => {
     }
     .color-box {
       width: 165px;
-      .color-box();
+      // .color-box();
       margin: 0 auto;
       .ripple-ink {
         border-radius: 45px;
@@ -177,7 +177,7 @@ const copyLink = (text) => {
   }
 }
 </style>
-<style lang="less">
+<style lang="scss">
 .share-dialog {
   // background-image: var(--dialog-gradient-bg) !important;
 }

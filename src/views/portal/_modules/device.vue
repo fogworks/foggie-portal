@@ -175,7 +175,7 @@ const search = () => {
     .then((res) => {
       console.log(res, "res");
       deviceList.list = res.data;
-      store.dispatch("setDeviceList", res.data);
+      store.dispatch("global/setDeviceList", res.data);
       loading.value = false;
     })
     .finally(() => {

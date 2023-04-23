@@ -69,7 +69,7 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .ripple-ink {
   position: absolute;
   top: 0;

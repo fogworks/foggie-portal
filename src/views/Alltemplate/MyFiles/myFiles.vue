@@ -773,6 +773,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+$light_blue: #29abff;
 .flex {
   display: flex;
 }

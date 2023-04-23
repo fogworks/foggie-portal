@@ -190,7 +190,7 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .container {
   max-width: 1200px;
   padding: 0 40px;

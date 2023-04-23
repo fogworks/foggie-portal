@@ -380,7 +380,7 @@ export default {
   },
 };
 </script>
-<style lang="less">
+<style lang="scss">
 .right_task_table {
   .cell {
     // color: #000 !important;
@@ -501,7 +501,7 @@ export default {
   margin-top: 10px;
   justify-content: center;
   .color-box {
-    .color-box();
+    // .color-box();
   }
   .task_load_more_btn {
     border-radius: 50px;
@@ -566,7 +566,7 @@ export default {
   }
 }
 </style>
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .table-box {
   // min-height: 430px;
   // margin-bottom: 40px;

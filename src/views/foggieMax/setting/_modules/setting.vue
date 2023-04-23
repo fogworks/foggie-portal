@@ -121,7 +121,7 @@ const change = (item, val) => {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .set-box {
   :deep {
     .el-loading-mask {

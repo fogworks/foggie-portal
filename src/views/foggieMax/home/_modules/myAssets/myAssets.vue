@@ -440,7 +440,7 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .flex {
   display: flex;
 }
@@ -455,7 +455,7 @@ export default {
   flex: 1;
   height: 350px;
   padding: 0;
-  .vip-card();
+  // .vip-card();
   overflow: hidden;
   min-width: 500px;
 
@@ -482,7 +482,7 @@ export default {
   color: #fff !important;
 
   z-index: 2;
-  .card-box();
+  // .card-box();
   box-shadow: 0px 2px 5px 0px rgb(0 0 0 / 20%),
     rgb(0 0 0 / 10%) 0px 0px 0px 0.5px inset;
 
@@ -551,7 +551,7 @@ export default {
       justify-content: flex-end;
       cursor: pointer;
       .color-box {
-        .color-box();
+        // .color-box();
         .ripple-ink {
           border-radius: 45px;
         }
@@ -572,7 +572,7 @@ export default {
   }
 }
 </style>
-<style lang="less">
+<style lang="scss">
 .plus-num-today {
   // margin: 0 4px;
   // letter-spacing: 2px;

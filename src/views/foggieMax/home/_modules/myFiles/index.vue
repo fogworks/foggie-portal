@@ -851,7 +851,7 @@ watch(
 defineExpose({ doSearch });
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .flex {
   display: flex;
 }
@@ -864,7 +864,7 @@ defineExpose({ doSearch });
 .card-box {
   width: 100%;
   margin: 24px 0 50px 0;
-  .card-box();
+  // .card-box();
   color: #000;
   background: var(--card-bg);
   border: var(--theme-border);
@@ -875,7 +875,7 @@ defineExpose({ doSearch });
         font-size: 20px;
         cursor: pointer;
         .el-breadcrumb__inner {
-          color: @light_blue !important;
+          color: $light_blue !important;
         }
         &:last-of-type {
           .el-breadcrumb__inner {
@@ -899,11 +899,11 @@ defineExpose({ doSearch });
       .refresh-icon,
       .el-icon--right {
         margin-right: 10px;
-        color: @light_blue;
+        color: $light_blue;
         transition: transform 0.3s;
       }
       &:hover {
-        color: @light_blue;
+        color: $light_blue;
         .refresh-icon {
           transform: rotate(90deg);
         }
@@ -1005,7 +1005,7 @@ defineExpose({ doSearch });
     .name-link {
       font-weight: 700;
       font-size: 16px;
-      color: @light_blue;
+      color: $light_blue;
       cursor: pointer;
       // img {
       //   width: 24px;
@@ -1044,7 +1044,7 @@ defineExpose({ doSearch });
           color: var(--text-color);
           cursor: pointer;
           &:hover {
-            color: @light_blue;
+            color: $light_blue;
           }
         }
       }
@@ -1076,7 +1076,7 @@ defineExpose({ doSearch });
       font-size: 14px !important;
     }
     .activeSort {
-      color: @light_blue;
+      color: $light_blue;
     }
   }
 }

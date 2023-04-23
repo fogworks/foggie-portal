@@ -34,7 +34,7 @@ const search = () => {
   search_foggie({ email: email.value })
     .then((res) => {
       console.log(res, "res");
-      store.dispatch("setDeviceList", res.data);
+      store.dispatch("global/setDeviceList", res.data);
       loading.value = false;
     })
     .finally(() => {
@@ -72,7 +72,7 @@ onMounted(() => {
 });
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .app-window {
   position: relative;
   height: 100%;

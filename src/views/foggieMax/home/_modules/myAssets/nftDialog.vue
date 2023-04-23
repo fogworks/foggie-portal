@@ -70,7 +70,7 @@ watch(
 );
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .task_one_lists {
   position: relative;
   padding-top: 10px;
@@ -162,7 +162,7 @@ watch(
   }
 }
 </style>
-<style lang="less">
+<style lang="scss">
 .nft-dialog {
   .el-dialog__body {
     position: relative;

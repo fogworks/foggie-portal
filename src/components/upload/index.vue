@@ -246,7 +246,7 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .upload_dialog {
   position: fixed;
   width: 100vw;
@@ -473,7 +473,7 @@ export default {
   border-radius: 16px;
   background: none;
   outline: none;
-  // background: @light_blue;
+  // background: $light_blue;
   // background: var(--btn-gradient);
 
   color: #004aff;

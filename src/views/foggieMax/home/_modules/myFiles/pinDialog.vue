@@ -75,7 +75,7 @@ const beforeClose = () => {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .share-content {
   margin-top: 20px;
   color: #000;
@@ -93,7 +93,7 @@ const beforeClose = () => {
 
     .color-box {
       width: 165px;
-      .color-box();
+      // .color-box();
       margin: 0 auto;
       .ripple-ink {
         border-radius: 45px;
@@ -111,7 +111,7 @@ const beforeClose = () => {
   }
 }
 </style>
-<style lang="less">
+<style lang="scss">
 .share-dialog {
   // background-image: var(--dialog-gradient-bg) !important;
   .pin-content {

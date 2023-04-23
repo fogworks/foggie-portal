@@ -18,7 +18,7 @@ import Setting from "./_modules/setting";
 const active = ref("Password");
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .demo-tabs {
   margin: 40px 0;
   :deep {
@@ -26,11 +26,11 @@ const active = ref("Password");
       font-size: 20px;
       color: var(--text-color);
       &.is-active {
-        color: @light_blue;
+        color: $light_blue;
       }
     }
     .el-tabs__active-bar {
-      background: @light_blue;
+      background: $light_blue;
     }
     .el-tabs__content {
       padding: 10px 0;

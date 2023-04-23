@@ -114,7 +114,7 @@ const list = computed(() => {
 });
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .right-content {
   height: 100%;
 }

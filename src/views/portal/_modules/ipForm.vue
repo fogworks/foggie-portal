@@ -141,7 +141,7 @@ const cancel = () => {
   }
 }
 </style>
-<style lang="less">
+<style lang="scss">
 .ip-dialog {
   .el-button {
     min-width: 80px;

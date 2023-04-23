@@ -239,7 +239,7 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .sub-title {
   margin-top: 40px;
   color: #000;
@@ -266,7 +266,7 @@ export default {
     display: flex;
     justify-content: center;
     .color-box {
-      .color-box();
+      // .color-box();
       .ripple-ink {
         border-radius: 16px;
       }
@@ -282,7 +282,7 @@ export default {
   }
 }
 </style>
-<style lang="less">
+<style lang="scss">
 .withdraw-dialog {
   position: relative;
   backdrop-filter: blur(40px);

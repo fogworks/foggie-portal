@@ -134,7 +134,7 @@ watch(visible, (val) => {
 });
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .share-content {
   margin-top: 20px;
   color: #000;
@@ -152,7 +152,7 @@ watch(visible, (val) => {
 
     .color-box {
       width: 165px;
-      .color-box();
+      // .color-box();
       margin: 0 auto;
       .ripple-ink {
         border-radius: 45px;
@@ -170,7 +170,7 @@ watch(visible, (val) => {
   }
 }
 </style>
-<style lang="less">
+<style lang="scss">
 .pin-dialog {
   // background-image: var(--dialog-gradient-bg) !important;
   color: #000;
@@ -200,7 +200,7 @@ watch(visible, (val) => {
     .color-box {
       width: 100px;
       margin-left: 15px;
-      .color-box();
+      // .color-box();
       .ripple-ink {
         border-radius: 45px;
       }

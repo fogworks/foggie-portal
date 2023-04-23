@@ -133,7 +133,7 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .flex {
   display: flex;
 }
@@ -151,7 +151,7 @@ export default {
   height: 350px;
 
   color: #000;
-  .card-box();
+  // .card-box();
   background: var(--card-bg);
   .title {
     font-size: 30px;
