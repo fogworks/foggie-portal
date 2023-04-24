@@ -291,6 +291,7 @@ import {
   oodFileSearch,
   shareLink,
   getIPFSLocalList,
+  oodFileListFoggie,
 } from "@/utils/api.js";
 import MyEcharts from "@/components/echarts/myEcharts";
 import ShareDialog from "./shareDialog";
@@ -380,16 +381,25 @@ const refresh = () => {
   getFileList("", breadcrumbList.prefix);
 };
 const getFileList = function (scroll, prefix) {
-  tableLoading.value = true;
+  let list_prefix = "";
   if (prefix?.length) {
-    prefix = prefix.join("/") + "/";
+    list_prefix = prefix.join("/") + "/";
   }
-
-  oodFileList("", prefix).then((res) => {
-    if (res && res.links && res.links.length > 0) {
-      initFileData(res.links);
-    }
-  });
+  if (currentOODItem.value.device_type === "foggie_max") {
+    tableLoading.value = true;
+    oodFileList(device_id.value, "", list_prefix).then((res) => {
+      if (res && res.links && res.links.length > 0) {
+        initFileData(res.links);
+      }
+    });
+  } else if (device_id.value) {
+    tableLoading.value = true;
+    oodFileListFoggie(device_id.value, "", list_prefix).then((res) => {
+      if (res && res.links && res.links.length > 0) {
+        initFileData(res.links);
+      }
+    });
+  }
 };
 
 const initFileData = async (data) => {

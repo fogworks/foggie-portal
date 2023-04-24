@@ -617,9 +617,6 @@ const doShare = async (item) => {
       ? `cyfs://o/${ood_id_cyfs.value}/${meta.file_id}`
       : "";
     let ipfsStr = item.cid ? `ipfs://${meta.cid}` : "";
-
-    // this.shareTitle = this.$t("vood.uploadShareTitle");
-    // this.shareContent = this.$t("vood.uploadShareContent");
     shareCopyContent = `${user} publish ${key} to Web3` + "\n";
     shareRefContent.user = `${user} publish ${key} to Web3`;
     let myQrcode = window.sessionStorage.getItem("myQrcode");
@@ -657,15 +654,12 @@ const doShare = async (item) => {
     shareCopyContent = shareCopyContent + shareStr + " \n";
     shareRefContent.shareStr = shareStr;
     copyContent.value = shareCopyContent;
-    // shareRefContent.value=shareCopyContent
     showShareDialog.value = true;
-    // this.shareBoxShow = true;
     console.log(
       "shareCopyContentshareCopyContentshareCopyContent",
       shareCopyContent
     );
   } else {
-    // this.closeRewardBox();
   }
 };
 const ipfsPin = (checked) => {

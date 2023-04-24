@@ -22,7 +22,7 @@
               @click="toSet"
             ></svg-icon>
           </div>
-          <MaxHome v-if="!isInSetup" :haveNet="haveNet"></MaxHome>
+          <MaxHome v-if="!isInSetup" :haveNet="haveNet" :deviceData="deviceData"></MaxHome>
           <Setting v-else></Setting>
         </div>
       </template>

@@ -42,6 +42,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    deviceData: {
+      type: Object,
+      default: {},
+    },
   },
   components: {
     MyAssets,
@@ -51,7 +55,7 @@ export default {
     ShareDialog,
   },
   setup(props) {
-    const { haveNet } = toRefs(props);
+    const { haveNet, deviceData } = toRefs(props);
     const showShareDialog = ref(false);
     const shareRefContent = reactive({});
     const currentPath = ref("");
@@ -69,20 +73,23 @@ export default {
     const showTopUpload = ref(false);
     const initFoggieDate = async () => {
       // get is have net
-
-      let data = {
-        pn: 1,
-        ps: 50,
-      };
-      let oodData = await getActivationVood(data);
-      currentOODItem.value.data = oodData.result;
-      console.log(oodData.result, "oodData.result");
-      store.dispatch("global/setCurrentOODItem", {
-        data: oodData.result,
-      });
-      // if (oodData && oodData.data && oodData.data.length > 0) {
-      //   currentOODItem.value.data = oodData.data[0];
-      // }
+      // max
+      if (deviceData.value.device_type === "foggie_max") {
+        let data = {
+          pn: 1,
+          ps: 50,
+        };
+        let oodData = await getActivationVood(data);
+        currentOODItem.value.data = oodData.result;
+        store.dispatch("global/setCurrentOODItem", {
+          data: oodData.result,
+        });
+      } else {
+        currentOODItem.value.data = deviceData.value;
+        store.dispatch("global/setCurrentOODItem", {
+          data: deviceData.value,
+        });
+      }
     };
     onMounted(() => {
       initFoggieDate();

@@ -429,19 +429,13 @@ export const oodFileListByDir = (ID, prefix) => {
 };
 //⽂件LIST
 export const oodFileList = (next_marker, prefix) => {
-  // let url = scroll ? `/o/${ID}/list?scroll=${scroll}` : `/o/${ID}/list`;
-  // let url = prefix ? `/o/${ID}/nixls?prefix=${prefix} ` : `/o/${ID}/nixls`;
   let url = "";
   if (prefix.length > 0) {
-    url = `/nixls?prefix=${prefix}&forward=true&delimiter=/`; //&delimiter=/
-    // if (scroll) {
-    //   url = `/${url}&scroll=${scroll}`;
-    // }
+    url = `/nixls?prefix=${prefix}&forward=true&delimiter=/`;
     if (next_marker) {
       url = `${url}&marker=${next_marker}&delimiter=/`;
     }
   } else {
-    // url = scroll ? `/o/${ID}/nixls?scroll=${scroll}` : `/o/${ID}/nixls`;
     url = next_marker
       ? `/nixls?forward=true&marker=${next_marker}&delimiter=/`
       : `/nixls?forward=true&delimiter=/`;
@@ -452,6 +446,27 @@ export const oodFileList = (next_marker, prefix) => {
     method: "GET",
   });
 };
+
+//⽂件LIST
+export const oodFileListFoggie = (ID, next_marker, prefix) => {  
+  let url = "";
+  if (prefix) {
+    url = `/o/${ID}/nixls?prefix=${prefix}&forward=true`;
+    if (next_marker) {
+      url = `${url}&marker=${next_marker}`;
+    }
+  } else {
+    url = next_marker
+      ? `/o/${ID}/nixls?forward=true&marker=${next_marker}`
+      : `/o/${ID}/nixls?forward=true`;
+  }
+  return request({
+    url: url,
+    method: "GET",
+  });
+};
+
+
 //pin task LIST
 export const oodTaskList = (ID, next_marker, prefix) => {
   let url = "";

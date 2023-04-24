@@ -4,7 +4,7 @@
       class="search-input"
       :prefix-icon="Search"
       type="text"
-      placeholder="Name Or DID"
+      placeholder="Name Or FID"
       clearable
       v-model="keyWord"
     ></el-input>
@@ -37,7 +37,7 @@
           {{ item.device_name || item.dedicatedip }}
         </div>
         <div>
-          <span> DID: </span>
+          <span> FID: </span>
           {{ handleID(item.device_id) }}
           <svg-icon
             icon-class="copy"
