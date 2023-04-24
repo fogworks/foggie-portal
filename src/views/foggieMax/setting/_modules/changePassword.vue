@@ -135,6 +135,11 @@ const submit = () => {
         access_pass_login({
           access_password: form.password,
         }).then((res) => {
+          proxy.$notify({
+            type: "success",
+            message: "Logged in again",
+            position: "bottom-left",
+          });
           formRef.value.resetFields();
           loading.value = false;
         });

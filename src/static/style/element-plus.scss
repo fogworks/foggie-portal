@@ -212,7 +212,7 @@
   &.el-button--primary {
     // background: $light_blue;
     // color: #fff;
-    --el-button-hover-bg-color: $light_blue;
+    --el-button-hover-bg-color: #{$light_blue};
   }
   &.is-disabled {
     background-color: #d8d8d8;

@@ -354,10 +354,11 @@ export default {
 }
 .card-box {
   width: 100%;
-  margin: 24px 0 100px 0;
-
-  color: #000;
   @include card-box;
+
+  margin: 24px 0 100px 0;
+  padding: 0 40px;
+  color: #000;
 
   .assetsRecord-tabs {
     margin-top: 40px;

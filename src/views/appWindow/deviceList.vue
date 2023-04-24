@@ -37,7 +37,7 @@
           {{ item.device_name || item.dedicatedip }}
         </div>
         <div>
-          <span> DID: </span>
+          <span> FID: </span>
           {{ handleID(item.device_id) }}
           <svg-icon
             icon-class="copy"
@@ -66,7 +66,15 @@
 </template>
 
 <script setup>
-import { computed, ref, reactive, toRefs, watch, toRaw } from "vue";
+import {
+  computed,
+  ref,
+  reactive,
+  toRefs,
+  watch,
+  toRaw,
+  getCurrentInstance,
+} from "vue";
 import { useStore } from "vuex";
 import { Search } from "@element-plus/icons-vue";
 const store = useStore();
@@ -77,6 +85,7 @@ const props = defineProps({
   },
 });
 const { totalActiveDevice } = toRefs(props);
+const { proxy } = getCurrentInstance();
 const emit = defineEmits(["clickItem", "cancelItem"]);
 const clickItem = (data) => {
   emit("clickItem", data);

@@ -1,18 +1,36 @@
 <template>
   <div class="portal-main">
-    <div>
-      <el-menu :default-active="defaultActive" router>
+    <div class="left-box">
+      <div class="collapse" @click="changeCollapse">
+        <svg-icon
+          icon-class="collapse"
+          :class="[isCollapse ? 'isCollapse' : '']"
+        ></svg-icon>
+      </div>
+      <el-menu
+        class="left-menu"
+        :collapse="isCollapse"
+        :default-active="defaultActive"
+        router
+      >
         <el-menu-item index="user" class="user">
           <svg-icon icon-class="user"></svg-icon>
-          <div v-if="userName" :title="userName">
+          <!-- <div v-if="userName" :title="userName">
             {{ userName }}
-          </div>
+          </div> -->
+          <template #title v-if="userName">
+            <div :title="userName">
+              {{ userName }}
+            </div>
+          </template>
         </el-menu-item>
         <el-menu-item index="device" v-if="userName !== 'Login'">
-          <span><svg-icon icon-class="devices"></svg-icon>Device</span>
+          <svg-icon icon-class="devices"></svg-icon>
+          <template #title> Device </template>
         </el-menu-item>
         <el-menu-item index="discover">
-          <span><svg-icon icon-class="discover"></svg-icon>Discover</span>
+          <svg-icon icon-class="discover"></svg-icon>
+          <template #title> Discover </template>
         </el-menu-item>
       </el-menu>
     </div>
@@ -36,9 +54,13 @@ import { useStore } from "vuex";
 import { useRoute } from "vue-router";
 const store = useStore();
 const route = useRoute();
+const isCollapse = ref(false);
 const defaultActive = ref(route.path.slice(1, route.path.length));
 
 const userName = computed(() => store.getters["token/currentUser"] || "Login");
+const changeCollapse = () => {
+  isCollapse.value = !isCollapse.value;
+};
 </script>
 
 <style lang="scss" scoped>
@@ -47,10 +69,37 @@ const userName = computed(() => store.getters["token/currentUser"] || "Login");
   height: 100%;
   background: url("~@/assets/cool-background.png") no-repeat;
   background-size: cover;
-
+  .left-box {
+    position: relative;
+    .collapse {
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      font-size: 30px;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      background-color: #fff;
+      cursor: pointer;
+      z-index: 1;
+      box-shadow: 0 0 7px #727272;
+      svg {
+        transform: rotate(-90deg);
+        transition: all 0.5s;
+        &.isCollapse {
+          transform: rotate(90deg);
+        }
+        color: #fff;
+        cursor: pointer;
+      }
+    }
+  }
+  .left-menu {
+    position: relative;
+  }
   :deep {
     .el-menu {
-      width: 250px;
+      // width: 250px;
       height: 100%;
       background-color: #f2f6ff;
       .el-menu-item {
@@ -69,7 +118,7 @@ const userName = computed(() => store.getters["token/currentUser"] || "Login");
           flex-direction: column;
           align-items: center;
           box-sizing: border-box;
-          width: 250px;
+          // width: 250px;
           padding: 10px 20px;
           // height: 50px;
           height: unset;
@@ -88,13 +137,36 @@ const userName = computed(() => store.getters["token/currentUser"] || "Login");
           }
 
           div {
-            padding: 0 10px;
+            padding: 5px 10px;
             font-size: 16px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
           }
         }
+      }
+      &.el-menu--collapse {
+        // width: 200px;
+        // min-height: 400px;
+        .user {
+          height: 56px;
+          div {
+            padding: 0 20px;
+          }
+          svg {
+            font-size: 30px;
+            margin: 0;
+          }
+        }
+        .el-menu-item {
+          svg {
+            margin: 0;
+            font-size: 30px;
+          }
+        }
+      }
+      &:not(.el-menu--collapse) {
+        width: 252px;
       }
     }
   }

@@ -24,7 +24,7 @@ const next = () => {
   font-weight: 700;
   font-size: 30px;
   text-align: center;
-  color: #fff;
+  color: #000;
 }
 img {
   display: block;
@@ -34,6 +34,6 @@ img {
   margin-bottom: 10px;
   font-size: 14px;
   text-align: center;
-  color: #fff;
+  color: #000;
 }
 </style>
