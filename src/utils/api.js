@@ -529,7 +529,7 @@ export const dmcRows = (data) => {
 };
 
 //⽂件Search
-export const oodFileSearch = (ID, key) => {
+export const oodFileSearch = (key) => {
   // let url = `/o/${ID}/find?key=${key}`;
   let url = `/find?key=${key}`;
   return request({
@@ -685,8 +685,7 @@ export const getIPFSPINList = (ID) => {
 };
 
 //ipns publish list
-export const pIN = (ood_id, data) => {
-  // let url = `ipfsops/${ood_id}/pin`;
+export const pIN = (data) => {
   let url = `/ipfsops/pin`;
   return request({
     url: url,
@@ -694,6 +693,7 @@ export const pIN = (ood_id, data) => {
     data: data,
   });
 };
+
 //ipns publish list
 export const dirPIN = (ood_id, data) => {
   let url = `ipfsops/${ood_id}/dirpath/pin`;

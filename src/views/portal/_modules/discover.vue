@@ -138,14 +138,22 @@ const toGuide = (item) => {
   if (detected_net.value && !item.email && !item.bind) {
     chooseAssociated.value = true;
   } else {
-    const url = `http://${item.ipaddress}:9001/#/welcome`;
-    window.location.href = url;
+    router.push({
+      name: "AppWindow",
+      params: { ...item, isDiscover: true },
+    });
+    // const url = `http://${item.ipaddress}:9001/#/welcome`;
+    // window.location.href = url;
   }
 };
 const skip = () => {
   chooseAssociated.value = false;
-  const url = `http://${currentItem.ipadreess}:9001/#/welcome`;
-  window.location.href = url;
+  // const url = `http://${currentItem.ipadreess}:9001/#/welcome`;
+  // window.location.href = url;
+  router.push({
+    name: "AppWindow",
+    params: { ...currentItem, isDiscover: true },
+  });
   // router.push({
   //   name: "Welcome",
   // });

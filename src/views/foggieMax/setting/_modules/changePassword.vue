@@ -134,7 +134,16 @@ const submit = () => {
         });
         access_pass_login({
           access_password: form.password,
-        }).then((res) => {
+        }).then(({ result }) => {
+          window.localStorage.setItem(
+            "access_token",
+            result.token_type + " " + result.token
+          );
+          proxy.$notify({
+            type: "success",
+            message: "Logged in again",
+            position: "bottom-left",
+          });
           formRef.value.resetFields();
           loading.value = false;
         });

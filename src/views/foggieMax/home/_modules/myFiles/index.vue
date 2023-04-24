@@ -179,7 +179,8 @@
           <template #default="scope">
             <el-dropdown trigger="click" @command="handleCommand">
               <div class="color-box">
-                <img src="@/assets/more.svg" alt="" />
+                <svg-icon icon-class="more"></svg-icon>
+                <!-- <img src="@/assets/more.svg" alt="" /> -->
               </div>
               <template #dropdown>
                 <el-dropdown-menu class="more-dropdown" slot="dropdown">
@@ -1066,11 +1067,14 @@ defineExpose({ doSearch });
       // .color-box();
       @include color-box;
 
-      img {
+      svg {
+        font-size: 28px;
+        color: $light_blue;
         transition: all 0.8s cubic-bezier(0.075, 0.82, 0.165, 1) 0s;
       }
       &:hover {
-        img {
+        svg {
+          color: #fff;
           transform: scale(1.1);
           cursor: pointer;
         }

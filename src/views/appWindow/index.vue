@@ -1,12 +1,12 @@
 <template>
-  <div class="app-window">
-    <template v-for="item in totalActiveDevice.data">
-      <div class="app-left" v-if="item.device_id">
+  <div class="app-window" id="app-window">
+    <template v-if="!isDiscover" v-for="item in totalActiveDevice.data">
+      <div :class="['app-left', `app-${item.device_id}`]" v-if="item.device_id">
         <FoggieMax :deviceData="item"></FoggieMax>
       </div>
     </template>
-
-    <div class="app-right" v-loading="loading">
+    <FoggieMax v-else :deviceData="discoverData.data"></FoggieMax>
+    <div class="app-right" v-loading="loading" v-if="!isDiscover">
       <DeviceList
         @clickItem="clickItem"
         @cancelItem="cancelItem"
@@ -17,7 +17,16 @@
 </template>
 
 <script setup>
-import { computed, ref, reactive, onMounted, provide } from "vue";
+import {
+  computed,
+  ref,
+  reactive,
+  onMounted,
+  onActivated,
+  provide,
+  nextTick,
+  getCurrentInstance,
+} from "vue";
 import { useStore } from "vuex";
 import FoggieMax from "@/views/foggieMax/layout";
 import DeviceList from "./deviceList";
@@ -25,7 +34,7 @@ import { search_foggie } from "@/utils/api";
 import { useRoute } from "vue-router";
 const store = useStore();
 const route = useRoute();
-
+const { proxy } = getCurrentInstance();
 const email = computed(() => store.getters["token/currentUser"]);
 const loading = ref(false);
 const search = () => {
@@ -40,17 +49,36 @@ const search = () => {
       loading.value = false;
     });
 };
-search();
 let totalActiveDevice = reactive({
   data: [],
 });
+const scrollIntoView = (data) => {
+  const app = document.getElementById("app-window");
+  const target = app.getElementsByClassName(`app-${data.device_id}`)[0];
+  console.dir(app, "appppppppppp");
+  console.dir(target, "targettarget");
+  app.scrollTo(0, target.offsetTop);
+};
 const clickItem = (data) => {
   console.log("clickItem");
   let target = totalActiveDevice.data.find(
     (el) => el.device_id === data.device_id
   );
-  if (!target && totalActiveDevice.data.length < 4) {
-    totalActiveDevice.data.push(data);
+  if (target) {
+    scrollIntoView(data);
+  } else {
+    if (totalActiveDevice.data.length < 4) {
+      totalActiveDevice.data.push(data);
+      nextTick(() => {
+        scrollIntoView(data);
+      });
+    } else {
+      proxy.$notify({
+        type: "info",
+        message: "Up to four windows can be opened simultaneously",
+        position: "bottom-left",
+      });
+    }
   }
 };
 const cancelItem = (data) => {
@@ -64,11 +92,28 @@ const cancelItem = (data) => {
     );
   }
 };
-onMounted(() => {
-  if (totalActiveDevice.data.length < 4) {
-    totalActiveDevice.data.push(route.params);
-    // totalActiveDevice.data.push(route.query);
+const isDiscover = ref(false);
+const discoverData = reactive({
+  data: {},
+});
+const init = () => {
+  if (route.params.isDiscover && route.params.device_id) {
+    // totalActiveDevice.data.push(route.params);
+    discoverData.data = route.params;
+    isDiscover.value = true;
+  } else {
+    isDiscover.value = false;
+    search();
+    if (totalActiveDevice.data.length < 4 && route.params.device_id) {
+      totalActiveDevice.data.push(route.params);
+    }
   }
+};
+onActivated(() => {
+  init();
+});
+onMounted(() => {
+  init();
 });
 </script>
 
@@ -77,6 +122,7 @@ onMounted(() => {
   position: relative;
   height: 100%;
   overflow-y: auto;
+  scroll-behavior: smooth;
   // display: flex;
   // justify-content: space-between;
   .app-left {

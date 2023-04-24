@@ -440,7 +440,7 @@ const next = async () => {
   font-weight: 700;
   font-size: 30px;
   text-align: center;
-  color: #fff;
+  color: #000;
 }
 .content {
   margin-top: 50px;
@@ -473,7 +473,7 @@ const next = async () => {
     margin: 40px auto;
     :deep {
       .el-progress-circle path:first-child {
-        stroke: #fff;
+        stroke: #a7a6a6;
       }
       .el-progress-bar__innerText {
         color: #000;
