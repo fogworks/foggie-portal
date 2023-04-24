@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory,createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
 import { defineAsyncComponent } from 'vue'
 
 import store from "@/store";
@@ -50,14 +50,6 @@ const router = createRouter({
         },
 
       ]
-    },
-    {
-      path: "/welcome",
-      name: "Welcome",
-      component: defineAsyncComponent(() => import(`../views/welcome`)),
-      meta: {
-        title: "welcome",
-      },
     },
     {
       path: "/detailFog",

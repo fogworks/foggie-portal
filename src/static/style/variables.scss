@@ -35,7 +35,6 @@ $shrinkHeader: 56px;
   light_blue: $light_blue;
 }
 
-$light_blue: #29abff;
 // @blue_gradient:linear-gradient (209.21deg, rgb(12, 39, 178) 13.57%, rgb(133, 218, 213) 98.38%);
 // @box_shadow:0px 2px 5px 0px rgb(0 0 0 / 20%);
 :root {
@@ -44,7 +43,7 @@ $light_blue: #29abff;
   --btn-text-color: #fff;
   --btn-gradient: linear-gradient(
     180deg,
-    $light_blue 0%,
+    #{$light_blue} 0%,
     rgb(158, 236, 217) 100%
   );
   --liner-gradient: linear-gradient(180deg, #3913b8 0%, #75e0e6 100%);
@@ -53,7 +52,7 @@ $light_blue: #29abff;
   --theme-border: none;
   --theme-box-bg: #000;
   --el-color-danger: #ff0000;
-  --el-button-hover-bg-color: $light_blue;
+  --el-button-hover-bg-color: #{$light_blue};
   --text-color-777: #777;
   --text-color-444: #444;
   --overlay-color: rgba(0, 0, 0, 0.4);

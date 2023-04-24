@@ -868,6 +868,8 @@ defineExpose({ doSearch });
   color: #000;
   background: var(--card-bg);
   border: var(--theme-border);
+  @include card-box;
+
   :deep {
     .el-breadcrumb {
       .el-breadcrumb__item {
@@ -1052,6 +1054,8 @@ defineExpose({ doSearch });
 
     .color-box {
       // .color-box();
+      @include color-box;
+
       img {
         transition: all 0.8s cubic-bezier(0.075, 0.82, 0.165, 1) 0s;
       }

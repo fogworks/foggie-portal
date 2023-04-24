@@ -28,7 +28,6 @@
 import LayoutHeader from "@/components/layout/layoutHeader";
 import Welcome from "./_modules/welcome.vue";
 // import DeviceDiscovery from "./_modules/deviceDiscovery.vue";
-import AdminAccount from "./_modules/adminAccount";
 import ExternalMember from "./_modules/externalMember";
 // import AdvancedServices from "./_modules/advancedServices";
 import { ref, markRaw, reactive } from "vue";
@@ -72,35 +71,6 @@ const pre = () => {
   }
 };
 const hasExternalNetwork = ref(true);
-const loading = ref(false);
-const getServiceInfo = () => {
-  loading.value = true;
-  get_service_info()
-    .then(async ({ result }) => {
-      if (hasExternalNetwork.value) {
-        // 有外网
-        if (
-          result.cbs_state === "finish" &&
-          result.ipfs_state === "finish" &&
-          result.cyfs_state === "finish"
-        ) {
-          window.location.href = "http://154.37.16.163:9000/#/access";
-          return true;
-        }
-      } else {
-        // 无外网
-        if (result.cbs_state === "finish" && result.ipfs_state === "finish") {
-          window.location.href = "http://154.37.16.163:9000/#/access";
-          return true;
-        }
-      }
-    })
-    .catch(() => {})
-    .finally(() => {
-      loading.value = false;
-    });
-};
-getServiceInfo();
 </script>
 
 <style lang="scss" scoped>

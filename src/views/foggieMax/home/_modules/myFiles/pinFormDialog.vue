@@ -153,6 +153,8 @@ watch(visible, (val) => {
     .color-box {
       width: 165px;
       // .color-box();
+      @include color-box;
+
       margin: 0 auto;
       .ripple-ink {
         border-radius: 45px;
@@ -201,6 +203,8 @@ watch(visible, (val) => {
       width: 100px;
       margin-left: 15px;
       // .color-box();
+      @include color-box;
+
       .ripple-ink {
         border-radius: 45px;
       }

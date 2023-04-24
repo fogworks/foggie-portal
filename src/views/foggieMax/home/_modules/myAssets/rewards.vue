@@ -267,6 +267,8 @@ export default {
     justify-content: center;
     .color-box {
       // .color-box();
+      @include color-box;
+
       .ripple-ink {
         border-radius: 16px;
       }

@@ -66,8 +66,8 @@ const cancelItem = (data) => {
 };
 onMounted(() => {
   if (totalActiveDevice.data.length < 4) {
-    // totalActiveDevice.data.push(route.params);
-    totalActiveDevice.data.push(route.query);
+    totalActiveDevice.data.push(route.params);
+    // totalActiveDevice.data.push(route.query);
   }
 });
 </script>

@@ -151,8 +151,10 @@ export default {
   height: 350px;
 
   color: #000;
-  // .card-box();
+
   background: var(--card-bg);
+  @include card-box;
+
   .title {
     font-size: 30px;
   }

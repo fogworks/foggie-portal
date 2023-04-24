@@ -101,7 +101,7 @@ const userName = computed(() => store.getters["token/currentUser"] || "Login");
   .main {
     position: relative;
     overflow-y: auto;
-    height: calc(100% - 60px);
+    // height: calc(100% - 60px);
     flex: 1;
     padding: 30px;
     padding-right: 0;

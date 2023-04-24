@@ -154,6 +154,8 @@ const copyLink = (text) => {
     .color-box {
       width: 165px;
       // .color-box();
+      @include color-box;
+
       margin: 0 auto;
       .ripple-ink {
         border-radius: 45px;

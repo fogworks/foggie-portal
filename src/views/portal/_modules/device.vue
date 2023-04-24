@@ -91,10 +91,10 @@ const emit = defineEmits(["next"]);
 const toGuide = (item) => {
   console.log(item, "item");
   router.push({
-    path: "/appWindow",
-    query: item,
-    // name: "AppWindow",
-    // params: item,
+    // path: "/appWindow",
+    // query: item,
+    name: "AppWindow",
+    params: item,
   });
   // if (item.device_type === "foggie_max") {
   //   router.push({

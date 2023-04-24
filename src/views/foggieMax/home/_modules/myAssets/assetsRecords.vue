@@ -355,8 +355,10 @@ export default {
 .card-box {
   width: 100%;
   margin: 24px 0 100px 0;
-  // .card-box();
+
   color: #000;
+  @include card-box;
+
   .assetsRecord-tabs {
     margin-top: 40px;
     :deep(.el-tabs__item) {

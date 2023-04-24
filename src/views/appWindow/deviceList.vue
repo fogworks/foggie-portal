@@ -69,7 +69,7 @@ const cancelItem = (data) => {
   emit("cancelItem", data);
 };
 const keyWord = ref("");
-const deviceList = computed(() => store.getters.deviceList);
+const deviceList = computed(() => store.getters["global/deviceList"]);
 
 const copyLink = (text) => {
   var input = document.createElement("input"); // 创建input对象
@@ -130,7 +130,7 @@ const list = computed(() => {
   height: calc(100% - 52px);
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0 10px;
+  padding: 0 15px;
   margin-top: 10px;
   &::-webkit-scrollbar {
     // display: none;
@@ -150,7 +150,7 @@ const list = computed(() => {
   position: relative;
   overflow: hidden;
   width: 205px;
-  height: 43px;
+  // height: 43px;
   padding: 5px;
   margin-bottom: 15px;
   background: linear-gradient(rgb(255, 255, 255) 0%, rgb(217, 223, 255) 100%);
@@ -176,9 +176,9 @@ const list = computed(() => {
   &:hover {
     // transform: translateX(-10px);
   }
-  &.foggie:hover {
-    height: 152px;
-  }
+  // &.foggie:hover {
+  //   height: 152px;
+  // }
   &.active {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     color: #fff;

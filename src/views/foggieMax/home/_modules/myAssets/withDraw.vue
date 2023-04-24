@@ -788,6 +788,8 @@ $light_blue: #29abff;
     text-align: center;
     .color-box {
       // .color-box();
+      @include color-box;
+
       display: inline-block;
       // width: 200px;
       // height: 60px;

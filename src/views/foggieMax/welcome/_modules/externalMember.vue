@@ -58,7 +58,15 @@
 </template>
 
 <script setup>
-import { ref, reactive, defineEmits, defineProps, toRefs, watch } from "vue";
+import {
+  ref,
+  reactive,
+  defineEmits,
+  defineProps,
+  toRefs,
+  watch,
+  inject,
+} from "vue";
 import {
   deploy_cbs,
   deploy_ipfs,
@@ -76,6 +84,7 @@ const props = defineProps({
     default: true,
   },
 });
+const goHome = inject("goHome");
 const { hasExternalNetwork } = toRefs(props);
 const rate = ref(0);
 const loading = ref(false);
@@ -421,7 +430,8 @@ const next = async () => {
   // gotoDeploy("", "ipfs");
   // gotoDeploy("", "cyfs");
   // emit("next");
-  window.location.href = "http://154.37.16.163:9000/#/access";
+  goHome();
+  // window.location.href = "http://154.37.16.163:9000/#/access";
 };
 </script>
 

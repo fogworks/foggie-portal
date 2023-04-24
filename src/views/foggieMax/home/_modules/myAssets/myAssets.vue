@@ -458,7 +458,7 @@ export default {
   // .vip-card();
   overflow: hidden;
   min-width: 500px;
-
+  @include vip-card;
   &::before {
     content: "";
     position: absolute;
@@ -485,6 +485,7 @@ export default {
   // .card-box();
   box-shadow: 0px 2px 5px 0px rgb(0 0 0 / 20%),
     rgb(0 0 0 / 10%) 0px 0px 0px 0.5px inset;
+  @include card-box;
 
   .records {
     cursor: pointer;
@@ -552,6 +553,8 @@ export default {
       cursor: pointer;
       .color-box {
         // .color-box();
+        @include color-box;
+
         .ripple-ink {
           border-radius: 45px;
         }

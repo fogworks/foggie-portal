@@ -502,6 +502,7 @@ export default {
   justify-content: center;
   .color-box {
     // .color-box();
+    @include color-box;
   }
   .task_load_more_btn {
     border-radius: 50px;

@@ -5,16 +5,23 @@
     </header> -->
     <main>
       <Access v-if="!accessible" v-model:accessible="accessible"></Access>
-      <div v-else>
-        <div class="top-title">
-          <span @click="isInSetup = false">
-            {{ deviceData.device_name }}
-          </span>
-          <svg-icon icon-class="setup" class="setup" @click="toSet"></svg-icon>
+      <template v-else>
+        <Welcome v-if="!hasReady"></Welcome>
+        <div v-else>
+          <div class="top-title">
+            <span @click="isInSetup = false">
+              {{ deviceData.device_name }}
+            </span>
+            <svg-icon
+              icon-class="setup"
+              class="setup"
+              @click="toSet"
+            ></svg-icon>
+          </div>
+          <MaxHome v-show="!isInSetup" :haveNet="haveNet"></MaxHome>
+          <Setting v-show="isInSetup"></Setting>
         </div>
-        <MaxHome v-if="!isInSetup" :haveNet="haveNet"></MaxHome>
-        <Setting v-else></Setting>
-      </div>
+      </template>
     </main>
     <!-- <footer>
       <LayoutFooter></LayoutFooter>
@@ -27,6 +34,7 @@
 // import LayoutFooter from "./layoutFooter";
 import MaxHome from "../home";
 import Access from "./access";
+import Welcome from "../welcome";
 import Setting from "../setting";
 import { useStore } from "vuex";
 // import mainVue from './views/main/main.vue'
@@ -34,15 +42,17 @@ import {
   shareLink,
   pIN,
   getActivationVood,
+  get_service_info,
   detected_net,
 } from "@/utils/api.js";
-import { ref, onMounted, reactive, provide, toRefs, inject } from "vue";
+import { ref, onMounted, reactive, watch, provide, toRefs, inject } from "vue";
 export default {
   name: "FoggieMax",
   components: {
     MaxHome,
     Access,
     Setting,
+    Welcome,
     // LayoutHeader,
     // LayoutFooter,
   },
@@ -65,6 +75,7 @@ export default {
     });
 
     const haveNet = ref(false);
+    const hasReady = ref(false);
     const isInSetup = ref(false);
     const initFoggieDate = async () => {
       detected_net().then((res) => {
@@ -90,6 +101,61 @@ export default {
     const toSet = () => {
       isInSetup.value = !isInSetup.value;
     };
+    const loading = ref(false);
+    const getServiceInfo = () => {
+      loading.value = true;
+      get_service_info()
+        .then(async ({ result }) => {
+          if (haveNet.value) {
+            // 有外网
+            if (
+              result.cbs_state === "finish" &&
+              result.ipfs_state === "finish" &&
+              result.cyfs_state === "finish"
+            ) {
+              hasReady.value = true;
+              return true;
+            }
+          } else {
+            // 无外网
+            if (
+              result.cbs_state === "finish" &&
+              result.ipfs_state === "finish"
+            ) {
+              hasReady.value = true;
+              return true;
+            }
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          loading.value = false;
+        });
+    };
+    watch(
+      accessible,
+      (val) => {
+        if (val) {
+          getServiceInfo();
+        }
+      },
+      {
+        immediate: true,
+      }
+    );
+    const reset = () => {
+      hasReady.value = false;
+      isInSetup.value = false;
+      console.log("reset!!!!!!!!!!!!!");
+    };
+    const goHome = () => {
+      hasReady.value = true;
+      isInSetup.value = false;
+
+      console.log("gothome!!!!!!!!!!!!!");
+    };
+    provide("reset", reset);
+    provide("goHome", goHome);
 
     return {
       currentOODItem,
@@ -97,6 +163,7 @@ export default {
       accessible,
       deviceData,
       isInSetup,
+      hasReady,
       toSet,
     };
   },
@@ -115,7 +182,8 @@ export default {
   .top-title {
     display: flex;
     justify-content: space-between;
-    margin: 20px 0;
+    // margin: 20px 0;
+    height: 60px;
     font-size: 30px;
     text-align: left;
     font-weight: 700;

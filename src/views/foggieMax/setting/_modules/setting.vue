@@ -1,7 +1,7 @@
 <template>
   <div class="set-box" v-loading="loading">
     <div class="reset">
-      <svg-icon @click="resetMethod" icon-class="reset"></svg-icon>
+      <svg-icon @click="resetMethod" icon-class="reset2"></svg-icon>
       <div>
         <p>Service one click reset</p>
         <p>After resetting, it needs to be reinitialized before entering</p>
@@ -34,10 +34,20 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, getCurrentInstance, watch } from "vue";
+import {
+  ref,
+  reactive,
+  computed,
+  getCurrentInstance,
+  watch,
+  inject,
+  useAttrs,
+} from "vue";
 import { op_ipfs, op_cyfs, reset_vood } from "@/utils/api";
 import { useStore } from "vuex";
 const { proxy } = getCurrentInstance();
+const $attrs = useAttrs();
+const reset = inject("reset");
 const kitsList = reactive([
   {
     label: "ipfs",
@@ -81,7 +91,9 @@ const resetMethod = async () => {
           message: "Reset successful",
           position: "bottom-left",
         });
-        window.location.href = "http://localhost:8081/#/welcome";
+        // $attrs.reset();
+        reset();
+        // window.location.href = "http://localhost:8081/#/welcome";
       })
       .catch(() => {
         count.value++;

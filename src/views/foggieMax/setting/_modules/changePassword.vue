@@ -178,6 +178,8 @@ const submit = () => {
   justify-content: center;
   .color-box {
     // .color-box();
+    @include color-box;
+
     .el-button {
       position: relative;
       width: 135px;
