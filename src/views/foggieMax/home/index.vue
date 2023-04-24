@@ -77,7 +77,7 @@ export default {
       let oodData = await getActivationVood(data);
       currentOODItem.value.data = oodData.result;
       console.log(oodData.result, "oodData.result");
-      store.dispatch("setCurrentOODItem", {
+      store.dispatch("global/setCurrentOODItem", {
         data: oodData.result,
       });
       // if (oodData && oodData.data && oodData.data.length > 0) {

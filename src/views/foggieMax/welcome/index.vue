@@ -16,7 +16,7 @@
           v-show="active === index"
           :is="item.com"
           @next="next"
-          :hasExternalNetwork="hasExternalNetwork"
+          :hasExternalNetwork="haveNet"
           v-model:preShow="preShow"
         ></component>
       </main>
@@ -30,7 +30,7 @@ import Welcome from "./_modules/welcome.vue";
 // import DeviceDiscovery from "./_modules/deviceDiscovery.vue";
 import ExternalMember from "./_modules/externalMember";
 // import AdvancedServices from "./_modules/advancedServices";
-import { ref, markRaw, reactive } from "vue";
+import { ref, markRaw, reactive, toRefs } from "vue";
 import { get_service_info } from "@/utils/api";
 const active = ref(0);
 const preShow = ref(false);
@@ -70,15 +70,21 @@ const pre = () => {
     active.value = --active.value;
   }
 };
-const hasExternalNetwork = ref(true);
+const props = defineProps({
+  haveNet: {
+    type: Boolean,
+    default: false,
+  },
+});
+const haveNet = toRefs(props);
 </script>
 
 <style lang="scss" scoped>
 .out-box {
   width: 100%;
   height: 100%;
-  background: url("~@/assets/cool-background.png") no-repeat;
-  background-size: cover;
+  // background: url("~@/assets/cool-background.png") no-repeat;
+  // background-size: cover;
 }
 .container {
   width: 1200px;

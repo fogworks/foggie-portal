@@ -48,7 +48,7 @@ import { access_pass, access_pass_login, check_access_pass } from "@/utils/api";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 const bcryptjs = require("bcryptjs");
-const emit = defineEmits(["next", "update:accessible"]);
+const emit = defineEmits(["accessCallback", "update:accessible"]);
 const props = defineProps({});
 const { proxy } = getCurrentInstance();
 const router = useRouter();
@@ -147,7 +147,8 @@ const submit = () => {
               "access_token",
               result.token_type + " " + result.token
             );
-            emit("update:accessible", true);
+            emit("accessCallback");
+            // emit("update:accessible", true);
             // router.push("/home");
           })
           .catch((err) => {

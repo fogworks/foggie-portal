@@ -19,17 +19,25 @@
         @click="clickItem(item)"
       >
         <svg-icon
+          v-if="isActive(item.device_id)"
+          icon-class="logo-dog"
+          class="logo"
+        ></svg-icon>
+        <svg-icon v-else icon-class="logo-dog-black" class="logo"></svg-icon>
+        <svg-icon
           v-show="isActive(item.device_id)"
           @click.stop="cancelItem(item)"
           icon-class="cancel"
           class="cancel"
         ></svg-icon>
         <div>
-          {{ item.device_type ? "Name:" : "IP:" }}
+          <span>
+            {{ item.device_type ? "Name:" : "IP:" }}
+          </span>
           {{ item.device_name || item.dedicatedip }}
         </div>
         <div>
-          DID:
+          <span> DID: </span>
           {{ handleID(item.device_id) }}
           <svg-icon
             icon-class="copy"
@@ -38,11 +46,19 @@
           ></svg-icon>
         </div>
         <template v-if="!item.device_type && item.product_custom.length">
-          <div>CPU: {{ item.product_custom[0].field_value }}</div>
-          <div>Memory: {{ item.product_custom[1].field_value }}</div>
-          <div>Disk Type: {{ item.product_custom[2].field_value }}</div>
-          <div>Disk Size: {{ item.product_custom[3].field_value }}</div>
-          <div>Bandwidth: {{ item.product_custom[4].field_value }}</div>
+          <div><span>CPU:</span> {{ item.product_custom[0].field_value }}</div>
+          <div>
+            <span>Memory:</span> {{ item.product_custom[1].field_value }}
+          </div>
+          <div>
+            <span>Disk Type:</span> {{ item.product_custom[2].field_value }}
+          </div>
+          <div>
+            <span>Disk Size:</span> {{ item.product_custom[3].field_value }}
+          </div>
+          <div>
+            <span>Bandwidth:</span> {{ item.product_custom[4].field_value }}
+          </div>
         </template>
       </li>
     </ul>
@@ -150,7 +166,7 @@ const list = computed(() => {
   position: relative;
   overflow: hidden;
   width: 205px;
-  // height: 43px;
+  height: 150px;
   padding: 5px;
   margin-bottom: 15px;
   background: linear-gradient(rgb(255, 255, 255) 0%, rgb(217, 223, 255) 100%);
@@ -159,23 +175,28 @@ const list = computed(() => {
   transition: all 0.3s;
   text-align: left;
   div {
+    height: 20px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    &:first-child {
-      font-weight: 500;
-      width: 180px;
-    }
+    font-family: math !important;
+    color: #005ea0;
     svg {
       cursor: pointer;
       &:hover {
         color: #29abff;
       }
     }
+    span {
+      color: #8b8b8b;
+      font-family: sans-serif !important;
+    }
   }
-  &:hover {
-    // transform: translateX(-10px);
+  div:first-of-type {
+    font-weight: 500;
+    width: 180px;
   }
+
   // &.foggie:hover {
   //   height: 152px;
   // }
@@ -187,6 +208,12 @@ const list = computed(() => {
       #093891 13.57%,
       rgb(54, 135, 216) 98.38%
     );
+    div {
+      color: #fff;
+      span {
+        color: #fff;
+      }
+    }
     // color: #fff;
     // background: linear-gradient(93deg, #6794e9 0%, #837ecd 100%);
   }
@@ -199,6 +226,12 @@ const list = computed(() => {
     &:hover {
       transform: rotate(90deg);
     }
+  }
+  .logo {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    font-size: 35px;
   }
 }
 </style>

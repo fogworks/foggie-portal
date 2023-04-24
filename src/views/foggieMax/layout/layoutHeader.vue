@@ -113,7 +113,7 @@ export default {
       currentTheme.value = val;
       document.documentElement.setAttribute("class", val);
       // window.localStorage.setItem("theme", val);
-      store.dispatch("setTheme", val);
+      store.dispatch("global/setTheme", val);
     };
 
     const getTimeState = () => {
@@ -139,7 +139,7 @@ export default {
       }
     }
 
-    getTimeState();
+    // getTimeState();
     return {
       userName,
       accessible,

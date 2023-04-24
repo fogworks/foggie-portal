@@ -1,12 +1,16 @@
 <template>
-  <div class="container">
+  <div class="container" v-loading="loading">
     <!-- <header>
       <LayoutHeader></LayoutHeader>
     </header> -->
     <main>
-      <Access v-if="!accessible" v-model:accessible="accessible"></Access>
+      <Access
+        v-if="!accessible"
+        v-model:accessible="accessible"
+        @accessCallback="accessCallback"
+      ></Access>
       <template v-else>
-        <Welcome v-if="!hasReady"></Welcome>
+        <Welcome v-if="!hasReady" :haveNet="haveNet"></Welcome>
         <div v-else>
           <div class="top-title">
             <span @click="isInSetup = false">
@@ -18,8 +22,8 @@
               @click="toSet"
             ></svg-icon>
           </div>
-          <MaxHome v-show="!isInSetup" :haveNet="haveNet"></MaxHome>
-          <Setting v-show="isInSetup"></Setting>
+          <MaxHome v-if="!isInSetup" :haveNet="haveNet"></MaxHome>
+          <Setting v-else></Setting>
         </div>
       </template>
     </main>
@@ -68,6 +72,7 @@ export default {
     provide("deviceData", deviceData);
     const store = useStore();
     const accessible = ref(false);
+    const loading = ref(false);
     const currentOODItem = ref({
       data: {
         device_id: "",
@@ -78,12 +83,14 @@ export default {
     const hasReady = ref(false);
     const isInSetup = ref(false);
     const initFoggieDate = async () => {
+      loading.value = true;
       detected_net().then((res) => {
         if (res.result.detected_net) {
           haveNet.value = true;
         } else {
-          haveNet.value = true;
+          haveNet.value = false;
         }
+        loading.value = false;
       });
       // let data = {
       //   pn: 1,
@@ -101,7 +108,6 @@ export default {
     const toSet = () => {
       isInSetup.value = !isInSetup.value;
     };
-    const loading = ref(false);
     const getServiceInfo = () => {
       loading.value = true;
       get_service_info()
@@ -114,7 +120,6 @@ export default {
               result.cyfs_state === "finish"
             ) {
               hasReady.value = true;
-              return true;
             }
           } else {
             // 无外网
@@ -123,41 +128,43 @@ export default {
               result.ipfs_state === "finish"
             ) {
               hasReady.value = true;
-              return true;
             }
           }
+          accessible.value = true;
         })
         .catch(() => {})
         .finally(() => {
           loading.value = false;
         });
     };
-    watch(
-      accessible,
-      (val) => {
-        if (val) {
-          getServiceInfo();
-        }
-      },
-      {
-        immediate: true,
-      }
-    );
+    // watch(
+    //   accessible,
+    //   (val) => {
+    //     if (val) {
+    //       loading.value = true;
+    //       getServiceInfo();
+    //     }
+    //   },
+    //   {
+    //     immediate: true,
+    //   }
+    // );
+    const accessCallback = () => {
+      getServiceInfo();
+    };
     const reset = () => {
       hasReady.value = false;
       isInSetup.value = false;
-      console.log("reset!!!!!!!!!!!!!");
     };
     const goHome = () => {
       hasReady.value = true;
       isInSetup.value = false;
-
-      console.log("gothome!!!!!!!!!!!!!");
     };
     provide("reset", reset);
     provide("goHome", goHome);
 
     return {
+      loading,
       currentOODItem,
       haveNet,
       accessible,
@@ -165,6 +172,7 @@ export default {
       isInSetup,
       hasReady,
       toSet,
+      accessCallback,
     };
   },
 };
@@ -176,6 +184,11 @@ export default {
   padding: 0 40px;
   margin: 0 auto;
   box-sizing: border-box;
+  :deep {
+    .el-loading-mask {
+      background: transparent;
+    }
+  }
   main {
     z-index: 1;
   }
