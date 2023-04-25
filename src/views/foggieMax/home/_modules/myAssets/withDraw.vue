@@ -241,7 +241,7 @@
 </template>
 
 <script>
-import { ref, reactive, toRefs, watch, computed } from "vue";
+import { ref, reactive, toRefs, watch, computed, inject } from "vue";
 import {
   getGoogle,
   getWithdrawGoogle,
@@ -280,6 +280,7 @@ export default {
     withDrawMoney: {},
   },
   setup(props, { emit }) {
+    const requestTarget = inject("requestTarget");
     const close = () => {
       emit("reload");
       emit("update:visible", false);
@@ -330,7 +331,7 @@ export default {
         let postdata = {
           account_name: form.receiver,
         };
-        checkAccount(postdata).then(
+        checkAccount(postdata, requestTarget).then(
           (res) => {
             cb();
           },
@@ -529,7 +530,7 @@ export default {
       // withdrawFormRef.value.validate((valid) => {
       if (!showErrorTips.value) {
         loading.value = true;
-        checkAccount(postdata).then(
+        checkAccount(postdata, requestTarget).then(
           (res) => {
             let data = {
               account: walletUser.value,

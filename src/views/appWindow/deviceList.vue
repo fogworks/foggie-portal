@@ -15,6 +15,7 @@
           'item',
           !item.device_type ? 'foggie' : '',
           isActive(item.device_id) ? 'active' : '',
+          discoverData.data.device_id === item.device_id ? 'currentActive' : '',
         ]"
         @click="clickItem(item)"
       >
@@ -34,11 +35,15 @@
           <span>
             {{ item.device_type ? "Name:" : "IP:" }}
           </span>
-          {{ item.device_name || item.dedicatedip }}
+          <span class="top-value-span">
+            {{ item.device_name || item.dedicatedip }}
+          </span>
         </div>
         <div>
           <span> FID: </span>
-          {{ handleID(item.device_id) }}
+          <span class="top-value-span">
+            {{ handleID(item.device_id) }}
+          </span>
           <svg-icon
             icon-class="copy"
             class="copy-icon"
@@ -46,18 +51,50 @@
           ></svg-icon>
         </div>
         <template v-if="!item.device_type && item.product_custom.length">
-          <div><span>CPU:</span> {{ item.product_custom[0].field_value }}</div>
+          <!-- <span class="value-span">
+            {{ item.product_custom[0].field_value }} </span
+          >-core CPU
+          <span class="value-span"
+            >{{ item.product_custom[1].field_value }}
+          </span>
+          GB Memory
+          <span class="value-span">
+            {{ item.product_custom[3].field_value }}</span
+          >
+          GB
+          <span> {{ item.product_custom[2].field_value }}</span
+          >-Disk
+          <span class="value-span">
+            {{ item.product_custom[4].field_value }}</span
+          >MB Bandwidth -->
+
           <div>
-            <span>Memory:</span> {{ item.product_custom[1].field_value }}
+            <span class="value-span">{{
+              item.product_custom[0].field_value
+            }}</span
+            >-core CPU
           </div>
           <div>
-            <span>Disk Type:</span> {{ item.product_custom[2].field_value }}
+            <span class="value-span">{{
+              item.product_custom[1].field_value
+            }}</span
+            >GB Memory
           </div>
           <div>
-            <span>Disk Size:</span> {{ item.product_custom[3].field_value }}
+            <span class="value-span">{{
+              item.product_custom[3].field_value
+            }}</span
+            >GB
+            <span class="value-span">{{
+              item.product_custom[2].field_value
+            }}</span
+            >Disk
           </div>
           <div>
-            <span>Bandwidth:</span> {{ item.product_custom[4].field_value }}
+            <span class="value-span">{{
+              item.product_custom[4].field_value
+            }}</span
+            >MB Bandwidth
           </div>
         </template>
       </li>
@@ -83,8 +120,12 @@ const props = defineProps({
     type: Object,
     default: { data: [] },
   },
+  discoverData: {
+    type: Object,
+    default: { data: {} },
+  },
 });
-const { totalActiveDevice } = toRefs(props);
+const { totalActiveDevice, discoverData } = toRefs(props);
 const { proxy } = getCurrentInstance();
 const emit = defineEmits(["clickItem", "cancelItem"]);
 const clickItem = (data) => {
@@ -113,7 +154,7 @@ const copyLink = (text) => {
 };
 const handleID = (str) => {
   return (
-    str.substring(0, 6) + "..." + str.substring(str.length - 6, str.length)
+    str.substring(0, 5) + "..." + str.substring(str.length - 5, str.length)
   );
 };
 const isActive = (id) => {
@@ -141,7 +182,9 @@ const list = computed(() => {
 
 <style lang="scss" scoped>
 .right-content {
+  overflow: hidden;
   height: 100%;
+  padding-top: 10px;
 }
 .search-input {
   padding: 0 10px;
@@ -155,6 +198,7 @@ const list = computed(() => {
   height: calc(100% - 52px);
   overflow-y: auto;
   overflow-x: hidden;
+
   padding: 0 15px;
   margin-top: 10px;
   &::-webkit-scrollbar {
@@ -175,8 +219,9 @@ const list = computed(() => {
   position: relative;
   overflow: hidden;
   width: 205px;
-  height: 150px;
+  height: 135px;
   padding: 5px;
+  margin: 0 auto;
   margin-bottom: 15px;
   background: linear-gradient(rgb(255, 255, 255) 0%, rgb(217, 223, 255) 100%);
   border-radius: 5px;
@@ -188,8 +233,9 @@ const list = computed(() => {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-family: math !important;
     color: #005ea0;
+    font-size: 15px;
+    // font-weight: 600;
     svg {
       cursor: pointer;
       &:hover {
@@ -197,18 +243,24 @@ const list = computed(() => {
       }
     }
     span {
+      font-weight: 500;
       color: #8b8b8b;
-      font-family: sans-serif !important;
     }
   }
   div:first-of-type {
-    font-weight: 500;
     width: 180px;
   }
+  .top-value-span {
+    font-size: 16px;
+    font-weight: 600;
+    color: #005ea0;
+  }
+  .value-span {
+    font-weight: 500;
+    font-size: 18px;
+    color: #29abff !important;
+  }
 
-  // &.foggie:hover {
-  //   height: 152px;
-  // }
   &.active {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     color: #fff;
@@ -225,6 +277,9 @@ const list = computed(() => {
     }
     // color: #fff;
     // background: linear-gradient(93deg, #6794e9 0%, #837ecd 100%);
+  }
+  &.currentActive {
+    transform: translateX(-10px);
   }
   .cancel {
     position: absolute;

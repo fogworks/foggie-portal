@@ -1,15 +1,41 @@
 <template>
   <div class="app-window" id="app-window">
+    <!-- <div class="app-left-box"> -->
     <template v-if="!isDiscover" v-for="item in totalActiveDevice.data">
-      <div :class="['app-left', `app-${item.device_id}`]" v-if="item.device_id">
+      <div
+        :class="[
+          'app-left',
+          `app-${item.device_id}`,
+          isCollapse ? 'left-collapse' : '',
+        ]"
+        v-if="item.device_id"
+      >
         <FoggieMax :deviceData="item"></FoggieMax>
       </div>
     </template>
-    <FoggieMax v-else :deviceData="discoverData.data"></FoggieMax>
-    <div class="app-right" v-loading="loading" v-if="!isDiscover">
+    <div class="app-left left-collapse" v-else>
+      <FoggieMax :deviceData="discoverData.data"></FoggieMax>
+    </div>
+    <!-- </div> -->
+
+    <div
+      :class="['app-right', isCollapse ? 'right-collapse' : '']"
+      v-loading="loading"
+      v-if="!isDiscover"
+    >
+      <div
+        :class="['collapse', isCollapse ? 'isCollapse' : '']"
+        @click="changeCollapse"
+      >
+        <svg-icon
+          icon-class="collapse"
+          :class="[isCollapse ? 'isCollapse' : '']"
+        ></svg-icon>
+      </div>
       <DeviceList
         @clickItem="clickItem"
         @cancelItem="cancelItem"
+        :discoverData="discoverData"
         :totalActiveDevice="totalActiveDevice"
       ></DeviceList>
     </div>
@@ -37,6 +63,10 @@ const route = useRoute();
 const { proxy } = getCurrentInstance();
 const email = computed(() => store.getters["token/currentUser"]);
 const loading = ref(false);
+const isCollapse = ref(false);
+const discoverData = reactive({
+  data: {},
+});
 const search = () => {
   loading.value = true;
   search_foggie({ email: email.value })
@@ -66,9 +96,11 @@ const clickItem = (data) => {
   );
   if (target) {
     scrollIntoView(data);
+    discoverData.data = data;
   } else {
     if (totalActiveDevice.data.length < 4) {
       totalActiveDevice.data.push(data);
+      discoverData.data = data;
       nextTick(() => {
         scrollIntoView(data);
       });
@@ -86,16 +118,27 @@ const cancelItem = (data) => {
   let target = totalActiveDevice.data.find(
     (el) => el.device_id === data.device_id
   );
+  let targetIndex = totalActiveDevice.data.findIndex(
+    (el) => el.device_id === data.device_id
+  );
   if (target) {
     totalActiveDevice.data = totalActiveDevice.data.filter(
       (el) => el.device_id !== data.device_id
     );
+    if (target.device_id === discoverData.data.device_id) {
+      discoverData.data =
+        totalActiveDevice.data[targetIndex] ||
+        totalActiveDevice.data[targetIndex - 1] ||
+        {};
+      if (discoverData.data.device_id) scrollIntoView(discoverData.data);
+    }
   }
 };
 const isDiscover = ref(false);
-const discoverData = reactive({
-  data: {},
-});
+const changeCollapse = () => {
+  isCollapse.value = !isCollapse.value;
+};
+
 const init = () => {
   if (route.params.isDiscover && route.params.device_id) {
     // totalActiveDevice.data.push(route.params);
@@ -104,6 +147,7 @@ const init = () => {
   } else {
     isDiscover.value = false;
     search();
+
     if (totalActiveDevice.data.length < 4 && route.params.device_id) {
       totalActiveDevice.data.push(route.params);
     }
@@ -121,27 +165,38 @@ onMounted(() => {
 .app-window {
   position: relative;
   height: 100%;
-  overflow-y: auto;
+  overflow-y: hidden;
   scroll-behavior: smooth;
   // display: flex;
   // justify-content: space-between;
+  .app-left-box {
+    // flex: 1;
+    // margin-right: 50px;
+  }
   .app-left {
     overflow-y: auto;
     box-sizing: border-box;
-    min-width: 1280px;
+    min-width: 1200px;
     height: 100%;
     padding: 30px;
     background: var(--bg-color);
-    margin-right: 300px;
+    // margin-right: 300px;
     border-radius: 20px;
+    transition: all 0.5s;
     & + .app-left {
       margin-top: 40px;
     }
+    &.left-collapse {
+      margin-right: 10px;
+    }
   }
   .app-right {
+    // position: sticky;
+    // top: 0;
     // overflow-x: visible;
     // overflow-y: auto;
     box-sizing: border-box;
+    // height: 100%;
     height: calc(100% - 60px);
     width: 240px;
     // padding: 0 10px;
@@ -149,9 +204,43 @@ onMounted(() => {
     position: fixed;
     top: 30px;
     right: 20px;
+    transition: all 0.5s;
+
+    border-radius: 20px;
+    background: rgba(210, 210, 210, 0.6);
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 0px 0.5px inset;
+    &.right-collapse {
+      width: 0;
+    }
     :deep {
       .el-loading-mask {
         background-color: transparent;
+      }
+    }
+
+    .collapse {
+      position: absolute;
+      top: 50%;
+      left: -20px;
+      font-size: 30px;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      background-color: #fff;
+      cursor: pointer;
+      z-index: 1;
+      box-shadow: 0 0 7px #727272;
+      &.isCollapse {
+        left: -18px;
+      }
+      svg {
+        transform: rotate(90deg);
+        transition: all 0.5s;
+        &.isCollapse {
+          transform: rotate(-90deg);
+        }
+        color: #fff;
+        cursor: pointer;
       }
     }
   }

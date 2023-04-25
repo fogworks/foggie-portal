@@ -108,7 +108,7 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted, watchEffect, toRefs } from "vue";
+import { ref, reactive, onMounted, watchEffect, toRefs, inject } from "vue";
 import NftDialog from "./nftDialog";
 import Rewards from "./rewards";
 import Withdraw from "./withDraw";
@@ -142,6 +142,7 @@ export default {
     },
   },
   setup(props, { emit }) {
+    const requestTarget = inject("requestTarget");
     const { currentOODItem } = toRefs(props);
     const addNum = ref(0);
     const estimateNum = ref(0);

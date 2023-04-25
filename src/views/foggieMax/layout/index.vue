@@ -69,7 +69,13 @@ export default {
 
   setup(props) {
     const deviceData = reactive(props.deviceData);
+    const requestTarget = reactive({
+      ip: deviceData.dedicatedip,
+      device_id: deviceData.device_id,
+    });
     provide("deviceData", deviceData);
+    provide("requestTarget", requestTarget);
+
     const store = useStore();
     const accessible = ref(false);
     const loading = ref(false);
@@ -84,7 +90,7 @@ export default {
     const isInSetup = ref(false);
     const initFoggieDate = async () => {
       loading.value = true;
-      detected_net().then((res) => {
+      detected_net(requestTarget).then((res) => {
         if (res.result.detected_net) {
           haveNet.value = true;
         } else {
@@ -110,7 +116,7 @@ export default {
     };
     const getServiceInfo = () => {
       loading.value = true;
-      get_service_info()
+      get_service_info(requestTarget)
         .then(async ({ result }) => {
           if (haveNet.value) {
             // 有外网
@@ -180,8 +186,8 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  width: 1200px;
-  padding: 0 40px;
+  width: 1120px;
+  // padding: 0 40px;
   margin: 0 auto;
   box-sizing: border-box;
   :deep {

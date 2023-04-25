@@ -505,11 +505,12 @@ export const oodFileUpload = (data, ID) => {
 };
 
 //dmc
-export const dmcRows = (data) => {
+export const dmcRows = (data, target) => {
   return request({
     url: `/v1/chain/get_table_rows`,
     method: "POST",
     data: data,
+    target
   });
 };
 
@@ -624,11 +625,12 @@ export const oodhealthVood = () => {
 };
 
 //VOOD总容量和健康度信息获取
-export const getActivationVood = (data) => {
+export const getActivationVood = (data, target) => {
   let url = `/v1/get_service_info`;
   return request({
     url: url,
     method: "GET",
+    target
   });
 };
 
@@ -1356,14 +1358,7 @@ export const sourceReward = (owner_id) => {
   }
 };
 
-//开启主网账号验证
-export const checkAccount = (data) => {
-  return request({
-    url: "/v1/chain/get_account",
-    method: "POST",
-    data: data,
-  });
-};
+
 
 //取消交易(支付系统取消)
 export const paymentCancel = (data) => {
@@ -1497,58 +1492,40 @@ export const get_kit_installation_status = (params) => {
   });
 };
 
-// 管理员注册
-export const adminRegister = (data) => {
-  return request({
-    url: `/v1/account/register`,
-    method: "POST",
-    data,
-  });
-};
-// 管理员登录
-export const adminLogin = (data) => {
-  return request({
-    url: `/v1/account/login`,
-    method: "POST",
-    data,
-  });
-};
-// 管理员修改密码
-export const modifyPassword = (id) => {
-  return request({
-    url: `/v1/account/modifyPassword/${id}`,
-    method: "PUT",
-  });
-};
+
 // cbs服务激活
-export const deploy_cbs = (data) => {
+export const deploy_cbs = (data, target) => {
   return request({
     url: `/v1/service/deploy_cbs`,
     method: "POST",
     data,
+    target
   });
 };
 // ipfs服务激活
-export const deploy_ipfs = (data) => {
+export const deploy_ipfs = (data, target) => {
   return request({
     url: `/v1/service/deploy_ipfs`,
     method: "POST",
     data,
+    target
   });
 };
 // cyfs服务激活
-export const deploy_cyfs = (data) => {
+export const deploy_cyfs = (data, target) => {
   return request({
     url: `/v1/service/deploy_cyfs`,
     method: "POST",
     data,
+    target
   });
 };
 // 服务状态查询
-export const get_service_info = () => {
+export const get_service_info = (target) => {
   return request({
     url: `/v1/get_service_info`,
     method: "get",
+    target//{ip,device_id}
   });
 };
 
@@ -1561,18 +1538,20 @@ export const get_foggie_dmc = (data) => {
   });
 };
 //  绑定/注册 foggie 账户
-export const bind_foggie = (data) => {
+export const bind_foggie = (data, target) => {
   return request({
     url: `/v1/account/bind_foggie`,
     method: "POST",
-    data
+    data,
+    target
   });
 };
 //  解绑 foggie 账户
-export const unbind_foggie = () => {
+export const unbind_foggie = (target) => {
   return request({
     url: `/v1/account/unbind_foggie`,
     method: "POST",
+    target
   });
 };
 
@@ -1584,66 +1563,82 @@ export const search_foggie = (data) => {
     data
   });
 };
-
+//开启主网账号验证
+export const checkAccount = (data, target) => {
+  return request({
+    url: "/v1/chain/get_account",
+    method: "POST",
+    data,
+    target
+  });
+};
 // 修改访问密码
-export const modify_access_password = (data) => {
+export const modify_access_password = (data, target) => {
   return request({
     url: `/v1/account/modify_access_password`,
     method: "POST",
-    data
+    data,
+    target
   });
 };
 // 访问密码是否存在监测
-export const check_access_pass = () => {
+export const check_access_pass = (target) => {
   return request({
     url: `/v1/account/check_access_pass`,
     method: "GET",
+    target
   });
 };
 // 访问密码设置
-export const access_pass = (data) => {
+export const access_pass = (data, target) => {
   return request({
     url: `/v1/account/access_pass`,
     method: "POST",
-    data
+    data,
+    target
   });
 };
 // 访问密码登录
-export const access_pass_login = (data) => {
+export const access_pass_login = (data, target) => {
   return request({
     url: `/v1/account/access_pass_login`,
     method: "POST",
-    data
+    data,
+    target
   });
 };
 // IPFS 服务开启/关闭
-export const op_ipfs = (data) => {
+export const op_ipfs = (data, target) => {
   return request({
     url: `/v1/service/op_ipfs`,
     method: "POST",
-    data
+    data,
+    target
   });
 };
 // cyFS 服务开启/关闭
-export const op_cyfs = (data) => {
+export const op_cyfs = (data, target) => {
   return request({
     url: `/v1/service/op_cyfs`,
     method: "POST",
-    data
+    data,
+    target
   });
 };
 // 服务一键重置
-export const reset_vood = () => {
+export const reset_vood = (target) => {
   return request({
     url: `/v1/service/reset_vood`,
     method: "POST",
+    target
   });
 };
 //  探测设备是否可以外网访问
-export const detected_net = () => {
+export const detected_net = (target) => {
   return request({
     url: `/v1/detected_net`,
     method: "GET",
+    target
   });
 };
 
