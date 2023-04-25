@@ -48,7 +48,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, defineEmits, getCurrentInstance } from "vue";
+import { ref, reactive, defineEmits, getCurrentInstance, inject } from "vue";
 import {
   access_pass,
   access_pass_login,
@@ -56,6 +56,7 @@ import {
 } from "@/utils/api";
 const emit = defineEmits(["next", "update:preShow"]);
 const { proxy } = getCurrentInstance();
+const goHome = inject("goHome");
 const form = reactive({
   oldPassword: "",
   password: "",
@@ -146,6 +147,7 @@ const submit = () => {
           });
           formRef.value.resetFields();
           loading.value = false;
+          goHome();
         });
       });
     }
