@@ -10,7 +10,11 @@
         ]"
         v-if="item.device_id"
       >
-        <FoggieMax :deviceData="item"></FoggieMax>
+        <FoggieMax
+          :deviceData="item"
+          v-if="item.device_type === 'foggie_max'"
+        ></FoggieMax>
+        <FoggieClient :deviceData="item" v-else></FoggieClient>
       </div>
     </template>
     <div class="app-left left-collapse" v-else>
@@ -55,6 +59,7 @@ import {
 } from "vue";
 import { useStore } from "vuex";
 import FoggieMax from "@/views/foggieMax/layout";
+import FoggieClient from "@/views/Alltemplate/Alltemplate";
 import DeviceList from "./deviceList";
 import { search_foggie } from "@/utils/api";
 import { useRoute } from "vue-router";
@@ -147,9 +152,8 @@ const init = () => {
   } else {
     isDiscover.value = false;
     search();
-
-    if (totalActiveDevice.data.length < 4 && route.params.device_id) {
-      totalActiveDevice.data.push(route.params);
+    if (route.params.device_id) {
+      clickItem(route.params);
     }
   }
 };
@@ -183,6 +187,7 @@ onMounted(() => {
     // margin-right: 300px;
     border-radius: 20px;
     transition: all 0.5s;
+    z-index: 1;
     & + .app-left {
       margin-top: 40px;
     }
@@ -191,6 +196,7 @@ onMounted(() => {
     }
   }
   .app-right {
+    z-index: 2;
     // position: sticky;
     // top: 0;
     // overflow-x: visible;
