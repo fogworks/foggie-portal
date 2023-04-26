@@ -184,6 +184,7 @@ onMounted(() => {
     height: 100%;
     padding: 30px;
     background: var(--bg-color);
+    background: rgba(255, 255, 255, 0.6);
     // margin-right: 300px;
     border-radius: 20px;
     transition: all 0.5s;

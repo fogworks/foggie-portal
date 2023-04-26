@@ -906,6 +906,7 @@ onMounted(() => {
   max-width: 1960px;
   border: var(--theme-border);
   min-height: calc(100vh - 200px);
+  background: #f2f6ff;
 
   ::v-deep {
     .el-breadcrumb {
