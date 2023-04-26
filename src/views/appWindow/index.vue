@@ -147,9 +147,8 @@ const init = () => {
   } else {
     isDiscover.value = false;
     search();
-
-    if (totalActiveDevice.data.length < 4 && route.params.device_id) {
-      totalActiveDevice.data.push(route.params);
+    if (route.params.device_id) {
+      clickItem(route.params);
     }
   }
 };
