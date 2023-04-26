@@ -95,6 +95,10 @@ const bcryptjs = require("bcryptjs");
 const emit = defineEmits(["next", "update:visible", "update:preShow"]);
 const props = defineProps({
   visible: Boolean,
+  currentItem: {
+    type: Object,
+    default: { data: {} },
+  },
 });
 const store = useStore();
 const isNew = ref(false); //是否是新用户
@@ -106,7 +110,7 @@ const tipTitle = computed(() => {
   }
 });
 // const form = reactive(props.form);
-const { visible } = toRefs(props);
+const { visible, currentItem } = toRefs(props);
 const { proxy } = getCurrentInstance();
 const form = reactive({
   password: "",
@@ -188,7 +192,10 @@ const submit = () => {
         bind: true,
       };
       if (isNew.value || form.dmc_account) {
-        bind_foggie(postData)
+        bind_foggie(postData, {
+          ip: currentItem.data.ipaddress,
+          device_id: currentItem.data.device_id,
+        })
           .then((res) => {
             proxy.$notify({
               type: "success",

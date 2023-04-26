@@ -43,10 +43,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, defineEmits, getCurrentInstance } from "vue";
+import { ref, reactive, defineEmits, getCurrentInstance, inject } from "vue";
 import { access_pass, access_pass_login, check_access_pass } from "@/utils/api";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
+import { setTokenMap } from "@/utils/tokenMap";
 const bcryptjs = require("bcryptjs");
 const emit = defineEmits(["accessCallback", "update:accessible"]);
 const props = defineProps({});
@@ -61,9 +62,11 @@ const formRef = ref(null);
 const loading = ref(false);
 const btnLoading = ref(false);
 const hasAccessPass = ref(false);
+const deviceData = inject("deviceData");
+const requestTarget = inject("requestTarget");
 const getAccessPass = () => {
   loading.value = true;
-  check_access_pass()
+  check_access_pass(requestTarget)
     .then((res) => {
       loading.value = false;
       if (res?.result?.access_pass) {
@@ -136,15 +139,22 @@ const submit = () => {
       };
       if (hasAccessPass.value) {
         // 登录
-        access_pass_login({
-          access_password: form.password,
-        })
+        access_pass_login(
+          {
+            access_password: form.password,
+          },
+          requestTarget
+        )
           .then(({ result }) => {
             // window.sessionStorage.setItem("accessible", true);
             // store.dispatch("setAccessible", true);
             btnLoading.value = false;
-            window.localStorage.setItem(
-              "access_token",
+            // window.localStorage.setItem(
+            //   "access_token",
+            //   result.token_type + " " + result.token
+            // );
+            setTokenMap(
+              deviceData.device_id,
               result.token_type + " " + result.token
             );
             emit("accessCallback");
@@ -164,7 +174,7 @@ const submit = () => {
           });
       } else {
         // 新建
-        access_pass(data)
+        access_pass(data, requestTarget)
           .then((res) => {
             proxy.$notify({
               type: "success",

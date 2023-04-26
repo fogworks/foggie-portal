@@ -176,7 +176,7 @@ const changeCollapse = () => {
     // height: calc(100% - 60px);
     flex: 1;
     padding: 30px;
-    padding-right: 0;
+    padding-right: 20px;
     // background: linear-gradient(
     //   220deg,
     //   rgba(174, 176, 238, 1) 0%,

@@ -83,6 +83,7 @@ import {
   getCurrentInstance,
   computed,
   toRefs,
+  inject,
 } from "vue";
 import NextButton from "@/components/nextButton";
 import { login, get_foggie_dmc, user, unbind_foggie } from "@/utils/api";
@@ -94,6 +95,7 @@ const router = useRouter();
 const isNew = ref(false); //是否是新用户
 // const form = reactive(props.form);
 const { proxy } = getCurrentInstance();
+const requestTarget = inject("requestTarget");
 const form = reactive({
   password: "",
   email: "",
@@ -101,7 +103,7 @@ const form = reactive({
 const formRef = ref(null);
 const unbindVisible = ref(false);
 const needLogin = ref(true);
-const userInfo = computed(() => store.getters['global/userInfo']);
+const userInfo = computed(() => store.getters["global/userInfo"]);
 const validatePass = (rule, value, callback) => {
   if (value === "") {
     callback(new Error("Please input the password"));
@@ -192,7 +194,7 @@ const logout = () => {
 };
 const unbind = () => {
   unbindVisible.value = false;
-  unbind_foggie().then((res) => {
+  unbind_foggie(requestTarget).then((res) => {
     logout();
   });
 };

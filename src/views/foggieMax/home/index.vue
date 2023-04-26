@@ -31,7 +31,7 @@ import DashBoard from "./_modules/myAssets/dashBoard";
 import MyFiles from "./_modules/myFiles";
 import TopUpload from "@/components/upload/index";
 import { shareLink, pIN, getActivationVood } from "@/utils/api.js";
-import { ref, reactive, onMounted, computed, toRefs } from "vue";
+import { ref, reactive, onMounted, computed, toRefs, inject } from "vue";
 import ShareDialog from "./_modules/myFiles/shareDialog";
 import { ElNotification } from "element-plus";
 import { useStore } from "vuex";
@@ -71,25 +71,23 @@ export default {
       myFile.value.doSearch();
     };
     const showTopUpload = ref(false);
+    const requestTarget = inject("requestTarget");
     const initFoggieDate = async () => {
       // get is have net
-      // max
-      if (deviceData.value.device_type === "foggie_max") {
-        let data = {
-          pn: 1,
-          ps: 50,
-        };
-        let oodData = await getActivationVood(data);
-        currentOODItem.value.data = oodData.result;
-        store.dispatch("global/setCurrentOODItem", {
-          data: oodData.result,
-        });
-      } else {
-        currentOODItem.value.data = deviceData.value;
-        store.dispatch("global/setCurrentOODItem", {
-          data: deviceData.value,
-        });
-      }
+
+      let data = {
+        pn: 1,
+        ps: 50,
+      };
+      let oodData = await getActivationVood(data, requestTarget);
+      currentOODItem.value.data = oodData.result;
+      console.log(oodData.result, "oodData.result");
+      store.dispatch("global/setCurrentOODItem", {
+        data: oodData.result,
+      });
+      // if (oodData && oodData.data && oodData.data.length > 0) {
+      //   currentOODItem.value.data = oodData.data[0];
+      // }
     };
     onMounted(() => {
       initFoggieDate();

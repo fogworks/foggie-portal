@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, defineEmits, getCurrentInstance } from "vue";
+import { ref, reactive, defineEmits, getCurrentInstance, inject } from "vue";
 import NextButton from "@/components/nextButton";
 import { adminRegister, adminLogin, modifyPassword } from "@/utils/api";
 const emit = defineEmits(["next", "update:preShow"]);
@@ -53,6 +53,7 @@ const form = reactive({
   confirmPassword: "",
   old_password: "",
 });
+const requestTarget = inject("requestTarget");
 const formRef = ref(null);
 const validatePass = (rule, value, callback) => {
   if (value === "") {

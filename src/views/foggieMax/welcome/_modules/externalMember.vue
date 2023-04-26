@@ -85,6 +85,7 @@ const props = defineProps({
   },
 });
 const goHome = inject("goHome");
+const requestTarget = inject("requestTarget");
 const { hasExternalNetwork } = toRefs(props);
 const rate = ref(0);
 const loading = ref(false);
@@ -109,7 +110,7 @@ const statusMap = {
 const resetMethod = async () => {
   return new Promise((resolve, reject) => {
     const rest = () => {
-      reset_vood()
+      reset_vood(requestTarget)
         .then(async () => {
           let isInitial = await getInitialState();
           if (isInitial) {
@@ -135,7 +136,7 @@ let ipfsTimer = "";
 let cyfsTimer = "";
 const installCBS = async (isFinish) => {
   try {
-    await deploy_cbs();
+    await deploy_cbs(requestTarget);
     cbsTimer = setInterval(
       timeCallback(hasExternalNetwork.value ? 33 : 50),
       hasExternalNetwork.value ? 1000 : 500
@@ -168,7 +169,7 @@ const installCBS = async (isFinish) => {
 };
 const installIPFS = async (isFinish) => {
   try {
-    await deploy_ipfs();
+    await deploy_ipfs(requestTarget);
     ipfsTimer = setInterval(
       timeCallback(hasExternalNetwork.value ? 66 : 99),
       hasExternalNetwork.value ? 1000 : 500
@@ -204,7 +205,7 @@ const installCYFS = async (isFinish) => {
         sec: bindInfoObj.sec,
         index,
       };
-      deploy_cyfs(bind_info)
+      deploy_cyfs(bind_info, requestTarget)
         .then(async (res) => {
           cyfsTimer = setInterval(timeCallback(99), 1000);
           console.log("deploy cyfs", res);
@@ -272,7 +273,7 @@ const gotoDeploy = async (item, type) => {
   count.value = 0;
   emit("update:preShow", false);
 
-  get_service_info()
+  get_service_info(requestTarget)
     .then(async ({ result }) => {
       if (getNeedResetBool(result)) {
         status.value = "Resetting";
@@ -332,7 +333,7 @@ const getInstallStatus = (type) => {
   // 获取安装状态
   return new Promise((resolve, reject) => {
     const getStatus = () => {
-      get_service_info()
+      get_service_info(requestTarget)
         .then(({ result }) => {
           if (type === "cbs") {
             if (result.cbs_state === "finish") {
@@ -384,7 +385,7 @@ const getInstallStatus = (type) => {
 const getInitialState = () => {
   return new Promise((resolve, reject) => {
     const getStatus = () => {
-      get_service_info()
+      get_service_info(requestTarget)
         .then(({ result }) => {
           if (getNeedResetBool(result)) {
             setTimeout(() => {

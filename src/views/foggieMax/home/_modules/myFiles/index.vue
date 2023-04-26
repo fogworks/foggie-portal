@@ -96,7 +96,7 @@
         <el-table-column
           label="Name"
           show-overflow-tooltip
-          width="340"
+          width="440"
           prop="name"
         >
           <template #default="{ row }">
@@ -159,7 +159,7 @@
           width="100"
           show-overflow-tooltip
         />
-        <el-table-column label="Share" width="100">
+        <!-- <el-table-column label="Share" width="100">
           <template #default="{ row }">
             <div>
               <MyEcharts
@@ -168,7 +168,7 @@
               ></MyEcharts>
             </div>
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <!-- <el-table-column prop="status" label="Status" width="140" /> -->
         <el-table-column
           label="Actions"
@@ -483,7 +483,7 @@ const initFileData = async (data) => {
       canShare: data[i].pubkey ? true : false,
     };
     data[i] = item;
-    getCidShare(device_id.value, data[i].cid);
+    // getCidShare(device_id.value, data[i].cid);
   }
   tableData.data = data;
 

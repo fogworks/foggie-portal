@@ -48,7 +48,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, defineEmits, getCurrentInstance } from "vue";
+import { ref, reactive, defineEmits, getCurrentInstance, inject } from "vue";
 import {
   access_pass,
   access_pass_login,
@@ -56,6 +56,8 @@ import {
 } from "@/utils/api";
 const emit = defineEmits(["next", "update:preShow"]);
 const { proxy } = getCurrentInstance();
+const goHome = inject("goHome");
+const requestTarget = inject("requestTarget");
 const form = reactive({
   oldPassword: "",
   password: "",
@@ -126,15 +128,18 @@ const submit = () => {
         confirm_access_password: form.confirmPassword,
         old_access_password: form.oldPassword,
       };
-      modify_access_password(data).then((res) => {
+      modify_access_password(data, requestTarget).then((res) => {
         proxy.$notify({
           type: "success",
           message: "Successfully modified",
           position: "bottom-left",
         });
-        access_pass_login({
-          access_password: form.password,
-        }).then(({ result }) => {
+        access_pass_login(
+          {
+            access_password: form.password,
+          },
+          requestTarget
+        ).then(({ result }) => {
           window.localStorage.setItem(
             "access_token",
             result.token_type + " " + result.token
@@ -146,6 +151,7 @@ const submit = () => {
           });
           formRef.value.resetFields();
           loading.value = false;
+          goHome();
         });
       });
     }

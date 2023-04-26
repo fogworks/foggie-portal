@@ -48,6 +48,7 @@ import { useStore } from "vuex";
 const { proxy } = getCurrentInstance();
 const $attrs = useAttrs();
 const reset = inject("reset");
+const requestTarget = inject("requestTarget");
 const kitsList = reactive([
   {
     label: "ipfs",
@@ -83,7 +84,7 @@ const count = ref(0);
 const resetMethod = async () => {
   const rest = () => {
     loading.value = true;
-    reset_vood()
+    reset_vood(requestTarget)
       .then(async () => {
         loading.value = false;
         proxy.$notify({
@@ -111,7 +112,7 @@ const change = (item, val) => {
   console.log(item, val);
   item.loading = true;
   let fetchMethod = item.label === "ipfs" ? op_ipfs : op_cyfs;
-  fetchMethod({ op_type: val })
+  fetchMethod({ op_type: val }, requestTarget)
     .then((res) => {
       proxy.$notify({
         type: "success",

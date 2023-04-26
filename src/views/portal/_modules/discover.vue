@@ -35,7 +35,10 @@
       </template>
     </ul>
     <IpForm v-model:visible="visible" @getMax="getMax"></IpForm>
-    <AssociatedAccount v-model:visible="accountVisible"></AssociatedAccount>
+    <AssociatedAccount
+      v-model:visible="accountVisible"
+      :currentItem="currentItem"
+    ></AssociatedAccount>
     <el-dialog
       class="account-dialog"
       title="Associated account"
@@ -126,9 +129,11 @@ const refresh = () => {
 };
 const userInfo = computed(() => store.getters.userInfo);
 const detected_net = computed(() => store.getters.detected_net);
-let currentItem = {};
+let currentItem = reactive({
+  data: {},
+});
 const toGuide = (item) => {
-  currentItem = item;
+  currentItem.data = item;
   // if (userInfo.email) {
   // 绑定且登录
   // const url = `http://${item.ipaddress}:8080/#/welcome`;
@@ -152,7 +157,7 @@ const skip = () => {
   // window.location.href = url;
   router.push({
     name: "AppWindow",
-    params: { ...currentItem, isDiscover: true },
+    params: { ...currentItem.data, isDiscover: true },
   });
   // router.push({
   //   name: "Welcome",
