@@ -1,7 +1,13 @@
 <template>
   <div class="Alltemplate_boxs">
     <div>
-      <el-container>
+
+      <orderList></orderList>
+      <myFiles></myFiles>
+      <teleport to='body'>
+        <upload v-show="uploadIsShow"></upload>
+      </teleport>
+      <!-- <el-container>
         <el-aside :width="asideWidth">
           <TemplateAside :isMobile="isMobile" />
         </el-aside>
@@ -17,7 +23,7 @@
             </teleport>
           </el-main>
         </el-container>
-      </el-container>
+      </el-container> -->
     </div>
   </div>
 </template>
@@ -32,15 +38,16 @@ import {
   watch,
 } from "vue";
 import upload from "@/components/upload";
+import orderList from '@/components/orders/orderList.vue'
 
-import TemplateHeader from "@/components/layout/header.vue";
-import TemplateAside from "@/components/layout/aside.vue";
+import myFiles from '@/views/Alltemplate/MyFiles/myFiles'
+// import TemplateHeader from "@/components/layout/header.vue";
+// import TemplateAside from "@/components/layout/aside.vue";
 import { getChain_id } from '@/api/common.js'
-import { provide, defineExpose, computed } from "vue";
+import { provide, defineExpose, computed, defineProps } from "vue";
 import { useStore } from "vuex";
+const props = defineProps(['deviceData'])
 
-let isMobile = ref(false);
-let asideWidth = ref("236px");
 
 
 const store = useStore()
@@ -48,7 +55,13 @@ const store = useStore()
 let uploadIsShow = computed(() => store.getters.uploadIsShow)
 
 
-
+watch(
+  () => props.deviceData,
+  (newValue) => {
+    console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~', newValue);
+  },
+  { immediate: true, deep: true }
+);
 
 
 /* 获取链ID */
@@ -59,46 +72,49 @@ function loadChainId() {
     }
   })
 }
-
-
-
-
-watch(
-  isMobile,
-  (newValue) => {
-    if (!newValue) {
-      asideWidth.value = "236px";
-    } else {
-      asideWidth.value = "60px";
-    }
-  },
-  { immediate: true }
-);
-
-const { body } = document;
-const WIDTH = 992; //
-
-onBeforeMount(() => {
-  window.addEventListener("resize", $_resizeHandler);
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener("resize", $_resizeHandler);
-});
 onMounted(() => {
-  isMobile.value = $_isMobile();
-  loadChainId()
+  // loadChainId()
 });
 
-function $_isMobile() {
-  const rect = body.getBoundingClientRect();
-  return rect.width - 1 < WIDTH;
-}
-function $_resizeHandler() {
-  if (!document.hidden) {
-    isMobile.value = $_isMobile();
-  }
-}
+// let isMobile = ref(false);
+// let asideWidth = ref("236px");
+
+// watch(
+//   isMobile,
+//   (newValue) => {
+//     if (!newValue) {
+//       asideWidth.value = "236px";
+//     } else {
+//       asideWidth.value = "60px";
+//     }
+//   },
+//   { immediate: true }
+// );
+
+// const { body } = document;
+// const WIDTH = 992; //
+
+// onBeforeMount(() => {
+//   window.addEventListener("resize", $_resizeHandler);
+// });
+
+// onBeforeUnmount(() => {
+//   window.removeEventListener("resize", $_resizeHandler);
+// });
+// onMounted(() => {
+//   isMobile.value = $_isMobile();
+//   loadChainId()
+// });
+
+// function $_isMobile() {
+//   const rect = body.getBoundingClientRect();
+//   return rect.width - 1 < WIDTH;
+// }
+// function $_resizeHandler() {
+//   if (!document.hidden) {
+//     isMobile.value = $_isMobile();
+//   }
+// }
 </script>
 
 <style lang="scss" scoped>

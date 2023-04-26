@@ -1,39 +1,41 @@
 {
-    "serverConfig": {
-        "port": 3000
-    },
-    "chainConfig":{
-        "chainUrl":"http://test.dmctech.io",
-        "httpEndpoint":"http://154.22.123.188:8870",
-        "getChainInfo":"/v1/chain/get_info",
-        "getTableRows":"/v1/chain/get_table_rows",
-        "getOutstandingOrders":"/1.1",
-        "getOrders":"/1.1",
-        "getChallengeList":"/1.1",
-        "createTime":"2023-03-23T01:50:00Z"
-    },
-    "userConfig":{
-        "keyStoreFileName":"foggie/keystore/keystore.json",
-        "username":"tianbao12345",
-        "keyProvider":"5J2J27QSRhX4yXaxDrbA2w1RoWciFV4J9gdQNz1fUGxN1BhJ93z"
-    },
-    "dbConfig":{
-        "dbPath":"",
-        "fileTableName":"foggie/db/fileTable.db",
-        "orderTableName":"foggie/db/orderTable.db",
-        "userTableName":"foggie/db/userTable.db",
-        "codebookTableName":"foggie/db/codebookTable.db",
-        "testTableName":"foggie/db/testTableName.db"
-    },
-    "logConfig":{
-        "dbPath":"",
-        "logFileName":"foggie/logs/foggiv-client.log"
-    },
-    "grpcConfig":{
-        "ip":"154.31.34.194",
-        "port":"8007"
-    },
-    "fileConfig":{
-        "bufferSize": 4096
-    }
+  "serverConfig": {
+    "port": 3000
+  },
+  "chainConfig": {
+    "browserAddress": "http://156.242.10.10:8632",
+    "transactionAddress": "http://156.242.10.10:8361",
+    "getOutstandingOrders": "/1.1",
+    "getOrders": "/1.1",
+    "getChallengeList": "/1.1",
+    "httpEndpoint": "http://156.242.10.10:5802",
+    "getChainInfo": "/v1/chain/get_info",
+    "getTableRows": "/v1/chain/get_table_rows",
+    "getAccounts": "/v1/chain/get_accounts_by_authorizers",
+    "createTime": "2023-03-23T01:50:00Z"
+  },
+  "userConfig": {
+    "keyStoreFileName": "foggie/keystore/keystore.json",
+    "username": "tianbao12345",
+    "keyProvider": "5J2J27QSRhX4yXaxDrbA2w1RoWciFV4J9gdQNz1fUGxN1BhJ93z"
+  },
+  "dbConfig": {
+    "dbPath": "",
+    "fileTableName": "foggie/db/fileTable.db",
+    "orderTableName": "foggie/db/orderTable.db",
+    "userTableName": "foggie/db/userTable.db",
+    "codebookTableName": "foggie/db/codebookTable.db",
+    "testTableName": "foggie/db/testTableName.db"
+  },
+  "logConfig": {
+    "dbPath": "",
+    "logFileName": "foggie/logs/foggiv-client.log"
+  },
+  "grpcConfig": {
+    "ip": "154.31.34.194",
+    "port": "8007"
+  },
+  "fileConfig": {
+    "bufferSize": 4096
+  }
 }
