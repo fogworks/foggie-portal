@@ -87,7 +87,8 @@ export default {
     const router = useRouter();
     const theme = computed(() => store.getters.theme);
     // const currentOODItem = JSON.parse(localStorage.getItem("currentOODItem"));
-    const currentOODItem = computed(() => store.getters.currentOODItem);
+    const currentOODItem = inject("currentOODItem");
+    // const currentOODItem = computed(() => store.getters.currentOODItem);
     const documentInfo = reactive({
       title: detailData.data.name,
       idList: detailData.data.idList,

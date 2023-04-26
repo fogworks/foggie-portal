@@ -15,7 +15,7 @@
           'item',
           !item.device_type ? 'foggie' : '',
           isActive(item.device_id) ? 'active' : '',
-          discoverData.data.device_id === item.device_id ? 'currentActive' : '',
+          deviceData.data.device_id === item.device_id ? 'currentActive' : '',
         ]"
         @click="clickItem(item)"
       >
@@ -120,12 +120,12 @@ const props = defineProps({
     type: Object,
     default: { data: [] },
   },
-  discoverData: {
+  deviceData: {
     type: Object,
     default: { data: {} },
   },
 });
-const { totalActiveDevice, discoverData } = toRefs(props);
+const { totalActiveDevice, deviceData } = toRefs(props);
 const { proxy } = getCurrentInstance();
 const emit = defineEmits(["clickItem", "cancelItem"]);
 const clickItem = (data) => {

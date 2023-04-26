@@ -5,8 +5,14 @@
     </el-icon>
 
     <div style="display: flex; align-items: center">
-      <el-switch style="margin-right: 20px" v-model="theme" inline-prompt :active-icon="Sunny" :inactive-icon="Moon"
-        @click="toggle()" />
+      <el-switch
+        style="margin-right: 20px"
+        v-model="theme"
+        inline-prompt
+        :active-icon="Sunny"
+        :inactive-icon="Moon"
+        @click="toggle()"
+      />
 
       <el-dropdown trigger="click" @command="handleChange">
         <el-avatar>
@@ -39,7 +45,7 @@ import {
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 
-const store = useStore()
+const store = useStore();
 let theme = ref(true);
 
 const emit = defineEmits(["setlanguage_key"]);
@@ -55,20 +61,18 @@ const isDark = useDark({
 const toggle = useToggle(isDark);
 
 watch(theme, (newVal) => {
-  store.commit('global/setSystemTheme', newVal)
-
-})
-
-onMounted(() => {
-  if (window.localStorage.getItem("useDarkKEY")) {
-    window.localStorage.getItem("useDarkKEY") == "auto" ? (theme.value = true) : (theme.value = false);
-  } else {
-    theme.value = true;
-  }
-  store.commit('global/setSystemTheme', theme.value)
-
-
+  store.commit("global/setSystemTheme", newVal);
 });
+
+// onMounted(() => {
+//   if (window.localStorage.getItem("useDarkKEY")) {
+//     window.localStorage.getItem("useDarkKEY") == "auto" ? (theme.value = true) : (theme.value = false);
+//   } else {
+//     theme.value = true;
+//   }
+//   store.commit('global/setSystemTheme', theme.value)
+
+// });
 
 /* 关闭 或打开 aside */
 function closeOpenAside() {
@@ -119,9 +123,11 @@ function handleChange(item) {
 }
 
 .ejUnNt {
-  background: linear-gradient(91.4deg,
-      rgb(47, 184, 255) 0%,
-      rgb(158, 236, 217) 100%);
+  background: linear-gradient(
+    91.4deg,
+    rgb(47, 184, 255) 0%,
+    rgb(158, 236, 217) 100%
+  );
   border: none;
   border-radius: 30px;
   box-shadow: rgb(147 231 221 / 30%) 0px 20px 40px;
@@ -200,8 +206,10 @@ function handleChange(item) {
   transition: background-color 5000s ease-in-out 0s;
   box-shadow: rgb(47 184 255 / 30%) 0px 10px 40px,
     rgb(47 184 255) 0px 0px 0px 1px inset;
-  background: linear-gradient(rgba(24, 32, 79, 0.4) 0%,
-      rgba(24, 32, 79, 0.25) 100%);
+  background: linear-gradient(
+    rgba(24, 32, 79, 0.4) 0%,
+    rgba(24, 32, 79, 0.25) 100%
+  );
 }
 
 .my_login_box ::placeholder {

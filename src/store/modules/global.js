@@ -16,6 +16,7 @@ export default {
         device_id: "",
       },
     },
+    discoverData: {}
   },
   mutations: {
     SET_THEME: (state, theme) => {
@@ -46,6 +47,9 @@ export default {
     SET_DeviceList: (state, data) => {
       state.deviceList = data;
     },
+    SET_DiscoverData: (state, data) => {
+      state.discoverData = data;
+    },
 
   },
   actions: {
@@ -69,6 +73,9 @@ export default {
     setCurrentOODItem({ commit }, data) {
       commit("SET_currentOODItem", data);
     },
+    setDiscoverData({ commit }, data) {
+      commit("SET_DiscoverData", data);
+    },
   },
   getters: {
     userInfo: (state) => state.userInfo,
@@ -79,5 +86,6 @@ export default {
     Password: (state) => state.Password,
     deviceList: (state) => state.deviceList,
     currentOODItem: (state) => state.currentOODItem,
+    discoverData: (state) => state.discoverData,
   },
 };

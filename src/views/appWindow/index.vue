@@ -18,7 +18,7 @@
       </div>
     </template>
     <div class="app-left left-collapse" v-else>
-      <FoggieMax :deviceData="discoverData.data"></FoggieMax>
+      <FoggieMax :deviceData="discoverData"></FoggieMax>
     </div>
     <!-- </div> -->
 
@@ -39,7 +39,7 @@
       <DeviceList
         @clickItem="clickItem"
         @cancelItem="cancelItem"
-        :discoverData="discoverData"
+        :deviceData="deviceData"
         :totalActiveDevice="totalActiveDevice"
       ></DeviceList>
     </div>
@@ -69,9 +69,10 @@ const { proxy } = getCurrentInstance();
 const email = computed(() => store.getters["token/currentUser"]);
 const loading = ref(false);
 const isCollapse = ref(false);
-const discoverData = reactive({
+const deviceData = reactive({
   data: {},
 });
+const discoverData = computed(() => store.getters["global/discoverData"]);
 const search = () => {
   loading.value = true;
   search_foggie({ email: email.value })
@@ -99,11 +100,11 @@ const clickItem = (data) => {
   );
   if (target) {
     scrollIntoView(data);
-    discoverData.data = data;
+    deviceData.data = data;
   } else {
     if (totalActiveDevice.data.length < 4) {
       totalActiveDevice.data.push(data);
-      discoverData.data = data;
+      deviceData.data = data;
       nextTick(() => {
         scrollIntoView(data);
       });
@@ -128,12 +129,12 @@ const cancelItem = (data) => {
     totalActiveDevice.data = totalActiveDevice.data.filter(
       (el) => el.device_id !== data.device_id
     );
-    if (target.device_id === discoverData.data.device_id) {
-      discoverData.data =
+    if (target.device_id === deviceData.data.device_id) {
+      deviceData.data =
         totalActiveDevice.data[targetIndex] ||
         totalActiveDevice.data[targetIndex - 1] ||
         {};
-      if (discoverData.data.device_id) scrollIntoView(discoverData.data);
+      if (deviceData.data.device_id) scrollIntoView(deviceData.data);
     }
   }
 };
@@ -141,17 +142,18 @@ const isDiscover = ref(false);
 const changeCollapse = () => {
   isCollapse.value = !isCollapse.value;
 };
-
 const init = () => {
-  if (route.params.isDiscover && route.params.device_id) {
+  if (route.query.isDiscover) {
     // totalActiveDevice.data.push(route.params);
-    discoverData.data = route.params;
+    // deviceData.data = route.params;
     isDiscover.value = true;
   } else {
     isDiscover.value = false;
     search();
-    if (route.params.device_id) {
-      clickItem(route.params);
+    if (discoverData.value.device_id) {
+      nextTick(() => {
+        clickItem(discoverData.value);
+      });
     }
   }
 };

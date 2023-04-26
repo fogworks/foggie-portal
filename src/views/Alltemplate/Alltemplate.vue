@@ -1,10 +1,9 @@
 <template>
   <div class="Alltemplate_boxs">
     <div>
-
       <orderList></orderList>
       <myFiles></myFiles>
-      <teleport to='body'>
+      <teleport to="body">
         <upload v-show="uploadIsShow"></upload>
       </teleport>
       <!-- <el-container>
@@ -38,39 +37,35 @@ import {
   watch,
 } from "vue";
 import upload from "@/components/upload";
-import orderList from '@/components/orders/orderList.vue'
+import orderList from "@/components/orders/orderList.vue";
 
-import myFiles from '@/views/Alltemplate/MyFiles/myFiles'
+import myFiles from "@/views/Alltemplate/MyFiles/myFiles";
 // import TemplateHeader from "@/components/layout/header.vue";
 // import TemplateAside from "@/components/layout/aside.vue";
-import { getChain_id } from '@/api/common.js'
+import { getChain_id } from "@/api/common.js";
 import { provide, defineExpose, computed, defineProps } from "vue";
 import { useStore } from "vuex";
-const props = defineProps(['deviceData'])
+const props = defineProps(["deviceData"]);
 
+const store = useStore();
 
-
-const store = useStore()
-
-let uploadIsShow = computed(() => store.getters.uploadIsShow)
-
+let uploadIsShow = computed(() => store.getters.uploadIsShow);
 
 watch(
   () => props.deviceData,
   (newValue) => {
-    console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~', newValue);
+    console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", newValue);
   },
   { immediate: true, deep: true }
 );
 
-
 /* 获取链ID */
 function loadChainId() {
-  getChain_id().then(res => {
+  getChain_id().then((res) => {
     if (res.code == 200) {
-      store.commit('global/SAVE_ChainId', res.data)
+      store.commit("global/SAVE_ChainId", res.data);
     }
-  })
+  });
 }
 onMounted(() => {
   // loadChainId()
@@ -121,22 +116,21 @@ onMounted(() => {
 // @import "../../static/style/variables.scss";
 @import "@/static/style/variables.scss";
 
-
-
 .Alltemplate_boxs {
   background-repeat: no-repeat;
-  width: 100vw;
   box-sizing: border-box;
   color: #fff;
   font-family: Lucida Fax-Italic, Lucida Fax;
-  height: 100%;
-  overflow-y: scroll;
+  // height: 100%;
+  // overflow-y: scroll;
   background-size: cover;
   background-position: 50%;
-  height: 100vh;
   border-radius: 0 0 0 0;
   z-index: 1;
-  min-height: 100vh;
+  // min-height: 100vh;
+  width: 1120px;
+  // padding: 0 40px;
+  margin: 0 auto;
 }
 
 .main_header {

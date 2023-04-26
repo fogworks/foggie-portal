@@ -32,6 +32,10 @@
           <svg-icon icon-class="discover"></svg-icon>
           <template #title> Discover </template>
         </el-menu-item>
+        <el-menu-item index="assets" v-if="userName !== 'Login'">
+          <svg-icon icon-class="income"></svg-icon>
+          <template #title> Assets </template>
+        </el-menu-item>
       </el-menu>
     </div>
     <div class="main">
@@ -137,11 +141,12 @@ const changeCollapse = () => {
           }
 
           div {
-            padding: 5px 10px;
+            padding: 5px 0px;
             font-size: 16px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            max-width: 100%;
           }
         }
       }
@@ -166,7 +171,7 @@ const changeCollapse = () => {
         }
       }
       &:not(.el-menu--collapse) {
-        width: 252px;
+        width: 220px;
       }
     }
   }

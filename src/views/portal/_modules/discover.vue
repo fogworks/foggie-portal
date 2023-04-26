@@ -143,9 +143,10 @@ const toGuide = (item) => {
   if (detected_net.value && !item.email && !item.bind) {
     chooseAssociated.value = true;
   } else {
+    store.dispatch("global/setDiscoverData", item);
     router.push({
       name: "AppWindow",
-      params: { ...item, isDiscover: true },
+      query: { isDiscover: true },
     });
     // const url = `http://${item.ipaddress}:9001/#/welcome`;
     // window.location.href = url;
@@ -155,9 +156,11 @@ const skip = () => {
   chooseAssociated.value = false;
   // const url = `http://${currentItem.ipadreess}:9001/#/welcome`;
   // window.location.href = url;
+  store.dispatch("global/setDiscoverData", currentItem.data);
+
   router.push({
     name: "AppWindow",
-    params: { ...currentItem.data, isDiscover: true },
+    query: { isDiscover: true },
   });
   // router.push({
   //   name: "Welcome",
