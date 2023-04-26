@@ -1,8 +1,5 @@
 <template>
   <div class="container" v-loading="loading">
-    <!-- <header>
-      <LayoutHeader></LayoutHeader>
-    </header> -->
     <main>
       <Access
         v-if="!accessible"
@@ -27,28 +24,16 @@
         </div>
       </template>
     </main>
-    <!-- <footer>
-      <LayoutFooter></LayoutFooter>
-    </footer> -->
   </div>
 </template>
 
 <script>
-// import LayoutHeader from "./layoutHeader";
-// import LayoutFooter from "./layoutFooter";
 import MaxHome from "../home";
 import Access from "./access";
 import Welcome from "../welcome";
 import Setting from "../setting";
 import { useStore } from "vuex";
-// import mainVue from './views/main/main.vue'
-import {
-  shareLink,
-  pIN,
-  getActivationVood,
-  get_service_info,
-  detected_net,
-} from "@/utils/api.js";
+import { get_service_info, detected_net } from "@/utils/api.js";
 import { ref, onMounted, reactive, watch, provide, toRefs, inject } from "vue";
 export default {
   name: "FoggieMax",
@@ -57,8 +42,6 @@ export default {
     Access,
     Setting,
     Welcome,
-    // LayoutHeader,
-    // LayoutFooter,
   },
   props: {
     deviceData: {

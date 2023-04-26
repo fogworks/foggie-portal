@@ -90,8 +90,6 @@ let totalActiveDevice = reactive({
 const scrollIntoView = (data) => {
   const app = document.getElementById("app-window");
   const target = app.getElementsByClassName(`app-${data.device_id}`)[0];
-  console.dir(app, "appppppppppp");
-  console.dir(target, "targettarget");
   app.scrollTo(0, target.offsetTop);
 };
 const clickItem = (data) => {
