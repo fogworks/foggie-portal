@@ -63,7 +63,7 @@
         </el-dropdown> -->
       </li>
     </ul>
-
+    <div class="to-app" @click="router.push({ name: 'AppWindow' })">APP</div>
     <IPFrom v-model:visible="visible"></IPFrom>
   </div>
 </template>
@@ -195,6 +195,22 @@ search();
   font-weight: 700;
   font-size: 24px;
   color: #fff;
+}
+.to-app {
+  position: fixed;
+  right: 50px;
+  bottom: 50px;
+  width: 50px;
+  height: 50px;
+  line-height: 50px;
+  font-weight: 900;
+  border-radius: 50%;
+  background: #f2f6ff;
+  box-shadow: 0 0 10px #ccc;
+  cursor: pointer;
+  &:hover {
+    transform: scale(1.1);
+  }
 }
 
 .deviceList {
