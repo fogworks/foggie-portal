@@ -92,7 +92,7 @@
 </template>
 
 <script>
-import { reactive, ref, onMounted, watch, toRefs } from "vue";
+import { reactive, ref, onMounted, watch, toRefs, inject } from "vue";
 import { historyReward, getWithdrawList } from "@/utils/api.js";
 import { transferTime } from "@/utils/util.js";
 export default {
@@ -107,6 +107,7 @@ export default {
     },
   },
   setup(props, { emit }) {
+    const deviceData = inject("deviceData");
     const { currentOODItem } = toRefs(props);
     const activeName = ref("Reward");
     const tabList = ref([

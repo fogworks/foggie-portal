@@ -428,6 +428,7 @@ export default {
       NftDialogVisible,
       lastweekCount,
       lastWeekOptions,
+      currentOODItem,
       nftLink,
       openNoVoodDialog,
       adminCategoriesListInit,
