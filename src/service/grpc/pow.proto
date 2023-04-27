@@ -4,7 +4,9 @@ option go_package = "bct.com/prox_powd/api/pow_pb";
 
 message PutObjectMKRequest {
  string key = 1;
+
  string cid = 2;
+ int64 size = 3;
 }
 message PowHeader {
  string peerId =1;
@@ -29,18 +31,31 @@ message PutObjectMKResp {
 message CliGetMerkleRequest{
  string  id = 1;
  string cid = 2;
+ int64 idx = 3;
 }
 message CliMerkleInfo{
  bytes rootBytes = 1;
  string root = 2;
- int32  blocks = 4;
+ int32  blocks = 3;
+ bytes  normalRoot = 4;
+ int64  totalBlocks= 5;
 }
 message CliGetMerkleReply{
  CliMerkleInfo root = 1;
  CliMerkleInfo cidRoot = 2;
 }
+message GetMerkleProofResp{
+ repeated bytes proofs = 1;
+ bytes data=2;
+ bytes hash = 3;
+ bytes key = 4;
+ int64 idx = 5;
+ bytes chash = 6;
+ bytes ckey = 7;
+ int64 cidx = 8;
+}
 service PowService {
  rpc GetMerkleRoot(CliGetMerkleRequest)returns(CliGetMerkleReply){}
- rpc GetMerkleProof(CliGetMerkleRequest)returns(CliGetMerkleReply){}
+ rpc GetMerkleProof(CliGetMerkleRequest)returns(GetMerkleProofResp){}
  rpc BuildMerkelLeaf(stream PutObjectMKOpt)returns(PutObjectMKResp){}
 }

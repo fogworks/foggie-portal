@@ -14,17 +14,27 @@
         :class="[
           'item',
           !item.device_type ? 'foggie' : '',
+          item.device_type === 'foggie_max' ? 'max' : '',
           isActive(item.device_id) ? 'active' : '',
           deviceData.data.device_id === item.device_id ? 'currentActive' : '',
         ]"
         @click="clickItem(item)"
       >
         <svg-icon
-          v-if="isActive(item.device_id)"
+          v-if="isActive(item.device_id) && item.device_type !== 'foggie_max'"
           icon-class="logo-dog"
           class="logo"
         ></svg-icon>
-        <svg-icon v-else icon-class="logo-dog-black" class="logo"></svg-icon>
+        <svg-icon
+          v-else-if="
+            !isActive(item.device_id) && item.device_type !== 'foggie_max'
+          "
+          icon-class="logo-dog-black"
+          class="logo"
+        ></svg-icon>
+        <span class="logo logo-text" v-if="item.device_type == 'foggie_max'"
+          >MAX</span
+        >
         <svg-icon
           v-show="isActive(item.device_id)"
           @click.stop="cancelItem(item)"
@@ -296,6 +306,11 @@ const list = computed(() => {
     bottom: 5px;
     right: 5px;
     font-size: 35px;
+  }
+  .logo-text {
+    font-size: 18px;
+    font-style: italic;
+    font-weight: 700;
   }
 }
 </style>

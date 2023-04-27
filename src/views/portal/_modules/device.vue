@@ -9,6 +9,7 @@
         v-for="(item, index) in deviceList.list"
         @click="toGuide(item)"
       >
+        <span></span>
         <div class="item">
           <span>{{ item.device_type ? "" : "IP: " }}</span>
           <span :title="item.device_type ? item.device_name : item.dedicatedip">
@@ -27,7 +28,36 @@
             @click.stop="copyLink(item.device_id)"
           ></svg-icon>
         </div>
-        <template v-if="!item.device_type"> </template>
+        <template v-if="!item.device_type">
+          <div>
+            <span class="value-span">{{
+              item.product_custom[0].field_value
+            }}</span
+            >-core CPU
+          </div>
+          <div>
+            <span class="value-span">{{
+              item.product_custom[1].field_value
+            }}</span
+            >GB Memory
+          </div>
+          <div>
+            <span class="value-span">{{
+              item.product_custom[3].field_value
+            }}</span
+            >GB
+            <span class="value-span">{{
+              item.product_custom[2].field_value
+            }}</span
+            >Disk
+          </div>
+          <div>
+            <span class="value-span">{{
+              item.product_custom[4].field_value
+            }}</span
+            >MB Bandwidth
+          </div>
+        </template>
 
         <!-- <el-dropdown
           popper-class="more-popper"
@@ -210,6 +240,7 @@ search();
   box-shadow: 0 0 10px #ccc;
   cursor: pointer;
   &:hover {
+    color: $light_blue;
     transform: scale(1.1);
   }
 }
@@ -248,17 +279,19 @@ search();
     align-items: flex-start;
     justify-content: center;
     user-select: none;
-    font-weight: bolder;
+    font-weight: 500;
     color: #3f3c3c;
     // color: #093aed;
     cursor: pointer;
     span {
       display: inline-block;
       z-index: 10;
+      height: 24px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+
     .item {
       display: flex;
       justify-content: center;
@@ -349,8 +382,80 @@ search();
       opacity: 0.2;
       z-index: -1;
     }
+    > div {
+      display: flex;
+      align-items: center;
+    }
+    .value-span {
+      line-height: 24px;
+      font-weight: 500;
+      font-size: 18px;
+      color: #1973be !important;
+    }
   }
   .max {
+    overflow: unset;
+
+    & > span {
+      position: absolute;
+      overflow: hidden;
+      width: 74px;
+      height: 85px;
+      top: -9px;
+      left: -9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    & > span::before {
+      content: "MAX";
+      position: absolute;
+      width: 150%;
+      height: 30px;
+      background-image: linear-gradient(
+        45deg,
+        #ff6547 0%,
+        #ffb144 51%,
+        #ff7053 100%
+      );
+      background-image: linear-gradient(
+        209.21deg,
+        rgb(29, 145, 252) 13.57%,
+        rgb(90, 54, 192) 98.38%
+      );
+      transform: rotate(-45deg) translateY(-20px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      box-shadow: 0 0px 4px rgba(0, 0, 0, 0.23);
+    }
+
+    & > span::after {
+      content: "";
+      position: absolute;
+      width: 10px;
+      bottom: 13px;
+      left: -6px;
+      height: 10px;
+      z-index: -1;
+      box-shadow: 140px -140px #cc3f47;
+      background-image: linear-gradient(
+        45deg,
+        #ff512f 0%,
+        #f09819 51%,
+        #ff512f 100%
+      );
+      background-image: linear-gradient(
+        209.21deg,
+        rgb(29, 145, 252) 13.57%,
+        rgb(90, 54, 192) 98.38%
+      );
+    }
     // border: 5px solid transparent;
     // background: linear-gradient(315deg, #03a9f4, #ff0058);
     // &::before {

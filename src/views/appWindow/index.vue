@@ -197,7 +197,7 @@ onMounted(() => {
     }
   }
   .app-right {
-    z-index: 2;
+    z-index: 1;
     // position: sticky;
     // top: 0;
     // overflow-x: visible;
