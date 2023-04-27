@@ -65,40 +65,36 @@ app.post('/order/challenge_list', jsonParser, (req, res) => {
 });
 
 app.post('/user/encode_user_order', jsonParser, (req, res) => {
-  var orderId = req.body.orderId;
-  var password = req.body.password;
-  var username = req.body.username;
-  UserController.encodeUserOrder(orderId , password, username, res);
+  UserController.encodeUserOrder(req, res);
 });
 
 app.post('/user/validate_user_login', jsonParser, (req, res) => {
-  UserController.validateUserLogin(res);
+  UserController.validateUserLogin(req, res);
 });
 
 app.post('/user/save_password', jsonParser, (req, res) => {
+  var email = req.body.email;
   var password = req.body.password;
-  UserController.saveUserPassword(password, res);
+  UserController.saveUserPassword(email, password, res);
 });
 
 app.post('/user/validate_password', jsonParser, (req, res) => {
-  var password = req.body.password;
-  UserController.validateUserPassword(password, res);
+  
+  UserController.validateUserPassword(req, res);
 });
 
 app.post('/user/reset_password', jsonParser, (req, res) => {
-  var password = req.body.password;
-  UserController.resetUserPassword(password, res);
+  UserController.resetUserPassword(req, res);
 });
 
 // import private key
 app.post('/user/import_private_key', jsonParser, (req, res) => {
-  var privateKey = req.body.privateKey;
-  UserController.saveUserPrivateKey(privateKey, res);
+  
+  UserController.saveUserPrivateKey(req, res);
 });
 
 app.post('/user/get_private_key', jsonParser, (req, res) => {
-  var password = req.body.password;
-  UserController.getUserPrivateKey(password, res);
+  UserController.getUserPrivateKey(req, res);
 });
 
 app.post('/user/claim_order', jsonParser, (req, res) => {
