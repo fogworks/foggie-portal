@@ -1,35 +1,36 @@
 // 用户
-export default {
-  // 开启命名空间
-  namespaced: true,
-  state: {
-    uploadIsShow: false,
+
+const state = {
+  uploadIsShow: false,
   orderId: '',
   uploadFileList: {},
+}
+const mutations = {
+  setFileList(state, data) {
+    state.uploadFileList[state.orderId] = data;
   },
-  mutations: {
-    setFileList(state, data) {
-      state.uploadFileList[state.orderId] = data;
-    },
-    closeUpload(state, data) {
-      state.uploadIsShow = false
-    },
-    openMyFiles(state, orderId) {
-      state.orderId = orderId
-    },
-    openUpload(state, orderId) {
-      state.orderId = orderId
-      state.uploadIsShow = true
-    }
+  closeUpload(state, data) {
+    state.uploadIsShow = false
   },
-  actions: {
-    setFileList({ commit }, data) {
-      commit("setFileList", data);
-    },
+  openMyFiles(state, orderId) {
+    state.orderId = orderId
   },
-  getters: {
-    fileList: (state) => state.uploadFileList,
-    uploadIsShow: (state) => state.uploadIsShow,
-    orderId: (state) => state.orderId,
-  },
-};
+  openUpload(state, orderId) {
+    state.orderId = orderId
+    state.uploadIsShow = true
+  }
+}
+const actions = {
+  // setFileList({ commit }, data) {
+  //   commit("setFileList", data);
+  // }
+}
+
+
+export default {
+  namespaced: true,
+  state,
+  mutations,
+  actions,
+  // getters
+}

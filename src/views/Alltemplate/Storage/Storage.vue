@@ -373,6 +373,7 @@ import { useStore } from "vuex";
 const store = useStore()
 
 const ChainId = computed(() => store.getters.ChainId)
+const username = computed(() => store.getters.userInfo?.dmc)
 let loading = ref(false);
 let dialogIsShow = ref(false); // 弹窗是否展示
 let curReferenceRate = ref(0); //当前基准率
@@ -431,7 +432,7 @@ const totalPrice = computed(() => {
 /* 筛选订单 */
 function filterOrder() {
   let params = {
-    username: "null", //测试时可以为空，空则取默认的用户名tianbao12345
+    username: username.value, //测试时可以为空，空则取默认的用户名tianbao12345
     unmatchedAmount: state.formLine.quantity, //pst数量
     period: state.formLine.week, //购买周期
   };
@@ -542,7 +543,7 @@ async function submit() {
   if (flag) {
     loading.value = true;
     let params = {
-      username: "null", //测试时可以为空，空则取默认的用户名tianbao12345
+      username:username.value, //测试时可以为空，空则取默认的用户名tianbao12345
       chainId: ChainId.value, //chainId
       billId: state.orderDetail.orderID, //挂单的id
       period: state.formLine.week, //购买周期，大于等于24

@@ -1,4 +1,4 @@
-import request from '@/utils/request_miner';
+import request from '@/utils/request1';
 import setting from '@/setting';
 
 const { baseUrl } = setting;
@@ -16,7 +16,7 @@ export function getOrderList(data) {
 //提交merkle树
 export function pushMerkle(data) {
   return request({
-    url: baseUrl + '/file/push_merkle',
+    url: baseUrl + '/order/push_merkle',
     method: 'post',
     data,
   });

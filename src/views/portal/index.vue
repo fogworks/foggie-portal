@@ -1,18 +1,12 @@
 <template>
-  <div class="portal-main">
+  <div class="portal-main" id="portal-main">
     <div class="left-box">
       <div class="collapse" @click="changeCollapse">
-        <svg-icon
-          icon-class="collapse"
-          :class="[isCollapse ? 'isCollapse' : '']"
-        ></svg-icon>
+        <svg-icon icon-class="collapse" :class="[isCollapse ? 'isCollapse' : '']"></svg-icon>
       </div>
-      <el-menu
-        class="left-menu"
-        :collapse="isCollapse"
-        :default-active="defaultActive"
-        router
-      >
+
+
+      <el-menu class="left-menu" :collapse="isCollapse" :default-active="defaultActive" router>
         <el-menu-item index="user" class="user">
           <svg-icon icon-class="user"></svg-icon>
           <!-- <div v-if="userName" :title="userName">
@@ -38,7 +32,10 @@
         </el-menu-item>
       </el-menu>
     </div>
-    <div class="main">
+    <teleport to="body">
+      <upload v-show="uploadIsShow"></upload>
+    </teleport>
+    <div class="main" id="main">
       <!-- <User v-if="active === 'User'"></User>
       <Device v-if="active === 'Device'"></Device>
       <Discover v-if="active === 'Discover'"></Discover> -->
@@ -53,10 +50,13 @@
 </template>
 
 <script setup>
+import upload from "@/components/upload";
 import { ref, computed } from "vue";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
 const store = useStore();
+
+let uploadIsShow = computed(() => store.getters.uploadIsShow);
 const route = useRoute();
 const isCollapse = ref(false);
 const defaultActive = ref(route.path.slice(1, route.path.length));
@@ -73,8 +73,10 @@ const changeCollapse = () => {
   height: 100%;
   background: url("~@/assets/cool-background.png") no-repeat;
   background-size: cover;
+
   .left-box {
     position: relative;
+
     .collapse {
       position: absolute;
       right: -20px;
@@ -87,36 +89,44 @@ const changeCollapse = () => {
       cursor: pointer;
       z-index: 1;
       box-shadow: 0 0 7px #727272;
+
       svg {
         transform: rotate(-90deg);
         transition: all 0.5s;
+
         &.isCollapse {
           transform: rotate(90deg);
         }
+
         color: #fff;
         cursor: pointer;
       }
     }
   }
+
   .left-menu {
     position: relative;
   }
+
   :deep {
     .el-menu {
       // width: 250px;
       height: 100%;
       background-color: #f2f6ff;
+
       .el-menu-item {
         display: flex;
         text-align: left;
         align-items: center;
         font-size: 20px;
+
         svg {
           margin-right: 15px;
           font-size: 30px;
           cursor: pointer;
           vertical-align: middle;
         }
+
         &.user {
           display: flex;
           flex-direction: column;
@@ -130,6 +140,7 @@ const changeCollapse = () => {
           color: #fff;
           // background: #8b49ec;
           background: #495dd0;
+
           // background: rgb(28, 42, 237);
           // background: linear-gradient(
           //   93deg,
@@ -150,19 +161,24 @@ const changeCollapse = () => {
           }
         }
       }
+
       &.el-menu--collapse {
+
         // width: 200px;
         // min-height: 400px;
         .user {
           height: 56px;
+
           div {
             padding: 0 20px;
           }
+
           svg {
             font-size: 30px;
             margin: 0;
           }
         }
+
         .el-menu-item {
           svg {
             margin: 0;
@@ -170,11 +186,13 @@ const changeCollapse = () => {
           }
         }
       }
+
       &:not(.el-menu--collapse) {
         width: 220px;
       }
     }
   }
+
   .main {
     position: relative;
     overflow-y: auto;
@@ -188,9 +206,10 @@ const changeCollapse = () => {
     //   rgba(148, 187, 233, 1) 100%
     // );
 
-    > div {
+    >div {
       z-index: 1;
     }
+
     // &::after {
     //   content: "";
     //   position: absolute;

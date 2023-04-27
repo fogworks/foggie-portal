@@ -64,7 +64,7 @@ export default {
     },
     /* 保存密码 */
     async setSavePassword({ commit }, password) {
-      const res = await savePassword({ password: password });
+      const res = await savePassword(password);
       commit("SAVE_PASSWORD", res.data);
     },
     setDeviceList({ commit }, data) {

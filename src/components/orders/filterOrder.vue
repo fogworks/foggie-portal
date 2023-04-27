@@ -100,8 +100,8 @@
             <label>预存金额:</label>
             <div class="formBox clearfix" style="margin-left: 20px; margin-top: 15px">
               <el-input v-model="formLine.prestoreDMC" maxlength="6" :placeholder="`最少预存${(
-                orderDetail.total - orderDetail.deposit
-              ).toFixed(4)}`" style="width: 270px" @input="inputPrestoreDMC" @blur="blurPrestoreDMC">
+                  orderDetail.total - orderDetail.deposit
+                ).toFixed(4)}`" style="width: 270px" @input="inputPrestoreDMC" @blur="blurPrestoreDMC">
                 <template #prefix>
                   <svg-icon icon-class="search" size="25"></svg-icon>
                 </template>
@@ -159,6 +159,8 @@ import { useStore } from "vuex";
 const store = useStore()
 
 const ChainId = computed(() => store.getters.ChainId)
+const username = computed(() =>store.getters.userInfo?.dmc)
+const email = computed(() => store.getters.userInfo?.email);
 let loading = ref(false);
 let dialogIsShow = ref(false); // 弹窗是否展示
 let curReferenceRate = ref(0);  //当前基准率
@@ -203,7 +205,7 @@ watch(curReferenceRate, (newVal) => {
 /* 筛选订单 */
 function filterOrder() {
   let params = {
-    username: 'null', //测试时可以为空，空则取默认的用户名tianbao12345
+    username: username.value, //测试时可以为空，空则取默认的用户名tianbao12345
     unmatchedAmount: state.formLine.quantity, //pst数量
     period: state.formLine.week, //购买周期
   };
@@ -313,8 +315,9 @@ async function submit() {
   if (flag) {
     loading.value = true
     let params = {
-      username: 'null', //测试时可以为空，空则取默认的用户名tianbao12345
+      username: username.value, //测试时可以为空，空则取默认的用户名tianbao12345
       chainId: ChainId.value,  //chainId
+      email:  email.value,
       billId: state.orderDetail.orderID,    //挂单的id
       period: state.formLine.week,     //购买周期，大于等于24
       benchmarkPrice: curReferenceRate.value, //基准价格，单位DMC
@@ -334,7 +337,6 @@ async function submit() {
         break;
 
     }
-
 
     buyOrder(params).then(res => {
       if (res.code == 200) {

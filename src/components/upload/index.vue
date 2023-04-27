@@ -1,7 +1,7 @@
 <template>
   <div class="upload_dialog" @click="closeUploadBox">
     <!-- my_top_upload -->
-    <div class="upload_dialog_wrap vood_dialog_wrap" @click.stop="innerClick">
+    <div class="upload_dialog_wrap vood_dialog_wrap" @click.stop="">
       <div>
         <!-- my_top_uploadText my_top_uploadTitle -->
         <div class="upload_dialog_title">Publish</div>
@@ -12,79 +12,92 @@
         </div>
         <div class="my_top_uploadText">
           The OOD you have chosen is:
-          <!-- {{ currentOODItem.data.device_id }} ({{
-            currentOODItem.data.dedicatedip
-          }}) -->
+          456
         </div>
       </div>
-      <uploader
-        style="position: relative"
-        v-loading="loading"
-        element-loading-text="loading..."
-        element-loading-spinner="el-icon-loading"
-        element-loading-background="rgba(0,0,0, 0.25)"
-        ref="uploader"
-        class="uploader-app"
-        :options="options"
-        :auto-start="false"
-        :file-status-text="fileStatusText"
-        @files-added="onFilesAdded"
-        @file-added="onFileAdded"
-      >
+      <uploader style="position: relative" ref="uploader" class="uploader-app" :multiple='true' :options="options"
+        :auto-start="false" :file-status-text="fileStatusText" @files-added="onFilesAdded" @file-added="onFileAdded">
         <uploader-unsupport />
         <uploader-drop>
-          <div style="width: 100%">
-            Drop file here or click on the button below
-          </div>
-          <uploader-btn :single="true">
-            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-            Select File
-          </uploader-btn>
-          <uploader-btn :directory="true" :single="true">
-            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-            Select a folder
-          </uploader-btn>
+          <uploader-btn class="uploader-btn" :single="true">Select File</uploader-btn>
+          <uploader-btn class="uploader-btn" :directory="true" :single="true">Select a folder</uploader-btn>
         </uploader-drop>
       </uploader>
-      <fileList
-        :isPin="isPin"
-        @fileShare="fileShare"
-        @fileDetail="fileDetail"
-      ></fileList>
+
+      <teplate v-for="(uploadList, key) in uploadFileList" :key="key" style="height: 100%;">
+        <fileList @fileShare="fileShare" @fileDetail="fileDetail" :orderID="key" v-model:uploadLists="uploadFileList[key]"
+          v-show="key == orderId">
+        </fileList>
+      </teplate>
+
+
+
+      <!-- <div class="uploader-list" v-if="isEmpty">
+        <ul>
+          <li>
+            <div class="uploader-file-info head-info">
+              <div class="uploader-file-name">File Name</div>
+              <div class="uploader-file-prefix">Upload Path</div>
+              <div class="uploader-file-size">File Size</div>
+              <div class="uploader-file-status">Upload Status</div>
+              <div class="uploader-file-actions">Operate</div>
+            </div>
+          </li>
+
+        </ul>
+      </div> -->
+
+
+
+
     </div>
   </div>
 </template>
 
 <script>
-import { ref, reactive, onMounted, toRefs } from "vue";
+import { ref, reactive, onMounted, toRefs, readonly, provide, computed } from "vue";
 import fileList from "../upload/fileList.vue";
 import uploader from "vue-simple-uploader";
 import { useStore } from "vuex";
-import { UploadLookVersion } from "@/utils/api.js";
-import { ElNotification } from "element-plus";
+
+
+import { APIClient, } from "@/pb/node_grpc_web_pb";
+
 export default {
-  name: "UploadIndex",
+  name: "DashBoard",
   components: { fileList },
-  props: {
-    currentOODItem: {
-      type: Object,
-      default: () => {},
-    },
-    oodId: {
-      type: String,
-      default: "",
-    },
-    currentPath: {
-      type: String,
-      default: "",
-    },
-  },
+
   setup(props, { emit }) {
+
+
+    const currentPath = ref('')
+
+    const FILE_SIZE = readonly(1024 * 1024 * 1024 * 2);
     const store = useStore();
+    const orderId = computed(() => store.state.upload.orderId)
+
+    const isEmpty = computed(() => {
+      if (JSON.stringify(store.state.upload.uploadFileList) == '{}') {
+        return true
+      } else {
+        return false
+      }
+    })
+    const uploadFileList = computed(() => store.state.upload.uploadFileList)
+
     const options = ref({
       simultaneousUploads: 5,
+
+      chunkSize: 1024 * 1024 * 5,
+      forceChunkSize: true, // 是否强制每个块都小于 chunkSize
+      allowDuplicateUploads: true  //如果说一个文件已经上传过了是否还允许再次上传。默认的话如果已经上传了，除非你移除了否则是不会再次重新上传的，所以也就是默认值为 false。
     });
-    const { currentOODItem, oodId, currentPath } = toRefs(props);
+    const client = new APIClient('http://154.31.34.194:9007')
+    // window.client = client
+    provide('client', readonly(client))
+
+
+
     const alertTitle = ref("");
     const fileStatusText = ref({
       success: () => "Upload Success",
@@ -92,110 +105,58 @@ export default {
       uploading: () => "Uploading...",
       paused: () => "Paused...",
       waiting: () => "Waiting...",
-      md5: () => "Calculating hash...",
+      md5: () => "Calculating file hash value...",
       CID: () => "Calculate CID...",
     });
     const fileList = ref([]);
-    const isChunk = ref(true);
-    const isGateway = ref(true);
-    const loading = ref(false);
-    const isIPFS = ref(true);
-    const isCYFS = ref(true);
-    const loadNumber = ref(0);
-    const isPin = ref(false);
-    const loadPing = (device_id, isTrue) => {
-      if (loadNumber.value > 3) {
-        return;
-      } else {
-        loadNumber.value++;
-      }
-      if (!isTrue) {
-        isGateway.value = false;
-      }
-      UploadLookVersion(device_id, isTrue)
-        .then((res) => {
-          if (res.version && res.version.split(".")[0] >= 1) {
-            isChunk.value = true;
-          } else {
-            isChunk.value = false;
-          }
-          isCYFS.value = res.cyfs;
-          isIPFS.value = res.ipfs;
-          loading.value = false;
-          alertTitle.value = `Total capacity ${
-            currentOODItem.value.data.total_disk_size <= 50 ? 50 : 100
-          }GB,The maximum recommended upload space is ${
-            currentOODItem.value.data.total_disk_size
-          }GB。`;
-          //   this.$message({
-          //     message: this.alertTitle,
-          //     showClose: true,
-          //     duration: 3000,
-          //     type: "success",
-          //   });
-        })
-        .catch(() => {
-          if (loadNumber.value >= 3) {
-            loadPing(device_id, false);
-          } else {
-            loadPing(device_id, true);
-          }
-        });
-    };
-    const FILE_SIZE = ref(1024 * 1024 * 1024 * 2);
+
+
+
+
     const onFileAdded = (file) => {
+      console.log(file);
       if (file.size === 0) return;
       if (file.size > FILE_SIZE) {
-        // this.$message({
-        //   message: "The maximum upload size of a single file should not exceed 2GB.",
-        //   type: "warning",
-        //   duration: 3000,
-        // });
-        ElNotification({
-          type: "info",
-          message:
-            "he maximum upload size of a single file should not exceed 2GB.",
-          position: "bottom-left",
-        });
+        ElMessage({
+          message: "The maximum upload size of a single file should not exceed 2GB.",
+          type: "warning",
+          duration: 3000,
+        })
         return;
       }
+
+
 
       let directory = file.file.webkitRelativePath;
       let directoryPath = directory.substr(0, directory.lastIndexOf("/") + 1);
-
       let target = "";
-      let device_id = currentOODItem.value.data.device_id;
-      target = `/object`;
-      file.isGateway = isGateway.value;
-      file.isChunk = isChunk;
-
-      file.dedicatedip = currentOODItem.value.data.dedicatedip;
-      file.device_id = device_id;
-
-      file.isCYFS = isCYFS.value;
-      file.isIPFS = isIPFS.value;
       file.paused = false;
       file.rootPath = currentPath.value;
-      file.urlPath = target;
-      file.urlPrefix = directoryPath
-        ? currentPath.value + directoryPath
-        : currentPath.value || "/";
-      file.urlFileName = directoryPath
-        ? currentPath.value + directoryPath + file.name
-        : currentPath.value + file.name;
 
-      let list = store.state.upload.uploadFileList;
-      let arr = [];
-      arr = list.slice(0);
-      arr.unshift(file);
-      store.dispatch("upload/setFileList", arr);
+      file.urlPath = target;
+
+      file.urlPrefix = directoryPath ? currentPath.value + directoryPath : currentPath.value || "/";
+      file.urlFileName = directoryPath ? currentPath.value + directoryPath + file.name : currentPath.value + file.name;
+
+
+
+      let list = store.state.upload.uploadFileList[orderId.value] ?? []
+      if (list.some(item => item.uniqueIdentifier == file.uniqueIdentifier && item.urlPrefix == file.urlPrefix)) {   // 唯一标识  + 文件夹路径如果相同
+        return
+      }
+
+
+      file.orderId = orderId.value
+
+
+      list.unshift(file);
+      store.commit("upload/setFileList", list);
     };
     const onFileProgress = (rootFile, file, chunk) => {
       console.log(rootFile, file, chunk, "aaa");
     };
     const onFilesAdded = (files, fileList) => {
-      console.log(files);
-      console.log(fileList);
+
     };
     const onFileSuccess = () => {
       console.log("onFileSuccess");
@@ -204,43 +165,40 @@ export default {
       emit("fileShare", item);
     };
     const fileDetail = (file) => {
-      window.localStorage.setItem(
-        "voodItem",
-        JSON.stringify(currentOODItem.value.data)
-      );
+      // window.localStorage.setItem(
+      //   "voodItem",
+      //   JSON.stringify(currentOODItem.value.data)
+      // );
       // emit("closeUploadBox");
     };
-    const initUploadData = () => {
-      // loadPing(currentOODItem.value.data.device_id, true);
-    };
+
     const closeUploadBox = () => {
-      emit("closeUploadBox");
+
+      store.commit('upload/closeUpload')
+
     };
-    const innerClick = () => {};
-    onMounted(initUploadData);
+    onMounted(() => {
+
+    })
+
+
     return {
       FILE_SIZE,
       alertTitle,
       fileStatusText,
       fileList,
-      isChunk,
-      isGateway,
-      loading,
-      isIPFS,
-      isCYFS,
-      loadNumber,
-      isPin,
-      currentOODItem,
-      loadPing,
+      options,
+      isEmpty,
+      uploadFileList,
+      orderId,
       onFileAdded,
       onFileProgress,
       onFilesAdded,
       onFileSuccess,
       fileShare,
       fileDetail,
-      initUploadData,
       closeUploadBox,
-      innerClick,
+
     };
   },
 };

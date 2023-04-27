@@ -1,5 +1,5 @@
 
-import request from '@/utils/request_miner';
+import request from '@/utils/request1';
 import setting from '@/setting';
 
 const { baseUrl } = setting;
@@ -51,7 +51,6 @@ export function fileComplete(data) {
 }
 
 // 文件本地保存 
-
 export function SaveFile(data) {
   return request({
     url: baseUrl + '/file/save',
