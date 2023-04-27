@@ -40,6 +40,14 @@ const router = createRouter({
           },
         },
         {
+          path: 'assets',
+          name: 'Assets',
+          component: defineAsyncComponent(() => import(`../views/portal/assets`)),
+          meta: {
+            title: 'assets',
+          },
+        },
+        {
           path: 'appWindow',
           name: 'AppWindow',
           component: defineAsyncComponent(() => import(`../views/appWindow`)),

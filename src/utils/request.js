@@ -98,7 +98,7 @@ service.interceptors.request.use(
       if (config.url.indexOf("/v1") > -1) {
         console.log(config, 'configconfigconfig');
         let token = getTokenMap(config.target?.device_id)
-        config.headers["Authorization"] = token || refresh_token;
+        config.headers["Authorization"] = token || ''
 
       }
     }

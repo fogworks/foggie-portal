@@ -61,7 +61,7 @@ const form = reactive({
 const formRef = ref(null);
 const loading = ref(false);
 const btnLoading = ref(false);
-const hasAccessPass = ref(false);
+const hasAccessPass = ref(true);
 const deviceData = inject("deviceData");
 const requestTarget = inject("requestTarget");
 const getAccessPass = () => {

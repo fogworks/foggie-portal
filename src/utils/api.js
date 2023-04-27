@@ -448,7 +448,7 @@ export const oodFileList = (next_marker, prefix) => {
 };
 
 //⽂件LIST
-export const oodFileListFoggie = (ID, next_marker, prefix) => {  
+export const oodFileListFoggie = (ID, next_marker, prefix) => {
   let url = "";
   if (prefix) {
     url = `/o/${ID}/nixls?prefix=${prefix}&forward=true`;
@@ -1509,20 +1509,18 @@ export const get_kit_installation_status = (params) => {
 
 
 // cbs服务激活
-export const deploy_cbs = (data, target) => {
+export const deploy_cbs = (target) => {
   return request({
     url: `/v1/service/deploy_cbs`,
     method: "POST",
-    data,
     target
   });
 };
 // ipfs服务激活
-export const deploy_ipfs = (data, target) => {
+export const deploy_ipfs = (target) => {
   return request({
     url: `/v1/service/deploy_ipfs`,
     method: "POST",
-    data,
     target
   });
 };

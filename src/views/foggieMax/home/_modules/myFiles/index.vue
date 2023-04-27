@@ -100,11 +100,7 @@
           prop="name"
         >
           <template #default="{ row }">
-            <router-link
-              class="name-link"
-              to="user"
-              @click.prevent="toDetail(row)"
-            >
+            <div class="name-link" @click="toDetail(row)">
               <div class="name-img">
                 <img
                   v-if="row.type === 'application/x-directory'"
@@ -127,7 +123,7 @@
                 <img v-else :src="row.imgUrl" alt="" />
               </div>
               {{ row.name }}
-            </router-link>
+            </div>
           </template>
         </el-table-column>
         <el-table-column label="Content / File ID" width="250">
