@@ -4,11 +4,11 @@
     },
     "chainConfig":{
         "browserAddress":"http://156.242.10.10:8632",
-        "transactionAddress":"http://test.dmctech.io",
+        "transactionAddress":"http://156.242.10.10:8361",
         "getOutstandingOrders":"/1.1",
         "getOrders":"/1.1",
         "getChallengeList":"/1.1",
-        "httpEndpoint":"http://154.39.239.234:5803",
+        "httpEndpoint":"http://156.242.10.10:5802",
         "getChainInfo":"/v1/chain/get_info",
         "getTableRows":"/v1/chain/get_table_rows",
         "getAccounts":"/v1/chain/get_accounts_by_authorizers",

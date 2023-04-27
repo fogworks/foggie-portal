@@ -83,7 +83,7 @@ function claimorder() {
         // res.send(BizResult.fail(BizResultCode.PUSH_MERKLE_FAILED));
     })
 }
-// claimorder();
+
 
 // 查询挑战记录
 function findChallenge() {
@@ -130,7 +130,7 @@ function findChallenge() {
     console.log('challengeList:', challengeList);
 }
 
-// findChallenge();
+
 
 function transfer() {
     dmc_client.transact({
@@ -163,7 +163,7 @@ function transfer() {
     })
 }
 
-// transfer();
+
 
 // 买单
 function order() {
@@ -179,16 +179,16 @@ function order() {
             ],
             data: {
                 owner: "tianbao12345",
-                bill_id: "195",
+                bill_id: "211",
                 benchmark_price: "110",
                 epoch: "24",
                 price_range: 3,
                 asset: {
-                    quantity: "10 PST",
+                    quantity: "1 PST",
                     contract: "datamall"
                 },
                 reserve: {
-                    quantity: "0.2400 DMC",
+                    quantity: "0.0240 DMC",
                     contract: "datamall"
                 },
                 memo: ""
@@ -206,7 +206,7 @@ function order() {
         // res.send(BizResult.fail(BizResultCode.PUSH_MERKLE_FAILED));
     })
 }
-// order();
+
 
 // 用户提交merkle树
 function userPushMerkle() {
@@ -223,7 +223,7 @@ function userPushMerkle() {
             ],
             data: {
                 sender: "tianbao12345",
-                order_id: 151,
+                order_id: 156,
                 merkle_root: tree.root(),
                 data_block_count: 12
             }
@@ -241,7 +241,7 @@ function userPushMerkle() {
     })
 }
 
-// userPushMerkle();
+
 
 ////////////////////////////////////////////miner///////////
 var miner_dmc_client = DMC({
@@ -287,7 +287,7 @@ function increase() {
         // res.send(BizResult.fail(BizResultCode.PUSH_MERKLE_FAILED));
     })
 }
-// increase();
+
 
 // 铸造
 function mint() {
@@ -322,7 +322,7 @@ function mint() {
     })
 }
 
-// mint();
+
 
 // 挂单
 function bill() {
@@ -378,9 +378,9 @@ function minerPushMerkle() {
             ],
             data: {
                 sender: "miner1222222",
-                order_id: 153,
-                merkle_root: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-                data_block_count: 0
+                order_id: 156,
+                merkle_root: tree.root(),
+                data_block_count: 12
             }
         }]
     }, {
@@ -404,12 +404,6 @@ const config = require('config');
 const process = require('node:process');
 const path = require('path');
 const dbConfig = config.get('dbConfig');
-const testTableName = dbConfig.get('testTableName');
-
-const db = new NeDB({
-    filename: process.env.HOME + path.sep + testTableName,
-    autoload: true
-});
 
 
 // var data = Buffer.from('1234567890');
@@ -437,43 +431,108 @@ const db = new NeDB({
 // });
 
 
-const fs = require('fs');
-const zlib = require('zlib');
-// read the image file
-const imageData = fs.readFileSync('/Users/carl/Documents/5f475eb447fb4');
-// compress the image data
-var compressedData = zlib.gzipSync(imageData);
-var base64data = Buffer.from(compressedData).toString('base64');
 
-// insert the binary data into the database
-// db.insert({ data: base64data }, function (err, newDoc) {
-//     if (err) {
-//         console.log(err);
-//     } else {
-//         // console.log('Inserted new document:', newDoc);
-//         // retrieve the binary data from the database
-//         db.findOne({ _id: newDoc._id }, function (err, doc) {
-//             if (err) {
-//                 console.log(err);
-//             } else {
-//                 // write the binary data to a new file
-//                 var data = Buffer.from(doc.data, 'base64');
-//                 fs.writeFileSync('/Users/carl/Documents/new-5f475eb447fb4', zlib.unzipSync(data));
-//                 console.log('Saved binary data to file: new-image.jpg');
-//             }
-//         });
+/**
+ * 计算密码本的偏移量
+ * 文件大小小于分块大小，返回 [0]
+ * 完整的分块数量 小于等于3，则随机取一个分块的偏移量
+ * 完整的分块数量 大于3，则先随机从前3个中取一个分块的偏移量，
+ * 然后根据增长因子，计算出后续的分块，每次增长一次offset = offset + blockSize * growthFactor
+ * 增长的次数N 越大，存入偏移量数组的概率越小
+ * 
+ * @param {*} fileSize  文件大小
+ * @param {*} blockSize     分块大小
+ * @param {*} growthFactor  增长因子
+ * @returns 偏移量的数组
+ */
+function calcCodebookOffset(fileSize, blockSize, growthFactor) {
+    var offsetArr = [];
+    var offset = 0;
+    // 如果文件大小小于分块大小，则直接返回
+    if (fileSize < blockSize) {
+        return offsetArr;
+    }
+    // 计算完整的分块数量
+    var blockNum = Math.floor(fileSize / blockSize);
+
+    // 如果 完整的分块数量 小于等于3，则随机取一个分块
+    if (blockNum <= 3) {
+        var rand = Math.floor(Math.random() * blockNum);
+        offsetArr.push(rand * blockSize);
+        return offsetArr;
+    }
+
+    // 如果 完整的分块数量 大于3，则先随机从前3个 中 取一个分块
+    var rand = Math.floor(Math.random() * 3);
+    offset = rand * blockSize;
+    offsetArr.push(offset);
+
+    var i = 1;
+    // 然后根据增长因子，计算出后续的分块，每次增长一次offset = offset + blockSize * growthFactor
+    while (true) {
+        blockSize *= growthFactor;
+        offset += blockSize;
+        if (offset > fileSize) {
+            break;
+        }
+        // 增长的次数N 越大，存入偏移量数组的概率越小
+        if (Math.random() < 1 / i) {
+            offsetArr.push(offset);
+        }
+        i++;
+    }
+    return offsetArr;
+}
+
+// for (var i = 0; i < 5; i++) {
+//     calcCodebookOffset(5622, 4096, 2).forEach((arr) => {
+//         console.log("arr:", arr);
+//     });
+// }
+
+// const array = [1, 2];
+
+// function getRandomElement(arr) {
+//   const randomIndex = Math.floor(Math.random() * arr.length);
+//   return arr[randomIndex];
+// }
+
+// console.log(getRandomElement(array));
+
+// function testNull() {
+//     return new Promise((resolve, reject) => {
+//         resolve(null);
+//     });
+// }
+
+// async function test(){
+//     var res = await testNull().catch((err) => {
+//         console.log('err:', err);
+//     });
+//     if(!res){
+//         console.log('res:', res);
 //     }
-// });
+// } 
 
+// test();
 
-// import("es6-modules.mjs").then((module)=>{/*…*/}).catch((err)=>{/**…*/})
-// // 或者使用 async 函数
-// (async () => {
-//   await import('./es6-modules.mjs');
-// })();
-
-
-reqChallenge();
+// 发起挑战
+// reqChallenge();
+// 领取奖励
+// claimorder();
+// 查询挑战记录
+// findChallenge();
+// 转账
+// transfer();
+// 买单
+order();
+// 用户提交merkle树
+// userPushMerkle();
+// 挂单
 // bill();
+// 矿工提交merkle树
 // minerPushMerkle();
-
+// 质押
+// increase();
+// 铸造
+// mint();
