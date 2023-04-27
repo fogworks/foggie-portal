@@ -36,6 +36,12 @@ app.post('/order/list', jsonParser, (req, res) => {
   OrderController.orderList(username, pageNum, limit, res);
 });
 
+app.post('/order/id', jsonParser, (req, res) => {
+  var orderId = req.body.orderId;
+  OrderController.getOrderById(orderId, res);
+});
+
+
 app.get('/order/get_chain_id', (req, res) => {
   res.json(OrderController.getChainId());
 });

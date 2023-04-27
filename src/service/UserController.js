@@ -22,7 +22,7 @@ class UserController {
         }
         var result = await userService.getUserInfo(email);
 
-        if(result instanceof BizResult){
+        if(result instanceof BizResultCode){
             res.send(BizResult.fail(result));
             return;
         }
@@ -51,7 +51,7 @@ class UserController {
             return;
         }
         var resultCode = await userService.saveUserInfo(email, password);
-        if (resultCode === BizResultCode.SAVE_PASSWORD_FAILED) {
+        if (resultCode instanceof BizResultCode) {
             res.send(BizResult.fail(resultCode));
             return;
         }
@@ -74,11 +74,11 @@ class UserController {
             return;
         }
         var resultCode = await userService.removeUserInfo(email);
-        if (resultCode === BizResultCode.SUCCESS) {
-            UserController.saveUserPassword(email, password, res);
+        if (resultCode instanceof BizResultCode) {
+            res.send(BizResult.fail(resultCode));
             return;
         }
-        res.send(BizResult.fail(resultCode));
+        UserController.saveUserPassword(email, password, res);
     }
 
     /**

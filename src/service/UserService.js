@@ -25,7 +25,7 @@ module.exports = {
             }, function (err, doc) {
                 if (err) {
                     logger.error('err:', err);
-                    resolve(BizResultCode.VALIDATE_LOGIN_FAILED);
+                    resolve(BizResultCode.GET_USERINFO_FAILED);
                     return;
                 }
                 if (!doc) {
@@ -35,6 +35,9 @@ module.exports = {
                     resolve(doc);
                 }
             })
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.GET_USERINFO_FAILED;
         });
     },
     removeUserInfo: async (email) => {
@@ -48,8 +51,11 @@ module.exports = {
                     resolve(BizResultCode.RESET_PASSWORD_FAILED);
                     return;
                 }
-                resolve(BizResultCode.SUCCESS);
+                resolve(numRemoved);
             })
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.RESET_PASSWORD_FAILED;
         });
     },
     saveUserInfo: async (email, password) => {
@@ -87,6 +93,9 @@ module.exports = {
                     resolve(encryptd);
                 }
             });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.SAVE_PASSWORD_FAILED;
         });
     },
     getPrivateKeyByEmail: async (email) => {

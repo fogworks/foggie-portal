@@ -268,6 +268,71 @@ class OrderController {
     }
 
     /**
+     * 获取用户的订单列表
+     * @param {*} orderId   订单id
+     * @param {*} res       HTTP的响应
+     * @returns 订单列表
+     */
+    static getOrderById(orderId, res) {
+
+        if (!orderId) {
+            res.send(BizResult.validateFailed())
+            return;
+        }
+
+        var chainConfig = config.get('chainConfig')
+        var transactionAddress = chainConfig.get('transactionAddress')
+        var getOrders = chainConfig.get('getOrders')
+
+        let body = '{\n' +
+            '        find_order(\n' +
+            '                where: {\n' +
+            '                    id: "' + orderId + '",\n' +
+            '                },\n' +
+            '                order: "-created_time,id",\n' +
+            '        ){\n' +
+            '            id\n' +
+            '            user {\n' +
+            '                id\n' +
+            '            }\n' +
+            '            miner {\n' +
+            '                id\n' +
+            '            }\n' +
+            '            bill {\n' +
+            '                id\n' +
+            '            }\n' +
+            '            created_time\n' +
+            '            epoch\n' +
+            '            user_pledge_amount\n' +
+            '            miner_lock_pst_amount\n' +
+            '            miner_lock_dmc_amount\n' +
+            '            price_amount\n' +
+            '            settlement_pledge_amount\n' +
+            '            lock_pledge_amount\n' +
+            '            state\n' +
+            '            deliver_start_date\n' +
+            '            latest_settlement_date\n' +
+            '            miner_lock_rsi_amount\n' +
+            '            miner_rsi_amount\n' +
+            '            user_rsi_amount\n' +
+            '            deposit_amount\n' +
+            '            deposit_valid\n' +
+            '            cancel_date\n' +
+            '            createdAt\n' +
+            '        }\n' +
+            '    }'
+        // let request = ;
+        let order = JSON.parse(request('POST', transactionAddress + getOrders, {
+            headers: {
+                'Content-Type': 'application/graphql'
+            },
+            body: body
+        }).getBody('utf-8')).data.find_order;
+
+        res.send(BizResult.success(order));
+    }
+
+    /**
      * 上传merkle树
      * @param {*} req HTTP的request 
      * @param {*} res HTTP的response
