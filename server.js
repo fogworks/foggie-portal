@@ -22,27 +22,18 @@ app.post('/order/outstanding_orders', jsonParser, (req, res) => {
   var period = req.body.period;
   var minPrice = req.body.minPrice;
   var maxPrice = req.body.maxPrice;
-  res.send(OrderController.outstandingOrders(username, unmatchedAmount, period, minPrice, maxPrice));
+  OrderController.outstandingOrders(username, unmatchedAmount, period, minPrice, maxPrice, res);
 });
 
 app.post('/order/buy', jsonParser, (req, res) => {
-  var username = req.body.username;
-  var chainId = req.body.chainId;
-  var billId	 = req.body.billId;
-  var period = req.body.period;
-  var benchmarkPrice = req.body.benchmarkPrice;
-  var priceRange = req.body.priceRange;
-  var unmatchedAmount = req.body.unmatchedAmount;
-  var totalPrice = req.body.totalPrice;
-  
-  OrderController.buy(username, chainId, billId, period, benchmarkPrice, priceRange, unmatchedAmount, totalPrice, res);
+  OrderController.buy(req, res);
 });
 
 app.post('/order/list', jsonParser, (req, res) => {
   var username = req.body.username;
   var limit = req.body.limit;
   var pageNum = req.body.pageNum;
-  res.send(OrderController.orderList(username, pageNum, limit));
+  OrderController.orderList(username, pageNum, limit, res);
 });
 
 app.get('/order/get_chain_id', (req, res) => {
@@ -52,6 +43,19 @@ app.get('/order/get_chain_id', (req, res) => {
 app.get('/order/get_table_rows', (req, res) => {
   res.json(OrderController.getBenchmarkPrice());
 });
+
+app.post('/order/push_merkle', jsonParser, (req, res) => {
+  OrderController.pushMerkle(req, res);
+});
+
+app.post('/order/push_merkle_record', jsonParser, (req, res) => {
+  var orderId = req.body.orderId;
+  var username = req.body.username;
+  var pageSize = req.body.pageSize;
+  var pageNo = req.body.pageNo;
+  OrderController.getPushMerkleRecord(orderId, username, pageSize, pageNo, res);
+});
+
 
 app.post('/order/challenge_list', jsonParser, (req, res) => {
   var orderId = req.body.orderId;
@@ -97,12 +101,17 @@ app.post('/user/get_private_key', jsonParser, (req, res) => {
   UserController.getUserPrivateKey(password, res);
 });
 
+app.post('/user/claim_order', jsonParser, (req, res) => {
+  UserController.claimOrder(req, res);
+});
+
 app.post('/file/save', jsonParser, (req, res) => {
   var orderId = req.body.orderId;
   var username = req.body.username;
   var filePath = req.body.filePath;
   var fileSize = req.body.fileSize;
-  FileController.saveFileProp(orderId, username, filePath, fileSize, res);
+  var md5 = req.body.md5;
+  FileController.saveFileProp(orderId, username, filePath, fileSize, md5, res);
 });
 
 app.post('/file/list', jsonParser, (req, res) => {
@@ -111,6 +120,14 @@ app.post('/file/list', jsonParser, (req, res) => {
   var pageSize = req.body.pageSize;
   var pageNo = req.body.pageNo;
   FileController.list(orderId, username, pageSize, pageNo, res);
+});
+
+app.post('/file/remove', jsonParser, (req, res) => {
+  FileController.deleteFileProp(req, res);
+});
+
+app.post('/file/remove_file_codebook_offset', jsonParser, (req, res) => {
+  FileController.deleteFileCodebookOffset(req, res);
 });
 
 app.post('/file/upload', multipartMiddleware, (req, res) => {
@@ -125,15 +142,12 @@ app.post('/file/create', jsonParser, (req, res) => {
   var orderId = req.body.orderId;
   var token = req.body.token;
   var peerId = req.body.peerId;
-  FileController.create(fileName, md5, fileType, fileSize, orderId, token, peerId, res);
+  var username = req.body.username;
+  FileController.create(username, fileName, md5, fileType, fileSize, orderId, token, peerId, res);
 });
 
 app.post('/file/complete', jsonParser, (req, res) => {
   FileController.complete(req, res);
-});
-
-app.post('/file/push_merkle', jsonParser, (req, res) => {
-  FileController.pushMerkle(req, res);
 });
 
 app.post('/file/req_challenge', jsonParser, (req, res) => {

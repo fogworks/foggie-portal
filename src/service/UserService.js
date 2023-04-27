@@ -3,14 +3,16 @@ const BizResultCode = require('./BaseResultCode');
 const NeDB = require('nedb');
 const moment = require('moment');
 const config = require('config');
-const process = require('node:process');
+const common = require('./common');
 const path = require('path');
 const dbConfig = config.get('dbConfig');
 const userTableName = dbConfig.get('userTableName');
 const Encrypt = require('./Encrypt');
+const DMC = require('dmc.js');
+const axios = require('axios')
 
 const db = new NeDB({
-    filename: process.env.HOME + path.sep + userTableName,
+    filename: common.getHomePath() + path.sep + userTableName,
     autoload: true
 });
 
@@ -148,9 +150,41 @@ module.exports = {
                 logger.info('save private key success');
                 resolve(BizResultCode.SUCCESS);
             });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.SAVE_PRIVATE_KEY_FAILED;
         });
     },
-    name: 'zhangsan',
+    getUsername: async (privateKey) => {
+
+        let pubKey = DMC.ecc.privateToPublic(privateKey);
+        var chainConfig = config.get('chainConfig');
+        var httpEndpoint = chainConfig.get('httpEndpoint');
+        var getAccountsUrl = httpEndpoint + chainConfig.get('getAccounts');
+
+        let body = JSON.stringify({
+            accounts: [''],
+            keys: [pubKey]
+        });
+
+        return new Promise((resolve, reject) => {
+            axios({
+                method: 'post',
+                url: getAccountsUrl,
+                data: body,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then((res) => {
+                var accounts = res.data.accounts;
+                var account = accounts.filter(item => item.permission_name == 'active');
+                resolve(account[0].account_name);
+            }).catch((err) => {
+                logger.error(err);
+                resolve(null);
+            });
+        });
+    }
 }
 
 // 获取用户信息

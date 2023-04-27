@@ -3,6 +3,8 @@ const BizResultCode = require('./BaseResultCode');
 const logger = require('./logger')('UserController.js');
 const Encrypt = require('./Encrypt');
 const userService = require('./UserService');
+const DMC = require('dmc.js');
+const config = require('config');
 
 class UserController {
 
@@ -78,7 +80,12 @@ class UserController {
         var passwordFromDB = await userService.getUserInfo();
         // get password from NeDB
         if (encryptedPassword === passwordFromDB) {
-            res.send(BizResult.success(encryptedPassword));
+            var privateKey = await userService.getPrivateKeyByPassword(encryptedPassword);
+            let username = await userService.getUsername(privateKey);
+            var result = {};
+            result['username'] = username;
+            result['encryptedPassword'] = encryptedPassword;
+            res.send(BizResult.success(result));
         }
         else {
             res.send(BizResult.fail(BizResultCode.PASSWORD_VALID_FAILED));
@@ -118,9 +125,16 @@ class UserController {
             res.send(BizResult.validateFailed(privateKey));
             return;
         }
+
+        if(!DMC.ecc.isValidPrivate(privateKey)){
+            res.send(BizResult.fail(BizResultCode.PRIVATE_KEY_INVALID));
+            return;
+        }
+        
         var resultCode = await userService.saveUserPrivateKey(privateKey);
         if (resultCode === BizResultCode.SUCCESS) {
-            res.send(BizResult.success());
+            var username = await userService.getUsername(privateKey);
+            res.send(BizResult.success(username));
             return;
         }
         res.send(BizResult.fail(resultCode));
@@ -150,6 +164,58 @@ class UserController {
         }
         let base64Data = Buffer.from(privateKey + ':' + username + ':' + orderId).toString('base64');
         res.send(BizResult.success(base64Data));
+    }
+
+    // 用户领取奖励
+    static claimOrder(req, res) {
+        var username = req.body.username;
+        var password = req.body.password;
+        var orderId = req.body.orderId;
+        var chainId = req.body.chainId;
+
+        if (!username || !password || !orderId || !chainId) {
+            res.send(BizResult.validateFailed());
+            return;
+        }
+
+        var privateKey = userService.getPrivateKeyByPassword(password);
+        var chainConfig = config.get('chainConfig');
+        var httpEndpoint = chainConfig.get("httpEndpoint");
+
+        var dmc_client = DMC({
+            chainId: chainId,
+            keyProvider: privateKey,
+            httpEndpoint: httpEndpoint,
+            logger: {
+                log: null,
+                error: null
+            }
+        });
+
+        dmc_client.transact({
+            actions: [{
+                account: "dmc.token",
+                name: 'claimorder',
+                authorization: [
+                    {
+                        actor: username,
+                        permission: 'active'
+                    }
+                ],
+                data: {
+                    payer: username,
+                    order_id: parseInt(orderId)
+                }
+            }]
+        }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+        }).then((res) => {
+            res.send(BizResult.success());
+        }).catch((err) => {
+            logger.error('err:', err);
+            res.send(BizResult.fail(BizResultCode.CLAIM_ORDER_FAILED));
+        })
     }
 }
 

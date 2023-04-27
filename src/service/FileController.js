@@ -10,11 +10,12 @@ const DMC = require('dmc.js');
 const userService = require('./UserService');
 const fileService = require('./FileService');
 const zlib = require('zlib');
-// 32 KB buffer size
 const fileConfig = config.get('fileConfig');
-const bufferSize = fileConfig.get('bufferSize');
-const buffer = Buffer.alloc(bufferSize);
+const uploadFileBufferSize = fileConfig.get('uploadFileBufferSize');
+const merkleBufferSize = fileConfig.get('merkleBufferSize');
+const merkleBuffer = Buffer.alloc(merkleBufferSize);
 const crypto = require('crypto');
+const moment = require('moment');
 
 class FileController {
 
@@ -27,20 +28,16 @@ class FileController {
      * @param {*} res       HTTP的response
      * @returns 
      */
-    static async saveFileProp(orderId, username, filePath, fileSize, res) {
+    static async saveFileProp(orderId, username, filePath, fileSize, md5, res) {
 
-        if (!orderId || !username || !filePath || !fileSize) {
+        if (!orderId || !username || !filePath || !fileSize || !md5) {
             res.send(BizResult.validateFailed(orderId));
             return;
         }
 
-        var resultData = await fileService.saveFileProp(orderId, username, filePath, fileSize);
-        if (!resultData) {
-            res.send(BizResult.fail(BizResultCode.SAVE_FILE_FAILED));
-            return;
-        }
+        await fileService.saveFileProp(orderId, username, filePath, fileSize, md5);
 
-        res.send(BizResult.success(resultData));
+        res.send(BizResult.success());
     }
 
     /**
@@ -69,13 +66,13 @@ class FileController {
             skip = (pageNo - 1) * limit
         }
 
-        var resultData = await fileService.queryFileList(orderId, username, skip, limit);
+        var resultData = await fileService.getFileList(orderId, username, skip, limit);
         if (resultData instanceof BizResultCode) {
             res.send(BizResult.fail(resultData));
             return;
         }
 
-        var total = await fileService.queryFileCount(orderId, username);
+        var total = await fileService.getFileCount(orderId, username);
         if (total instanceof BizResultCode) {
             res.send(BizResult.fail(total));
             return;
@@ -95,7 +92,7 @@ class FileController {
      * @param {*} res HTTP的response
      * @returns
      */
-    static upload(req, res) {
+    static async upload(req, res) {
 
         // 上传文件的类别 1：小文件 2：大文件
         var fileCategory = req.body.fileCategory;
@@ -110,9 +107,25 @@ class FileController {
         // 大文件新增的入参
         var partId = req.body.partId;
         var uploadId = req.body.uploadId;
+        var minOffset = req.body.minOffset;
+        var maxOffset = req.body.maxOffset;
+        var wholeMd5 = req.body.wholeMd5;
+        var wholeFileSize = req.body.wholeFileSize;
 
-        if (!fileCategory || !fileName || !md5 || !fileSize || !orderId || !token || !peerId) {
+        if (!fileCategory || !fileName || !md5 || !fileSize || !orderId || !token || !peerId || !wholeMd5) {
             res.send(BizResult.validateFailed());
+            return;
+        }
+
+        // 校验相同的文件是否已经上传过
+        var resultData = await fileService.getFileByMd5(orderId, username, fileName, wholeMd5)
+
+        if (resultData instanceof BizResultCode) {
+            res.send(BizResult.fail(resultData));
+            return;
+        }
+        if (resultData > 0) {
+            res.send(BizResult.success());
             return;
         }
         const header = {
@@ -120,13 +133,14 @@ class FileController {
             Id: orderId,
             token: token
         };
+        var file = req.files.file;
         // 小文件上传
         if (parseInt(fileCategory) == 1) {
             if (!fileType) {
                 res.send(BizResult.validateFailed());
                 return;
             }
-            var client = FileController.getNetGrpcClient();
+            var netClient = FileController.getNetGrpcClient();
             const request = {
                 key: fileName,
                 md5: md5,
@@ -138,65 +152,81 @@ class FileController {
                 request: request
             };
 
-            let stream = client.PutObject(function (err, data) {
+            let uploadFileStream = netClient.PutObject(async function (err, data) {
                 if (err) {
                     logger.error('err:', err);
                     res.send(BizResult.fail(BizResultCode.UPLOAD_FILE_FAILED));
                     return;
                 }
-                res.send(BizResult.success(data.cid));
-            });
 
-            stream.write({ req: putObjectReq });
-
-            // 根据文件的大小，计算密码本的分片id 以及 分片的hash值
-            var file = req.files.file;
-            let rOffset = 0;
-            // sharding read file
-            fs.open(file.path, "r", function (err, rfd) {
-                if (err) {
-                    logger.error('err:', err);
-                    res.send(BizResult.fail(BizResultCode.OPEN_FILE_FAILED));
+                // 根据文件的大小，merkle树的块大小 计算密码本的偏移量数组
+                var offsetArray = await fileService.getCodebookOffset(fileCategory, orderId, username, fileName, md5, fileSize, merkleBufferSize, 2)
+                if (offsetArray instanceof BizResultCode) {
+                    res.send(BizResult.fail(offsetArray));
                     return;
                 }
-                next(rOffset);
-                function next(rOffset) {
-                    fs.read(rfd, buffer, 0, bufferSize, rOffset, function (err, bytesRead, buffer) {
-                        if (err) {
-                            logger.error('err:', err);
-                            res.send(BizResult.fail(BizResultCode.READ_FILE_FAILED));
-                            return;
-                        }
-                        // 如果全部读取完毕，则关闭当前 读写操作
-                        if (bytesRead == 0) {
-                            fs.close(rfd);
-                            stream.end();
-                            return;
-                        }
 
-                        var transferData = buffer;
-                        if(bytesRead < buffer.length){
-                            transferData = Buffer.alloc(bytesRead);
-                            transferData.fill(buffer);
-                        }
-                        stream.write({ chunk: transferData });
+                var powClient = FileController.getPowGrpcClient();
+                let merkleStream = powClient.BuildMerkelLeaf(function (err, data2) {
+                    if (err) {
+                        logger.error('err:', err);
+                        res.send(BizResult.fail(BizResultCode.BUILD_MERKLE_FAILED));
+                        return;
+                    }
+                    res.send(BizResult.success(data.cid));
+                });
+                const mkHeader = {
+                    peerId: peerId,
+                    Id: orderId
+                };
+                const putObjectMKRequest = {
+                    key: fileName,
+                    cid: data.cid,
+                    size: fileSize
+                };
+                const putObjectMKReq = {
+                    header: mkHeader,
+                    request: putObjectMKRequest
+                };
+                merkleStream.write({ req: putObjectMKReq });
 
-                        // 先记录第一个分片作为密码本
-                        if (rOffset == 0) {
-                            var hashVaule = crypto.createHash('md5').update(transferData).digest('hex');
-                            var compressedData = zlib.gzipSync(transferData);
-                            var base64data = Buffer.from(compressedData).toString('base64');
-                            fileService.saveFileCodeBook(orderId, username, fileName, "cid", 1, base64data, hashVaule);
-                        }
-                        rOffset += bytesRead;
-                        next(rOffset);
-                    });
-                }
+                var fd = fs.openSync(file.path, 'r');
+                offsetArray.forEach(async (offset) => {
+                    fs.readSync(fd, merkleBuffer, 0, merkleBufferSize, offset);
+                    var hashVaule = crypto.createHash('md5').update(merkleBuffer).digest('hex');
+                    var compressedData = zlib.gzipSync(merkleBuffer);
+                    var base64data = Buffer.from(compressedData).toString('base64');
+                    await fileService.saveFileCodeBook(orderId, username, md5, data.cid, offset / merkleBufferSize, base64data, hashVaule);
+                });
+                fs.closeSync(fd);
+                merkleStream.write({ chunk: fs.readFileSync(file.path) });
+                merkleStream.end();
+            });
+
+            uploadFileStream.write({ req: putObjectReq });
+
+            const readStream = fs.createReadStream(file.path, { highWaterMark: uploadFileBufferSize });
+
+            readStream.on('data', (chunk) => {
+                var md5 = crypto.createHash('md5').update(chunk).digest('hex');
+                logger.info('upload file, file_path:{}, partNum:{}, transferData.length:{}, md5:{}', file.path, partId, chunk.length, md5);
+                uploadFileStream.write({ chunk: chunk });
+            });
+
+            readStream.on('end', () => {
+                uploadFileStream.end();
+                return;
+            });
+
+            readStream.on('error', (err) => {
+                logger.error('err:', err);
+                res.send(BizResult.fail(BizResultCode.READ_FILE_FAILED));
+                return;
             });
         }
         // 大文件上传
         else if (parseInt(fileCategory) == 2) {
-            if (!partId || !uploadId) {
+            if (!partId || !uploadId || !minOffset || !maxOffset || !wholeFileSize) {
                 res.send(BizResult.validateFailed());
                 return;
             }
@@ -213,59 +243,64 @@ class FileController {
                 request: request
             };
 
-            var client = FileController.getNetGrpcClient();
-            let stream = client.PutObjectPart(function (err, data) {
+            var netClient = FileController.getNetGrpcClient();
+            let stream = netClient.PutObjectPart(async function (err, data) {
                 if (err) {
                     logger.error('err:', err);
                     res.send(BizResult.fail(BizResultCode.UPLOAD_FILE_FAILED));
                     return;
                 }
+
+                // 分片文件上传文件后，需要记录分片文件的临时路径以及整个大文件的md5，用于提交接口中生成merkle树
+                var saveFileUploadRecordRes = await fileService.saveFileUploadRecord(orderId, username, file.path, wholeMd5, partId)
+                if (saveFileUploadRecordRes instanceof BizResultCode) {
+                    res.send(BizResult.fail(saveFileUploadRecordRes));
+                    return;
+                }
+
+                // 根据文件的大小，merkle树的块大小 计算密码本的偏移量数组
+                var offsetArray = await fileService.getCodebookOffset(fileCategory, orderId, username, fileName, wholeMd5, wholeFileSize, merkleBufferSize, 2)
+                if (offsetArray instanceof BizResultCode) {
+                    res.send(BizResult.fail(offsetArray));
+                    return;
+                }
+
+                logger.info('big file codebookOffset,md5:{},offsetArray:{}', wholeMd5, offsetArray);
+                var fd = fs.openSync(file.path, 'r');
+                offsetArray.forEach(async (offset) => {
+                    // 判断当前的分片文件offset范围是否需要记录密码本
+                    if (offset >= minOffset && offset < maxOffset) {
+                        fs.readSync(fd, merkleBuffer, 0, merkleBufferSize, offset);
+                        var hashVaule = crypto.createHash('md5').update(merkleBuffer).digest('hex');
+                        logger.info('saveFileCodeBook, file_path:{}, partNum:{}, md5:{}, offset:{}, minOffset:{}, maxOffset:{}', file.path, partId, hashVaule, offset, minOffset, maxOffset);
+                        var compressedData = zlib.gzipSync(merkleBuffer);
+                        var base64data = Buffer.from(compressedData).toString('base64');
+                        // 大文件的cid在上传成功后，还没有生成，先记录一个空字符串，后续提交接口中会更新
+                        await fileService.saveFileCodeBook(orderId, username, wholeMd5, '', offset / merkleBufferSize, base64data, hashVaule);
+                    }
+                });
+                fs.closeSync(fd);
+
                 res.send(BizResult.success(data.etag));
             });
 
             stream.write({ req: putObjectPartReq });
-            var file = req.files.file;
-            let rOffset = 0;
-            // sharding read file
-            fs.open(file.path, "r", function (err, rfd) {
-                if (err) {
-                    logger.error('err:', err);
-                    res.send(BizResult.fail(BizResultCode.OPEN_FILE_FAILED));
-                    return;
-                }
-                next(rOffset);
-                function next(rOffset) {
-                    fs.read(rfd, buffer, 0, bufferSize, rOffset, function (err, bytesRead, buffer) {
-                        if (err) {
-                            logger.error('err:', err);
-                            res.send(BizResult.fail(BizResultCode.READ_FILE_FAILED));
-                            return;
-                        }
-                        // 如果全部读取完毕，则关闭当前 读写操作
-                        if (bytesRead == 0) {
-                            fs.close(rfd);
-                            stream.end();
-                            return;
-                        }
 
-                        var transferData = buffer;
-                        if(bytesRead < buffer.length){
-                            transferData = Buffer.alloc(bytesRead);
-                            transferData.fill(buffer);
-                        }
-                        stream.write({ chunk: transferData });
+            const readStream = fs.createReadStream(file.path, { highWaterMark: uploadFileBufferSize });
 
-                        // 先记录第一个分片作为密码本
-                        if (rOffset == 0) {
-                            var hashVaule = crypto.createHash('md5').update(transferData).digest('hex');
-                            var compressedData = zlib.gzipSync(transferData);
-                            var base64data = Buffer.from(compressedData).toString('base64');
-                            fileService.saveFileCodeBook(orderId, username, fileName, "cid", 1, base64data, hashVaule);
-                        }
-                        rOffset += bytesRead;
-                        next(rOffset);
-                    });
-                }
+            readStream.on('data', (chunk) => {
+                stream.write({ chunk: chunk });
+            });
+
+            readStream.on('end', () => {
+                stream.end();
+                return;
+            });
+
+            readStream.on('error', (err) => {
+                logger.error('err:', err);
+                res.send(BizResult.fail(BizResultCode.READ_FILE_FAILED));
+                return;
             });
         }
         else {
@@ -274,7 +309,33 @@ class FileController {
     }
 
     /**
+     * 删除生成的密码本偏移数组
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
+    static async deleteFileCodebookOffset(req, res) {
+        var username = req.body.username;
+        var orderId = req.body.orderId;
+        var md5 = req.body.md5;
+
+        if (!orderId || !md5 || !username) {
+            res.send(BizResult.validateFailed());
+            return;
+        }
+
+        var resultData = await fileService.deleteCodebookOffset(orderId, username, md5)
+        if (resultData === BizResultCode.SUCCESS) {
+            res.send(BizResult.success(resultData));
+            return;
+        }
+
+        res.send(BizResult.fail(BizResultCode.DELETE_CODEBOOK_OFFSET_FAILED));
+    }
+
+    /**
      * 创建文件
+     * @param {*} username 用户名
      * @param {*} fileName 文件名
      * @param {*} md5      文件md5
      * @param {*} fileType 文件类型
@@ -285,9 +346,23 @@ class FileController {
      * @param {*} res      HTTP的response
      * @returns 
      */
-    static create(fileName, md5, fileType, fileSize, orderId, token, peerId, res) {
-        if (!fileName || !fileType || !fileSize || !orderId || !token || !peerId) {
+    static async create(username, fileName, md5, fileType, fileSize, orderId, token, peerId, res) {
+        if (!fileName || !fileType || !fileSize || !orderId || !token || !peerId || !md5 || !username) {
             res.send(BizResult.validateFailed());
+            return;
+        }
+
+        // 校验相同的文件是否已经上传过
+        var resultData = await fileService.getFileByMd5(orderId, username, fileName, md5)
+
+        if (resultData instanceof BizResultCode) {
+            res.send(BizResult.fail(resultData));
+            return;
+        }
+        var duplicateRes = {};
+        if (resultData > 0) {
+            duplicateRes['duplicateUpload'] = true;
+            res.send(BizResult.success(duplicateRes));
             return;
         }
         var client = FileController.getNetGrpcClient();
@@ -313,9 +388,26 @@ class FileController {
                 res.send(BizResult.fail(BizResultCode.CREATE_FILE_FAILED));
                 return;
             }
-
-            res.send(BizResult.success(data.uploadId));
+            var duplicateRes = {};
+            duplicateRes['duplicateUpload'] = false;
+            duplicateRes['uploadId'] = data.uploadId;
+            res.send(BizResult.success(duplicateRes));
         });
+    }
+
+    // 删除文件
+    static async deleteFileProp(req, res) {
+        var orderId = req.body.orderId;
+        var username = req.body.username;
+        var md5 = req.body.md5;
+
+        var resultData = await fileService.removeFileByMd5(orderId, username, md5)
+
+        if (resultData instanceof BizResultCode) {
+            res.send(BizResult.fail(resultData));
+            return;
+        }
+        res.send(BizResult.success());
     }
 
     /**
@@ -325,7 +417,7 @@ class FileController {
      * @param {*} res HTTP的response
      * @returns
      */
-    static complete(req, res) {
+    static async complete(req, res) {
 
         var fileName = req.body.fileName;
         var orderId = req.body.orderId;
@@ -333,40 +425,105 @@ class FileController {
         var peerId = req.body.peerId;
         var parts = req.body.parts;
         var uploadId = req.body.uploadId;
+        var md5 = req.body.md5;
+        var fileSize = req.body.fileSize;
+        var username = req.body.username;
 
-        if (!fileName || !orderId || !token || !peerId || !parts || !uploadId) {
+        if (!fileName || !orderId || !token || !peerId || !parts || !uploadId || !md5 || !fileSize || !username) {
             res.send(BizResult.validateFailed());
             return;
         }
-        const header = {
-            peerId: peerId,
-            Id: orderId,
-            token: token
-        };
-        const partArr = parts;
-        const completeUpload = {
-            parts: partArr
-        };
-        const request = {
-            key: fileName,
-            uploadId: uploadId,
-            completeUpload: completeUpload
-        };
-        const completeMultipartReq = {
-            header: header,
-            request: request
-        };
 
-        var client = FileController.getNetGrpcClient();
-        client.CompleteMultipart(completeMultipartReq, function (err, data) {
+        // 根据文件的上传记录，重读一次文件，生成merkle树后 提交
+        var fileUploadRecordRes = await fileService.getFileUploadRecord(orderId, username, md5);
+
+        if (fileUploadRecordRes instanceof BizResultCode) {
+            res.send(BizResult.fail(fileUploadRecordRes));
+            return;
+        }
+
+        var powClient = FileController.getPowGrpcClient();
+        let merkleStream = powClient.BuildMerkelLeaf(async function (err, data) {
             if (err) {
                 logger.error('err:', err);
-                res.send(BizResult.fail(BizResultCode.COMPLETE_FILE_FAILED));
+                res.send(BizResult.fail(BizResultCode.BUILD_MERKLE_FAILED));
+                return;
+            }
+            logger.info('generate merkle success, orderId{}, data:', data);
+            // 生成merkle树后 更新cid
+            var updateCodebookRes = await fileService.updateFileCodeBook(orderId, username, md5, data.cid)
+
+            if (updateCodebookRes instanceof BizResultCode) {
+                res.send(BizResult.fail(updateCodebookRes));
                 return;
             }
 
-            res.send(BizResult.success(data.cid));
+            // 生成merkle树后 提交
+            const header = {
+                peerId: peerId,
+                Id: orderId,
+                token: token
+            };
+            const completeUpload = {
+                parts: parts
+            };
+            const request = {
+                key: fileName,
+                uploadId: uploadId,
+                completeUpload: completeUpload
+            };
+            const completeMultipartReq = {
+                header: header,
+                request: request
+            };
+
+            var netClient = FileController.getNetGrpcClient();
+            netClient.CompleteMultipart(completeMultipartReq, function (err2, data2) {
+                if (err2) {
+                    logger.error('err:', err2);
+                    res.send(BizResult.fail(BizResultCode.COMPLETE_FILE_FAILED));
+                    return;
+                }
+
+                res.send(BizResult.success(data2.cid));
+            });
         });
+        const mkHeader = {
+            peerId: peerId,
+            Id: orderId
+        };
+        const putObjectMKRequest = {
+            key: fileName,
+            size: fileSize
+        };
+        const putObjectMKReq = {
+            header: mkHeader,
+            request: putObjectMKRequest
+        };
+        merkleStream.write({ req: putObjectMKReq });
+
+        await readFileSequentially(fileUploadRecordRes, merkleStream).catch(err => {
+            logger.error('read file error, err: {}', err);
+            res.send(BizResult.fail(BizResultCode.READ_FILE_FAILED));
+            return;
+        });
+        async function readFileSequentially(fileUploadRecordRes, merkleStream) {
+            try {
+                for (const file of fileUploadRecordRes) {
+                    const filename = file.file_path;
+                    const readStream = fs.createReadStream(filename, { highWaterMark: uploadFileBufferSize });
+                    // 将文件内容写入流
+                    for await (const chunk of readStream) {
+                        merkleStream.write({ chunk: chunk });
+                    }
+                }
+            } catch (err) {
+                logger.error('read file error, fileUploadRecordRes:{}, err: {}', fileUploadRecordRes, err);
+                res.send(BizResult.fail(BizResultCode.READ_FILE_FAILED));
+                return;
+            }
+            merkleStream.end();
+        }
     }
 
     static getNetGrpcClient() {
@@ -384,110 +541,27 @@ class FileController {
     }
 
     /**
-     * 上传merkle树
-     * @param {*} req HTTP的request 
-     * @param {*} res HTTP的response
-     * @returns 
-     */
-    static async pushMerkle(req, res) {
-
-        var chainId = req.body.chainId;
-        var username = req.body.username;
-        var orderId = req.body.orderId;
-        var password = req.body.password;
-
-        if (!chainId || !username || !orderId || !password) {
-            res.send(BizResult.validateFailed());
-            return;
-        }
-
-        var privateKey = await userService.getPrivateKeyByPassword(password);
-        if (!privateKey) {
-            logger.info('private key is null');
-            res.send(BizResult.fail(BizResultCode.GET_PRIVATE_KEY_FAILED));
-            return;
-        }
-
-        var chainConfig = config.get('chainConfig');
-        var httpEndpoint = chainConfig.get("httpEndpoint");
-        var dmcClient = DMC({
-            chainId: chainId,
-            keyProvider: privateKey,
-            httpEndpoint: httpEndpoint,
-            logger: {
-                log: null,
-                error: null
-            }
-        });
-
-        const getMerkleRequest = {
-            id: orderId
-        };
-
-        var powClient = FileController.getPowGrpcClient();
-        powClient.GetMerkleRoot(getMerkleRequest, function (err, data) {
-            if (err) {
-                logger.error('err:', err);
-                res.send(BizResult.fail(BizResultCode.GET_MERKLE_FAILED));
-                return;
-            }
-            var merkleRootBytes = data.root.rootBytes;
-            var merkleRoot = Buffer.from(merkleRootBytes).toString('hex');
-            var dataBlockCount = data.root.blocks;
-            console.log('merkleRoot:', merkleRoot);
-            console.log('dataBlockCount:', dataBlockCount);
-            dmcClient.transact({
-                actions: [{
-                    account: "dmc.token",
-                    name: 'addmerkle',
-                    authorization: [
-                        {
-                            actor: username,
-                            permission: 'active'
-                        }
-                    ],
-                    data: {
-                        sender: username,
-                        order_id: orderId,
-                        merkle_root: merkleRoot,
-                        data_block_count: dataBlockCount
-                    }
-                }]
-            }, {
-                blocksBehind: 3,
-                expireSeconds: 30,
-            }).then((result) => {
-                res.send(BizResult.success(result.transaction_id));
-            }).catch((err) => {
-                logger.error('err:', err);
-                res.send(BizResult.fail(BizResultCode.PUSH_MERKLE_FAILED));
-            })
-        });
-    }
-
-    /**
      * 发起挑战
      * @param {*} req 
-     * @param {*} res 
+     * @param {*} response 
      * @returns 
      */
-    static async reqChallenge(req, res) {
+    static async reqChallenge(req, response) {
         var orderId = req.body.orderId;
         var username = req.body.username;
         var password = req.body.password;
         var chainId = req.body.chainId;
-        var filePath = req.body.filePath;
-        var cid = req.body.cid;
+        var md5 = req.body.md5;
 
-        if (!orderId || !username || !password || !chainId || !filePath || !cid) {
-            res.send(BizResult.validateFailed());
+        if (!orderId || !username || !password || !chainId || !md5) {
+            response.send(BizResult.validateFailed());
             return;
         }
 
         var privateKey = await userService.getPrivateKeyByPassword(password);
         if (!privateKey) {
             logger.info('private key is null');
-            res.send(BizResult.fail(BizResultCode.GET_PRIVATE_KEY_FAILED));
+            response.send(BizResult.fail(BizResultCode.GET_PRIVATE_KEY_FAILED));
             return;
         }
 
@@ -503,19 +577,21 @@ class FileController {
             }
         });
 
-        var codebooks = await fileService.getFileCodeBook(orderId.toString(), username, filePath, cid);
+        var codebooks = await fileService.getFileCodeBook(orderId.toString(), username, md5);
         if (codebooks instanceof BizResultCode) {
             logger.info('codebooks is null');
-            res.send(BizResult.fail(codebooks));
+            response.send(BizResult.fail(codebooks));
             return;
         }
 
-        var codebook = codebooks[0];
-        let data = zlib.unzipSync(Buffer.from(codebook.data, 'base64'));
-        let nonce = codebook.cid;
-        let pre_data_hash = DMC.ecc.sha256(data + nonce);
-        let data_hash = Buffer.from(pre_data_hash).toString('hex');
-    
+        var codebook = codebooks[Math.floor(Math.random() * codebooks.length)];
+        let originData = zlib.unzipSync(Buffer.from(codebook.data, 'base64'));
+        let randomCharacter = fileService.generateRandom(4);
+        let nonce = randomCharacter + "#" + codebook.cid;
+        var containRandomData = originData + randomCharacter;
+        let pre_data_hash = DMC.ecc.sha256(containRandomData);
+        let data_hash = Buffer.from(DMC.ecc.sha256(Buffer.from(pre_data_hash, "hex"))).toString("hex");
+        logger.info("challenge, orderId:{},partId:{},data_hash:{},nonce:{}", codebook.order_id, codebook.part_id, data_hash, nonce);
         dmc_client.transact({
             actions: [{
                 account: "dmc.token",
@@ -538,10 +614,10 @@ class FileController {
             blocksBehind: 3,
             expireSeconds: 30,
         }).then((res) => {
-            res.send(BizResult.success());
+            response.send(BizResult.success());
         }).catch((err) => {
             logger.error('err:', err);
-            res.send(BizResult.fail(BizResultCode.REQ_CHALLENGE_FAILED));
+            response.send(BizResult.fail(BizResultCode.REQ_CHALLENGE_FAILED));
         })
 
     }

@@ -71,9 +71,4 @@ class Encrypt {
         return decrypted;
     }
 }
-// var encrypt = Encrypt.encrypt('5J2J27QSRhX4yXaxDrbA2w1RoWciFV4J9gdQNz1fUGxN1BhJ93z', 'a3f452');
-// console.log(encrypt);
-// var decrypt = Encrypt.decrypt(encrypt, 'a3f452');
-// console.log(decrypt);
-
 module.exports = Encrypt
