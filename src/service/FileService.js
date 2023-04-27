@@ -3,31 +3,44 @@ const BizResultCode = require('./BaseResultCode');
 const NeDB = require('nedb');
 const moment = require('moment');
 const config = require('config');
-const process = require('node:process');
+const common = require('./common');
 const path = require('path');
 const dbConfig = config.get('dbConfig');
 const fileTableName = dbConfig.get('fileTableName');
 const fileDB = new NeDB({
-    filename: process.env.HOME + path.sep + fileTableName,
+    filename: common.getHomePath() + path.sep + fileTableName,
     autoload: true,
 })
 
 const codebookTableName = dbConfig.get('codebookTableName');
 const codeBookDB = new NeDB({
-    filename: process.env.HOME + path.sep + codebookTableName,
+    filename: common.getHomePath() + path.sep + codebookTableName,
+    autoload: true
+})
+
+const codebookOffsetTableName = dbConfig.get('codebookOffsetTableName');
+const codeBookOffsetDB = new NeDB({
+    filename: common.getHomePath() + path.sep + codebookOffsetTableName,
+    autoload: true
+})
+
+const fileUploadRecordTableName = dbConfig.get('fileUploadRecordTableName');
+const fileUploadRecordDB = new NeDB({
+    filename: common.getHomePath() + path.sep + fileUploadRecordTableName,
     autoload: true
 })
 
 module.exports = {
-    saveFileProp: async (orderId, username, filePath, fileSize) => {
+    saveFileProp: async (orderId, username, filePath, fileSize, md5) => {
         // save file prop into NeDB
         return new Promise((resolve, reject) => {
             var now = moment();
             var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
             fileDB.find({
-                primary_key: orderId,
+                order_id: orderId,
                 username: username,
-                file_path: filePath
+                file_path: filePath,
+                md5: md5
             }, function (err, docs) {
                 if (err) {
                     logger.error('err:', err);
@@ -36,10 +49,11 @@ module.exports = {
                 }
                 if (docs.length === 0) {
                     fileDB.insert({
-                        primary_key: orderId,
+                        order_id: orderId,
                         username: username,
                         file_path: filePath,
                         file_size: fileSize,
+                        md5: md5,
                         update_time: currentTime,
                         create_time: currentTime
                     }, function (err, doc) {
@@ -52,34 +66,17 @@ module.exports = {
                     })
                 }
                 else {
-                    logger.info('update file, orderId:{}, filePath: {}', orderId, filePath);
-                    fileDB.update({
-                        primary_key: orderId,
-                        username: username,
-                        file_path: filePath
-                    }, {
-                        $set: {
-                            file_size: fileSize,
-                            update_time: currentTime
-                        }
-                    }, function (err, numReplaced) {
-                        if (err) {
-                            logger.error('err:', err);
-                            resolve(null);
-                            return;
-                        }
-                        resolve(docs[0]._id);
-                    });
+                    resolve(docs[0]._id);
                 }
             })
         });
     },
-    queryFileList: async (orderId, username, skip, limit) => {
+    getFileList: async (orderId, username, skip, limit) => {
 
         return new Promise((resolve, reject) => {
             // query file list from NeDB
             fileDB.find({
-                primary_key: orderId,
+                order_id: orderId,
                 username: username
             }).skip(skip).limit(limit).sort({ create_time: -1 }).exec(function (err, data) {
                 if (err) {
@@ -89,14 +86,17 @@ module.exports = {
                 }
                 resolve(data);
             });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.QUERY_FILE_FAILED;
         });
     },
-    queryFileCount: async (orderId, username) => {
+    getFileCount: async (orderId, username) => {
 
         return new Promise((resolve, reject) => {
             // query file list from NeDB
             fileDB.find({
-                primary_key: orderId,
+                order_id: orderId,
                 username: username
             }).exec(function (err, data) {
                 if (err) {
@@ -106,31 +106,100 @@ module.exports = {
                 }
                 resolve(data.length);
             });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.QUERY_FILE_FAILED;
         });
     },
-    saveFileCodeBook: async (orderId, username, filePath, cid, partId, database64, hashVaule) => {
+    getFileByMd5: async (orderId, username, fileName, md5) => {
+
+        return new Promise((resolve, reject) => {
+            // query file list from NeDB
+            fileDB.find({
+                order_id: orderId,
+                username: username,
+                file_path: fileName,
+                md5: md5
+            }).exec(function (err, data) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.GET_FILE_BY_MD5_FAILED);
+                    return;
+                }
+                resolve(data.length);
+            });
+        }).catch(err => {
+            logger.error(err);
+            return BizResultCode.GET_FILE_BY_MD5_FAILED;
+        });
+    },
+    removeFileByMd5: async (orderId, username, md5) => {
+
+        return new Promise((resolve, reject) => {
+            // query file list from NeDB
+            fileDB.remove({
+                order_id: orderId,
+                username: username,
+                md5: md5
+            }, { multi: true }, function (err, data) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.REMOVE_FILE_FAILED);
+                    return;
+                }
+                resolve(data);
+            });
+        }).catch(err => {
+            logger.error(err);
+            return BizResultCode.REMOVE_FILE_FAILED;
+        });
+    },
+    saveFileCodeBook: async (orderId, username, md5, cid, partId, database64, hashVaule) => {
         // save file codeBook into NeDB
         return new Promise((resolve, reject) => {
             var now = moment();
             var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
-            codeBookDB.find({
-                primary_key: orderId,
+            codeBookDB.findOne({
+                order_id: orderId,
                 username: username,
-                file_path: filePath
-            }, function (err, docs) {
+                md5: md5,
+                part_id: partId
+            }, function (err, doc) {
                 if (err) {
                     logger.error('err:', err);
                     resolve(null);
                     return;
                 }
-                if (docs.length === 0) {
-                    codeBookDB.insert({
-                        primary_key: orderId,
+                if (doc) {
+                    codeBookDB.update({
+                        order_id: orderId,
                         username: username,
-                        file_path: filePath,
+                        md5: md5,
+                        part_id: partId
+                    }, {
+                        $set: {
+                            cid: cid,
+                            data: database64,
+                            hash_vaule: hashVaule,
+                            update_time: currentTime
+                        }
+                    }, function (err, numReplaced) {
+                        if (err) {
+                            logger.error('err:', err);
+                            resolve(null);
+                            return;
+                        }
+                        resolve(doc._id);
+                    });
+                }
+                else {
+                    codeBookDB.insert({
+                        order_id: orderId,
+                        username: username,
+                        md5: md5,
                         cid: cid,
                         part_id: partId,
-                        data : database64,
+                        data: database64,
                         hash_vaule: hashVaule,
                         update_time: currentTime,
                         create_time: currentTime
@@ -144,16 +213,53 @@ module.exports = {
                     })
                 }
             })
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.SAVE_CODEBOOK_FAILED;
         });
     },
-    getFileCodeBook: async (orderId, username, filePath, cid) => {
+    updateFileCodeBook: async (orderId, username, md5, cid) => {
+
+        return new Promise((resolve, reject) => {
+
+            var now = moment();
+            var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
+            // update file codeBook cid into NeDB
+            codeBookDB.update({
+                order_id: orderId,
+                username: username,
+                md5: md5
+            }, {
+                $set: {
+                    cid: cid,
+                    update_time: currentTime
+                }
+            }, { multi: true }, function (err, numReplaced) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.UPDATE_FILE_CODEBOOK_FAILED);
+                    return;
+                }
+
+                if (numReplaced == 0) {
+                    resolve(BizResultCode.UPDATE_FILE_CODEBOOK_FAILED);
+                    return;
+                }
+
+                resolve(numReplaced);
+            });
+        }).catch(err => {
+            logger.error(err);
+            return BizResultCode.UPDATE_FILE_CODEBOOK_FAILED;
+        });
+    },
+    getFileCodeBook: async (orderId, username, md5) => {
         // get file codeBook into NeDB
         return new Promise((resolve, reject) => {
             codeBookDB.find({
-                primary_key: orderId,
+                order_id: orderId,
                 username: username,
-                file_path: filePath,
-                cid: cid
+                md5: md5
             }, function (err, docs) {
                 if (err) {
                     logger.error('err:', err);
@@ -161,12 +267,240 @@ module.exports = {
                     return;
                 }
                 if (docs.length === 0) {
-                    resolve(resolve(BizResultCode.GET_FILE_CODEBOOK_FAILED));
+                    resolve(BizResultCode.GET_FILE_CODEBOOK_FAILED);
                 }
-                else{
+                else {
                     resolve(docs);
                 }
             })
+        }).catch(err => {
+            logger.error(err);
+            return BizResultCode.GET_FILE_CODEBOOK_FAILED;
         });
+    },
+    /**
+     * 计算密码本的偏移量
+     * 文件大小小于分块大小，返回 []
+     * 完整的分块数量 小于等于3，则随机取一个分块的偏移量
+     * 完整的分块数量 大于3，则先随机从前3个中取一个分块的偏移量，
+     * 然后根据增长因子，计算出后续的分块，每次增长一次offset = offset + blockSize * growthFactor
+     * 增长的次数N 越大，存入偏移量数组的概率越小
+     * 
+     * @param {*} fileCategory  文件类型 1:小文件 2:大文件
+     * @param {*} orderId   订单号
+     * @param {*} username  用户名
+     * @param {*} fileName  文件名
+     * @param {*} fileSize  文件大小
+     * @param {*} blockSize     分块大小
+     * @param {*} growthFactor  增长因子
+     * @returns 偏移量的数组
+     */
+    getCodebookOffset: async (fileCategory, orderId, username, fileName, md5, fileSize, blockSize, growthFactor) => {
+
+        return new Promise((resolve, reject) => {
+            codeBookOffsetDB.find({
+                order_id: orderId,
+                username: username,
+                md5: md5
+            }, function (err, docs) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.GET_CODEBOOK_OFFSET_FAILED);
+                    return;
+                }
+                if (docs.length === 0) {
+                    var offsetArr = [];
+                    var offset = 0;
+                    // 如果文件大小小于分块大小，则直接返回[]
+                    if (fileSize < blockSize) {
+                        return offsetArr;
+                    }
+                    // 计算完整的分块数量
+                    var blockNum = Math.floor(fileSize / blockSize);
+
+                    // 如果 完整的分块数量 小于等于3，则随机取一个分块
+                    if (blockNum <= 3) {
+                        var rand = Math.floor(Math.random() * blockNum);
+                        offsetArr.push(rand * blockSize);
+                        return offsetArr;
+                    }
+
+                    // 如果 完整的分块数量 大于3，则先随机从前3个 中 取一个分块
+                    var rand = Math.floor(Math.random() * 3);
+                    offset = rand * blockSize;
+                    offsetArr.push(offset);
+
+                    var i = 1;
+                    // 然后根据增长因子，计算出后续的分块，每次增长一次offset = offset + blockSize * growthFactor
+                    while (true) {
+                        blockSize *= growthFactor;
+                        offset += blockSize;
+                        if (offset > fileSize) {
+                            break;
+                        }
+                        // 增长的次数N 越大，存入偏移量数组的概率越小
+                        if (Math.random() < 1 / i) {
+                            offsetArr.push(offset);
+                        }
+                        i++;
+
+                    }
+                    // 小文件不插入数据库，直接返回
+                    if (fileCategory === 1) {
+                        resolve(offsetArr);
+                        return;
+                    }
+                    var now = moment();
+                    var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
+                    codeBookOffsetDB.insert({
+                        order_id: orderId,
+                        username: username,
+                        file_path: fileName,
+                        md5: md5,
+                        data: offsetArr,
+                        update_time: currentTime,
+                        create_time: currentTime
+                    }, function (err, doc) {
+                        if (err) {
+                            logger.error('err:', err);
+                            resolve(BizResultCode.SAVE_CODEBOOK_OFFSET_FAILED);
+                            return;
+                        }
+                        resolve(offsetArr);
+                    })
+                }
+                else {
+                    resolve(docs[0].data);
+                }
+            })
+        }).catch(err => {
+            logger.error(err);
+            return BizResultCode.GET_CODEBOOK_OFFSET_FAILED;
+        });
+    },
+    deleteCodebookOffset: (orderId, username, md5) => {
+
+        // delete codeBookOffset from NeDB
+        codeBookOffsetDB.remove({
+            order_id: orderId,
+            username: username,
+            md5: md5
+        }, function (err, numRemoved) {
+            if (err) {
+                logger.error('err:', err);
+                return;
+            }
+            if (numRemoved === 0) {
+                logger.error('delete codebook offset failed');
+                return BizResultCode.DELETE_CODEBOOK_OFFSET_FAILED;
+            }
+            return BizResultCode.SUCCESS;
+        });
+    },
+    saveFileUploadRecord: async (orderId, username, filePath, md5, partNum) => {
+        // save file upload record into NeDB
+        return new Promise((resolve, reject) => {
+
+            var now = moment();
+            var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
+            fileUploadRecordDB.findOne({
+                order_id: orderId,
+                username: username,
+                md5: md5,
+                part_num: partNum
+            }, function (err, doc) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.SAVE_FILE_UPLOAD_RECORD_FAILED);
+                    return;
+                }
+                // 如果已经存在，则更新数据
+                if (doc) {
+                    fileUploadRecordDB.update
+                        ({
+                            _id: doc._id,
+                        }, {
+                            $set: {
+                                file_path: filePath,
+                                update_time: currentTime
+                            }
+                        }, {}, function (err, numReplaced) {
+                            if (err) {
+                                logger.error('err:', err);
+                                resolve(BizResultCode.SAVE_FILE_UPLOAD_RECORD_FAILED);
+                                return;
+                            }
+                            if (numReplaced === 0) {
+                                logger.error('update file upload record failed');
+                                resolve(BizResultCode.SAVE_FILE_UPLOAD_RECORD_FAILED);
+                                return;
+                            }
+                            resolve(doc._id);
+                            return;
+                        });
+                }
+                else {
+                    fileUploadRecordDB.insert({
+                        order_id: orderId,
+                        username: username,
+                        file_path: filePath,
+                        md5: md5,
+                        part_num: partNum,
+                        update_time: currentTime,
+                        create_time: currentTime
+                    }, function (err, doc) {
+                        if (err) {
+                            logger.error('err:', err);
+                            resolve(BizResultCode.SAVE_FILE_UPLOAD_RECORD_FAILED);
+                            return;
+                        }
+                        resolve(doc._id);
+                    })
+                }
+            });
+        }).catch(err => {
+            logger.error(err);
+            return BizResultCode.SAVE_FILE_UPLOAD_RECORD_FAILED;
+        });
+    },
+    getFileUploadRecord: async (orderId, username, md5) => {
+        // save file upload record into NeDB
+        return new Promise((resolve, reject) => {
+            fileUploadRecordDB.find({
+                order_id: orderId,
+                username: username,
+                md5: md5
+            }).sort({ part_num: 1 }).exec(function (err, docs) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.GET_FILE_UPLOAD_RECORD_FAILED);
+                    return;
+                }
+                if (docs.length === 0) {
+                    resolve(BizResultCode.GET_FILE_UPLOAD_RECORD_FAILED);
+                    return;
+                }
+                resolve(docs);
+            });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.GET_FILE_UPLOAD_RECORD_FAILED;
+        });
+    },
+    /**
+     * 生成16进制的随机字符串
+     * @param {*} num 生成字符串的长度 
+     * @returns 
+     */
+    generateRandom: (num) => {
+        if (num <= 0) {
+            return;
+        }
+        const result = [];
+        const characters = '0123456789abcdef';
+        for (let i = 0; i < num; i++) {
+            result.push(characters.charAt(Math.floor(Math.random() * characters.length)));
+        }
+        return result.join('');
     }
 }

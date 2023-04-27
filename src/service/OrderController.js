@@ -4,39 +4,49 @@ const request = require('sync-request')
 const config = require('config')
 const logger = require('./logger')('OrderController.js')
 const DMC = require('dmc.js')
+const userService = require('./UserService')
+const orderService = require('./OrderService')
+const pow_proto = require('./grpc/pow');
+const grpc = require('@grpc/grpc-js');
 
 class OrderController {
 
     /**
      * 买单
-     * @param {*} username 用户名
-     * @param {*} chainId  chainId
-     * @param {*} billId   挂单的id
-     * @param {*} period    购买周期，单位周
-     * @param {*} benchmarkPrice 基准价格，单位 DMC
-     * @param {*} priceRange    价格区间 1 基准价格正负浮动20%；2 基准价格正负浮动30%
-     * @param {*} unmatchedAmount 购买PST的数量
-     * @param {*} totalPrice 订单总价，单位 DMC
+     * @param {*} req    HTTP的请求
      * @param {*} response      HTTP的响应
      * @returns 
      */
-    static buy(username, chainId, billId, period, benchmarkPrice, priceRange, unmatchedAmount, totalPrice, response) {
+    static async buy(req, response) {
 
-        var userConfig = config.get('userConfig')
-        var user = userConfig.get('username')
-        var keyProvider = userConfig.get('keyProvider')
+        // 用户名
+        var username = req.body.username;
+        // chainId
+        var chainId = req.body.chainId;
+        // 挂单的id
+        var billId = req.body.billId;
+        // 购买周期，单位周
+        var period = req.body.period;
+        // 基准价格，单位 DMC
+        var benchmarkPrice = req.body.benchmarkPrice;
+        // 价格区间 1 基准价格正负浮动20%；2 基准价格正负浮动30%
+        var priceRange = req.body.priceRange;
+        // 购买PST的数量
+        var unmatchedAmount = req.body.unmatchedAmount;
+        // 订单总价，单位 DMC
+        var totalPrice = req.body.totalPrice;
+        // 加密后的密码
+        var password = req.body.password;
+
         var chainConfig = config.get('chainConfig')
         var httpEndpoint = chainConfig.get('httpEndpoint')
-        var owner = user
-        // 如果没有传入用默认配置的用户名 for test
-        if (!username) {
-            owner = username
-        }
 
-        if (!chainId || !billId || !period || !benchmarkPrice || !priceRange || !unmatchedAmount || !totalPrice) {
+        if (!chainId || !billId || !period || !benchmarkPrice || !priceRange || !unmatchedAmount || !totalPrice || !username || !password) {
             response.send(BizResult.validateFailed());
             return;
         }
+
+        var keyProvider = await userService.getPrivateKeyByPassword(password);
 
         // 基准价格*10000
         var benchmark = (benchmarkPrice * 10000).toString()
@@ -56,12 +66,12 @@ class OrderController {
                 name: 'order',
                 authorization: [
                     {
-                        actor: owner,
+                        actor: username,
                         permission: 'active'
                     }
                 ],
                 data: {
-                    owner: owner,
+                    owner: username,
                     bill_id: billId,
                     benchmark_price: benchmark,
                     epoch: period,
@@ -96,24 +106,23 @@ class OrderController {
      * @param {*} period    购买周期，单位 周
      * @param {*} minPrice  最低价，单位 DMC
      * @param {*} maxPrice  最高价，单位 DMC
+     * @param {*} res       HTTP的响应
      * @returns 订单列表
      */
-    static outstandingOrders(username, unmatchedAmount, period, minPrice, maxPrice) {
+    static outstandingOrders(username, unmatchedAmount, period, minPrice, maxPrice, res) {
+
+        if (!username || !unmatchedAmount || !period) {
+            res.send(BizResult.validateFailed())
+            return;
+        }
+
         var moment = require('moment')
         var expireTime = moment().add(period, "weeks").utc().format()
 
         var chainConfig = config.get('chainConfig')
         var createTime = chainConfig.get('createTime')
-        var chainUrl = chainConfig.get('chainUrl')
+        var transactionAddress = chainConfig.get('transactionAddress')
         var getOutstandingOrders = chainConfig.get('getOutstandingOrders')
-
-        var userConfig = config.get('userConfig')
-        var user = userConfig.get('username')
-        var owner = user
-        // 如果没有传入用默认配置的用户名 for test
-        if (!username) {
-            owner = username
-        }
 
         // minPrice & maxPrice同时有值
         var price = ""
@@ -126,7 +135,7 @@ class OrderController {
             '                limit: 10,\n' +
             '                order: "price,-expire_on,-created_time",\n' +
             '                where: {\n' +
-            '                    owner: { ne : "' + owner + '"}\n' +
+            '                    owner: { ne : "' + username + '"}\n' +
             '                    state: "active",\n' +
             '                    unmatched_amount: { gte: ' + unmatchedAmount + ' },\n' +
             '                    expire_on: {\n' +
@@ -153,13 +162,13 @@ class OrderController {
             '            }\n' +
             '        }\n' +
             '    }'
-        let outstandingOrders = JSON.parse(request('POST', chainUrl + getOutstandingOrders, {
+        let outstandingOrders = JSON.parse(request('POST', transactionAddress + getOutstandingOrders, {
             headers: {
                 'Content-Type': 'application/graphql'
             },
             body: body
         }).getBody('utf-8')).data.find_bill
-        return BizResult.success(outstandingOrders);
+        res.send(BizResult.success(outstandingOrders));
     }
 
     /**
@@ -167,19 +176,19 @@ class OrderController {
      * @param {*} username  用户名 
      * @param {*} pageNum   页数
      * @param {*} limit     每页展示的条数
+     * @param {*} res       HTTP的响应
      * @returns 订单列表
      */
-    static orderList(username, pageNum, limit) {
-        var chainConfig = config.get('chainConfig')
-        var chainUrl = chainConfig.get('chainUrl')
-        var getOrders = chainConfig.get('getOrders')
-        var userConfig = config.get('userConfig')
-        var user = userConfig.get('username')
-        var owner = user
-        // 如果没有传入用默认配置的用户名 for test
+    static orderList(username, pageNum, limit, res) {
+
         if (!username) {
-            owner = username
+            res.send(BizResult.validateFailed())
+            return;
         }
+
+        var chainConfig = config.get('chainConfig')
+        var transactionAddress = chainConfig.get('transactionAddress')
+        var getOrders = chainConfig.get('getOrders')
 
         var pageSize = 10;
         if (typeof (limit) !== "undefined") {
@@ -196,7 +205,7 @@ class OrderController {
             '                skip: ' + skip + ',\n' +
             '                limit: ' + pageSize + ',\n' +
             '                where: {\n' +
-            '                    user_id: "' + owner + '",\n' +
+            '                    user_id: "' + username + '",\n' +
             '                },\n' +
             '                order: "-created_time,id",\n' +
             '        ){\n' +
@@ -230,7 +239,7 @@ class OrderController {
             '            createdAt\n' +
             '        }\n' +
             '    }'
-        let orderList = JSON.parse(request('POST', chainUrl + getOrders, {
+        let orderList = JSON.parse(request('POST', transactionAddress + getOrders, {
             headers: {
                 'Content-Type': 'application/graphql'
             },
@@ -238,10 +247,10 @@ class OrderController {
         }).getBody('utf-8')).data.find_order
         // 获取用户订单总数
         let num = '{count_order(\n' +
-            '            where:{and:[{user_id:"' + owner + '" }]}\n' +
+            '            where:{and:[{user_id:"' + username + '" }]}\n' +
             '        )\n' +
             '    }'
-        let orderCount = JSON.parse(request('POST', chainUrl + getOrders, {
+        let orderCount = JSON.parse(request('POST', transactionAddress + getOrders, {
             headers: {
                 'Content-Type': 'application/graphql'
             },
@@ -251,7 +260,145 @@ class OrderController {
         result['count'] = orderCount
         result['list'] = orderList
 
-        return BizResult.success(result);
+        res.send(BizResult.success(result));
+    }
+
+    /**
+     * 上传merkle树
+     * @param {*} req HTTP的request 
+     * @param {*} res HTTP的response
+     * @returns 
+     */
+    static async pushMerkle(req, res) {
+
+        var chainId = req.body.chainId;
+        var username = req.body.username;
+        var orderId = req.body.orderId;
+        var password = req.body.password;
+
+        if (!chainId || !username || !orderId || !password) {
+            res.send(BizResult.validateFailed());
+            return;
+        }
+
+        var privateKey = await userService.getPrivateKeyByPassword(password);
+        if (!privateKey) {
+            logger.info('private key is null');
+            res.send(BizResult.fail(BizResultCode.GET_PRIVATE_KEY_FAILED));
+            return;
+        }
+
+        var chainConfig = config.get('chainConfig');
+        var httpEndpoint = chainConfig.get("httpEndpoint");
+        var dmcClient = DMC({
+            chainId: chainId,
+            keyProvider: privateKey,
+            httpEndpoint: httpEndpoint,
+            logger: {
+                log: null,
+                error: null
+            }
+        });
+
+        const getMerkleRequest = {
+            id: orderId
+        };
+
+        var powClient = OrderController.getPowGrpcClient();
+        powClient.GetMerkleRoot(getMerkleRequest, function (err, data) {
+            if (err) {
+                logger.error('err:', err);
+                res.send(BizResult.fail(BizResultCode.GET_MERKLE_FAILED));
+                return;
+            }
+            logger.info("GetMerkleRoot, data:{}", data.root);
+            var merkleRootBytes = data.root.normalRoot;
+            var merkleRoot = Buffer.from(merkleRootBytes).toString('hex');
+            var dataBlockCount = data.root.totalBlocks;
+            logger.info('pushMerkle orderId{},merkleRoot{},blockCount:{}', orderId, merkleRoot, dataBlockCount);
+            dmcClient.transact({
+                actions: [{
+                    account: "dmc.token",
+                    name: 'addmerkle',
+                    authorization: [
+                        {
+                            actor: username,
+                            permission: 'active'
+                        }
+                    ],
+                    data: {
+                        sender: username,
+                        order_id: orderId,
+                        merkle_root: merkleRoot,
+                        data_block_count: dataBlockCount
+                    }
+                }]
+            }, {
+                blocksBehind: 3,
+                expireSeconds: 30,
+            }).then(async (result) => {
+                var savePushMerkleRecordRes = await orderService.savePuskMerkleRecord(orderId, username, merkleRoot, dataBlockCount, result.transaction_id);
+                if (savePushMerkleRecordRes instanceof BizResultCode) {
+                    res.send(BizResult.fail(savePushMerkleRecordRes));
+                    return;
+                }
+                res.send(BizResult.success(result.transaction_id));
+            }).catch((err) => {
+                logger.error('err:', err);
+                res.send(BizResult.fail(BizResultCode.PUSH_MERKLE_FAILED));
+            })
+        });
+    }
+
+    static getPowGrpcClient() {
+        var grpcConfig = config.get('grpcConfig');
+        var ip = grpcConfig.get("ip");
+        var port = grpcConfig.get("port");
+        return new pow_proto.PowService(ip + ':' + port, grpc.credentials.createInsecure());
+    }
+
+    /**
+     * 查询，包含 订单id，merkleRoot，dataBlockCount，transactionId
+     * @param {*} orderId       订单id
+     * @param {*} username      用户名
+     * @param {*} pageSize      每页条数
+     * @param {*} pageNo        页数
+     * @param {*} res HTTP的response
+     * @returns 
+     */
+    static async getPushMerkleRecord(orderId, username, pageSize, pageNo, res) {
+
+        if (!orderId || !username) {
+            res.send(BizResult.validateFailed(orderId));
+            return;
+        }
+
+        var limit = 10;
+        if (typeof (pageSize) !== "undefined") {
+            limit = pageSize
+        }
+
+        var skip = 0;
+        if (typeof (pageNo) !== "undefined") {
+            skip = (pageNo - 1) * limit
+        }
+
+        var resultData = await orderService.getPuskMerkleRecord(orderId, username, skip, limit);
+        if (resultData instanceof BizResultCode) {
+            res.send(BizResult.fail(resultData));
+            return;
+        }
+
+        var total = await orderService.getPuskMerkleRecordCount(orderId, username);
+        if (total instanceof BizResultCode) {
+            res.send(BizResult.fail(total));
+            return;
+        }
+
+        var result = {};
+        result['list'] = resultData;
+        result['count'] = total;
+        res.send(BizResult.success(result));
     }
 
     /**
@@ -264,12 +411,12 @@ class OrderController {
      */
     static getChallengeList(orderId, pageNum, limit, res) {
 
-        if(!orderId){
-             res.send(BizResult.validateFailed());
-             return;
+        if (!orderId) {
+            res.send(BizResult.validateFailed());
+            return;
         }
         var chainConfig = config.get('chainConfig')
-        var chainUrl = chainConfig.get('chainUrl')
+        var transactionAddress = chainConfig.get('transactionAddress')
         var getChallengeList = chainConfig.get('getChallengeList')
 
         var pageSize = 10;
@@ -312,7 +459,7 @@ class OrderController {
             '            }\n' +
             '        }\n' +
             '    }'
-        let challengeList = JSON.parse(request('POST', chainUrl + getChallengeList, {
+        let challengeList = JSON.parse(request('POST', transactionAddress + getChallengeList, {
             headers: {
                 'Content-Type': 'application/graphql'
             },
@@ -327,9 +474,9 @@ class OrderController {
      */
     static getChainId() {
         var chainConfig = config.get('chainConfig')
-        var chainUrl = chainConfig.get('chainUrl')
+        var httpEndpoint = chainConfig.get('httpEndpoint')
         var getChainInfo = chainConfig.get('getChainInfo')
-        let chainId = JSON.parse(request('POST', chainUrl + getChainInfo, {}).getBody('utf-8')).chain_id
+        let chainId = JSON.parse(request('POST', httpEndpoint + getChainInfo, {}).getBody('utf-8')).chain_id
 
         return BizResult.success(chainId);
     }
@@ -340,9 +487,9 @@ class OrderController {
      */
     static getBenchmarkPrice() {
         var chainConfig = config.get('chainConfig')
-        var chainUrl = chainConfig.get('chainUrl')
+        var httpEndpoint = chainConfig.get('httpEndpoint')
         var getTableRows = chainConfig.get('getTableRows')
-        let benchmarkPrice = JSON.parse(request('POST', chainUrl + getTableRows, {
+        let benchmarkPrice = JSON.parse(request('POST', httpEndpoint + getTableRows, {
             json: { "json": true, "code": "dmc.token", "scope": "dmc.token", "table": "bcprice" }
         }).getBody('utf-8')).rows[0].benchmark_price
 
