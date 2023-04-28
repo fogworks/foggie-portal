@@ -44,7 +44,11 @@ class BaseResultCode {
     static ORDER_BUY_FAILED = new BaseResultCode(20000, 'buy failed');
     static SAVE_PUSH_MERKLE_RECORD_FAILED = new BaseResultCode(20001, 'save push merkle record failed');
     static QUERY_PUSH_MERKLE_RECORD_FAILED = new BaseResultCode(20002, 'query push merkle record failed');
-    
+    static SAVE_BUY_ORDER_RECORD_FAILED = new BaseResultCode(20003, 'save buy order record failed');
+    static QUERY_BUY_ORDER_RECORD_FAILED = new BaseResultCode(20004, 'query buy order record failed');
+    static GET_ORDER_BASIC_INFO_FAILED = new BaseResultCode(20005, 'get order basic info failed');
+    static GET_BILL_MEMO_FAILED = new BaseResultCode(20006, 'get bill memo failed');
+
     // 文件的异常code 30000～39999
     static FILE_NOT_EXIST = new BaseResultCode(30000, 'file is not exist');
     static SAVE_FILE_FAILED = new BaseResultCode(30001, 'save file failed');

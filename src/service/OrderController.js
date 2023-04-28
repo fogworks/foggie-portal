@@ -94,7 +94,20 @@ class OrderController {
         }, {
             blocksBehind: 3,
             expireSeconds: 30,
-        }).then((res) => {
+        }).then(async (res) => {
+            var bill = orderService.getBillById(billId);
+            // 获取挂单时的transaction_id
+            var transactionId = bill[0].action[0].trx_id;
+            // 根据挂单时的tranaction_id获取挂单信息
+            var transaction = await orderService.getTransactionById(transactionId);
+            // 根据挂单信息，获取memo
+            var memo = await orderService.getMemoByRawData(transaction[0].rawData);
+            var expire = bill[0].expire_on;
+            // 根据买单的返回数据获取订单的基本信息，包含订单的id、矿工、用户
+            var orderBasic = await orderService.getOrderBasicByBuyRes(res);
+            // 保存订单到neDB
+            let saveRes = await orderService.saveBuyOrderRecord(email, orderBasic.orderId, orderBasic.miner, orderBasic.user, billId, peerId, rpc, totalSpace, 0, res.transaction_id);
+            
             response.send(BizResult.success(res))
         }).catch((err) => {
             logger.error(err)
