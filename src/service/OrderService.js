@@ -184,6 +184,34 @@ module.exports = {
             return BizResultCode.UPDTAE_ORDER_FAILED;
         });
     },
+    updateOrderUsedSpace: async (email, orderId, usedSpace) => {
+        // update buy order record into NeDB
+        return new Promise((resolve, reject) => {
+            var now = moment();
+            var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
+            orderDB.update({
+                email: email,
+                order_id: orderId,
+            }, {
+                $set: {
+                    update_time: currentTime
+                },
+                $inc: {
+                    used_space: usedSpace
+                }
+            }, {}, function (err, num) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.UPDTAE_ORDER_FAILED);
+                    return;
+                }
+                resolve(num);
+            });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.UPDTAE_ORDER_FAILED;
+        });
+    },
     syncOrder2RegisterCenter: async (email, orderId, billId, totalSpace, usedSpace, transactionId) => {
 
         try {
