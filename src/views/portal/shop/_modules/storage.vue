@@ -138,6 +138,7 @@
 
 <script setup>
 import { getCurReferenceRate, getOrderFilterList, buyOrder } from "@/api/order/filterOrder.js";
+import { getChain_id } from "@/api/common.js";
 import { transferTime, ChinaTime4 } from "@/utils/ChinaStandardTime.js";
 import customDialog from "@/components-V3/customDialog";
 import { ElMessage } from "element-plus";
@@ -359,10 +360,16 @@ async function submit() {
 
   }
 }
-
+function loadChainId() {
+  getChain_id().then((res) => {
+    if (res.code == 200) {
+      store.commit("clientGlobal/SAVE_ChainId", res.data);
+    }
+  });
+}
 onMounted(() => {
   loadCurReferenceRate();
-
+  loadChainId()
 
 });
 </script>
