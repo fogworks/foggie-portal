@@ -1,22 +1,23 @@
 <template>
   <div class="Alltemplate_boxs" id="Alltemplate_boxs">
     <!-- isInsertBody="app-window" -->
-    <customDialog v-if="customDialogIsShow" :isBox="false" :closeClickModal="false">
-      <login @closeDialog="closeDialog" :userInfo="userInfo"></login>
-    </customDialog>
-    <template v-if="!customDialogIsShow">
+
+    <login
+      v-if="customDialogIsShow"
+      @closeDialog="closeDialog"
+      :userInfo="userInfo"
+    ></login>
+    <template v-else>
       <orderList :orderId="orderId"></orderList>
       <myFiles :orderId="orderId"></myFiles>
     </template>
-
-
-
   </div>
 </template>
 
 <script setup>
 import {
   ref,
+  toRefs,
   reactive,
   onBeforeMount,
   onBeforeUnmount,
@@ -25,29 +26,29 @@ import {
 } from "vue";
 import orderList from "@/components/orders/orderList.vue";
 import myFiles from "@/views/Alltemplate/MyFiles/myFiles";
-import customDialog from '@/components-V3/customDialog'
-import login from '@/components/login'
+import customDialog from "@/components-V3/customDialog";
+import login from "@/components/login";
 import { useStore } from "vuex";
 
 import { getChain_id } from "@/api/common.js";
 import { provide, defineExpose, computed, defineProps, readonly } from "vue";
-const store = useStore()
+const store = useStore();
 const props = defineProps(["deviceData"]);
-const orderId = readonly(props.deviceData.order_id)
-const userInfo = computed(() => store.getters.userInfo)
-let customDialogIsShow = ref(true)   // 是否展示 
-const clientPassword = computed(() => store.getters.clientPassword)
+const { deviceData } = toRefs(props);
+const orderId = readonly(props.deviceData.order_id);
+const userInfo = computed(() => store.getters.userInfo);
+let customDialogIsShow = ref(true); // 是否展示
+const clientPassword = computed(() => store.getters.clientPassword);
 
 if (clientPassword.value) {
-  customDialogIsShow.value = false
+  customDialogIsShow.value = false;
 } else {
-  customDialogIsShow.value = true
+  customDialogIsShow.value = true;
 }
 
-store.commit('upload/setOrderId',10)
+store.commit("upload/setOrderId", 10);
 
 // store.commit('upload/setOrderId',orderId)
-
 
 watch(
   () => props.deviceData,
@@ -58,7 +59,7 @@ watch(
 );
 
 function closeDialog() {
-  customDialogIsShow.value = false
+  customDialogIsShow.value = false;
 }
 
 /* 获取链ID */
@@ -70,7 +71,7 @@ function loadChainId() {
   });
 }
 onMounted(() => {
-  loadChainId()
+  loadChainId();
 });
 
 // let isMobile = ref(false);
@@ -123,16 +124,14 @@ onMounted(() => {
   color: #fff;
   font-family: Lucida Fax-Italic, Lucida Fax;
 
-
   background-size: cover;
   background-position: 50%;
   border-radius: 0 0 0 0;
   z-index: 1;
   width: 1120px;
-  height: 100%;
+  // height: 100%;
   margin: 0 auto;
   position: relative;
-
 }
 
 .Alltemplate_boxs::-webkit-scrollbar {

@@ -1,29 +1,32 @@
 <template>
   <div class="box" v-loading="loading">
-    <el-form
-      v-if="needLogin"
-      class="account-form"
-      :model="form"
-      label-position="top"
-      ref="formRef"
-      :rules="rules"
-    >
-      <el-form-item label="Foggie Email" prop="email">
-        <el-input v-model="form.email"></el-input>
-      </el-form-item>
-      <el-form-item label="Password" prop="password">
-        <el-input
-          type="password"
-          v-model="form.password"
-          show-password
-        ></el-input>
-      </el-form-item>
-      <div class="foot-btn">
-        <el-button :loading="loading" type="primary" @click="submit">
-          {{ "Login" }}
-        </el-button>
-      </div>
-    </el-form>
+    <div v-if="needLogin" class="login-box">
+      <img src="@/assets/login-left.png" alt="" />
+      <el-form
+        class="account-form"
+        :model="form"
+        label-position="top"
+        ref="formRef"
+        :rules="rules"
+      >
+        <el-form-item label="Foggie Email" prop="email">
+          <el-input v-model="form.email"></el-input>
+        </el-form-item>
+        <el-form-item label="Password" prop="password">
+          <el-input
+            type="password"
+            v-model="form.password"
+            show-password
+          ></el-input>
+        </el-form-item>
+        <div class="foot-btn">
+          <el-button :loading="loading" type="primary" @click="submit">
+            {{ "Login" }}
+          </el-button>
+        </div>
+      </el-form>
+    </div>
+
     <div class="info-box" v-else>
       <!-- <el-descriptions :column="3" size="large" border>
         <template #extra>
@@ -215,9 +218,18 @@ const unbind = () => {
   font-size: 30px;
   text-align: center;
 }
+.login-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  img {
+    width: 350px;
+  }
+}
 .account-form {
   width: 500px;
-  margin: 0 auto;
+  // margin: 0 auto;
+  margin-left: 30px;
   padding: 20px 30px;
   background: transparent;
   border-radius: 10px;

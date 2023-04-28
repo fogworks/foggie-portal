@@ -1,27 +1,19 @@
 <template>
   <div v-loading="loading" class="access-box">
-    <el-form
-      class="account-form"
-      :model="form"
-      label-position="left"
-      ref="formRef"
-      :rules="rules"
-    >
-      <el-form-item label="Password" prop="password">
+    <el-form class="account-form" :model="form" ref="formRef" :rules="rules">
+      <el-form-item prop="password">
         <el-input
           type="password"
           v-model="form.password"
+          placeholder="Password"
           :maxlength="6"
           :minlength="6"
           show-password
         ></el-input>
       </el-form-item>
-      <el-form-item
-        v-if="!hasAccessPass"
-        label="Confirm Password"
-        prop="confirmPassword"
-      >
+      <el-form-item v-if="!hasAccessPass" prop="confirmPassword">
         <el-input
+          placeholder="Confirm Password"
           type="password"
           :maxlength="6"
           :minlength="6"
@@ -208,6 +200,8 @@ const submit = () => {
   padding: 50px;
   background-color: var(--bg-color);
   border-radius: 20px;
+  width: 450px;
+  margin: 0 auto;
   :deep {
     .el-loading-mask {
       background: transparent;
@@ -216,9 +210,9 @@ const submit = () => {
   }
 }
 .account-form {
-  width: 500px;
+  // width: 500px;
   margin: 0 auto;
-  padding: 40px 30px;
+  // padding: 40px 30px;
   background: transparent;
   border-radius: 10px;
   // box-shadow: 0px 0px 9px #ffffff73, 0px 0px 5px rgba(94, 104, 121, 0.288);
@@ -234,6 +228,9 @@ const submit = () => {
       border: 1px solid rgb(153 153 153);
       border-radius: 16px;
       background: transparent !important;
+      padding: 0px 15px;
+      border-radius: 30px;
+      height: 45px;
       .el-input__suffix-inner {
         span {
           font-size: 24px;
@@ -243,6 +240,20 @@ const submit = () => {
       .el-input__inner {
         color: #000;
         --el-input-placeholder-color: #727272;
+        border: none;
+        background: transparent;
+        height: 45px;
+        // width: 100%;
+        border-radius: 30px;
+        box-sizing: border-box;
+        // padding: 10px;
+        font-style: normal;
+        font-weight: normal;
+        font-size: 16px;
+        line-height: 130%;
+
+        transition: all 1s cubic-bezier(0.075, 0.82, 0.165, 1) 0s;
+        // width: 340px;
       }
     }
   }

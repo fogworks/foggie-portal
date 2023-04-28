@@ -3,7 +3,10 @@
     <div class="card">
       <div class="content">
         <div class="title">Foggie</div>
-        <div class="price">$39.99</div>
+        <div>
+          <svg-icon icon-class="logo-dog"></svg-icon>
+        </div>
+        <div class="price">$399.9</div>
         <div class="description">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at
           posuere eros. Interdum et malesuada fames ac ante ipsum primis in
@@ -16,7 +19,10 @@
     <div class="card">
       <div class="content">
         <div class="title">Foggie Pro Max</div>
-        <div class="price">$39.99</div>
+        <div>
+          <svg-icon icon-class="logo-dog"></svg-icon>
+        </div>
+        <div class="price">$399.9</div>
         <div class="description">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at
           posuere eros. Interdum et malesuada fames ac ante ipsum primis in
@@ -29,7 +35,10 @@
     <div class="card">
       <div class="content">
         <div class="title">Storage</div>
-        <div class="price">$39.99</div>
+        <div>
+          <svg-icon icon-class="storage"></svg-icon>
+        </div>
+        <div class="price">$399.9</div>
         <div class="description">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at
           posuere eros. Interdum et malesuada fames ac ante ipsum primis in
@@ -42,14 +51,17 @@
     <div class="card">
       <div class="content">
         <div class="title">NFT</div>
-        <div class="price">$39.99</div>
+        <div>
+          <svg-icon icon-class="logo-dog"></svg-icon>
+        </div>
+        <div class="price">$399.9</div>
         <div class="description">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at
           posuere eros. Interdum et malesuada fames ac ante ipsum primis in
           faucibus.
         </div>
       </div>
-      <button>Buy now</button>
+      <button>COMING SOON</button>
     </div>
   </div>
   <div class="back" v-if="!isShop" @click="handleActive">
@@ -83,6 +95,7 @@ const handleActive = (val = "") => {
   align-items: center;
   justify-content: space-around;
   width: 300px;
+  min-width: 300px;
   padding: 20px 1px;
   margin: 10px 0;
   text-align: center;
@@ -93,6 +106,10 @@ const handleActive = (val = "") => {
   border-radius: 10px;
   background-color: #6b6ecc;
   background: linear-gradient(45deg, #04051dea 0%, #2b566e 100%);
+  transition: all 0.3s;
+  &:hover {
+    transform: scale(1.1);
+  }
   &:nth-child(2) {
     background: linear-gradient(
       209.21deg,
@@ -118,6 +135,12 @@ const handleActive = (val = "") => {
 
 .content {
   padding: 20px;
+  svg {
+    font-size: 100px;
+    // color: rgba(255, 255, 255, 0.64);
+    color: #fff;
+    opacity: 0.64;
+  }
 }
 
 .content .price {
@@ -158,6 +181,9 @@ button {
   width: 90%;
   text-shadow: 0px 4px 18px #2c3442;
   cursor: pointer;
+  &:hover {
+    background: #29abff;
+  }
 }
 .back {
   text-align: left;

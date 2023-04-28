@@ -39,8 +39,8 @@
             <span class="value-span">{{ handleTimeStamp(item.expire) }}</span>
           </div>
           <div>
-            Space
             <span class="value-span">500G</span>
+            Storage
           </div>
         </template>
 
@@ -277,13 +277,16 @@ search();
     .circle {
       position: absolute;
       top: 10px;
-      left: 10px;
+      right: 10px;
       width: 15px;
       height: 15px;
       border-radius: 50%;
     }
     .onlineC {
       background: #1eb92a;
+    }
+    .offlineC {
+      background: #999;
     }
     span {
       display: inline-block;
