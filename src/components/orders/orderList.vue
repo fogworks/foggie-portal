@@ -254,7 +254,7 @@ function openUpload(item) {
   $state.commit("upload/openUpload", item.id);
 }
 function openMyFiles(item) {
-  $state.commit("upload/openMyFiles", item.id);
+  $state.commit("upload/setOrderId", item.id);
   // router.push({ path: "/Alltemplate/MyFiles", query: { orderState: item.state } });
 }
 

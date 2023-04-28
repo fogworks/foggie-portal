@@ -12,7 +12,7 @@ const mutations = {
   closeUpload(state, data) {
     state.uploadIsShow = false
   },
-  openMyFiles(state, orderId) {
+  setOrderId(state, orderId) {
     state.orderId = orderId
   },
   openUpload(state, orderId) {

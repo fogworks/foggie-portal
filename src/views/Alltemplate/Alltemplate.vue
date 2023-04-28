@@ -44,6 +44,11 @@ if (clientPassword.value) {
   customDialogIsShow.value = true
 }
 
+store.commit('upload/setOrderId',10)
+
+// store.commit('upload/setOrderId',orderId)
+
+
 watch(
   () => props.deviceData,
   (newValue) => {
