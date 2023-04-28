@@ -74,15 +74,9 @@ export default {
 
     const FILE_SIZE = readonly(1024 * 1024 * 1024 * 2);
     const store = useStore();
-    const orderId = computed(() => store.state.upload.orderId)
+    const orderId = computed(() => store.getters.orderId)
 
-    const isEmpty = computed(() => {
-      if (JSON.stringify(store.state.upload.uploadFileList) == '{}') {
-        return true
-      } else {
-        return false
-      }
-    })
+
     const uploadFileList = computed(() => store.state.upload.uploadFileList)
 
     const options = ref({
@@ -188,7 +182,6 @@ export default {
       fileStatusText,
       fileList,
       options,
-      isEmpty,
       uploadFileList,
       orderId,
       onFileAdded,

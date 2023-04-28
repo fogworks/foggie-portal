@@ -101,7 +101,8 @@
               </div>
               <template #dropdown>
                 <el-dropdown-menu class="more-dropdown" slot="dropdown">
-                  <el-dropdown-item :command="{ flag: 'challenge', command: scope.row }" :disabled="!orderState">challenge</el-dropdown-item>
+                  <el-dropdown-item :command="{ flag: 'challenge', command: scope.row }"
+                    :disabled="!orderState">challenge</el-dropdown-item>
                   <!-- <el-dropdown-item :command="{ flag: 'ipfs', command: scope.row }" :disabled="
                     !(
                       !scope.row.isDir &&
@@ -207,7 +208,7 @@ const orderState = computed(() => {
   let state = route.query.orderState
   if (state == 0 || state == 4 || state == 5) {
     return false
-  }else{
+  } else {
     return true
   }
 
@@ -278,7 +279,9 @@ function openUpload() {
 function loadFileList() {
   let params = {
     username: username.value,
-    orderId: orderId.value,
+    orderId: 10,
+
+    // orderId: orderId.value,
     pageSize: tableData.pageSize,
     pageNo: tableData.pageNum,
   }
@@ -898,10 +901,8 @@ onMounted(() => {
     :deep(.el-input__wrapper) {
       width: 200px;
       height: 40px;
-      background: linear-gradient(
-        rgba(99, 106, 150, 0.8) 0%,
-        rgba(182, 186, 214, 0.6) 100%
-      );
+      background: linear-gradient(rgba(99, 106, 150, 0.8) 0%,
+          rgba(182, 186, 214, 0.6) 100%);
 
       .el-input__prefix {
         img {
@@ -920,10 +921,8 @@ onMounted(() => {
       }
 
       &.is-focus {
-        background: linear-gradient(
-          rgba(24, 32, 79, 0.4) 0%,
-          rgba(24, 32, 79, 0.25) 100%
-        );
+        background: linear-gradient(rgba(24, 32, 79, 0.4) 0%,
+            rgba(24, 32, 79, 0.25) 100%);
       }
     }
   }
@@ -1047,6 +1046,7 @@ onMounted(() => {
     }
 
     .color-box {
+
       // .color-box();
       img {
         transition: all 0.8s cubic-bezier(0.075, 0.82, 0.165, 1) 0s;

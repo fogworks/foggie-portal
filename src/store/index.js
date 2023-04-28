@@ -23,14 +23,14 @@ export default createStore({
   getters,
   plugins: [
     createPersistedState({
-      storage: window.localStorage,
+      storage: window.sessionStorage,
       key: 'FoggieV',
       // paths: ['global',],
 
       reducer: (state) => ({
-        global: {
-          ChainId: state.global.ChainId,
-          Password: state.global.Password,
+        clientGlobal: {
+          ChainId: state.clientGlobal.ChainId,
+          clientPassword: state.clientGlobal.clientPassword,
         },
         upload: {
           orderId: state.upload.orderId

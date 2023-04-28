@@ -189,18 +189,17 @@
       </div>
     </div>
   </div>
-  <myFiles ></myFiles>
+
   <!-- </div>s -->
 </template>
 
 <script setup>
-import myFiles from "@/views/Alltemplate/MyFiles/myFiles";
 import { ElMessage } from "element-plus";
 import { ref, reactive, toRefs, onMounted, computed } from "vue";
 import { useStore } from "vuex";
 // import { useRouter } from "vue-router";
 
-import { getOrderList, pushMerkle } from "@/api/order/orderList";
+import { getOrderList, pushMerkle ,getOrderById} from "@/api/order/orderList";
 import {
   transferTime,
   ChinaTime1,
@@ -210,7 +209,7 @@ import {
 const $state = useStore();
 // const router = useRouter();
 const props = defineProps({
-  activeName: {
+  orderId: {
     type: String,
     default: "",
   },
@@ -220,35 +219,29 @@ const username = computed(() => $state.getters.userInfo?.dmc);
 const email = computed(() => $state.getters.userInfo?.email);
 const state = reactive({
   orderList: [],
-  total: 0,
-  limit: 10,
-  pageNum: 1,
 });
 const { orderList } = toRefs(state);
 
 function loadOrderList() {
   let params = {
-    username: username.value,
-    limit: state.limit,
-    pageNum: state.pageNum,
+    // orderId: props.orderId,
+    orderId:10,
+
   };
 
-  getOrderList(params)
+  getOrderById(params)
     .then((res) => {
       if (res.code == 200) {
         console.log(res);
-        for (const item of res.data.list) {
+        for (const item of res.data) {
           item.popoverShow = false;
           item.created_time = ChinaTime1(new Date(item.created_time));
           let nowDate = new Date(item.created_time);
 
-          item.serverTime = getResidueTime(
-            nowDate.setDate(nowDate.getDate() + item.epoch * 7),
-            item.created_time
-          );
+          item.serverTime = getResidueTime(nowDate.setDate(nowDate.getDate() + item.epoch * 7),item.created_time);
         }
-        state.total = res.data.count;
-        state.orderList = state.orderList.concat(res.data.list);
+  
+        state.orderList =res.data
       }
     })
     .catch((error) => {
@@ -256,13 +249,6 @@ function loadOrderList() {
     });
 }
 
-function orderListInfinite() {
-  if (state.total > state.orderList.length) {
-    loadOrderList();
-  } else {
-    return false;
-  }
-}
 
 function openUpload(item) {
   $state.commit("upload/openUpload", item.id);

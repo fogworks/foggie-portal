@@ -5,8 +5,8 @@
       <login @closeDialog="closeDialog" :userInfo="userInfo"></login>
     </customDialog>
     <template v-if="!customDialogIsShow">
-      <orderList></orderList>
-     
+      <orderList :orderId="orderId"></orderList>
+      <myFiles :orderId="orderId"></myFiles>
     </template>
 
 
@@ -24,19 +24,25 @@ import {
   watch,
 } from "vue";
 import orderList from "@/components/orders/orderList.vue";
-
+import myFiles from "@/views/Alltemplate/MyFiles/myFiles";
 import customDialog from '@/components-V3/customDialog'
 import login from '@/components/login'
 import { useStore } from "vuex";
 
 import { getChain_id } from "@/api/common.js";
-import { provide, defineExpose, computed, defineProps } from "vue";
+import { provide, defineExpose, computed, defineProps, readonly } from "vue";
 const store = useStore()
 const props = defineProps(["deviceData"]);
+const orderId = readonly(props.deviceData.order_id)
 const userInfo = computed(() => store.getters.userInfo)
 let customDialogIsShow = ref(true)   // 是否展示 
+const clientPassword = computed(() => store.getters.clientPassword)
 
-
+if (clientPassword.value) {
+  customDialogIsShow.value = false
+} else {
+  customDialogIsShow.value = true
+}
 
 watch(
   () => props.deviceData,
@@ -54,7 +60,7 @@ function closeDialog() {
 function loadChainId() {
   getChain_id().then((res) => {
     if (res.code == 200) {
-      store.commit("global/SAVE_ChainId", res.data);
+      store.commit("clientGlobal/SAVE_ChainId", res.data);
     }
   });
 }

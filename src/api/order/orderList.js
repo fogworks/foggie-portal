@@ -13,6 +13,16 @@ export function getOrderList(data) {
 }
 
 
+/* 根据订单id获取订单 */
+export function getOrderById(data) {
+  return request({
+    url: baseUrl + '/order/id',
+    method: 'post',
+    data,
+  });
+}
+
+
 //提交merkle树
 export function pushMerkle(data) {
   return request({

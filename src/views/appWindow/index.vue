@@ -94,7 +94,6 @@ const scrollIntoView = (data) => {
   app.scrollTo(0, target.offsetTop);
 };
 const clickItem = (data) => {
-  console.log("clickItem");
   let target = totalActiveDevice.data.find(
     (el) => el.device_id === data.device_id
   );

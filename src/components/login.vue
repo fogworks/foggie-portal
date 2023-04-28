@@ -146,7 +146,7 @@ function submit(FormRef) {
           setresetPassword({ password: loginForm.registerForm.password,email:props.userInfo.email }).then(async res => {
             if (res.code == 200) {
 
-              store.commit('global/SAVE_PASSWORD', res.data)
+              store.commit('clientGlobal/SAVE_PASSWORD', res.data)
               await importPrivateKey()
             }
             loading.value = false
@@ -156,8 +156,9 @@ function submit(FormRef) {
         } else {
           getValidatePassword({ password: loginForm.registerForm.password,email:props.userInfo.email }).then(res => {
             if (res.code == 200) {
-              // store.commit('global/SAVE_PASSWORD', res.data.encryptedPassword)
 
+              store.commit('clientGlobal/SAVE_PASSWORD', res.data.encryptedPassword)
+       
               loading.value = false
 
               emits('closeDialog')
@@ -198,7 +199,7 @@ async function importPrivateKey() {
   /* 密码不存在  或 重置密码都需要重新导入私钥 */
 
 
-  await store.dispatch('global/setSavePassword',  {password:loginForm.registerForm.password,email:props.userInfo.email})
+  await store.dispatch('clientGlobal/setSavePassword',  {password:loginForm.registerForm.password,email:props.userInfo.email})
 
   ElMessageBox.prompt('请输入私钥', 'Tip', {
     'show-close': false,
@@ -217,7 +218,7 @@ async function importPrivateKey() {
             // store.commit('global/SAVE_USERNAME', res.data)
             done()
 
-            // router.push({ path: '/Alltemplate/Home' })
+
 
           }
         })
