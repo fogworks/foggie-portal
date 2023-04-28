@@ -29,6 +29,10 @@ app.post('/order/buy', jsonParser, (req, res) => {
   OrderController.buy(req, res);
 });
 
+app.post('/order/sync', jsonParser, (req, res) => {
+  OrderController.syncOrder(req, res);
+});
+
 app.post('/order/list', jsonParser, (req, res) => {
   var username = req.body.username;
   var limit = req.body.limit;

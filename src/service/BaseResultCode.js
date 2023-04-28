@@ -44,13 +44,18 @@ class BaseResultCode {
     static ORDER_BUY_FAILED = new BaseResultCode(20000, 'buy failed');
     static SAVE_PUSH_MERKLE_RECORD_FAILED = new BaseResultCode(20001, 'save push merkle record failed');
     static QUERY_PUSH_MERKLE_RECORD_FAILED = new BaseResultCode(20002, 'query push merkle record failed');
-    static SAVE_BUY_ORDER_RECORD_FAILED = new BaseResultCode(20003, 'save buy order record failed');
-    static QUERY_BUY_ORDER_RECORD_FAILED = new BaseResultCode(20004, 'query buy order record failed');
+    static SAVE_ORDER_FAILED = new BaseResultCode(20003, 'save order failed');
+    static QUERY_ORDER_FAILED = new BaseResultCode(20004, 'query order failed');
     static GET_ORDER_BASIC_INFO_FAILED = new BaseResultCode(20005, 'get order basic info failed');
     static GET_BILL_MEMO_FAILED = new BaseResultCode(20006, 'get bill memo failed');
     static SYNC_ORDER_2_REGISTER_CENTER_FAILED = new BaseResultCode(20007, 'sync order to register center failed');
-    static UPDTAE_BUY_ORDER_RECORD_FAILED = new BaseResultCode(20008, 'update order record failed');
-    static SAVE_SNYC_ORDER_RETRY_FAILED = new BaseResultCode(20009, 'save sync order retry failed');
+    static UPDTAE_ORDER_FAILED = new BaseResultCode(20008, 'update order failed');
+    static QUERY_BILL_FAILED = new BaseResultCode(20010, 'query bill failed');
+    static GET_TRANSACTION_ID_FAILED = new BaseResultCode(20011, 'get transaction id failed');
+    static GET_EXPIRE_FAILED = new BaseResultCode(20012, 'get expire failed');
+    static GET_TRANSACTION_FAILED = new BaseResultCode(20013, 'get transaction failed');
+    static GET_PEER_ID_FAILED = new BaseResultCode(20014, 'get peer id failed');
+    static GET_RPC_FAILED = new BaseResultCode(20015, 'get rpc failed');
 
     // 文件的异常code 30000～39999
     static FILE_NOT_EXIST = new BaseResultCode(30000, 'file is not exist');

@@ -14,15 +14,9 @@ const pushMerkleRecordDB = new NeDB({
     autoload: true,
 })
 
-const buyOrderRecordTableName = dbConfig.get('buyOrderRecordTableName');
-const buyOrderRecordDB = new NeDB({
-    filename: common.getHomePath() + path.sep + buyOrderRecordTableName,
-    autoload: true,
-})
-
-const syncOrderRetryTableName = dbConfig.get('syncOrderRetryTableName');
-const syncOrderRetryDB = new NeDB({
-    filename: common.getHomePath() + path.sep + syncOrderRetryTableName,
+const orderTableName = dbConfig.get('orderTableName');
+const orderDB = new NeDB({
+    filename: common.getHomePath() + path.sep + orderTableName,
     autoload: true,
 })
 
@@ -93,47 +87,84 @@ module.exports = {
             return BizResultCode.QUERY_PUSH_MERKLE_RECORD_FAILED;
         });
     },
-    saveBuyOrderRecord: async (email, orderId, miner, user, billId, pst, totalPrice, transactionId) => {
+    saveOrder: async (email, orderId, miner, user, billId, pst, totalPrice, transactionId) => {
         // save buy order record into NeDB
         return new Promise((resolve, reject) => {
-            var now = moment();
-            var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
-            buyOrderRecordDB.insert({
+
+            orderDB.findOne({
                 email: email,
                 order_id: orderId,
-                miner: miner,
-                user: user,
-                bill_id: billId,
-                pst: pst,
-                peer_id: '',
-                rpc: '',
-                total_price: totalPrice,
-                transaction_id: transactionId,
-                update_time: currentTime,
-                create_time: currentTime
-            }, function (err, doc) {
+                bill_id: billId
+            }, async function (err, doc) {
                 if (err) {
                     logger.error('err:', err);
-                    resolve(BizResultCode.SAVE_BUY_ORDER_RECORD_FAILED);
+                    resolve(BizResultCode.SAVE_ORDER_FAILED);
                     return;
                 }
-                resolve(doc._id);
+                var now = moment();
+                var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
+                if (doc) {
+                    orderDB.update({
+                        email: email,
+                        order_id: orderId,
+                        bill_id: billId
+                    }, {
+                        $set: {
+                            miner: miner,
+                            user: user,
+                            pst: pst,
+                            peer_id: '',
+                            rpc: '',
+                            total_price: totalPrice,
+                            transaction_id: transactionId,
+                            update_time: currentTime,
+                        }
+                    }, {}, function (err, num) {
+                        if (err) {
+                            logger.error('err:', err);
+                            resolve(BizResultCode.UPDTAE_ORDER_FAILED);
+                        }
+                        resolve(doc._id);
+                    });
+                }
+                else {
+                    orderDB.insert({
+                        email: email,
+                        order_id: orderId,
+                        miner: miner,
+                        user: user,
+                        bill_id: billId,
+                        pst: pst,
+                        peer_id: '',
+                        rpc: '',
+                        total_price: totalPrice,
+                        transaction_id: transactionId,
+                        update_time: currentTime,
+                        create_time: currentTime
+                    }, function (err, doc) {
+                        if (err) {
+                            logger.error('err:', err);
+                            resolve(BizResultCode.SAVE_ORDER_FAILED);
+                            return;
+                        }
+                        resolve(doc._id);
+                    });
+                }
             });
         }).catch((err) => {
             logger.error('err:', err);
-            return BizResultCode.SAVE_BUY_ORDER_RECORD_FAILED;
+            return BizResultCode.SAVE_ORDER_FAILED;
         });
     },
-    updateBuyOrderRecord: async (email, orderId, billId, peerId, rpc, transactionId) => {
-        // save buy order record into NeDB
+    updateOrder: async (email, orderId, billId, peerId, rpc) => {
+        // update buy order record into NeDB
         return new Promise((resolve, reject) => {
             var now = moment();
             var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
-            buyOrderRecordDB.update({
+            orderDB.update({
                 email: email,
                 order_id: orderId,
                 bill_id: billId,
-                transaction_id: transactionId,
             }, {
                 $set: {
                     peer_id: peerId,
@@ -143,24 +174,57 @@ module.exports = {
             }, {}, function (err, num) {
                 if (err) {
                     logger.error('err:', err);
-                    resolve(BizResultCode.UPDTAE_BUY_ORDER_RECORD_FAILED);
+                    resolve(BizResultCode.UPDTAE_ORDER_FAILED);
                     return;
                 }
                 resolve(num);
             });
         }).catch((err) => {
             logger.error('err:', err);
-            return BizResultCode.UPDTAE_BUY_ORDER_RECORD_FAILED;
+            return BizResultCode.UPDTAE_ORDER_FAILED;
         });
     },
-    syncOrder2RegisterCenter: async (email, orderId, billId, peerId, rpc, totalSpace, usedSpace, expire, transactionId) => {
-        // sync order to register center
-        var registerCenterConfig = config.get('registerCenterConfig');
-        var registerCenterUrl = registerCenterConfig.get('url');
-        var syncOrder = registerCenterConfig.get('syncOrder');
-        var expire = moment(expire).valueOf().toString();
+    syncOrder2RegisterCenter: async (email, orderId, billId, totalSpace, usedSpace, transactionId) => {
 
         try {
+            var bill = module.exports.getBillById(billId);
+            if (bill instanceof BizResultCode) {
+                return bill;
+            }
+            // 获取挂单时的transaction_id
+            var transactionId = bill[0].action[0].trx_id;
+            if (!transactionId) {
+                return BizResultCode.GET_TRANSACTION_ID_FAILED;
+            }
+            var expire = bill[0].expire_on;
+            if (!expire) {
+                return BizResultCode.GET_EXPIRE_FAILED;
+            }
+            // 根据挂单时的tranaction_id获取挂单信息
+            var transaction = module.exports.getTransactionById(transactionId);
+            if (transaction instanceof BizResultCode) {
+                return transaction;
+            }
+            // 根据挂单信息，获取memo
+            var memo = await module.exports.getMemoByRawData(transaction[0].rawData);
+            if (memo instanceof BizResultCode) {
+                return memo;
+            }
+            var memoArr = memo.split('$');
+            var peerId = memoArr[1];
+            if (!peerId) {
+                return BizResultCode.GET_PEER_ID_FAILED;
+            }
+            var rpc = memoArr[0];
+            if (!rpc) {
+                return BizResultCode.GET_RPC_FAILED;
+            }
+            // sync order to register center
+            var registerCenterConfig = config.get('registerCenterConfig');
+            var registerCenterUrl = registerCenterConfig.get('url');
+            var syncOrder = registerCenterConfig.get('syncOrder');
+            var expire = new Date(expire).getTime();
+
             let body = {};
             body['email'] = email;
             body['bill_id'] = billId;
@@ -178,147 +242,156 @@ module.exports = {
                 body: JSON.stringify(body)
             }).getBody('utf-8'))
             if (result.code == 200) {
-                resolve(orderId);
+                // 同步成功后，更新订单中的peer_id和rpc
+                logger.info('sync order to register center success, orderId:{}', orderId);
+                var updateBuyOrderRes = await module.exports.updateOrder(email, orderId, billId, peerId, rpc);
+                if (updateBuyOrderRes instanceof BizResultCode) {
+                    return updateBuyOrderRes;
+                }
+                return orderId;
             }
+            return BizResultCode.SYNC_ORDER_2_REGISTER_CENTER_FAILED;
         }
         catch (e) {
             logger.error('err:', e);
-            return new Promise((resolve, reject) => {
-                var now = moment();
-                var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
-                // 同步订单到注册中心失败，需要写入同步失败记录表，后续再加
-                syncOrderRetryDB.insert({
-                    email: email,
-                    order_id: orderId,
-                    bill_id: billId,
-                    transaction_id: transactionId,
-                    peer_id: peerId,
-                    rpc: rpc,
-                    total_space: totalSpace,
-                    used_space: usedSpace,
-                    expire: expire,
-                    state: 0,
-                    update_time: currentTime,
-                    create_time: currentTime
-                }, function (err, doc) {
-                    if (err) {
-                        logger.error('err:', err);
-                        resolve(BizResultCode.SAVE_SNYC_ORDER_RETRY_FAILED);
-                        return;
-                    }
-                    resolve(doc._id);
-
-                });
-            }).catch((err) => {
-                logger.error('err:', err);
-                return BizResultCode.SAVE_SNYC_ORDER_RETRY_FAILED;
-            });
+            return BizResultCode.SYNC_ORDER_2_REGISTER_CENTER_FAILED;
         }
     },
-    getBuyOrderRecord: async (email, skip, limit) => {
+    getOrder: async (email, skip, limit) => {
 
         return new Promise((resolve, reject) => {
             // query buy order record from NeDB
-            buyOrderRecordDB.find({
+            orderDB.find({
                 email: email
             }).skip(skip).limit(limit).sort({ create_time: -1 }).exec(function (err, data) {
                 if (err) {
                     logger.error('err:', err);
-                    resolve(BizResultCode.QUERY_BUY_ORDER_RECORD_FAILED);
+                    resolve(BizResultCode.QUERY_ORDER_FAILED);
                     return;
                 }
                 resolve(data);
             });
         }).catch((err) => {
             logger.error('err:', err);
-            return BizResultCode.QUERY_BUY_ORDER_RECORD_FAILED;
+            return BizResultCode.QUERY_ORDER_FAILED;
         });
     },
-    getBuyOrderRecordCount: async (email) => {
+    getOrderByBillId: async (email, billId) => {
+        return new Promise((resolve, reject) => {
+            // query buy order record from NeDB
+            orderDB.findOne({
+                email: email,
+                bill_id: billId
+            }).exec(function (err, data) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.QUERY_ORDER_FAILED);
+                    return;
+                }
+                resolve(data);
+            });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.QUERY_ORDER_FAILED;
+        });
+    },
+    getOrderCount: async (email) => {
 
         return new Promise((resolve, reject) => {
             // query buy order record count from NeDB
-            buyOrderRecordDB.find({
+            orderDB.find({
                 email: email
             }).exec(function (err, data) {
                 if (err) {
                     logger.error('err:', err);
-                    resolve(BizResultCode.QUERY_BUY_ORDER_RECORD_FAILED);
+                    resolve(BizResultCode.QUERY_ORDER_FAILED);
                     return;
                 }
                 resolve(data.length);
             });
         }).catch((err) => {
             logger.error('err:', err);
-            return BizResultCode.QUERY_BUY_ORDER_RECORD_FAILED;
+            return BizResultCode.QUERY_ORDER_FAILED;
         });
     },
     getBillById: (billId) => {
-        var chainConfig = config.get('chainConfig');
-        var transactionAddress = chainConfig.get('transactionAddress');
-        var getBill = chainConfig.get('getBill');
+        try {
+            var chainConfig = config.get('chainConfig');
+            var transactionAddress = chainConfig.get('transactionAddress');
+            var getBill = chainConfig.get('getBill');
 
-        let body = '{\n' +
-            '        find_bill(\n' +
-            '                order: "-created_time",\n' +
-            '                where: {\n' +
-            '                    id: { ne : "' + billId + '"}\n' +
-            '                },\n' +
-            '        ){\n' +
-            '            owner\n' +
-            '            state\n' +
-            '            created_time\n' +
-            '            unmatched_amount\n' +
-            '            matched_amount\n' +
-            '            id\n' +
-            '            action (\n' +
-            '                where: {\n' +
-            '                },\n' +
-            '            ){\n' +
-            '            trx_id\n' +
-            '            }\n' +
-            '            price\n' +
-            '            createdAt\n' +
-            '            expire_on\n' +
-            '            deposit_ratio\n' +
-            '            maker {\n' +
-            '                benchmark_stake_rate\n' +
-            '            }\n' +
-            '        }\n' +
-            '    }'
-        return JSON.parse(request('POST', transactionAddress + getBill, {
-            headers: {
-                'Content-Type': 'application/graphql'
-            },
-            body: body
-        }).getBody('utf-8')).data.find_bill
+            let body = '{\n' +
+                '        find_bill(\n' +
+                '                order: "-created_time",\n' +
+                '                where: {\n' +
+                '                    id: { ne : "' + billId + '"}\n' +
+                '                },\n' +
+                '        ){\n' +
+                '            owner\n' +
+                '            state\n' +
+                '            created_time\n' +
+                '            unmatched_amount\n' +
+                '            matched_amount\n' +
+                '            id\n' +
+                '            action (\n' +
+                '                where: {\n' +
+                '                },\n' +
+                '            ){\n' +
+                '            trx_id\n' +
+                '            }\n' +
+                '            price\n' +
+                '            createdAt\n' +
+                '            expire_on\n' +
+                '            deposit_ratio\n' +
+                '            maker {\n' +
+                '                benchmark_stake_rate\n' +
+                '            }\n' +
+                '        }\n' +
+                '    }'
+            return JSON.parse(request('POST', transactionAddress + getBill, {
+                headers: {
+                    'Content-Type': 'application/graphql'
+                },
+                body: body
+            }).getBody('utf-8')).data.find_bill
+        }
+        catch (e) {
+            logger.error('err:', e);
+            return BizResultCode.QUERY_BILL_FAILED;
+        }
     },
     getTransactionById: (transactionId) => {
-        var chainConfig = config.get('chainConfig');
-        var transactionAddress = chainConfig.get('transactionAddress');
-        var getTransaction = chainConfig.get('getTransaction');
+        try {
+            var chainConfig = config.get('chainConfig');
+            var transactionAddress = chainConfig.get('transactionAddress');
+            var getTransaction = chainConfig.get('getTransaction');
 
-        let body = '{\n' +
-            '        find_fibos_transactions(\n' +
-            '                order: "-createdAt"\n' +
-            '                where: {\n' +
-            '                    and:[\n' +
-            '                     {trx_id: "' + transactionId + '"},\n' +
-            '                     { and: [ { contract_action: { ne: "dmc/onblock" } } ] \n' +
-            '                   ]\n' +
-            '                },\n' +
-            '        ){\n' +
-            '            id\n' +
-            '            rawData\n' +
-            '        }\n' +
-            '    }'
-        let transactions = JSON.parse(request('POST', transactionAddress + getTransaction, {
-            headers: {
-                'Content-Type': 'application/graphql'
-            },
-            body: body
-        }).getBody('utf-8')).data.find_fibos_transactions
-        return transactions;
+            let body = '{\n' +
+                '        find_fibos_transactions(\n' +
+                '                order: "-createdAt"\n' +
+                '                where: {\n' +
+                '                    and:[\n' +
+                '                     {trx_id: "' + transactionId + '"},\n' +
+                '                     { and: [ { contract_action: { ne: "dmc/onblock" } } ] } \n' +
+                '                   ]\n' +
+                '                },\n' +
+                '        ){\n' +
+                '            id\n' +
+                '            rawData\n' +
+                '        }\n' +
+                '    }'
+            let transactions = JSON.parse(request('POST', transactionAddress + getTransaction, {
+                headers: {
+                    'Content-Type': 'application/graphql'
+                },
+                body: body
+            }).getBody('utf-8')).data
+            return transactions.find_fibos_transactions;
+        }
+        catch (e) {
+            logger.error('err:', e);
+            return BizResultCode.GET_TRANSACTION_FAILED;
+        }
     },
     getOrderBasicByBuyRes: async (buyRes) => {
         var actionTraces = buyRes.processed.action_traces;
@@ -332,8 +405,9 @@ module.exports = {
                     basicInfo['orderId'] = orderInfo.order_id;
                     basicInfo['user'] = orderInfo.user;
                     basicInfo['miner'] = orderInfo.miner;
+                    resolve(basicInfo);
+                    return;
                 }
-                resolve(basicInfo);
             });
         }).catch((err) => {
             logger.error('err:', err);
