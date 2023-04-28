@@ -1,4 +1,4 @@
-import request from '@/utils/request_miner';
+import request from '@/utils/request1';
 import setting from '@/setting';
 
 const { baseUrl } = setting;
@@ -12,10 +12,11 @@ export function getChain_id() {
 }
 
 //校验用户的登录状态
-export function getUserLoginStatus() {
+export function getUserLoginStatus(data) {
   return request({
     url: baseUrl + '/user/validate_user_login',
     method: 'POST',
+    data
   });
 }
 
@@ -23,6 +24,15 @@ export function getUserLoginStatus() {
 export function setImportPrivateKey(data) {
   return request({
     url: baseUrl + '/user/import_private_key',
+    method: 'POST',
+    data
+  });
+}
+
+//重置密码
+export function setresetPassword(data) {
+  return request({
+    url: baseUrl + '/user/reset_password',
     method: 'POST',
     data
   });

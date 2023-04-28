@@ -1,297 +1,205 @@
 <template>
-  <div>
-    <template v-for="(item, index) in orderList" :key="item.id">
-      <div class="OrdersList clearfix" v-if="item.id == '161'">
-        <div class="ListTitle">
-          <div>
-            <span>订单ID: {{ item.id }} </span>
-            <span
-              style="
-                font-size: 15px;
-                color: rgba(255, 255, 255, 0.7);
-                margin-left: 30px;
-              "
-              >{{ item.created_time }}</span
-            >
-          </div>
-          <div style="font-size: 15px; color: rgba(255, 255, 255, 0.7)">
-            <el-tag type="info" effect="dark" round v-if="item.state == '0'">
-              订单未共识，等待中...</el-tag
-            >
-            <el-tag effect="dark" round v-if="item.state == '1'"
-              >订单状态交付中</el-tag
-            >
-            <el-tag type="warning" effect="dark" round v-if="item.state == '2'">
-              没有足够的预存金，订单即将结束
-            </el-tag>
-            <el-tag effect="dark" round v-if="item.state == '3'">
-              有足够的预存金，订单下个周期依然处于交付中
-            </el-tag>
-            <el-tag type="success" effect="dark" round v-if="item.state == '4'">
-              订单已经结束</el-tag
-            >
-            <el-tag type="danger" effect="dark" round v-if="item.state == '5'">
-              订单已取消</el-tag
-            >
-            <el-tag type="warning" effect="dark" round v-if="item.state == '6'">
-              订单下个周期将要取消
-            </el-tag>
-          </div>
-        </div>
-        <div
-          class="ListBox"
-          :style="
-            item.state !== '2' || item.state !== '6'
-              ? 'background-color: transparent'
-              : ''
-          "
-        >
-          <div class="BoxContent">
-            <el-row class="BoxContent_header">
-              <el-col :span="3" style="line-height: 140px; text-align: center">
-                <span
-                  style="margin-right: 10px; font-size: 40px; font-weight: 600"
-                  >{{ item.miner_lock_pst_amount }}</span
-                >
-                <span style="font-size: 24px; font-weight: 600">PST</span>
-              </el-col>
-              <el-col :span="11" class="tow_col">
-                <div>
-                  <div>Price</div>
-                  <div>
-                    <span>{{ item.price_amount.split(".")[0] }}</span
-                    ><span style="font-size: 16px"
-                      >.{{ item.price_amount.split(".")[1] }}</span
-                    >
-                  </div>
-                </div>
-                <div style="text-align: center">
-                  <svg-icon
-                    icon-class="money"
-                    size="40"
-                    style="margin-right: 10px"
-                  ></svg-icon>
-                  <div style="color: #86ffff; font-style: italic">Price</div>
-                  <div style="color: #86ffff; font-style: italic">
-                    （total）
-                  </div>
-                  <div>
-                    <span>{{ item.miner_lock_dmc_amount.split(".")[0] }}</span
-                    ><span style="font-size: 16px">
-                      .{{ item.miner_lock_dmc_amount.split(".")[1] }}</span
-                    >
-                  </div>
-                </div>
-                <div>
-                  <div>Deposit</div>
-                  <div>
-                    <span>{{ item.deposit_amount.split(".")[0] }}</span
-                    ><span style="font-size: 16px">
-                      .{{ item.deposit_amount.split(".")[1] }}</span
-                    >
-                  </div>
-                </div>
-                <div>
-                  <div>Residue</div>
-                  <div>
-                    <span>200</span>
-                  </div>
-                </div>
-                <div>
-                  <div>day Estimated</div>
-                  <div>
-                    <span>1</span><span style="font-size: 16px">.0000</span>
-                  </div>
-                </div>
-                <div>
-                  <div>Punish</div>
-                  <div style="color: #db001b; font-weight: bold">1</div>
-                </div>
-              </el-col>
-              <el-col :span="10" style="text-align: center; padding: 0px 20px">
-                <svg-icon
-                  icon-class="serverTime"
-                  size="40"
-                  style="margin-right: 10px"
-                ></svg-icon>
-                <div
-                  style="
-                    display: flex;
-                    margin-top: 20px;
-                    font-weight: bold;
-                    font-size: 20px;
-                    color: #fbfbfb;
-                  "
-                >
-                  <div style="width: 160px; text-align: start">Services</div>
-                  <el-progress
-                    style="flex: 1"
-                    :text-inside="true"
-                    color="#7066FF"
-                    :stroke-width="8"
-                    :percentage="item.serverTime.percentage"
-                  >
-                    <template #default="{ percentage }">
-                      <span
-                        >{{ item.serverTime.time.D }}天
-                        {{ item.serverTime.time.H }}时
-                        {{ item.serverTime.time.M }}分</span
-                      >
-                    </template>
-                  </el-progress>
-                </div>
-                <div
-                  style="
-                    display: flex;
-                    margin-top: 20px;
-                    font-weight: bold;
-                    font-size: 20px;
-                    color: #fbfbfb;
-                  "
-                >
-                  <div style="width: 160px; text-align: start">
-                    Last Challenge
-                  </div>
-                  <el-progress
-                    style="flex: 1"
-                    :text-inside="true"
-                    color="#6FE9EE"
-                    :stroke-width="8"
-                    :percentage="70"
-                  >
-                    <template #default="{ percentage }">
-                      <span>15days 30min</span>
-                    </template>
-                  </el-progress>
-                </div>
-              </el-col>
-            </el-row>
-            <el-divider
-              style="
-                margin: 12px 0;
-                border-top: 1px #4a4c51 var(--el-border-style);
-              "
-            />
-            <el-row style="height: 90px">
-              <el-col :span="12" class="bottom_col">
-                <svg-icon
-                  icon-class="left"
-                  size="40"
-                  style="margin-right: 10px"
-                ></svg-icon>
-                <div>
-                  <div>Blocks</div>
-                  <div>12600</div>
-                </div>
-                <div style="text-align: center">
-                  <div>Foggie</div>
-                  <div>12</div>
-                </div>
-                <div>
-                  <div>Files</div>
-                  <div>12</div>
-                </div>
-                <div>
-                  <div>Size</div>
-                  <div>120GB</div>
-                </div>
-                <div>
-                  <div>Slots</div>
-                  <div>82600</div>
-                </div>
-              </el-col>
-              <el-col :span="8" class="bottom_col">
-                <svg-icon
-                  icon-class="hammer"
-                  size="40"
-                  style="margin-right: 10px"
-                ></svg-icon>
-                <div>
-                  <div>User</div>
-                  <div>
-                    <span>12/</span><span style="color: #db001b">1</span>
-                  </div>
-                </div>
-                <div>
-                  <div>Chain</div>
-                  <div>
-                    <span>12/</span><span style="color: #db001b">0</span>
-                  </div>
-                </div>
-                <div>
-                  <div>Pool</div>
-                  <div>
-                    <span>300/</span><span style="color: #db001b">12</span
-                    ><span style="color: #ffff00">/1</span>
-                  </div>
-                </div>
-              </el-col>
-              <el-col
-                :span="4"
-                style="
-                  display: flex;
-                  justify-content: space-around;
-                  align-items: center;
-                  padding-left: 15px;
-                  cursor: pointer;
-                "
-              >
-                <svg-icon
-                  icon-class="upload"
-                  size="36"
-                  style="margin-right: 10px"
-                  @click.stop="openUpload(item)"
-                ></svg-icon>
-                <svg-icon
-                  icon-class="folder"
-                  size="40"
-                  style="margin-right: 10px"
-                  @click.stop="openMyFiles(item)"
-                ></svg-icon>
-                <svg-icon
-                  icon-class="dinwei"
-                  size="40"
-                  style="margin-right: 10px"
-                ></svg-icon>
-
-                <el-popover
-                  placement="bottom"
-                  :ref="'popover_' + index"
-                  v-model:visible="item.popoverShow"
-                  :show-arrow="true"
-                  popper-class="tabsPopover"
-                  trigger="hover"
-                >
-                  <div class="popoverBox">
-                    <div
-                      class="popoverBox_item"
-                      @click.stop="popoverClick('submitMerkle', item)"
-                    >
-                      上传Merkle
-                    </div>
-                  </div>
-                  <template #reference>
-                    <div>
-                      <svg-icon icon-class="setting" size="40"></svg-icon>
-                    </div>
-                  </template>
-                </el-popover>
-              </el-col>
-            </el-row>
-          </div>
-        </div>
+  <!-- <div v-infinite-scroll="orderListInfinite" :infinite-scroll-immediate="false" :infinite-scroll-distance="150"
+    :infinite-scroll-disabled="activeName != 'List'"> -->
+  <div class="OrdersList clearfix" v-for="(item, index) in orderList" :key="index">
+    <div class="ListTitle">
+      <div>
+        <span>订单ID: {{ item.id }} </span>
+        <span style="
+                  font-size: 15px;
+                  color: rgba(255, 255, 255, 0.7);
+                  margin-left: 30px;
+                ">{{ item.created_time }}</span>
       </div>
-    </template>
+      <div style="font-size: 15px; color: rgba(255, 255, 255, 0.7)">
+        <el-tag type="info" effect="dark" round v-if="item.state == '0'">
+          订单未共识，等待中...</el-tag>
+        <el-tag effect="dark" round v-if="item.state == '1'">订单状态交付中</el-tag>
+        <el-tag type="warning" effect="dark" round v-if="item.state == '2'">
+          没有足够的预存金，订单即将结束
+        </el-tag>
+        <el-tag effect="dark" round v-if="item.state == '3'">
+          有足够的预存金，订单下个周期依然处于交付中
+        </el-tag>
+        <el-tag type="success" effect="dark" round v-if="item.state == '4'">
+          订单已经结束</el-tag>
+        <el-tag type="danger" effect="dark" round v-if="item.state == '5'">
+          订单已取消</el-tag>
+        <el-tag type="warning" effect="dark" round v-if="item.state == '6'">
+          订单下个周期将要取消
+        </el-tag>
+      </div>
+    </div>
+    <div class="ListBox" :style="item.state !== '2' || item.state !== '6' ? 'background-color: transparent' : ''">
+      <div class="BoxContent">
+        <el-row class="BoxContent_header">
+          <el-col :span="3" style="line-height: 140px; text-align: center">
+            <span style="margin-right: 10px; font-size: 40px; font-weight: 600">{{ item.miner_lock_pst_amount }}</span>
+            <span style="font-size: 24px; font-weight: 600">PST</span>
+          </el-col>
+          <el-col :span="11" class="tow_col">
+            <div>
+              <div>Price</div>
+              <div>
+                <span>{{ item.price_amount.split(".")[0] }}</span><span style="font-size: 16px">.{{
+                  item.price_amount.split(".")[1] }}</span>
+              </div>
+            </div>
+            <div style="text-align: center">
+              <svg-icon icon-class="money" size="40" style="margin-right: 10px"></svg-icon>
+              <div style="color: #86ffff; font-style: italic">Price</div>
+              <div style="color: #86ffff; font-style: italic">（total）</div>
+              <div>
+                <span>{{ item.miner_lock_dmc_amount.split(".")[0] }}</span><span style="font-size: 16px">
+                  .{{ item.miner_lock_dmc_amount.split(".")[1] }}</span>
+              </div>
+            </div>
+            <div>
+              <div>Deposit</div>
+              <div>
+                <span>{{ item.deposit_amount.split(".")[0] }}</span><span style="font-size: 16px">
+                  .{{ item.deposit_amount.split(".")[1] }}</span>
+              </div>
+            </div>
+            <div>
+              <div>Residue</div>
+              <div>
+                <span>200</span>
+              </div>
+            </div>
+            <div>
+              <div>day Estimated</div>
+              <div>
+                <span>1</span><span style="font-size: 16px">.0000</span>
+              </div>
+            </div>
+            <div>
+              <div>Punish</div>
+              <div style="color: #db001b; font-weight: bold">1</div>
+            </div>
+          </el-col>
+          <el-col :span="10" style="text-align: center; padding: 0px 20px">
+            <svg-icon icon-class="serverTime" size="40" style="margin-right: 10px"></svg-icon>
+            <div style="
+                      display: flex;
+                      margin-top: 20px;
+                      font-weight: bold;
+                      font-size: 20px;
+                      color: #fbfbfb;
+                    ">
+              <div style="width: 160px; text-align: start">Services</div>
+              <el-progress style="flex: 1" :text-inside="true" color="#7066FF" :stroke-width="8"
+                :percentage="item.serverTime.percentage">
+                <template #default="{ percentage }">
+                  <span>{{ item.serverTime.time.D }}天
+                    {{ item.serverTime.time.H }}时
+                    {{ item.serverTime.time.M }}分</span>
+                </template>
+              </el-progress>
+            </div>
+            <div style="
+                      display: flex;
+                      margin-top: 20px;
+                      font-weight: bold;
+                      font-size: 20px;
+                      color: #fbfbfb;
+                    ">
+              <div style="width: 160px; text-align: start">
+                Last Challenge
+              </div>
+              <el-progress style="flex: 1" :text-inside="true" color="#6FE9EE" :stroke-width="8" :percentage="70">
+                <template #default="{ percentage }">
+                  <span>15days 30min</span>
+                </template>
+              </el-progress>
+            </div>
+          </el-col>
+        </el-row>
+        <el-divider style="
+                  margin: 12px 0;
+                  border-top: 1px #4a4c51 var(--el-border-style);
+                " />
+        <el-row style="height: 90px">
+          <el-col :span="12" class="bottom_col">
+            <svg-icon icon-class="left" size="40" style="margin-right: 10px"></svg-icon>
+            <div>
+              <div>Blocks</div>
+              <div>12600</div>
+            </div>
+            <div style="text-align: center">
+              <div>Foggie</div>
+              <div>12</div>
+            </div>
+            <div>
+              <div>Files</div>
+              <div>12</div>
+            </div>
+            <div>
+              <div>Size</div>
+              <div>120GB</div>
+            </div>
+            <div>
+              <div>Slots</div>
+              <div>82600</div>
+            </div>
+          </el-col>
+          <el-col :span="8" class="bottom_col">
+            <svg-icon icon-class="hammer" size="40" style="margin-right: 10px"></svg-icon>
+            <div>
+              <div>User</div>
+              <div><span>12/</span><span style="color: #db001b">1</span></div>
+            </div>
+            <div>
+              <div>Chain</div>
+              <div><span>12/</span><span style="color: #db001b">0</span></div>
+            </div>
+            <div>
+              <div>Pool</div>
+              <div>
+                <span>300/</span><span style="color: #db001b">12</span><span style="color: #ffff00">/1</span>
+              </div>
+            </div>
+          </el-col>
+          <el-col :span="4" style="
+                    display: flex;
+                    justify-content: space-around;
+                    align-items: center;
+                    padding-left: 15px;
+                    cursor: pointer;
+                  ">
+            <svg-icon icon-class="upload" size="36" style="margin-right: 10px" @click.stop="openUpload(item)"></svg-icon>
+            <svg-icon icon-class="folder" size="40" style="margin-right: 10px" @click.stop="openMyFiles(item)"></svg-icon>
+            <svg-icon icon-class="dinwei" size="40" style="margin-right: 10px"></svg-icon>
+
+            <el-popover placement="bottom" :ref="'popover_' + index" v-model:visible="item.popoverShow" :show-arrow="true"
+              popper-class="tabsPopover" trigger="hover">
+              <div class="popoverBox">
+                <div class="popoverBox_item" @click.stop="popoverClick('submitMerkle', item)">
+                  上传Merkle
+                </div>
+              </div>
+              <template #reference>
+                <div>
+                  <svg-icon icon-class="setting" size="40"></svg-icon>
+                </div>
+              </template>
+            </el-popover>
+          </el-col>
+        </el-row>
+      </div>
+    </div>
   </div>
+
+  <!-- </div>s -->
 </template>
 
 <script setup>
 import { ElMessage } from "element-plus";
 import { ref, reactive, toRefs, onMounted, computed } from "vue";
 import { useStore } from "vuex";
-import { useRouter } from "vue-router";
+// import { useRouter } from "vue-router";
 
-import { getOrderList, pushMerkle } from "@/api/order/orderList";
+import { getOrderList, pushMerkle ,getOrderById} from "@/api/order/orderList";
 import {
   transferTime,
   ChinaTime1,
@@ -299,50 +207,41 @@ import {
   ChinaTime4,
 } from "@/utils/ChinaStandardTime";
 const $state = useStore();
-const router = useRouter();
+// const router = useRouter();
 const props = defineProps({
-  activeName: {
+  orderId: {
     type: String,
     default: "",
   },
 });
 const ChainId = computed(() => $state.getters.ChainId);
-const Password = computed(
-  () => $state.getters.Password || $state.state.Password
-);
+const username = computed(() => $state.getters.userInfo?.dmc);
+const email = computed(() => $state.getters.userInfo?.email);
 const state = reactive({
   orderList: [],
-  total: 0,
-  limit: 10,
-  pageNum: 1,
 });
 const { orderList } = toRefs(state);
 
 function loadOrderList() {
   let params = {
-    username: "null",
-    limit: state.limit,
-    pageNum: state.pageNum,
+    // orderId: props.orderId,
+    orderId:10,
+
   };
 
-  getOrderList(params)
+  getOrderById(params)
     .then((res) => {
       if (res.code == 200) {
         console.log(res);
-        for (const item of res.data.list) {
+        for (const item of res.data) {
           item.popoverShow = false;
           item.created_time = ChinaTime1(new Date(item.created_time));
           let nowDate = new Date(item.created_time);
 
-          item.serverTime = getResidueTime(
-            nowDate.setDate(nowDate.getDate() + item.epoch * 7),
-            item.created_time
-          );
+          item.serverTime = getResidueTime(nowDate.setDate(nowDate.getDate() + item.epoch * 7),item.created_time);
         }
-        state.total = res.data.count;
-        state.orderList = state.orderList
-          .concat(res.data.list)
-          .filter((el) => el.id == "161");
+  
+        state.orderList =res.data
       }
     })
     .catch((error) => {
@@ -350,20 +249,13 @@ function loadOrderList() {
     });
 }
 
-function orderListInfinite() {
-  if (state.total > state.orderList.length) {
-    loadOrderList();
-  } else {
-    return false;
-  }
-}
 
 function openUpload(item) {
   $state.commit("upload/openUpload", item.id);
 }
 function openMyFiles(item) {
   $state.commit("upload/openMyFiles", item.id);
-  router.push({ path: "/Alltemplate/MyFiles" });
+  // router.push({ path: "/Alltemplate/MyFiles", query: { orderState: item.state } });
 }
 
 function popoverClick(type, item) {
@@ -380,14 +272,20 @@ function popoverClick(type, item) {
 
     let params = {
       chainId: ChainId.value,
-      username: "tianbao12345",
-      password: Password.value,
+      username: username.value,
+      email: email.value,
       orderId: item.id,
     };
 
     pushMerkle(params).then((res) => {
       if (res.code == 200) {
         item.popoverShow = false;
+        ElMessage({
+          showClose: true,
+          message: "merKle树上传成功！",
+          type: "success",
+          grouping: true,
+        });
       }
     });
   }
@@ -474,7 +372,7 @@ onMounted(() => {
           align-items: end;
           padding-bottom: 20px;
 
-          & > div {
+          &>div {
             height: 100%;
             display: flex;
             flex-direction: column;
@@ -483,7 +381,7 @@ onMounted(() => {
             cursor: pointer;
           }
 
-          & > div > div:first-child {
+          &>div>div:first-child {
             font-size: 14px;
             text-align: center;
             color: #86ffff;
@@ -492,7 +390,7 @@ onMounted(() => {
             margin-bottom: 10px;
           }
 
-          & > div > div:last-child {
+          &>div>div:last-child {
             font-size: 36px !important;
             text-align: center;
           }
@@ -506,7 +404,7 @@ onMounted(() => {
       justify-content: space-between;
       align-items: center;
 
-      & > div {
+      &>div {
         font-size: 19px;
         color: #dddddd;
         color: #3d3d3d;
@@ -570,7 +468,7 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 
-.homeBoxHeader-left > div {
+.homeBoxHeader-left>div {
   margin-right: 30px;
   margin-top: 15px;
 }
@@ -639,11 +537,11 @@ onMounted(() => {
       width: 100%;
     }
 
-    & > div {
+    &>div {
       display: flex;
       align-items: center;
 
-      & > div {
+      &>div {
         font-size: 14px;
         font-weight: bold;
         width: 80px;
@@ -655,7 +553,7 @@ onMounted(() => {
         flex: 0 0 auto;
       }
 
-      & > span {
+      &>span {
         color: #666;
         font-size: 14px;
         white-space: nowrap;

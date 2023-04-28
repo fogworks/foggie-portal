@@ -1,10 +1,10 @@
 <template>
-  <teleport to="body">
+  <teleport :to="isInsertBody">
     <div class="dialogDetail" v-if="isShow" @click="closeClickModal ? closeDialog() : ''">
-      <div class="dialog_box" @click.stop="" :style="{
-        width: width,
-        minHeight: height,
-      }">
+      <div class="dialog_box" v-if="isBox" @click.stop="" :style="{
+          width: width,
+          minHeight: height,
+        }">
         <div class="closeDialog" @click="closeDialog">
           <el-icon color="#fff">
             <CloseBold />
@@ -13,6 +13,9 @@
 
         <slot></slot>
       </div>
+
+      <slot v-if="!isBox"></slot>
+
     </div>
   </teleport>
 </template>
@@ -37,7 +40,7 @@ export default {
     /* dialog 显示隐藏 */
     modelValue: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     /* 是否可以通过点击 modal 关闭 dialog */
     closeClickModal: {
@@ -54,6 +57,16 @@ export default {
       type: String,
       default: "500px",
     },
+    /* 是否需要 Box */
+    isBox: {
+      type: Boolean,
+      default: true,
+    },
+    /* 是否需要 Box */
+    isInsertBody: {
+      type: String,
+      default: 'body',
+    }
   },
   methods: {
     /* 关闭Dialog */

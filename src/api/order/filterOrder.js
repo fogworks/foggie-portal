@@ -1,4 +1,4 @@
-import request from '@/utils/request_miner';
+import request from '@/utils/request1';
 import setting from '@/setting';
 
 const { baseUrl } = setting;

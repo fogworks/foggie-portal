@@ -35,18 +35,22 @@ class OrderController {
         var unmatchedAmount = req.body.unmatchedAmount;
         // 订单总价，单位 DMC
         var totalPrice = req.body.totalPrice;
-        // 加密后的密码
-        var password = req.body.password;
+        // foggie的邮箱
+        var email = req.body.email;
 
         var chainConfig = config.get('chainConfig')
         var httpEndpoint = chainConfig.get('httpEndpoint')
 
-        if (!chainId || !billId || !period || !benchmarkPrice || !priceRange || !unmatchedAmount || !totalPrice || !username || !password) {
+        if (!chainId || !billId || !period || !benchmarkPrice || !priceRange || !unmatchedAmount || !totalPrice || !username || !email) {
             response.send(BizResult.validateFailed());
             return;
         }
 
-        var keyProvider = await userService.getPrivateKeyByPassword(password);
+        var keyProvider = await userService.getPrivateKeyByEmail(email);
+        if(keyProvider instanceof BizResultCode) {
+            response.send(BizResult.fail(keyProvider));
+            return;
+        }
 
         // 基准价格*10000
         var benchmark = (benchmarkPrice * 10000).toString()
@@ -264,6 +268,71 @@ class OrderController {
     }
 
     /**
+     * 获取用户的订单列表
+     * @param {*} orderId   订单id
+     * @param {*} res       HTTP的响应
+     * @returns 订单列表
+     */
+    static getOrderById(orderId, res) {
+
+        if (!orderId) {
+            res.send(BizResult.validateFailed())
+            return;
+        }
+
+        var chainConfig = config.get('chainConfig')
+        var transactionAddress = chainConfig.get('transactionAddress')
+        var getOrders = chainConfig.get('getOrders')
+
+        let body = '{\n' +
+            '        find_order(\n' +
+            '                where: {\n' +
+            '                    id: "' + orderId + '",\n' +
+            '                },\n' +
+            '                order: "-created_time,id",\n' +
+            '        ){\n' +
+            '            id\n' +
+            '            user {\n' +
+            '                id\n' +
+            '            }\n' +
+            '            miner {\n' +
+            '                id\n' +
+            '            }\n' +
+            '            bill {\n' +
+            '                id\n' +
+            '            }\n' +
+            '            created_time\n' +
+            '            epoch\n' +
+            '            user_pledge_amount\n' +
+            '            miner_lock_pst_amount\n' +
+            '            miner_lock_dmc_amount\n' +
+            '            price_amount\n' +
+            '            settlement_pledge_amount\n' +
+            '            lock_pledge_amount\n' +
+            '            state\n' +
+            '            deliver_start_date\n' +
+            '            latest_settlement_date\n' +
+            '            miner_lock_rsi_amount\n' +
+            '            miner_rsi_amount\n' +
+            '            user_rsi_amount\n' +
+            '            deposit_amount\n' +
+            '            deposit_valid\n' +
+            '            cancel_date\n' +
+            '            createdAt\n' +
+            '        }\n' +
+            '    }'
+        // let request = ;
+        let order = JSON.parse(request('POST', transactionAddress + getOrders, {
+            headers: {
+                'Content-Type': 'application/graphql'
+            },
+            body: body
+        }).getBody('utf-8')).data.find_order;
+
+        res.send(BizResult.success(order));
+    }
+
+    /**
      * 上传merkle树
      * @param {*} req HTTP的request 
      * @param {*} res HTTP的response
@@ -274,17 +343,17 @@ class OrderController {
         var chainId = req.body.chainId;
         var username = req.body.username;
         var orderId = req.body.orderId;
-        var password = req.body.password;
+        var email = req.body.email;
 
-        if (!chainId || !username || !orderId || !password) {
+        if (!chainId || !username || !orderId || !email) {
             res.send(BizResult.validateFailed());
             return;
         }
 
-        var privateKey = await userService.getPrivateKeyByPassword(password);
-        if (!privateKey) {
+        var privateKey = await userService.getPrivateKeyByEmail(email);
+        if (privateKey instanceof BizResultCode) {
             logger.info('private key is null');
-            res.send(BizResult.fail(BizResultCode.GET_PRIVATE_KEY_FAILED));
+            res.send(BizResult.fail(privateKey));
             return;
         }
 

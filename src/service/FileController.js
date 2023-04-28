@@ -208,8 +208,6 @@ class FileController {
             const readStream = fs.createReadStream(file.path, { highWaterMark: uploadFileBufferSize });
 
             readStream.on('data', (chunk) => {
-                var md5 = crypto.createHash('md5').update(chunk).digest('hex');
-                logger.info('upload file, file_path:{}, partNum:{}, transferData.length:{}, md5:{}', file.path, partId, chunk.length, md5);
                 uploadFileStream.write({ chunk: chunk });
             });
 
@@ -549,19 +547,19 @@ class FileController {
     static async reqChallenge(req, response) {
         var orderId = req.body.orderId;
         var username = req.body.username;
-        var password = req.body.password;
+        var email = req.body.password;
         var chainId = req.body.chainId;
         var md5 = req.body.md5;
 
-        if (!orderId || !username || !password || !chainId || !md5) {
+        if (!orderId || !username || !email || !chainId || !md5) {
             response.send(BizResult.validateFailed());
             return;
         }
 
-        var privateKey = await userService.getPrivateKeyByPassword(password);
-        if (!privateKey) {
+        var privateKey = await userService.getPrivateKeyByEmail(email);
+        if (privateKey instanceof BizResultCode) {
             logger.info('private key is null');
-            response.send(BizResult.fail(BizResultCode.GET_PRIVATE_KEY_FAILED));
+            response.send(BizResult.fail(privateKey));
             return;
         }
 
@@ -588,9 +586,9 @@ class FileController {
         let originData = zlib.unzipSync(Buffer.from(codebook.data, 'base64'));
         let randomCharacter = fileService.generateRandom(4);
         let nonce = randomCharacter + "#" + codebook.cid;
-        var containRandomData = originData + randomCharacter;
+        var containRandomData = Buffer.concat([originData, Buffer.from(randomCharacter)]);
         let pre_data_hash = DMC.ecc.sha256(containRandomData);
-        let data_hash = Buffer.from(DMC.ecc.sha256(Buffer.from(pre_data_hash, "hex"))).toString("hex");
+        let data_hash = Buffer.from(DMC.ecc.sha256(Buffer.from(pre_data_hash))).toString("hex");
         logger.info("challenge, orderId:{},partId:{},data_hash:{},nonce:{}", codebook.order_id, codebook.part_id, data_hash, nonce);
         dmc_client.transact({
             actions: [{

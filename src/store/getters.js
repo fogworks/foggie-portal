@@ -2,9 +2,9 @@
 const getters = {
   uploadIsShow: state => state.upload.uploadIsShow,
   orderId: state => state.upload.orderId,
-  activeIndex:state => state.global.activeIndex,
-  theme:state => state.global.theme,
-  ChainId:state => state.global.ChainId, //链ID
-  Password:state => state.global.Password  // 用户加密密码
+  theme: state => state.global.theme,
+  userInfo: state => state.global.userInfo,
+  ChainId: state => state.clientGlobal.ChainId, //链ID
+  clientPassword: state => state.clientGlobal.clientPassword,  // 用户加密密码
 }
 export default getters

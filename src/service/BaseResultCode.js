@@ -38,6 +38,7 @@ class BaseResultCode {
     static GET_USERNAME_FAILED = new BaseResultCode(10010, 'get username failed');
     static PRIVATE_KEY_INVALID = new BaseResultCode(10011, 'private key is invalid');
     static CLAIM_ORDER_FAILED = new BaseResultCode(10012, 'claim order failed'); 
+    static GET_USERINFO_FAILED = new BaseResultCode(10013, 'get userinfo failed');
 
     // 订单的异常code 20000～29999
     static ORDER_BUY_FAILED = new BaseResultCode(20000, 'buy failed');
