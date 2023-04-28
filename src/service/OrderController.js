@@ -47,7 +47,7 @@ class OrderController {
         }
 
         var keyProvider = await userService.getPrivateKeyByEmail(email);
-        if(keyProvider instanceof BizResultCode) {
+        if (keyProvider instanceof BizResultCode) {
             response.send(BizResult.fail(keyProvider));
             return;
         }
@@ -95,20 +95,31 @@ class OrderController {
             blocksBehind: 3,
             expireSeconds: 30,
         }).then(async (res) => {
+            // 根据买单的返回数据获取订单的基本信息，包含订单的id、矿工、用户
+            var orderBasic = await orderService.getOrderBasicByBuyRes(res);
+            // 保存订单到neDB
+            let saveRes = await orderService.saveBuyOrderRecord(email, orderBasic.orderId, orderBasic.miner, orderBasic.user, billId, unmatchedAmount, totalPrice, res.transaction_id);
+            if (saveRes instanceof BizResultCode) {
+                response.send(BizResult.fail(saveRes));
+                return;
+            }
             var bill = orderService.getBillById(billId);
             // 获取挂单时的transaction_id
             var transactionId = bill[0].action[0].trx_id;
+            var expire = bill[0].expire_on;
             // 根据挂单时的tranaction_id获取挂单信息
             var transaction = await orderService.getTransactionById(transactionId);
             // 根据挂单信息，获取memo
             var memo = await orderService.getMemoByRawData(transaction[0].rawData);
-            var expire = bill[0].expire_on;
-            // 根据买单的返回数据获取订单的基本信息，包含订单的id、矿工、用户
-            var orderBasic = await orderService.getOrderBasicByBuyRes(res);
-            // 保存订单到neDB
-            let saveRes = await orderService.saveBuyOrderRecord(email, orderBasic.orderId, orderBasic.miner, orderBasic.user, billId, peerId, rpc, totalSpace, 0, res.transaction_id);
-            
-            response.send(BizResult.success(res))
+            if (memo instanceof BizResultCode) {
+                response.send(BizResult.fail(memo));
+                return;
+            }
+            var memoArr = memo.split('$');
+            orderService.syncOrder2RegisterCenter(email, orderBasic.orderId,
+                billId, memoArr[1], memoArr[0], unmatchedAmount * 1024 * 1024 * 1024, 0, expire, res.transaction_id);
+
+            response.send(BizResult.success(res.transaction_id))
         }).catch((err) => {
             logger.error(err)
             response.send(BizResult.fail(BizResultCode.ORDER_BUY_FAILED))

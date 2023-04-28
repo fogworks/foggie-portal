@@ -20,6 +20,12 @@ const buyOrderRecordDB = new NeDB({
     autoload: true,
 })
 
+const syncOrderRetryTableName = dbConfig.get('syncOrderRetryTableName');
+const syncOrderRetryDB = new NeDB({
+    filename: common.getHomePath() + path.sep + syncOrderRetryTableName,
+    autoload: true,
+})
+
 module.exports = {
     savePuskMerkleRecord: async (orderId, username, merkleRoot, blockNum, transactionId) => {
         // save push merkle record into NeDB
@@ -87,7 +93,7 @@ module.exports = {
             return BizResultCode.QUERY_PUSH_MERKLE_RECORD_FAILED;
         });
     },
-    saveBuyOrderRecord: async (email, orderId, miner, user, billId, peerId, rpc, totalSpace, usedSpace, transactionId) => {
+    saveBuyOrderRecord: async (email, orderId, miner, user, billId, pst, totalPrice, transactionId) => {
         // save buy order record into NeDB
         return new Promise((resolve, reject) => {
             var now = moment();
@@ -98,10 +104,10 @@ module.exports = {
                 miner: miner,
                 user: user,
                 bill_id: billId,
-                peer_id: peerId,
-                rpc: rpc,
-                total_space: totalSpace,
-                used_space: usedSpace,
+                pst: pst,
+                peer_id: '',
+                rpc: '',
+                total_price: totalPrice,
                 transaction_id: transactionId,
                 update_time: currentTime,
                 create_time: currentTime
@@ -117,6 +123,97 @@ module.exports = {
             logger.error('err:', err);
             return BizResultCode.SAVE_BUY_ORDER_RECORD_FAILED;
         });
+    },
+    updateBuyOrderRecord: async (email, orderId, billId, peerId, rpc, transactionId) => {
+        // save buy order record into NeDB
+        return new Promise((resolve, reject) => {
+            var now = moment();
+            var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
+            buyOrderRecordDB.update({
+                email: email,
+                order_id: orderId,
+                bill_id: billId,
+                transaction_id: transactionId,
+            }, {
+                $set: {
+                    peer_id: peerId,
+                    rpc: rpc,
+                    update_time: currentTime
+                }
+            }, {}, function (err, num) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.UPDTAE_BUY_ORDER_RECORD_FAILED);
+                    return;
+                }
+                resolve(num);
+            });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.UPDTAE_BUY_ORDER_RECORD_FAILED;
+        });
+    },
+    syncOrder2RegisterCenter: async (email, orderId, billId, peerId, rpc, totalSpace, usedSpace, expire, transactionId) => {
+        // sync order to register center
+        var registerCenterConfig = config.get('registerCenterConfig');
+        var registerCenterUrl = registerCenterConfig.get('url');
+        var syncOrder = registerCenterConfig.get('syncOrder');
+        var expire = moment(expire).valueOf().toString();
+
+        try {
+            let body = {};
+            body['email'] = email;
+            body['bill_id'] = billId;
+            body['order_id'] = orderId;
+            body['transaction_id'] = transactionId;
+            body['peer_id'] = peerId;
+            body['rpc'] = rpc;
+            body['total_space'] = totalSpace;
+            body['used_space'] = usedSpace;
+            body['expire'] = expire;
+            let result = JSON.parse(request('POST', registerCenterUrl + syncOrder, {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            }).getBody('utf-8'))
+            if (result.code == 200) {
+                resolve(orderId);
+            }
+        }
+        catch (e) {
+            logger.error('err:', e);
+            return new Promise((resolve, reject) => {
+                var now = moment();
+                var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
+                // 同步订单到注册中心失败，需要写入同步失败记录表，后续再加
+                syncOrderRetryDB.insert({
+                    email: email,
+                    order_id: orderId,
+                    bill_id: billId,
+                    transaction_id: transactionId,
+                    peer_id: peerId,
+                    rpc: rpc,
+                    total_space: totalSpace,
+                    used_space: usedSpace,
+                    expire: expire,
+                    state: 0,
+                    update_time: currentTime,
+                    create_time: currentTime
+                }, function (err, doc) {
+                    if (err) {
+                        logger.error('err:', err);
+                        resolve(BizResultCode.SAVE_SNYC_ORDER_RETRY_FAILED);
+                        return;
+                    }
+                    resolve(doc._id);
+
+                });
+            }).catch((err) => {
+                logger.error('err:', err);
+                return BizResultCode.SAVE_SNYC_ORDER_RETRY_FAILED;
+            });
+        }
     },
     getBuyOrderRecord: async (email, skip, limit) => {
 

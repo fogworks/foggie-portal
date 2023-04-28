@@ -24,7 +24,8 @@
         "codebookOffsetTableName":"foggieV/db/fc_codebook_offset.db",
         "fileUploadRecordTableName":"foggieV/db/fc_file_upload_record.db",
         "pushMerkleRecordTableName":"foggieV/db/fc_push_merkle_record.db",
-        "buyOrderRecordTableName":"foggieV/db/fc_buy_order_record.db"
+        "buyOrderRecordTableName":"foggieV/db/fc_buy_order_record.db",
+        "syncOrderRetryTableName":"foggieV/db/fc_sync_order_retry.db"
     },
     "logConfig":{
         "dbPath":"",
@@ -38,8 +39,8 @@
         "merkleBufferSize": 4096,
         "uploadFileBufferSize": 32768
     },
-    "registerCenter":{
-        "ip":"154.31.41.36",
-        "port":"8001"
+    "registerCenterConfig":{
+        "url":"http://154.31.41.36:8001",
+        "syncOrder":"/api/accounts/bind_space_order"
     }
 }

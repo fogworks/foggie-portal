@@ -48,8 +48,9 @@ class BaseResultCode {
     static QUERY_BUY_ORDER_RECORD_FAILED = new BaseResultCode(20004, 'query buy order record failed');
     static GET_ORDER_BASIC_INFO_FAILED = new BaseResultCode(20005, 'get order basic info failed');
     static GET_BILL_MEMO_FAILED = new BaseResultCode(20006, 'get bill memo failed');
-
-    
+    static SYNC_ORDER_2_REGISTER_CENTER_FAILED = new BaseResultCode(20007, 'sync order to register center failed');
+    static UPDTAE_BUY_ORDER_RECORD_FAILED = new BaseResultCode(20008, 'update order record failed');
+    static SAVE_SNYC_ORDER_RETRY_FAILED = new BaseResultCode(20009, 'save sync order retry failed');
 
     // 文件的异常code 30000～39999
     static FILE_NOT_EXIST = new BaseResultCode(30000, 'file is not exist');

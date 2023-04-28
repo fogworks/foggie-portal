@@ -206,29 +206,29 @@ let nonce = 'eddd';
 
 const request = require('sync-request');
 
-// function syncOrder2RegsiterCenter(){
+function syncOrder2RegsiterCenter(){
 
-//     let body = {};
-//     body['email']="jiakai.li@megaops.net";
-//     body['bill_id']="1";
-//     body['order_id']="1";
-//     body['transaction_id']="4291391203129421";
-//     body['peer_id']="21212121322986839423";
-//     body['rpc']="154.31.34.194:6007";
-//     body['total_space']="100";
-//     body['used_space']="10";
-//     body['expire']="3821311223";
-//     let result = JSON.parse(request('POST', "http://154.31.41.36:8001/api/accounts/bind_space_order", {
-//         headers: {
-//             'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify(body)
-//     }).getBody('utf-8'))
+    let body = {};
+    body['email']="jiakai.li@megaops.net";
+    body['bill_id']="1";
+    body['order_id']="1";
+    body['transaction_id']="4291391203129421";
+    body['peer_id']="21212121322986839423";
+    body['rpc']="154.31.34.194:6007";
+    body['total_space']="100";
+    body['used_space']="10";
+    body['expire']="3821311223";
+    let result = JSON.parse(request('POST', "http://154.31.41.36:8001/api/accounts/bind_space_order", {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    }).getBody('utf-8'))
 
-//     console.log(result)
-// }
+    console.log(result)
+}
 
-// syncOrder2RegsiterCenter()
+syncOrder2RegsiterCenter()
 
 var body = '{\
     "transaction_id":"35935f9b37f1859ae125b6e23e1410cfac82bd32393c9f48c2af063abc44525d",\
@@ -497,14 +497,17 @@ var body = '{\
         "error_code":null\
     }\
 }';
-const _ = require('lodash');
-var json = JSON.parse(body);
-var actionTraces = json.processed.action_traces;
-var actionTrace = actionTraces[actionTraces.length - 1];
-var inlineTraces = actionTrace.inline_traces;
-inlineTraces.forEach((item) => {
-    const orderId = _.get(item, 'act.data.order_info.order_id');
-    if (orderId !== undefined) {
-      console.log('找到的 order_id:', orderId);
-    }
-});
+// const _ = require('lodash');
+// var json = JSON.parse(body);
+// var actionTraces = json.processed.action_traces;
+// var actionTrace = actionTraces[actionTraces.length - 1];
+// var inlineTraces = actionTrace.inline_traces;
+// inlineTraces.forEach((item) => {
+//     const orderId = _.get(item, 'act.data.order_info.order_id');
+//     if (orderId !== undefined) {
+//       console.log('找到的 order_id:', orderId);
+//     }
+// });
+
+// var num = "2";
+// console.log(num*1024*1024);
