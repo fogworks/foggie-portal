@@ -1,5 +1,10 @@
 <template>
-  <el-dialog top="10px" :model-value="visible" :before-close="beforeClose">
+  <el-dialog
+    top="10px"
+    width="1025px"
+    :model-value="visible"
+    :before-close="beforeClose"
+  >
     <div class="detail-container">
       <div class="title">
         {{ documentInfo.title }}

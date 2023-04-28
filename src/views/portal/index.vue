@@ -36,6 +36,10 @@
           <svg-icon icon-class="income"></svg-icon>
           <template #title> Assets </template>
         </el-menu-item>
+        <el-menu-item index="shop">
+          <svg-icon icon-class="shop"></svg-icon>
+          <template #title> Shop </template>
+        </el-menu-item>
       </el-menu>
     </div>
     <div class="main">
