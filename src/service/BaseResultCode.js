@@ -49,6 +49,8 @@ class BaseResultCode {
     static GET_ORDER_BASIC_INFO_FAILED = new BaseResultCode(20005, 'get order basic info failed');
     static GET_BILL_MEMO_FAILED = new BaseResultCode(20006, 'get bill memo failed');
 
+    
+
     // 文件的异常code 30000～39999
     static FILE_NOT_EXIST = new BaseResultCode(30000, 'file is not exist');
     static SAVE_FILE_FAILED = new BaseResultCode(30001, 'save file failed');
