@@ -109,6 +109,9 @@ const handleActive = (val = "") => {
   transition: all 0.3s;
   &:hover {
     transform: scale(1.1);
+    svg {
+      transform: scale(0.9);
+    }
   }
   &:nth-child(2) {
     background: linear-gradient(
@@ -140,6 +143,7 @@ const handleActive = (val = "") => {
     // color: rgba(255, 255, 255, 0.64);
     color: #fff;
     opacity: 0.64;
+    transition: all 0.3s;
   }
 }
 
