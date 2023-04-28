@@ -1,11 +1,7 @@
 <template>
   <div class="container" v-loading="loading">
     <main>
-      <Access
-        v-if="!accessible"
-        v-model:accessible="accessible"
-        @accessCallback="accessCallback"
-      ></Access>
+      <Access v-if="!accessible" v-model:accessible="accessible" @accessCallback="accessCallback"></Access>
       <template v-else>
         <Welcome v-if="!hasReady" :haveNet="haveNet"></Welcome>
         <div v-else>
@@ -13,17 +9,9 @@
             <span @click="isInSetup = false">
               {{ deviceData.device_name }}
             </span>
-            <svg-icon
-              icon-class="setup"
-              class="setup"
-              @click="toSet"
-            ></svg-icon>
+            <svg-icon icon-class="setup" class="setup" @click="toSet"></svg-icon>
           </div>
-          <MaxHome
-            v-if="!isInSetup"
-            :haveNet="haveNet"
-            :deviceData="deviceData"
-          ></MaxHome>
+          <MaxHome v-if="!isInSetup" :haveNet="haveNet" :deviceData="deviceData"></MaxHome>
           <Setting v-else></Setting>
         </div>
       </template>
@@ -38,7 +26,7 @@ import Welcome from "../welcome";
 import Setting from "../setting";
 import { useStore } from "vuex";
 import { get_service_info, detected_net } from "@/utils/api.js";
-import { ref, onMounted, reactive, watch, provide, toRefs, inject } from "vue";
+import { ref, onMounted, reactive, watch, provide, toRefs, inject, readonly } from "vue";
 export default {
   name: "FoggieMax",
   components: {
@@ -60,10 +48,20 @@ export default {
       ip: deviceData.dedicatedip,
       device_id: deviceData.device_id,
     });
+
     provide("deviceData", deviceData);
     provide("requestTarget", requestTarget);
 
     const store = useStore();
+    if (deviceData.device_type == 'foggie_max' || deviceData.device_type == 'foggie' || deviceData.device_type == '') {
+      const orderId = readonly(deviceData.device_id)
+      store.commit('upload/setOrderId', orderId)
+    } else {
+      const orderId = readonly(deviceData.order_id)
+      store.commit('upload/setOrderId', orderId)
+    }
+
+
     const accessible = ref(false);
     const loading = ref(false);
     const currentOODItem = ref({
@@ -125,7 +123,7 @@ export default {
           }
           accessible.value = true;
         })
-        .catch(() => {})
+        .catch(() => { })
         .finally(() => {
           loading.value = false;
         });
@@ -177,14 +175,17 @@ export default {
   // padding: 0 40px;
   margin: 0 auto;
   box-sizing: border-box;
+
   :deep {
     .el-loading-mask {
       background: transparent;
     }
   }
+
   main {
     z-index: 1;
   }
+
   .top-title {
     display: flex;
     justify-content: space-between;
@@ -194,6 +195,7 @@ export default {
     text-align: left;
     font-weight: 700;
     text-align: left;
+
     span {
       background: linear-gradient(to right, #3913b8 0%, #75e0e6 100%);
       background-clip: text;
@@ -202,16 +204,19 @@ export default {
       -webkit-text-fill-color: transparent;
       cursor: pointer;
     }
+
     .setup {
       color: #29abff;
       cursor: pointer;
       transition: all 0.5s;
+
       &:hover {
         transform: rotate(90deg);
       }
     }
   }
 }
+
 .top-between {
   display: flex;
   justify-content: space-between;

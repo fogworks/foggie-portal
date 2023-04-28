@@ -140,6 +140,7 @@
 import { getCurReferenceRate, getOrderFilterList, buyOrder } from "@/api/order/filterOrder.js";
 import { transferTime, ChinaTime4 } from "@/utils/ChinaStandardTime.js";
 import customDialog from "@/components-V3/customDialog";
+import { getChain_id } from "@/api/common.js";
 import { ElMessage } from "element-plus";
 import {
   h,
@@ -159,7 +160,7 @@ import { useStore } from "vuex";
 const store = useStore()
 
 const ChainId = computed(() => store.getters.ChainId)
-const username = computed(() =>store.getters.userInfo?.dmc)
+const username = computed(() => store.getters.userInfo?.dmc)
 const email = computed(() => store.getters.userInfo?.email);
 let loading = ref(false);
 let dialogIsShow = ref(false); // 弹窗是否展示
@@ -317,7 +318,7 @@ async function submit() {
     let params = {
       username: username.value, //测试时可以为空，空则取默认的用户名tianbao12345
       chainId: ChainId.value,  //chainId
-      email:  email.value,
+      email: email.value,
       billId: state.orderDetail.orderID,    //挂单的id
       period: state.formLine.week,     //购买周期，大于等于24
       benchmarkPrice: curReferenceRate.value, //基准价格，单位DMC
@@ -360,9 +361,17 @@ async function submit() {
   }
 }
 
+function loadChainId() {
+  getChain_id().then((res) => {
+    if (res.code == 200) {
+      store.commit("clientGlobal/SAVE_ChainId", res.data);
+    }
+  });
+}
+
 onMounted(() => {
   loadCurReferenceRate();
-
+  loadChainId()
 
 });
 </script>

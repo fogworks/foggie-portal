@@ -459,13 +459,11 @@ export default {
       form.append('fileType', smallFile.fileType)
       form.append('fileSize', smallFile.size)
       form.append('orderId', smallFile.orderId)
-      form.append('token', '58df9379402ab6c87a51be426290e0f752ba5be4fe45736674a05dc12e642c50')
-      form.append('peerId', '12D3KooWDj1NkJ1DrVvpbBhtJ3nLCNA9CKyg3eynpiUTKsVEDkgx')
+      form.append('token', token)
+      form.append('peerId', peerId)
       fileUpload(form, abortController.value, UploadProgress).then(async (res) => {
         if (res.code == 200) {
-
           await Save_File()
-
           progress.value = 100;
           completed.value = true;
           let data = {
@@ -608,7 +606,7 @@ export default {
 
         fileReader.readAsArrayBuffer(blobSlice.call(file.value.file, start, end));
       }
-      
+
       /* 切片上传 */
       async function uploadChunk() {
         return new Promise(async (resolve, reject) => {
@@ -641,7 +639,7 @@ export default {
                 let index = 0;
                 let errorUploadArray = [];
                 res[0].forEach((res, nindex) => {
-                  if (res.status == "fulfilled"&& res.value?.code == 200) {
+                  if (res.status == "fulfilled" && res.value?.code == 200) {
                     let blobFileArrayIndex = curUploadIndex[nindex];
                     blobFileArray.value[blobFileArrayIndex][1] = true;
                     multipartFileArray.value.push({
