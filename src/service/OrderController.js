@@ -19,8 +19,6 @@ class OrderController {
      */
     static async buy(req, response) {
 
-        // 用户名
-        var username = req.body.username;
         // chainId
         var chainId = req.body.chainId;
         // 挂单的id
@@ -41,7 +39,7 @@ class OrderController {
         var chainConfig = config.get('chainConfig')
         var httpEndpoint = chainConfig.get('httpEndpoint')
 
-        if (!chainId || !billId || !period || !benchmarkPrice || !priceRange || !unmatchedAmount || !totalPrice || !username || !email) {
+        if (!chainId || !billId || !period || !benchmarkPrice || !priceRange || !unmatchedAmount || !totalPrice || !email) {
             response.send(BizResult.validateFailed());
             return;
         }
@@ -51,7 +49,14 @@ class OrderController {
             response.send(BizResult.fail(keyProvider));
             return;
         }
-
+        var userInfo = await userService.getUserInfo(email);
+        if (userInfo instanceof BizResultCode) {
+            logger.info('userInfo is null');
+            res.send(BizResult.fail(userInfo));
+            return;
+        }
+        // 用户名
+        var username = userInfo.username;
         // 基准价格*10000
         var benchmark = (benchmarkPrice * 10000).toString()
         var dmc_client = DMC({
@@ -142,7 +147,7 @@ class OrderController {
     /**
      * 获取筛选的订单列表
      * 筛选条件的价格范围是 左闭右闭
-     * @param {*} username  用户名
+     * @param {*} email     foggie的邮箱
      * @param {*} unmatchedAmount 购买PST的数量
      * @param {*} period    购买周期，单位 周
      * @param {*} minPrice  最低价，单位 DMC
@@ -150,9 +155,9 @@ class OrderController {
      * @param {*} res       HTTP的响应
      * @returns 订单列表
      */
-    static outstandingOrders(username, unmatchedAmount, period, minPrice, maxPrice, res) {
+    static async outstandingOrders(email, unmatchedAmount, period, minPrice, maxPrice, res) {
 
-        if (!username || !unmatchedAmount || !period) {
+        if (!email || !unmatchedAmount || !period) {
             res.send(BizResult.validateFailed())
             return;
         }
@@ -165,6 +170,13 @@ class OrderController {
         var transactionAddress = chainConfig.get('transactionAddress')
         var getOutstandingOrders = chainConfig.get('getOutstandingOrders')
 
+        var userInfo = await userService.getUserInfo(email);
+        if (userInfo instanceof BizResultCode) {
+            logger.info('userInfo is null');
+            res.send(BizResult.fail(userInfo));
+            return;
+        }
+        var username = userInfo.username;
         // minPrice & maxPrice同时有值
         var price = ""
         if (typeof (minPrice) !== "undefined" && typeof (maxPrice) !== "undefined") {
@@ -214,18 +226,26 @@ class OrderController {
 
     /**
      * 获取用户的订单列表
-     * @param {*} username  用户名 
+     * @param {*} email     foggie的邮箱 
      * @param {*} pageNum   页数
      * @param {*} limit     每页展示的条数
      * @param {*} res       HTTP的响应
      * @returns 订单列表
      */
-    static orderList(username, pageNum, limit, res) {
+    static async orderList(email, pageNum, limit, res) {
 
-        if (!username) {
+        if (!email) {
             res.send(BizResult.validateFailed())
             return;
         }
+
+        var userInfo = await userService.getUserInfo(email);
+        if (userInfo instanceof BizResultCode) {
+            logger.info('userInfo is null');
+            res.send(BizResult.fail(userInfo));
+            return;
+        }
+        var username = userInfo.username;
 
         var chainConfig = config.get('chainConfig')
         var transactionAddress = chainConfig.get('transactionAddress')
@@ -378,14 +398,21 @@ class OrderController {
     static async pushMerkle(req, res) {
 
         var chainId = req.body.chainId;
-        var username = req.body.username;
         var orderId = req.body.orderId;
         var email = req.body.email;
 
-        if (!chainId || !username || !orderId || !email) {
+        if (!chainId || !orderId || !email) {
             res.send(BizResult.validateFailed());
             return;
         }
+
+        var userInfo = await userService.getUserInfo(email);
+        if (userInfo instanceof BizResultCode) {
+            logger.info('userInfo is null');
+            res.send(BizResult.fail(userInfo));
+            return;
+        }
+        var username = userInfo.username;
 
         var privateKey = await userService.getPrivateKeyByEmail(email);
         if (privateKey instanceof BizResultCode) {
@@ -466,15 +493,15 @@ class OrderController {
     /**
      * 查询，包含 订单id，merkleRoot，dataBlockCount，transactionId
      * @param {*} orderId       订单id
-     * @param {*} username      用户名
+     * @param {*} email         foggie邮箱
      * @param {*} pageSize      每页条数
      * @param {*} pageNo        页数
      * @param {*} res HTTP的response
      * @returns 
      */
-    static async getPushMerkleRecord(orderId, username, pageSize, pageNo, res) {
+    static async getPushMerkleRecord(orderId, email, pageSize, pageNo, res) {
 
-        if (!orderId || !username) {
+        if (!orderId || !email) {
             res.send(BizResult.validateFailed(orderId));
             return;
         }
@@ -489,13 +516,13 @@ class OrderController {
             skip = (pageNo - 1) * limit
         }
 
-        var resultData = await orderService.getPuskMerkleRecord(orderId, username, skip, limit);
+        var resultData = await orderService.getPuskMerkleRecord(orderId, email, skip, limit);
         if (resultData instanceof BizResultCode) {
             res.send(BizResult.fail(resultData));
             return;
         }
 
-        var total = await orderService.getPuskMerkleRecordCount(orderId, username);
+        var total = await orderService.getPuskMerkleRecordCount(orderId, email);
         if (total instanceof BizResultCode) {
             res.send(BizResult.fail(total));
             return;

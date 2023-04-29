@@ -31,14 +31,14 @@ const fileUploadRecordDB = new NeDB({
 })
 
 module.exports = {
-    saveFileProp: async (orderId, username, filePath, fileSize, md5) => {
+    saveFileProp: async (orderId, email, filePath, fileSize, md5) => {
         // save file prop into NeDB
         return new Promise((resolve, reject) => {
             var now = moment();
             var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
             fileDB.find({
                 order_id: orderId,
-                username: username,
+                email: email,
                 file_path: filePath,
                 md5: md5
             }, function (err, docs) {
@@ -50,7 +50,7 @@ module.exports = {
                 if (docs.length === 0) {
                     fileDB.insert({
                         order_id: orderId,
-                        username: username,
+                        email: email,
                         file_path: filePath,
                         file_size: fileSize,
                         md5: md5,
@@ -71,13 +71,12 @@ module.exports = {
             })
         });
     },
-    getFileList: async (orderId, username, skip, limit) => {
-
+    getFileList: async (orderId, email, skip, limit) => {
         return new Promise((resolve, reject) => {
             // query file list from NeDB
             fileDB.find({
                 order_id: orderId,
-                username: username
+                email: email
             }).skip(skip).limit(limit).sort({ create_time: -1 }).exec(function (err, data) {
                 if (err) {
                     logger.error('err:', err);
@@ -91,13 +90,13 @@ module.exports = {
             return BizResultCode.QUERY_FILE_FAILED;
         });
     },
-    getFileCount: async (orderId, username) => {
+    getFileCount: async (orderId, email) => {
 
         return new Promise((resolve, reject) => {
             // query file list from NeDB
             fileDB.find({
                 order_id: orderId,
-                username: username
+                email: email
             }).exec(function (err, data) {
                 if (err) {
                     logger.error('err:', err);
@@ -111,13 +110,13 @@ module.exports = {
             return BizResultCode.QUERY_FILE_FAILED;
         });
     },
-    getFileByMd5: async (orderId, username, fileName, md5) => {
+    getFileByMd5: async (orderId, email, fileName, md5) => {
 
         return new Promise((resolve, reject) => {
             // query file list from NeDB
             fileDB.find({
                 order_id: orderId,
-                username: username,
+                email: email,
                 file_path: fileName,
                 md5: md5
             }).exec(function (err, data) {
@@ -133,13 +132,13 @@ module.exports = {
             return BizResultCode.GET_FILE_BY_MD5_FAILED;
         });
     },
-    removeFileByMd5: async (orderId, username, md5) => {
+    removeFileByMd5: async (orderId, email, md5) => {
 
         return new Promise((resolve, reject) => {
             // query file list from NeDB
             fileDB.remove({
                 order_id: orderId,
-                username: username,
+                email: email,
                 md5: md5
             }, { multi: true }, function (err, data) {
                 if (err) {
@@ -154,14 +153,14 @@ module.exports = {
             return BizResultCode.REMOVE_FILE_FAILED;
         });
     },
-    saveFileCodeBook: async (orderId, username, md5, cid, partId, database64, hashVaule) => {
+    saveFileCodeBook: async (orderId, email, md5, cid, partId, database64, hashVaule) => {
         // save file codeBook into NeDB
         return new Promise((resolve, reject) => {
             var now = moment();
             var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
             codeBookDB.findOne({
                 order_id: orderId,
-                username: username,
+                email: email,
                 md5: md5,
                 part_id: partId
             }, function (err, doc) {
@@ -173,7 +172,7 @@ module.exports = {
                 if (doc) {
                     codeBookDB.update({
                         order_id: orderId,
-                        username: username,
+                        email: email,
                         md5: md5,
                         part_id: partId
                     }, {
@@ -195,7 +194,7 @@ module.exports = {
                 else {
                     codeBookDB.insert({
                         order_id: orderId,
-                        username: username,
+                        email: email,
                         md5: md5,
                         cid: cid,
                         part_id: partId,
@@ -218,7 +217,7 @@ module.exports = {
             return BizResultCode.SAVE_CODEBOOK_FAILED;
         });
     },
-    updateFileCodeBook: async (orderId, username, md5, cid) => {
+    updateFileCodeBook: async (orderId, email, md5, cid) => {
 
         return new Promise((resolve, reject) => {
 
@@ -227,7 +226,7 @@ module.exports = {
             // update file codeBook cid into NeDB
             codeBookDB.update({
                 order_id: orderId,
-                username: username,
+                email: email,
                 md5: md5
             }, {
                 $set: {
@@ -253,12 +252,12 @@ module.exports = {
             return BizResultCode.UPDATE_FILE_CODEBOOK_FAILED;
         });
     },
-    getFileCodeBook: async (orderId, username, md5) => {
+    getFileCodeBook: async (orderId, email, md5) => {
         // get file codeBook into NeDB
         return new Promise((resolve, reject) => {
             codeBookDB.find({
                 order_id: orderId,
-                username: username,
+                email: email,
                 md5: md5
             }, function (err, docs) {
                 if (err) {
@@ -288,19 +287,19 @@ module.exports = {
      * 
      * @param {*} fileCategory  文件类型 1:小文件 2:大文件
      * @param {*} orderId   订单号
-     * @param {*} username  用户名
+     * @param {*} email     foggie邮箱
      * @param {*} fileName  文件名
      * @param {*} fileSize  文件大小
      * @param {*} blockSize     分块大小
      * @param {*} growthFactor  增长因子
      * @returns 偏移量的数组
      */
-    getCodebookOffset: async (fileCategory, orderId, username, fileName, md5, fileSize, blockSize, growthFactor) => {
+    getCodebookOffset: async (fileCategory, orderId, email, fileName, md5, fileSize, blockSize, growthFactor) => {
 
         return new Promise((resolve, reject) => {
             codeBookOffsetDB.find({
                 order_id: orderId,
-                username: username,
+                email: email,
                 md5: md5
             }, function (err, docs) {
                 if (err) {
@@ -354,7 +353,7 @@ module.exports = {
                     var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
                     codeBookOffsetDB.insert({
                         order_id: orderId,
-                        username: username,
+                        email: email,
                         file_path: fileName,
                         md5: md5,
                         data: offsetArr,
@@ -378,26 +377,32 @@ module.exports = {
             return BizResultCode.GET_CODEBOOK_OFFSET_FAILED;
         });
     },
-    deleteCodebookOffset: (orderId, username, md5) => {
+    deleteCodebookOffset: async (orderId, email, md5) => {
 
-        // delete codeBookOffset from NeDB
-        codeBookOffsetDB.remove({
-            order_id: orderId,
-            username: username,
-            md5: md5
-        }, function (err, numRemoved) {
-            if (err) {
-                logger.error('err:', err);
-                return;
-            }
-            if (numRemoved === 0) {
-                logger.error('delete codebook offset failed');
-                return BizResultCode.DELETE_CODEBOOK_OFFSET_FAILED;
-            }
-            return BizResultCode.SUCCESS;
+        return new Promise((resolve, reject) => {
+            // delete codeBookOffset from NeDB
+            codeBookOffsetDB.remove({
+                order_id: orderId,
+                email: email,
+                md5: md5
+            }, function (err, numRemoved) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.DELETE_CODEBOOK_OFFSET_FAILED);
+                }
+                if (numRemoved === 0) {
+                    logger.error('delete codebook offset failed');
+                    resolve(BizResultCode.DELETE_CODEBOOK_OFFSET_FAILED);
+                }
+                resolve(numRemoved);
+            });
+        }).catch(err => {
+            logger.error(err);
+            return BizResultCode.DELETE_CODEBOOK_OFFSET_FAILED;
         });
+
     },
-    saveFileUploadRecord: async (orderId, username, filePath, md5, partNum) => {
+    saveFileUploadRecord: async (orderId, email, filePath, md5, partNum) => {
         // save file upload record into NeDB
         return new Promise((resolve, reject) => {
 
@@ -405,7 +410,7 @@ module.exports = {
             var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
             fileUploadRecordDB.findOne({
                 order_id: orderId,
-                username: username,
+                email: email,
                 md5: md5,
                 part_num: partNum
             }, function (err, doc) {
@@ -442,7 +447,7 @@ module.exports = {
                 else {
                     fileUploadRecordDB.insert({
                         order_id: orderId,
-                        username: username,
+                        email: email,
                         file_path: filePath,
                         md5: md5,
                         part_num: partNum,
@@ -463,12 +468,12 @@ module.exports = {
             return BizResultCode.SAVE_FILE_UPLOAD_RECORD_FAILED;
         });
     },
-    getFileUploadRecord: async (orderId, username, md5) => {
+    getFileUploadRecord: async (orderId, email, md5) => {
         // save file upload record into NeDB
         return new Promise((resolve, reject) => {
             fileUploadRecordDB.find({
                 order_id: orderId,
-                username: username,
+                email: email,
                 md5: md5
             }).sort({ part_num: 1 }).exec(function (err, docs) {
                 if (err) {

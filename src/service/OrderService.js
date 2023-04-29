@@ -21,14 +21,14 @@ const orderDB = new NeDB({
 })
 
 module.exports = {
-    savePuskMerkleRecord: async (orderId, username, merkleRoot, blockNum, transactionId) => {
+    savePuskMerkleRecord: async (orderId, email, merkleRoot, blockNum, transactionId) => {
         // save push merkle record into NeDB
         return new Promise((resolve, reject) => {
             var now = moment();
             var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
             pushMerkleRecordDB.insert({
                 order_id: orderId,
-                username: username,
+                email: email,
                 merkle_root: merkleRoot,
                 block_num: blockNum,
                 transaction_id: transactionId,
@@ -47,13 +47,13 @@ module.exports = {
             return BizResultCode.SAVE_PUSH_MERKLE_RECORD_FAILED;
         });
     },
-    getPuskMerkleRecord: async (orderId, username, skip, limit) => {
+    getPuskMerkleRecord: async (orderId, email, skip, limit) => {
 
         return new Promise((resolve, reject) => {
             // query push merkle record from NeDB
             pushMerkleRecordDB.find({
                 order_id: orderId,
-                username: username
+                email: email
             }).skip(skip).limit(limit).sort({ create_time: -1 }).exec(function (err, data) {
                 if (err) {
                     logger.error('err:', err);
@@ -67,13 +67,13 @@ module.exports = {
             return BizResultCode.QUERY_PUSH_MERKLE_RECORD_FAILED;
         });
     },
-    getPuskMerkleRecordCount: async (orderId, username) => {
+    getPuskMerkleRecordCount: async (orderId, email) => {
 
         return new Promise((resolve, reject) => {
             // query push merkle record count from NeDB
             pushMerkleRecordDB.find({
                 order_id: orderId,
-                username: username
+                email: email
             }).exec(function (err, data) {
                 if (err) {
                     logger.error('err:', err);

@@ -42,15 +42,16 @@ class UserController {
      * save user password
      * @param {*} email     foggie的邮箱
      * @param {*} password  用户的密码
+     * @param {*} username  用户名
      * @param {*} res       HTTP响应
      * @returns
      */
-    static async saveUserPassword(email, password, res) {
+    static async saveUserPassword(email, password, username, res) {
         if (!password || !email) {
             res.send(BizResult.validateFailed());
             return;
         }
-        var resultCode = await userService.saveUserInfo(email, password);
+        var resultCode = await userService.saveUserInfo(email, password, username);
         if (resultCode instanceof BizResultCode) {
             res.send(BizResult.fail(resultCode));
             return;
@@ -68,8 +69,8 @@ class UserController {
     static async resetUserPassword(req, res) {
         var password = req.body.password;
         var email = req.body.email;
-
-        if (!password || !email) {
+        var username = req.body.username;
+        if (!password || !email || !username) {
             res.send(BizResult.validateFailed());
             return;
         }
@@ -78,7 +79,7 @@ class UserController {
             res.send(BizResult.fail(resultCode));
             return;
         }
-        UserController.saveUserPassword(email, password, res);
+        UserController.saveUserPassword(email, password, username, res);
     }
 
     /**
@@ -167,8 +168,7 @@ class UserController {
     static async encodeUserOrder(req, res) {
         var orderId = req.body.orderId;
         var email = req.body.email;
-        var username = req.body.username;
-        if (!orderId || !email || !username) {
+        if (!orderId || !email) {
             res.send(BizResult.validateFailed(orderId));
             return;
         }
@@ -179,18 +179,23 @@ class UserController {
             res.send(BizResult.fail(privateKey));
             return;
         }
-        let base64Data = Buffer.from(privateKey + ':' + username + ':' + orderId).toString('base64');
+        var userInfo = await userService.getUserInfo(email);
+        if (userInfo instanceof BizResultCode) {
+            logger.info('userInfo is null');
+            res.send(BizResult.fail(userInfo));
+            return;
+        }
+        var base64Data = Buffer.from(privateKey + ':' + userInfo.username + ':' + orderId).toString('base64');
         res.send(BizResult.success(base64Data));
     }
 
     // 用户领取奖励
-    static claimOrder(req, res) {
-        var username = req.body.username;
+    static async claimOrder(req, res) {
         var email = req.body.email;
         var orderId = req.body.orderId;
         var chainId = req.body.chainId;
 
-        if (!username || !email || !orderId || !chainId) {
+        if (!email || !orderId || !chainId) {
             res.send(BizResult.validateFailed());
             return;
         }
@@ -203,6 +208,13 @@ class UserController {
         var chainConfig = config.get('chainConfig');
         var httpEndpoint = chainConfig.get("httpEndpoint");
 
+        var userInfo = await userService.getUserInfo(email);
+        if (userInfo instanceof BizResultCode) {
+            logger.info('userInfo is null');
+            res.send(BizResult.fail(userInfo));
+            return;
+        }
+        var username = userInfo.username;
         var dmc_client = DMC({
             chainId: chainId,
             keyProvider: privateKey,

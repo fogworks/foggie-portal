@@ -58,7 +58,7 @@ module.exports = {
             return BizResultCode.RESET_PASSWORD_FAILED;
         });
     },
-    saveUserInfo: async (email, password) => {
+    saveUserInfo: async (email, password, username) => {
         return new Promise((resolve, reject) => {
             // encrypt password
             let encryptd = Encrypt.encrypt(password, '6a4de5');
@@ -75,6 +75,7 @@ module.exports = {
                     // save password to NeDB
                     db.insert({
                         email: email,
+                        username: username,
                         password: encryptd,
                         private_key: "",
                         update_time: currentTime,
@@ -163,35 +164,5 @@ module.exports = {
             logger.error('err:', err);
             return BizResultCode.SAVE_PRIVATE_KEY_FAILED;
         });
-    },
-    // getUsername: async (privateKey) => {
-
-    //     let pubKey = DMC.ecc.privateToPublic(privateKey);
-    //     var chainConfig = config.get('chainConfig');
-    //     var httpEndpoint = chainConfig.get('httpEndpoint');
-    //     var getAccountsUrl = httpEndpoint + chainConfig.get('getAccounts');
-
-    //     let body = JSON.stringify({
-    //         accounts: [''],
-    //         keys: [pubKey]
-    //     });
-
-    //     return new Promise((resolve, reject) => {
-    //         axios({
-    //             method: 'post',
-    //             url: getAccountsUrl,
-    //             data: body,
-    //             headers: {
-    //                 'Content-Type': 'application/json'
-    //             }
-    //         }).then((res) => {
-    //             var accounts = res.data.accounts;
-    //             var account = accounts.filter(item => item.permission_name == 'active');
-    //             resolve(account[0].account_name);
-    //         }).catch((err) => {
-    //             logger.error(err);
-    //             resolve(null);
-    //         });
-    //     });
-    // }
+    }
 }

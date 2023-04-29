@@ -17,12 +17,12 @@ const FileController = require('./src/service/FileController');
 var jsonParser = bodyParser.json();
 
 app.post('/order/outstanding_orders', jsonParser, (req, res) => {
-  var username = req.body.username;
+  var email = req.body.email;
   var unmatchedAmount = req.body.unmatchedAmount;
   var period = req.body.period;
   var minPrice = req.body.minPrice;
   var maxPrice = req.body.maxPrice;
-  OrderController.outstandingOrders(username, unmatchedAmount, period, minPrice, maxPrice, res);
+  OrderController.outstandingOrders(email, unmatchedAmount, period, minPrice, maxPrice, res);
 });
 
 app.post('/order/buy', jsonParser, (req, res) => {
@@ -34,10 +34,10 @@ app.post('/order/sync', jsonParser, (req, res) => {
 });
 
 app.post('/order/list', jsonParser, (req, res) => {
-  var username = req.body.username;
+  var email = req.body.email;
   var limit = req.body.limit;
   var pageNum = req.body.pageNum;
-  OrderController.orderList(username, pageNum, limit, res);
+  OrderController.orderList(email, pageNum, limit, res);
 });
 
 app.post('/order/id', jsonParser, (req, res) => {
@@ -60,10 +60,10 @@ app.post('/order/push_merkle', jsonParser, (req, res) => {
 
 app.post('/order/push_merkle_record', jsonParser, (req, res) => {
   var orderId = req.body.orderId;
-  var username = req.body.username;
+  var email = req.body.email;
   var pageSize = req.body.pageSize;
   var pageNo = req.body.pageNo;
-  OrderController.getPushMerkleRecord(orderId, username, pageSize, pageNo, res);
+  OrderController.getPushMerkleRecord(orderId, email, pageSize, pageNo, res);
 });
 
 
@@ -84,8 +84,9 @@ app.post('/user/validate_user_login', jsonParser, (req, res) => {
 
 app.post('/user/save_password', jsonParser, (req, res) => {
   var email = req.body.email;
+  var username = req.body.username;
   var password = req.body.password;
-  UserController.saveUserPassword(email, password, res);
+  UserController.saveUserPassword(email, password, username, res);
 });
 
 app.post('/user/validate_password', jsonParser, (req, res) => {
@@ -112,20 +113,15 @@ app.post('/user/claim_order', jsonParser, (req, res) => {
 });
 
 app.post('/file/save', jsonParser, (req, res) => {
-  var orderId = req.body.orderId;
-  var username = req.body.username;
-  var filePath = req.body.filePath;
-  var fileSize = req.body.fileSize;
-  var md5 = req.body.md5;
-  FileController.saveFileProp(orderId, username, filePath, fileSize, md5, res);
+  FileController.saveFileProp(req, res);
 });
 
 app.post('/file/list', jsonParser, (req, res) => {
   var orderId = req.body.orderId;
-  var username = req.body.username;
+  var email = req.body.email;
   var pageSize = req.body.pageSize;
   var pageNo = req.body.pageNo;
-  FileController.list(orderId, username, pageSize, pageNo, res);
+  FileController.list(orderId, email, pageSize, pageNo, res);
 });
 
 app.post('/file/remove', jsonParser, (req, res) => {
@@ -148,8 +144,8 @@ app.post('/file/create', jsonParser, (req, res) => {
   var orderId = req.body.orderId;
   var token = req.body.token;
   var peerId = req.body.peerId;
-  var username = req.body.username;
-  FileController.create(username, fileName, md5, fileType, fileSize, orderId, token, peerId, res);
+  var email = req.body.email;
+  FileController.create(email, fileName, md5, fileType, fileSize, orderId, token, peerId, res);
 });
 
 app.post('/file/complete', jsonParser, (req, res) => {
