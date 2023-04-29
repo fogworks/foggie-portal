@@ -304,13 +304,32 @@ module.exports = {
             return BizResultCode.QUERY_ORDER_FAILED;
         });
     },
-    getOrderByBillId: async (email, billId) => {
+    getOrderById: async (email, orderId) => {
+
         return new Promise((resolve, reject) => {
             // query buy order record from NeDB
             orderDB.findOne({
                 email: email,
+                order_id: orderId
+            }, function (err, data) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.QUERY_ORDER_FAILED);
+                    return;
+                }
+                resolve(data);
+            });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.QUERY_ORDER_FAILED;
+        });
+    },
+    getOrderByBillId: async (email, billId) => {
+        return new Promise((resolve, reject) => {
+            orderDB.findOne({
+                email: email,
                 bill_id: billId
-            }).exec(function (err, data) {
+            }, function (err, data) {
                 if (err) {
                     logger.error('err:', err);
                     resolve(BizResultCode.QUERY_ORDER_FAILED);

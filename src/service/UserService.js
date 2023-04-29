@@ -170,5 +170,19 @@ module.exports = {
             logger.error('err:', err);
             return BizResultCode.SAVE_PRIVATE_KEY_FAILED;
         });
+    },
+    getToken4UploadFile: async(orderId, email) =>{
+
+        var privateKey = await module.exports.getPrivateKeyByEmail(email);
+        if (privateKey instanceof BizResultCode) {
+            logger.info('private key is null');
+            return privateKey;
+        }
+        var userInfo = await module.exports.getUserInfo(email);
+        if (userInfo instanceof BizResultCode) {
+            logger.info('userInfo is null');
+            return userInfo;
+        }
+        return Buffer.from(privateKey + ':' + userInfo.username + ':' + orderId).toString('base64');
     }
 }

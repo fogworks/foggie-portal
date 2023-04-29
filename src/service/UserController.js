@@ -176,7 +176,7 @@ class UserController {
      * @param {*} res       HTTP响应
      * @returns 加密后的字符串
      */
-    static async encodeUserOrder(req, res) {
+    static async getToken4UploadFile(req, res) {
         var orderId = req.body.orderId;
         var email = req.body.email;
         if (!orderId || !email) {
@@ -184,20 +184,12 @@ class UserController {
             return;
         }
 
-        var privateKey = await userService.getPrivateKeyByEmail(email);
-        if (privateKey instanceof BizResultCode) {
-            logger.info('private key is null');
-            res.send(BizResult.fail(privateKey));
+        var token = userService.getToken4UploadFile(email, orderId);
+        if(token instanceof BizResultCode) {
+            res.send(BizResult.fail(token));
             return;
         }
-        var userInfo = await userService.getUserInfo(email);
-        if (userInfo instanceof BizResultCode) {
-            logger.info('userInfo is null');
-            res.send(BizResult.fail(userInfo));
-            return;
-        }
-        var base64Data = Buffer.from(privateKey + ':' + userInfo.username + ':' + orderId).toString('base64');
-        res.send(BizResult.success(base64Data));
+        res.send(BizResult.success(token));
     }
 
     // 用户领取奖励

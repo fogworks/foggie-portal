@@ -3,9 +3,6 @@ const fs = require('fs');
 const BizResult = require('./BizResult')
 const BizResultCode = require('./BaseResultCode');
 const logger = require('./logger')('FileController.js');
-const net_proto = require('./grpc/net');
-const pow_proto = require('./grpc/pow');
-const grpc = require('@grpc/grpc-js');
 const DMC = require('dmc.js');
 const userService = require('./UserService');
 const fileService = require('./FileService');
@@ -110,8 +107,7 @@ class FileController {
         var fileType = req.body.fileType;
         var fileSize = req.body.fileSize;
         var orderId = req.body.orderId;
-        var token = req.body.token;
-        var peerId = req.body.peerId;
+        
         var email = req.body.email;
         // 大文件新增的入参
         var partId = req.body.partId;
@@ -137,99 +133,40 @@ class FileController {
             res.send(BizResult.success());
             return;
         }
+
+        // 获取token
+        var token = userService.getToken4UploadFile(email, orderId);
+        if(token instanceof BizResultCode) {
+            res.send(BizResult.fail(token));
+            return;
+        }
+
+        // 获取peerId
+        var orderInfo = await orderService.getOrderById(email, orderId);
+        if(orderInfo instanceof BizResultCode){
+            response.send(BizResult.fail(orderInfo));
+            return;
+        }
+        var peerId = orderInfo.peer_id;
+
         const header = {
             peerId: peerId,
             Id: orderId,
             token: token
         };
         var file = req.files.file;
+        // 测试文件服务器端联通性
+        var grpcInfo = orderInfo.rpc;
+        var proxClient = fileService.getProxGrpcClient(grpcInfo);
+        
+        
         // 小文件上传
         if (parseInt(fileCategory) == 1) {
             if (!fileType) {
                 res.send(BizResult.validateFailed());
                 return;
             }
-            var netClient = FileController.getNetGrpcClient();
-            const request = {
-                key: fileName,
-                md5: md5,
-                contentLength: fileSize,
-                contentType: fileType
-            };
-            const putObjectReq = {
-                header: header,
-                request: request
-            };
-
-            let uploadFileStream = netClient.PutObject(async function (err, data) {
-                if (err) {
-                    logger.error('err:', err);
-                    res.send(BizResult.fail(BizResultCode.UPLOAD_FILE_FAILED));
-                    return;
-                }
-
-                // 根据文件的大小，merkle树的块大小 计算密码本的偏移量数组
-                var offsetArray = await fileService.getCodebookOffset(fileCategory, orderId, email, fileName, md5, fileSize, merkleBufferSize, 2)
-                if (offsetArray instanceof BizResultCode) {
-                    res.send(BizResult.fail(offsetArray));
-                    return;
-                }
-
-                var powClient = FileController.getPowGrpcClient();
-                let merkleStream = powClient.BuildMerkelLeaf(function (err, data2) {
-                    if (err) {
-                        logger.error('err:', err);
-                        res.send(BizResult.fail(BizResultCode.BUILD_MERKLE_FAILED));
-                        return;
-                    }
-                    res.send(BizResult.success(data.cid));
-                });
-                const mkHeader = {
-                    peerId: peerId,
-                    Id: orderId
-                };
-                const putObjectMKRequest = {
-                    key: fileName,
-                    cid: data.cid,
-                    size: fileSize
-                };
-                const putObjectMKReq = {
-                    header: mkHeader,
-                    request: putObjectMKRequest
-                };
-                merkleStream.write({ req: putObjectMKReq });
-
-                var fd = fs.openSync(file.path, 'r');
-                offsetArray.forEach(async (offset) => {
-                    fs.readSync(fd, merkleBuffer, 0, merkleBufferSize, offset);
-                    var hashVaule = crypto.createHash('md5').update(merkleBuffer).digest('hex');
-                    var compressedData = zlib.gzipSync(merkleBuffer);
-                    var base64data = Buffer.from(compressedData).toString('base64');
-                    await fileService.saveFileCodeBook(orderId, email, md5, data.cid, offset / merkleBufferSize, base64data, hashVaule);
-                });
-                fs.closeSync(fd);
-                merkleStream.write({ chunk: fs.readFileSync(file.path) });
-                merkleStream.end();
-            });
-
-            uploadFileStream.write({ req: putObjectReq });
-
-            const readStream = fs.createReadStream(file.path, { highWaterMark: uploadFileBufferSize });
-
-            readStream.on('data', (chunk) => {
-                uploadFileStream.write({ chunk: chunk });
-            });
-
-            readStream.on('end', () => {
-                uploadFileStream.end();
-                return;
-            });
-
-            readStream.on('error', (err) => {
-                logger.error('err:', err);
-                res.send(BizResult.fail(BizResultCode.READ_FILE_FAILED));
-                return;
-            });
+            smallFileUpload(fileName, md5, fileSize, fileType, header, res, fileCategory, orderId, email, peerId, file);
         }
         // 大文件上传
         else if (parseInt(fileCategory) == 2) {
@@ -250,7 +187,7 @@ class FileController {
                 request: request
             };
 
-            var netClient = FileController.getNetGrpcClient();
+            var netClient = fileService.getNetGrpcClient();
             let stream = netClient.PutObjectPart(async function (err, data) {
                 if (err) {
                     logger.error('err:', err);
@@ -372,7 +309,7 @@ class FileController {
             res.send(BizResult.success(duplicateRes));
             return;
         }
-        var client = FileController.getNetGrpcClient();
+        var client = fileService.getNetGrpcClient();
         const header = {
             peerId: peerId,
             Id: orderId,
@@ -449,7 +386,7 @@ class FileController {
             return;
         }
 
-        var powClient = FileController.getPowGrpcClient();
+        var powClient = fileService.getPowGrpcClient();
         let merkleStream = powClient.BuildMerkelLeaf(async function (err, data) {
             if (err) {
                 logger.error('err:', err);
@@ -484,7 +421,7 @@ class FileController {
                 request: request
             };
 
-            var netClient = FileController.getNetGrpcClient();
+            var netClient = fileService.getNetGrpcClient();
             netClient.CompleteMultipart(completeMultipartReq, function (err2, data2) {
                 if (err2) {
                     logger.error('err:', err2);
@@ -531,20 +468,6 @@ class FileController {
             }
             merkleStream.end();
         }
-    }
-
-    static getNetGrpcClient() {
-        var grpcConfig = config.get('grpcConfig');
-        var ip = grpcConfig.get("ip");
-        var port = grpcConfig.get("port");
-        return new net_proto.API(ip + ':' + port, grpc.credentials.createInsecure());
-    }
-
-    static getPowGrpcClient() {
-        var grpcConfig = config.get('grpcConfig');
-        var ip = grpcConfig.get("ip");
-        var port = grpcConfig.get("port");
-        return new pow_proto.PowService(ip + ':' + port, grpc.credentials.createInsecure());
     }
 
     /**
@@ -636,3 +559,88 @@ class FileController {
 }
 
 module.exports = FileController
+
+function smallFileUpload(fileName, md5, fileSize, fileType, header, res, fileCategory, orderId, email, peerId, file) {
+    var netClient = fileService.getNetGrpcClient();
+    const request = {
+        key: fileName,
+        md5: md5,
+        contentLength: fileSize,
+        contentType: fileType
+    };
+    const putObjectReq = {
+        header: header,
+        request: request
+    };
+
+    let uploadFileStream = netClient.PutObject(async function (err, data) {
+        if (err) {
+            logger.error('err:', err);
+            res.send(BizResult.fail(BizResultCode.UPLOAD_FILE_FAILED));
+            return;
+        }
+
+        // 根据文件的大小，merkle树的块大小 计算密码本的偏移量数组
+        var offsetArray = await fileService.getCodebookOffset(fileCategory, orderId, email, fileName, md5, fileSize, merkleBufferSize, 2);
+        if (offsetArray instanceof BizResultCode) {
+            res.send(BizResult.fail(offsetArray));
+            return;
+        }
+
+        var powClient = fileService.getPowGrpcClient();
+        let merkleStream = powClient.BuildMerkelLeaf(function (err, data2) {
+            if (err) {
+                logger.error('err:', err);
+                res.send(BizResult.fail(BizResultCode.BUILD_MERKLE_FAILED));
+                return;
+            }
+            res.send(BizResult.success(data.cid));
+        });
+        const mkHeader = {
+            peerId: peerId,
+            Id: orderId
+        };
+        const putObjectMKRequest = {
+            key: fileName,
+            cid: data.cid,
+            size: fileSize
+        };
+        const putObjectMKReq = {
+            header: mkHeader,
+            request: putObjectMKRequest
+        };
+        merkleStream.write({ req: putObjectMKReq });
+
+        var fd = fs.openSync(file.path, 'r');
+        offsetArray.forEach(async (offset) => {
+            fs.readSync(fd, merkleBuffer, 0, merkleBufferSize, offset);
+            var hashVaule = crypto.createHash('md5').update(merkleBuffer).digest('hex');
+            var compressedData = zlib.gzipSync(merkleBuffer);
+            var base64data = Buffer.from(compressedData).toString('base64');
+            await fileService.saveFileCodeBook(orderId, email, md5, data.cid, offset / merkleBufferSize, base64data, hashVaule);
+        });
+        fs.closeSync(fd);
+        merkleStream.write({ chunk: fs.readFileSync(file.path) });
+        merkleStream.end();
+    });
+
+    uploadFileStream.write({ req: putObjectReq });
+
+    const readStream = fs.createReadStream(file.path, { highWaterMark: uploadFileBufferSize });
+
+    readStream.on('data', (chunk) => {
+        uploadFileStream.write({ chunk: chunk });
+    });
+
+    readStream.on('end', () => {
+        uploadFileStream.end();
+        return;
+    });
+
+    readStream.on('error', (err) => {
+        logger.error('err:', err);
+        res.send(BizResult.fail(BizResultCode.READ_FILE_FAILED));
+        return;
+    });
+    return netClient;
+}

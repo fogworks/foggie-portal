@@ -4,6 +4,10 @@ const NeDB = require('nedb');
 const moment = require('moment');
 const config = require('config');
 const common = require('./common');
+const net_proto = require('./grpc/net');
+const pow_proto = require('./grpc/pow');
+const prox_proto = require('./grpc/prox');
+const grpc = require('@grpc/grpc-js');
 const path = require('path');
 const dbConfig = config.get('dbConfig');
 const fileTableName = dbConfig.get('fileTableName');
@@ -491,5 +495,21 @@ module.exports = {
             logger.error('err:', err);
             return BizResultCode.GET_FILE_UPLOAD_RECORD_FAILED;
         });
-    }
+    },
+    getNetGrpcClient: () => {
+        var grpcConfig = config.get('grpcConfig');
+        var ip = grpcConfig.get("ip");
+        var port = grpcConfig.get("port");
+        return new net_proto.API(ip + ':' + port, grpc.credentials.createInsecure());
+
+    },
+    getPowGrpcClient: () => {
+        var grpcConfig = config.get('grpcConfig');
+        var ip = grpcConfig.get("ip");
+        var port = grpcConfig.get("port");
+        return new pow_proto.PowService(ip + ':' + port, grpc.credentials.createInsecure());
+    },
+    getProxGrpcClient: (rpc) => {
+        return new prox_proto.Service(rpc, grpc.credentials.createInsecure());
+    },
 }

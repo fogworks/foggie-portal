@@ -75,7 +75,7 @@ app.post('/order/challenge_list', jsonParser, (req, res) => {
 });
 
 app.post('/user/encode_user_order', jsonParser, (req, res) => {
-  UserController.encodeUserOrder(req, res);
+  UserController.getToken4UploadFile(req, res);
 });
 
 app.post('/user/validate_user_login', jsonParser, (req, res) => {
