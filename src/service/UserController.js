@@ -16,13 +16,17 @@ class UserController {
      */
     static async validateUserLogin(req, res) {
         var email = req.body.email;
-        if(!email){
+        if (!email) {
             res.send(BizResult.validateFailed());
             return;
         }
         var result = await userService.getUserInfo(email);
 
-        if(result instanceof BizResultCode){
+        if (result instanceof BizResultCode) {
+            if (result == BizResultCode.USER_NOT_EXIST) {
+                res.send(BizResult.fail(BizResultCode.PASSWORD_NOT_EXIST));
+                return;
+            }
             res.send(BizResult.fail(result));
             return;
         }
@@ -96,10 +100,17 @@ class UserController {
             res.send(BizResult.validateFailed());
             return;
         }
-        var encryptedPassword = Encrypt.encrypt(password, '6a4de5');
-        var passwordFromDB = await userService.getUserInfo(email);
+        
+        var userInfo = await userService.getUserInfo(email);
+        
+        if (userInfo instanceof BizResultCode) {
+            res.send(BizResult.fail(BizResultCode.PASSWORD_VALID_FAILED));
+            return;
+        }
+        var nonce = userInfo.nonce;
+        var encryptedPassword = Encrypt.encrypt(password, nonce);
         // get password from NeDB
-        if (encryptedPassword === passwordFromDB.password) {
+        if (encryptedPassword === userInfo.password) {
             var result = {};
             result['encryptedPassword'] = encryptedPassword;
             res.send(BizResult.success(result));
@@ -145,11 +156,11 @@ class UserController {
             return;
         }
 
-        if(!DMC.ecc.isValidPrivate(privateKey)){
+        if (!DMC.ecc.isValidPrivate(privateKey)) {
             res.send(BizResult.fail(BizResultCode.PRIVATE_KEY_INVALID));
             return;
         }
-        
+
         var resultCode = await userService.saveUserPrivateKey(email, privateKey);
         if (resultCode === BizResultCode.SUCCESS) {
             res.send(BizResult.success());
@@ -201,7 +212,7 @@ class UserController {
         }
 
         var privateKey = userService.getPrivateKeyByEmail(email);
-        if(privateKey instanceof BizResultCode){
+        if (privateKey instanceof BizResultCode) {
             res.send(BizResult.fail(privateKey));
             return;
         }

@@ -17,6 +17,7 @@ const merkleBufferSize = fileConfig.get('merkleBufferSize');
 const merkleBuffer = Buffer.alloc(merkleBufferSize);
 const crypto = require('crypto');
 const moment = require('moment');
+const Encrypt = require('./Encrypt');
 
 class FileController {
 
@@ -591,7 +592,7 @@ class FileController {
 
         var codebook = codebooks[Math.floor(Math.random() * codebooks.length)];
         let originData = zlib.unzipSync(Buffer.from(codebook.data, 'base64'));
-        let randomCharacter = fileService.generateRandom(4);
+        let randomCharacter = Encrypt.randomString(4);
         let nonce = randomCharacter + "#" + codebook.cid;
         var containRandomData = Buffer.concat([originData, Buffer.from(randomCharacter)]);
         let pre_data_hash = DMC.ecc.sha256(containRandomData);

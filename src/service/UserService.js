@@ -8,8 +8,6 @@ const path = require('path');
 const dbConfig = config.get('dbConfig');
 const userTableName = dbConfig.get('userTableName');
 const Encrypt = require('./Encrypt');
-// const DMC = require('dmc.js');
-// const axios = require('axios')
 
 const db = new NeDB({
     filename: common.getHomePath() + path.sep + userTableName,
@@ -29,7 +27,8 @@ module.exports = {
                     return;
                 }
                 if (!doc) {
-                    resolve(BizResultCode.GET_USERINFO_FAILED);
+                    logger.info('userInfo is null, email:{}', email);
+                    resolve(BizResultCode.USER_NOT_EXIST);
                 }
                 else {
                     resolve(doc);
@@ -60,8 +59,9 @@ module.exports = {
     },
     saveUserInfo: async (email, password, username) => {
         return new Promise((resolve, reject) => {
+            var nonce = Encrypt.randomString(6);
             // encrypt password
-            let encryptd = Encrypt.encrypt(password, '6a4de5');
+            let encryptd = Encrypt.encrypt(password, nonce);
             var currentTime = moment().format("YYYY-MM-DD HH:mm:ss");
             db.findOne({
                 email: email,
@@ -77,6 +77,7 @@ module.exports = {
                         email: email,
                         username: username,
                         password: encryptd,
+                        nonce: nonce,
                         private_key: "",
                         update_time: currentTime,
                         create_time: currentTime
@@ -121,7 +122,7 @@ module.exports = {
                     var privateKey = doc.private_key;
                     if (privateKey) {
                         // decrypt private key
-                        resolve(Encrypt.decrypt(privateKey, 'a3f452'));
+                        resolve(Encrypt.decrypt(privateKey, doc.nonce));
                     }
                     else {
                         resolve(BizResultCode.GET_PRIVATE_KEY_FAILED);
@@ -135,9 +136,14 @@ module.exports = {
         });
     },
     saveUserPrivateKey: async (email, privateKey) => {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
+            var userInfo = await module.exports.getUserInfo(email);
+            if(userInfo instanceof BizResultCode){
+                resolve(userInfo);
+                return;
+            }
             // encrypt private key
-            privateKey = Encrypt.encrypt(privateKey, 'a3f452');
+            privateKey = Encrypt.encrypt(privateKey, userInfo.nonce);
             // get password from NeDB
             db.update({
                 email: email,

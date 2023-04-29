@@ -491,21 +491,5 @@ module.exports = {
             logger.error('err:', err);
             return BizResultCode.GET_FILE_UPLOAD_RECORD_FAILED;
         });
-    },
-    /**
-     * 生成16进制的随机字符串
-     * @param {*} num 生成字符串的长度 
-     * @returns 
-     */
-    generateRandom: (num) => {
-        if (num <= 0) {
-            return;
-        }
-        const result = [];
-        const characters = '0123456789abcdef';
-        for (let i = 0; i < num; i++) {
-            result.push(characters.charAt(Math.floor(Math.random() * characters.length)));
-        }
-        return result.join('');
     }
 }

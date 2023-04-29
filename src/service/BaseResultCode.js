@@ -40,6 +40,7 @@ class BaseResultCode {
     static CLAIM_ORDER_FAILED = new BaseResultCode(10012, 'claim order failed'); 
     static GET_USERINFO_FAILED = new BaseResultCode(10013, 'get userinfo failed');
 
+
     // 订单的异常code 20000～29999
     static ORDER_BUY_FAILED = new BaseResultCode(20000, 'buy failed');
     static SAVE_PUSH_MERKLE_RECORD_FAILED = new BaseResultCode(20001, 'save push merkle record failed');
