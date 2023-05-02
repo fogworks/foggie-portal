@@ -159,7 +159,7 @@ class FileController {
         var grpcInfo = orderInfo.rpc;
         var proxClient = fileService.getProxGrpcClient(grpcInfo);
         
-        
+
         // 小文件上传
         if (parseInt(fileCategory) == 1) {
             if (!fileType) {
@@ -290,12 +290,28 @@ class FileController {
      * @param {*} res      HTTP的response
      * @returns 
      */
-    static async create(email, fileName, md5, fileType, fileSize, orderId, token, peerId, res) {
-        if (!fileName || !fileType || !fileSize || !orderId || !token || !peerId || !md5 || !email) {
+    static async create(email, fileName, md5, fileType, fileSize, orderId, res) {
+        
+        if (!fileName || !fileType || !fileSize || !orderId || !md5 || !email) {
             res.send(BizResult.validateFailed());
             return;
         }
 
+        // 获取token
+        var token = userService.getToken4UploadFile(email, orderId);
+        if(token instanceof BizResultCode) {
+            res.send(BizResult.fail(token));
+            return;
+        }
+
+        // 获取peerId
+        var orderInfo = await orderService.getOrderById(email, orderId);
+        if(orderInfo instanceof BizResultCode){
+            response.send(BizResult.fail(orderInfo));
+            return;
+        }
+        var peerId = orderInfo.peer_id;
+        
         // 校验相同的文件是否已经上传过
         var resultData = await fileService.getFileByMd5(orderId, email, fileName, md5)
 
@@ -365,8 +381,6 @@ class FileController {
 
         var fileName = req.body.fileName;
         var orderId = req.body.orderId;
-        var token = req.body.token;
-        var peerId = req.body.peerId;
         var parts = req.body.parts;
         var uploadId = req.body.uploadId;
         var md5 = req.body.md5;
@@ -377,6 +391,21 @@ class FileController {
             res.send(BizResult.validateFailed());
             return;
         }
+
+        // 获取token
+        var token = userService.getToken4UploadFile(email, orderId);
+        if(token instanceof BizResultCode) {
+            res.send(BizResult.fail(token));
+            return;
+        }
+
+        // 获取peerId
+        var orderInfo = await orderService.getOrderById(email, orderId);
+        if(orderInfo instanceof BizResultCode){
+            response.send(BizResult.fail(orderInfo));
+            return;
+        }
+        var peerId = orderInfo.peer_id;
 
         // 根据文件的上传记录，重读一次文件，生成merkle树后 提交
         var fileUploadRecordRes = await fileService.getFileUploadRecord(orderId, email, md5);

@@ -142,10 +142,8 @@ app.post('/file/create', jsonParser, (req, res) => {
   var fileType = req.body.fileType;
   var fileSize = req.body.fileSize;
   var orderId = req.body.orderId;
-  var token = req.body.token;
-  var peerId = req.body.peerId;
   var email = req.body.email;
-  FileController.create(email, fileName, md5, fileType, fileSize, orderId, token, peerId, res);
+  FileController.create(email, fileName, md5, fileType, fileSize, orderId, res);
 });
 
 app.post('/file/complete', jsonParser, (req, res) => {
