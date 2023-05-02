@@ -282,13 +282,14 @@ import {
   oodFileList,
   pIN,
   IPFSPublish,
-  cyfsPINList,
   oodFileDel,
   CidShare,
   oodFileSearch,
   shareLink,
   getIPFSLocalList,
   oodFileListFoggie,
+  publishPin,
+  file_delete,
 } from "@/utils/api.js";
 import MyEcharts from "@/components/echarts/myEcharts";
 import ShareDialog from "./shareDialog";
@@ -382,77 +383,76 @@ const getFileList = function (scroll, prefix) {
   if (prefix?.length) {
     list_prefix = prefix.join("/") + "/";
   }
-  if (currentOODItem.value.device_type === "foggie_max") {
-    tableLoading.value = true;
-    oodFileList(device_id.value, "", list_prefix).then((res) => {
-      if (res && res.links && res.links.length > 0) {
-        initFileData(res.links);
+  tableLoading.value = true;
+  oodFileList(device_id.value, "", list_prefix)
+    .then((res) => {
+      if (res && res.content) {
+        initFileData(res);
       }
-    });
-  } else if (device_id.value) {
-    tableLoading.value = true;
-    oodFileListFoggie(device_id.value, "", list_prefix).then((res) => {
-      if (res && res.links && res.links.length > 0) {
-        initFileData(res.links);
-      }
-    });
-  }
+    })
+    .finally(() => (tableLoading.value = false));
 };
 
 const initFileData = async (data) => {
   tableData.data = [];
-  let fileList = await getIPFSLocalList();
-  for (let i = 0; i < data.length; i++) {
-    let date = "-";
-    if (data[i].created_at > 0) {
-      let created_at = new Date(data[i].created_at);
-      let year = created_at.getUTCFullYear();
-      let month = created_at.getUTCMonth() + 1;
-      month = month < 10 ? `0${month}` : month;
-      let day = created_at.getUTCDate();
-      day = day < 10 ? `0${day}` : day;
-      let hour = created_at.getUTCHours();
-      hour = hour < 10 ? `0${hour}` : hour;
-      let minute = created_at.getUTCMinutes();
-      minute = minute < 10 ? `0${minute}` : minute;
-      let second = created_at.getUTCSeconds();
-      second = second < 10 ? `0${second}` : second;
-      date = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
-      date = `${year}-${month}-${day}`;
-    }
-    let isDir =
-      data[i].content_type === "application/x-directory" ||
-      data[i].file_type === 2;
-    const type = data[i].key.substring(data[i].key.lastIndexOf(".") + 1);
+  for (let i = 0; i < data.commonPrefixes.length; i++) {
+    let item = {
+      isDir: true,
+      name: decodeURIComponent(data.commonPrefixes[i]),
+      key: data.commonPrefixes[i],
+      idList: [
+        {
+          name: "IPFS",
+          code: "",
+        },
+        {
+          name: "CYFS",
+          code: "",
+        },
+      ],
+      date: "-",
+      size: "",
+      status: "-",
+      type: "-",
+      file_id: "",
+      pubkey: "",
+      cid: "",
+      imgUrl: "",
+      imgUrlLarge: "",
+      share: {},
+      isSystemImg,
+      canShare: false,
+    };
+    tableData.data.push(item);
+  }
+
+  for (let j = 0; j < data.content.length; j++) {
+    let date = data.content[j].lastModified ;
+    let isDir = false;
+    const type = data.content[j].key.substring(data.content[j].key.lastIndexOf(".") + 1);
     let { imgHttpLink: url, isSystemImg } = handleImg(
       type,
       device_id.value,
-      data[i].pubkey,
+      data.content[j].cid,
       isDir
     );
     let { imgHttpLink: url_large } = handleImg(
       type,
       device_id.value,
-      data[i].pubkey,
+      data.content[j].cid,
       isDir,
       400
     );
     // let _url = require(`@/svg-icons/logo-dog-black.svg`);
-    let cid = "";
+    let cid = data.content[j].isIpfs ? data.content[j].cid : "";
+    let file_id = data.content[j].isCyfs ? data.content[j].file_id : "";
 
-    if (fileList && fileList.length > 0) {
-      for (let j = 0; j < fileList.length; j++) {
-        if (fileList[j].cid === data[i].cid) {
-          cid = fileList[j].cid;
-          break;
-        }
-      }
-    }
+    
 
     let item = {
       isDir: isDir,
-      name: decodeURIComponent(data[i].key),
-      key: data[i].key,
+      name: decodeURIComponent(data.content[j].key),
+      key: data.content[j].key,
       idList: [
         {
           name: "IPFS",
@@ -460,28 +460,29 @@ const initFileData = async (data) => {
         },
         {
           name: "CYFS",
-          code: data[i].file_id,
+          code: file_id,
         },
       ],
       date,
-      size: getfilesize(data[i].content_length),
+      size: getfilesize(data.content[j].size),
       // status: "Published",
-      status: data[i].pubkey || data[i].file_id ? "Published" : "-",
-      type: data[i].content_type,
-      file_id: data[i].file_id,
-      pubkey: data[i].pubkey,
+      status: cid || file_id ? "Published" : "-",
+      type: data.content[j].contentType,
+      file_id: file_id,
+      pubkey: cid,
       cid,
       imgUrl: url,
       imgUrlLarge: url_large,
       // share: getShareOptions(),
       share: {},
       isSystemImg,
-      canShare: data[i].pubkey ? true : false,
+      canShare: cid ? true : false,
     };
-    data[i] = item;
+    // data[i] = item;
     // getCidShare(device_id.value, data[i].cid);
+    tableData.data.push(item);
   }
-  tableData.data = data;
+  // tableData.data = data;
 
   tableLoading.value = false;
   if (activeSort.value) {
@@ -717,10 +718,12 @@ const ipfsPin = (checked) => {
   const item = pinData.item;
   let data = {
     key: item.pubkey,
-    is_pin: false,
     new_path: item.key,
+    ip_address: "154.37.16.163",
+    port: "9091",
+    type: "ipfs",
   };
-  pIN(data).then((res) => {
+  publishPin(data).then((res) => {
     if (res) {
       ipfsDialogShow.value = false;
     }
@@ -741,19 +744,25 @@ const cyfsPin = () => {
     ? item.pubkey
     : "QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn";
 
-  cyfsPINList(device_id.value, item.name, pubkey).then((res) => {
-    cyfsDialogShow.value = false;
-    // proxy.$message({
-    //   type: "success",
-    //   message: "CYFS Join queue!",
-    //   position: "bottom left",
-    // });
+  let data = {
+    key: pubkey,
+    new_path: item.key,
+    ip_address: "154.37.16.163",
+    port: "9091",
+    type: "cyfs",
+  };
+  publishPin(data).then((res) => {
+    if (res) {
+      cyfsDialogShow.value = false;
+    }
   });
 };
 const downloadItem = (item) => {
   // let ID = device_id.value;
   let pubkey = item.pubkey;
-  let downloadUrl = `/fog/${pubkey}?dl=true`;
+  // let downloadUrl = `/fog/${pubkey}?dl=true`;
+  console.log('~~~~~~~~~~~~~~', item)
+  let downloadUrl = `/file_download/`;
 
   var oA = document.createElement("a");
   oA.download = item.name; // 设置下载的文件名，默认是'下载'
@@ -769,8 +778,8 @@ const downloadItem = (item) => {
 };
 const deleteItem = (item) => {
   tableLoading.value = true;
-  oodFileDel(device_id.value, item).then((res) => {
-    if (res && res[0]) {
+  file_delete(item).then((res) => {
+    if (res && res.data) {
       proxy.$notify({
         type: "success",
         message: "Delete succeeded",

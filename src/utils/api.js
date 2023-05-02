@@ -429,21 +429,38 @@ export const oodFileListByDir = (ID, prefix) => {
 };
 //⽂件LIST
 export const oodFileList = (next_marker, prefix) => {
-  let url = "";
-  if (prefix.length > 0) {
-    url = `/nixls?prefix=${prefix}&forward=true&delimiter=/`;
-    if (next_marker) {
-      url = `${url}&marker=${next_marker}&delimiter=/`;
-    }
-  } else {
-    url = next_marker
-      ? `/nixls?forward=true&marker=${next_marker}&delimiter=/`
-      : `/nixls?forward=true&delimiter=/`;
-  }
+  // let url = "";
+  // if (prefix.length > 0) {
+  //   url = `/nixls?prefix=${prefix}&forward=true&delimiter=/`;
+  //   if (next_marker) {
+  //     url = `${url}&marker=${next_marker}&delimiter=/`;
+  //   }
+  // } else {
+  //   url = next_marker
+  //     ? `/nixls?forward=true&marker=${next_marker}&delimiter=/`
+  //     : `/nixls?forward=true&delimiter=/`;
+  // }
+  // return request({
+  //   url: url,
+  //   method: "GET",
+  // });
+
+  let url = "/list_files";
+  let cid = "";
+  let key = "";
+  let start = 0;
+  let length = 50;
+  let data = {
+    cid,
+    key,
+    start,
+    length,
+  };
 
   return request({
     url: url,
     method: "GET",
+    data,
   });
 };
 
@@ -465,7 +482,6 @@ export const oodFileListFoggie = (ID, next_marker, prefix) => {
     method: "GET",
   });
 };
-
 
 //pin task LIST
 export const oodTaskList = (ID, next_marker, prefix) => {
@@ -509,6 +525,25 @@ export const oodFileDel = (ID, item) => {
   });
 };
 
+export const file_delete = (item) => {
+  let objects = [
+    { pubkey: item.pubkey ? item.pubkey : encodeURIComponent(item.key) },
+  ];
+  let cids = [item.cid];
+  let object_type = item.type;
+  let url = `/file_delete`;
+  let data = {
+    cids,
+    objects,
+    object_type,
+  };
+  return request({
+    url: url,
+    method: "DELETE",
+    data,
+  });
+};
+
 //⽂件oodFileUpload
 export const oodFileUpload = (data, ID) => {
   return request({
@@ -525,7 +560,7 @@ export const dmcRows = (data, target) => {
     url: `/v1/chain/get_table_rows`,
     method: "POST",
     data: data,
-    target
+    target,
   });
 };
 
@@ -645,7 +680,7 @@ export const getActivationVood = (data, target) => {
   return request({
     url: url,
     method: "GET",
-    target
+    target,
   });
 };
 
@@ -689,6 +724,16 @@ export const getIPFSPINList = (ID) => {
 //ipns publish list
 export const pIN = (data) => {
   let url = `/ipfsops/pin`;
+  return request({
+    url: url,
+    method: "POST",
+    data: data,
+  });
+};
+
+//ipns publish list
+export const publishPin = (data) => {
+  let url = `/publish`;
   return request({
     url: url,
     method: "POST",
@@ -885,8 +930,9 @@ export const uploadMultipart = (params) => {
   //   }&content_type=${fileType}`;
   // }
 
-  url = `/mp/${encodeURIComponent(fileName)}?upload_id=${upload_id ?? ""
-    }&content_type=${fileType}`;
+  url = `/mp/${encodeURIComponent(fileName)}?upload_id=${
+    upload_id ?? ""
+  }&content_type=${fileType}`;
 
   let obj = {
     url: url,
@@ -909,8 +955,9 @@ export const uploadMultipart = (params) => {
 /* 大文件 断点续传 查看文件当前上传到第几段 */
 export const curUploadChunk = (params) => {
   return request({
-    url: `/mp/${encodeURIComponent(params.fileName)}?upload_id=${params.upload_id
-      }`,
+    url: `/mp/${encodeURIComponent(params.fileName)}?upload_id=${
+      params.upload_id
+    }`,
     method: "GET",
     data: data,
     headers: {
@@ -1373,8 +1420,6 @@ export const sourceReward = (owner_id) => {
   }
 };
 
-
-
 //取消交易(支付系统取消)
 export const paymentCancel = (data) => {
   return request({
@@ -1507,13 +1552,12 @@ export const get_kit_installation_status = (params) => {
   });
 };
 
-
 // cbs服务激活
 export const deploy_cbs = (target) => {
   return request({
     url: `/v1/service/deploy_cbs`,
     method: "POST",
-    target
+    target,
   });
 };
 // ipfs服务激活
@@ -1521,7 +1565,7 @@ export const deploy_ipfs = (target) => {
   return request({
     url: `/v1/service/deploy_ipfs`,
     method: "POST",
-    target
+    target,
   });
 };
 // cyfs服务激活
@@ -1530,7 +1574,7 @@ export const deploy_cyfs = (data, target) => {
     url: `/v1/service/deploy_cyfs`,
     method: "POST",
     data,
-    target
+    target,
   });
 };
 // 服务状态查询
@@ -1538,7 +1582,7 @@ export const get_service_info = (target) => {
   return request({
     url: `/v1/get_service_info`,
     method: "get",
-    target//{ip,device_id}
+    target, //{ip,device_id}
   });
 };
 
@@ -1547,7 +1591,7 @@ export const get_foggie_dmc = (data) => {
   return request({
     url: `/api/accounts/get_foggie_dmc`,
     method: "POST",
-    data
+    data,
   });
 };
 //  绑定/注册 foggie 账户
@@ -1556,7 +1600,7 @@ export const bind_foggie = (data, target) => {
     url: `/v1/account/bind_foggie`,
     method: "POST",
     data,
-    target
+    target,
   });
 };
 //  解绑 foggie 账户
@@ -1564,7 +1608,7 @@ export const unbind_foggie = (target) => {
   return request({
     url: `/v1/account/unbind_foggie`,
     method: "POST",
-    target
+    target,
   });
 };
 
@@ -1573,7 +1617,7 @@ export const search_foggie = (data) => {
   return request({
     url: `/api/accounts/search_foggie`,
     method: "POST",
-    data
+    data,
   });
 };
 //开启主网账号验证
@@ -1582,7 +1626,7 @@ export const checkAccount = (data, target) => {
     url: "/v1/chain/get_account",
     method: "POST",
     data,
-    target
+    target,
   });
 };
 // 修改访问密码
@@ -1591,7 +1635,7 @@ export const modify_access_password = (data, target) => {
     url: `/v1/account/modify_access_password`,
     method: "POST",
     data,
-    target
+    target,
   });
 };
 // 访问密码是否存在监测
@@ -1599,7 +1643,7 @@ export const check_access_pass = (target) => {
   return request({
     url: `/v1/account/check_access_pass`,
     method: "GET",
-    target
+    target,
   });
 };
 // 访问密码设置
@@ -1608,7 +1652,7 @@ export const access_pass = (data, target) => {
     url: `/v1/account/access_pass`,
     method: "POST",
     data,
-    target
+    target,
   });
 };
 // 访问密码登录
@@ -1617,7 +1661,7 @@ export const access_pass_login = (data, target) => {
     url: `/v1/account/access_pass_login`,
     method: "POST",
     data,
-    target
+    target,
   });
 };
 // IPFS 服务开启/关闭
@@ -1626,7 +1670,7 @@ export const op_ipfs = (data, target) => {
     url: `/v1/service/op_ipfs`,
     method: "POST",
     data,
-    target
+    target,
   });
 };
 // cyFS 服务开启/关闭
@@ -1635,7 +1679,7 @@ export const op_cyfs = (data, target) => {
     url: `/v1/service/op_cyfs`,
     method: "POST",
     data,
-    target
+    target,
   });
 };
 // 服务一键重置
@@ -1643,7 +1687,7 @@ export const reset_vood = (target) => {
   return request({
     url: `/v1/service/reset_vood`,
     method: "POST",
-    target
+    target,
   });
 };
 //  探测设备是否可以外网访问
@@ -1651,11 +1695,9 @@ export const detected_net = (target) => {
   return request({
     url: `/v1/detected_net`,
     method: "GET",
-    target
+    target,
   });
 };
-
-
 
 //getIP
 export const getIP = () => {
