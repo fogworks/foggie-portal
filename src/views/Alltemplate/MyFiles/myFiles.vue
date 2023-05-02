@@ -272,8 +272,6 @@ const emits = defineEmits(["currentPrefix"]);
 const orderId = computed(() => store.getters.orderId);
 const chainId = computed(() => store.getters.ChainId);
 const email = computed(() => store.getters.userInfo?.email);
-const username = computed(() => store.getters.userInfo?.dmc);
-
 const orderState = computed(() => {
   let state = route.query.orderState;
   if (state == 0 || state == 4 || state == 5) {
@@ -350,10 +348,8 @@ function openUpload() {
 
 function loadFileList() {
   let params = {
-    username: username.value,
+    email: email.value,
     orderId: 10,
-
-    // orderId: orderId.value,
     pageSize: tableData.pageSize,
     pageNo: tableData.pageNum,
   };
@@ -601,15 +597,12 @@ const handleCommand = async (val) => {
     case "challenge":
       let params = {
         chainId: chainId.value,
-        username: username.value,
         email: email.value,
         orderId: item.order_id,
         md5: item.md5,
       };
       challengeMiner(params);
-
       break;
-
     default:
       break;
   }

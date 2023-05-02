@@ -284,7 +284,7 @@ import { ref, reactive, toRefs, onMounted, computed } from "vue";
 import { useStore } from "vuex";
 // import { useRouter } from "vue-router";
 
-import { getOrderList, pushMerkle, getOrderById } from "@/api/order/orderList";
+import {  pushMerkle, getOrderById } from "@/api/order/orderList";
 import {
   transferTime,
   ChinaTime1,
@@ -300,7 +300,7 @@ const props = defineProps({
   },
 });
 const ChainId = computed(() => $state.getters.ChainId);
-const username = computed(() => $state.getters.userInfo?.dmc);
+
 const email = computed(() => $state.getters.userInfo?.email);
 const state = reactive({
   orderList: [],
@@ -358,7 +358,6 @@ function popoverClick(type, item) {
 
     let params = {
       chainId: ChainId.value,
-      username: username.value,
       email: email.value,
       orderId: item.id,
     };

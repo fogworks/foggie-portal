@@ -171,6 +171,7 @@ function submit(FormRef) {
           setresetPassword({
             password: loginForm.registerForm.password,
             email: props.userInfo.email,
+            username:props.userInfo.dmc
           })
             .then(async (res) => {
               if (res.code == 200) {
@@ -185,7 +186,7 @@ function submit(FormRef) {
         } else {
           getValidatePassword({
             password: loginForm.registerForm.password,
-            email: props.userInfo.email,
+            email: props.userInfo.email
           })
             .then((res) => {
               if (res.code == 200) {
@@ -266,7 +267,7 @@ async function importPrivateKey() {
 function loadUserLoginStatus() {
   let params = {
     email: props.userInfo.email,
-    username: props.userInfo.dmc,
+    // username: props.userInfo.dmc,
   };
 
   getUserLoginStatus(params).then((res) => {

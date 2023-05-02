@@ -206,7 +206,9 @@ watch(curReferenceRate, (newVal) => {
 /* 筛选订单 */
 function filterOrder() {
   let params = {
-    username: username.value, //测试时可以为空，空则取默认的用户名tianbao12345
+    email: email.value, //测试时可以为空，空则取默认的用户名tianbao12345
+    chainId:ChainId.value,
+    benchmarkPrice:curReferenceRate.value,
     unmatchedAmount: state.formLine.quantity, //pst数量
     period: state.formLine.week, //购买周期
   };
@@ -316,7 +318,6 @@ async function submit() {
   if (flag) {
     loading.value = true
     let params = {
-      username: username.value, //测试时可以为空，空则取默认的用户名tianbao12345
       chainId: ChainId.value,  //chainId
       email:  email.value,
       billId: state.orderDetail.orderID,    //挂单的id

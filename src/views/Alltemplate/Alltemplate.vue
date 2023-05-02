@@ -131,7 +131,7 @@ onMounted(() => {
   width: 1120px;
   // height: 100%;
   margin: 0 auto;
-  position: relative;
+  // position: relative;
 }
 
 .Alltemplate_boxs::-webkit-scrollbar {

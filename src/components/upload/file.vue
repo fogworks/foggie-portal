@@ -165,7 +165,7 @@ export default {
     /*  Header 设置结束 */
 
     const username = computed(() => store.getters.userInfo?.dmc)
-
+    const email = computed(() => store.getters.userInfo?.email);
     let fileIcon = computed(() => {
       let fileName = file.value.name.toLowerCase();
       if (
@@ -389,7 +389,7 @@ export default {
     function Save_File() {
       let params = {
         md5: fileMd5.value,
-        username: username.value,
+        email: email.value,
         orderId: file.value.orderId,
         filePath: encodeURIComponent(file.value.urlFileName),
         fileSize: file.value.size
@@ -450,7 +450,7 @@ export default {
 
       form.append('file', smallFile.file, name)
       form.append('fileCategory', 1)
-      form.append('username', username.value)
+      form.append('email', email.value)
 
       form.append('fileName', encodeURIComponent(name))
       form.append('md5', fileMd5.value)
@@ -459,8 +459,7 @@ export default {
       form.append('fileType', smallFile.fileType)
       form.append('fileSize', smallFile.size)
       form.append('orderId', smallFile.orderId)
-      form.append('token', token)
-      form.append('peerId', peerId)
+
       fileUpload(form, abortController.value, UploadProgress).then(async (res) => {
         if (res.code == 200) {
           await Save_File()
@@ -500,7 +499,7 @@ export default {
           orderId: file.value.orderId,
           token: token,
           peerId: peerId,
-          username: username.value
+          email: email.value
         };
 
         uploadMultipart(params)
@@ -795,7 +794,7 @@ export default {
             token: token,
             peerId: peerId,
             fileSize: file.value.size,
-            username: username.value,
+            email: email.value,
             md5: fileMd5.value
           };
 
