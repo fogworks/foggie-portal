@@ -317,6 +317,10 @@ module.exports = {
                     resolve(BizResultCode.QUERY_ORDER_FAILED);
                     return;
                 }
+                if(!data){
+                    resolve(BizResultCode.ORDER_NOT_EXIST);
+                    return;
+                }
                 resolve(data);
             });
         }).catch((err) => {
@@ -333,6 +337,10 @@ module.exports = {
                 if (err) {
                     logger.error('err:', err);
                     resolve(BizResultCode.QUERY_ORDER_FAILED);
+                    return;
+                }
+                if(!data){
+                    resolve(BizResultCode.ORDER_NOT_EXIST);
                     return;
                 }
                 resolve(data);
