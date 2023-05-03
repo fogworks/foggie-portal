@@ -22,11 +22,11 @@
 
           <div>
             <div style="
-                                                          margin-top: -20px;
-                                                          color: #ff6e6e;
-                                                          font-size: 12px;
-                                                          margin-left: 20px;
-                                                        ">
+                margin-top: -20px;
+                color: #ff6e6e;
+                font-size: 12px;
+                margin-left: 20px;
+              ">
               當前基準價:{{ Number(curReferenceRate).toFixed(4) }} DMC
             </div>
             <el-select v-model="formLine.priceSection" placeholder="請選擇理想價格區間" style="width: 360px">
@@ -110,11 +110,11 @@
                 </template>
               </el-input>
               <div style="
-                                                            margin-left: 15px;
-                                                            font-size: 14px;
-                                                            color: #ff6e6e;
-                                                            margin-top: 5px;
-                                                          ">
+                  margin-left: 15px;
+                  font-size: 14px;
+                  color: #ff6e6e;
+                  margin-top: 5px;
+                ">
                 預計服務時間至
                 {{ orderDetail.serverTime ? orderDetail.serverTime : "--" }}，約
                 {{ orderDetail.week ? orderDetail.week : "--" }} 週
@@ -137,11 +137,16 @@
 </template>
 
 <script setup>
-import { getCurReferenceRate, getOrderFilterList, buyOrder } from "@/api/order/filterOrder.js";
+import {
+  getCurReferenceRate,
+  getOrderFilterList,
+  buyOrder,
+  orderSync
+} from "@/api/order/filterOrder.js";
 import { getChain_id } from "@/api/common.js";
 import { transferTime, ChinaTime4 } from "@/utils/ChinaStandardTime.js";
 import customDialog from "@/components-V3/customDialog";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import {
   h,
   shallowRef,
@@ -151,20 +156,20 @@ import {
   onMounted,
   watch,
   computed,
-  inject
+  inject,
 } from "vue";
 import { switchCase } from "@babel/types";
 
 import { useStore } from "vuex";
 
-const store = useStore()
+const store = useStore();
 
-const ChainId = computed(() => store.getters.ChainId)
-const username = computed(() =>store.getters.userInfo?.dmc)
+const ChainId = computed(() => store.getters.ChainId);
+const username = computed(() => store.getters.userInfo?.dmc);
 const email = computed(() => store.getters.userInfo?.email);
 let loading = ref(false);
 let dialogIsShow = ref(false); // 弹窗是否展示
-let curReferenceRate = ref(0);  //当前基准率
+let curReferenceRate = ref(0); //当前基准率
 
 const state = reactive({
   formLine: {
@@ -185,7 +190,7 @@ const state = reactive({
   },
   filterOrderList: [], // 筛选出来的订单列表
   orderDetail: {
-    orderID: '',
+    orderID: "",
     price: "", // 订单单价
     total: "", //订单总价
     deposit: "", //订单押金
@@ -207,14 +212,14 @@ watch(curReferenceRate, (newVal) => {
 function filterOrder() {
   let params = {
     email: email.value, //测试时可以为空，空则取默认的用户名tianbao12345
-    chainId:ChainId.value,
-    benchmarkPrice:curReferenceRate.value,
+    chainId: ChainId.value,
+    benchmarkPrice: curReferenceRate.value,
     unmatchedAmount: state.formLine.quantity, //pst数量
     period: state.formLine.week, //购买周期
   };
   if (state.formLine.priceSection) {
-    params.minPrice = state.selectionOption[state.formLine.priceSection].min//最低价，单位DMC
-    params.maxPrice = state.selectionOption[state.formLine.priceSection].max //最高价，单位DMC
+    params.minPrice = state.selectionOption[state.formLine.priceSection].min; //最低价，单位DMC
+    params.maxPrice = state.selectionOption[state.formLine.priceSection].max; //最高价，单位DMC
   }
   loading.value = true;
   getOrderFilterList(params)
@@ -234,26 +239,28 @@ function filterOrder() {
     });
 }
 function blurPrestoreDMC() {
-
-  if (state.formLine.prestoreDMC == '') {
+  if (state.formLine.prestoreDMC == "") {
     ElMessage({
       message: `预存金额不能为空`,
       type: "warning",
       grouping: true,
     });
-    return false
-  } else if (state.formLine.prestoreDMC < state.orderDetail.total - state.orderDetail.deposit) {
+    return false;
+  } else if (
+    state.formLine.prestoreDMC <
+    state.orderDetail.total - state.orderDetail.deposit
+  ) {
     ElMessage({
-      message: `预存金额不能小于${(state.orderDetail.total - state.orderDetail.deposit).toFixed(4)}`,
+      message: `预存金额不能小于${(
+        state.orderDetail.total - state.orderDetail.deposit
+      ).toFixed(4)}`,
       type: "warning",
       grouping: true,
     });
-    return false
-
+    return false;
   } else {
-    return true
+    return true;
   }
-
 }
 
 /* 当预存金额改变时触发 处理总计 和预计服务时间 */
@@ -267,9 +274,8 @@ function inputPrestoreDMC(text) {
       "YYYY-MM-DD"
     );
   } else {
-    state.orderDetail.serverTime = ''
+    state.orderDetail.serverTime = "";
   }
-
 
   state.orderDetail.aggregate = (
     Number(state.formLine.prestoreDMC) + Number(state.orderDetail.deposit)
@@ -295,7 +301,7 @@ function loadCurReferenceRate() {
 }
 /* 购买PST */
 function purchasePST(item) {
-  state.orderDetail.orderID = item.id
+  state.orderDetail.orderID = item.id;
   state.orderDetail.price = (item.price / 10000).toFixed(4);
   state.orderDetail.total = computeTotalPrices(item);
   state.orderDetail.deposit = (
@@ -314,51 +320,79 @@ function returnBG(index) {
 }
 
 async function submit() {
-  let flag = await blurPrestoreDMC()
+  let flag = await blurPrestoreDMC();
   if (flag) {
-    loading.value = true
+    loading.value = true;
     let params = {
-      chainId: ChainId.value,  //chainId
-      email:  email.value,
-      billId: state.orderDetail.orderID,    //挂单的id
-      period: state.formLine.week,     //购买周期，大于等于24
+      chainId: ChainId.value, //chainId
+      email: email.value,
+      billId: state.orderDetail.orderID, //挂单的id
+      period: state.formLine.week, //购买周期，大于等于24
       benchmarkPrice: curReferenceRate.value, //基准价格，单位DMC
-      // priceRange: state.formLine.priceSection,      //1  基准价格正负浮动20% ； 2 基准价格正负浮动30%
-      unmatchedAmount: state.formLine.quantity,  //购买PST数量
-      totalPrice: state.orderDetail.aggregate,       //总价，单位 DMC
-    }
+      priceRange: state.formLine.priceSection,      //1  基准价格正负浮动20% ； 2 基准价格正负浮动30%
+      unmatchedAmount: state.formLine.quantity, //购买PST数量
+      totalPrice: state.orderDetail.aggregate, //总价，单位 DMC
+    };
     switch (state.formLine.priceSection) {
       case 0:
-        params.priceRange = 3
+        params.priceRange = 3;
         break;
       case "2":
-        params.priceRange = 1
+        params.priceRange = 1;
         break;
       case "3":
-        params.priceRange = 2
+        params.priceRange = 2;
         break;
-
     }
 
-    buyOrder(params).then(res => {
-      if (res.code == 200) {
-        state.formLine.prestoreDMC = ''
-        dialogIsShow.value = false
-        loading.value = false
-        ElMessage({
-          message: `购买成功！`,
-          type: "success",
-          grouping: true,
-        });
-      }
-    }).catch(error => {
-      loading.value = false
+    buyOrder(params)
+      .then((res) => {
+        if (res.code == 200) {
 
-    })
+          orderSync({ email: email.value, billId: state.orderDetail.orderID }).then(req => {
+            if (req.code == 200) {
+              state.formLine.prestoreDMC = "";
+              dialogIsShow.value = false;
+              loading.value = false;
+              ElMessage({
+                message: `购买成功！`,
+                type: "success",
+                grouping: true,
+              });
+            } else {
+              /* 买单失败 */
+
+              ElMessageBox.confirm(
+                '买单失败是否重试！',
+                'Warning',
+                {
+                  confirmButtonText: 'OK',
+                  cancelButtonText: 'Cancel',
+                  type: 'warning',
+                }
+              )
+                .then(async () => {
+                  await submit()
+                  ElMessage({
+                    type: 'success',
+                    message: '买单成功',
+                  })
+                })
+                .catch(() => {
+
+                })
+
+            }
+          })
 
 
 
 
+        }
+      })
+      .catch((error) => {
+        loading.value = false;
+      });
   }
 }
 function loadChainId() {
@@ -370,8 +404,7 @@ function loadChainId() {
 }
 onMounted(() => {
   loadCurReferenceRate();
-  loadChainId()
-
+  loadChainId();
 });
 </script>
 

@@ -6,59 +6,31 @@
       </template>
       <div class="text item my_login_box">
         <!-- 注册 -->
-        <el-form
-          ref="registerFormRef"
-          :model="registerForm"
-          :rules="registerRules"
-        >
-          <el-form-item
-            prop="password"
-            :style="
-              passwordIsExist ? 'margin-bottom:25px  ;margin-top:10px' : ''
-            "
-          >
+        <el-form ref="registerFormRef" :model="registerForm" :rules="registerRules">
+          <el-form-item prop="password" :style="passwordIsExist ? 'margin-bottom:25px  ;margin-top:10px' : ''
+            ">
             <div class="my_login_right_input_img">
               <svg-icon icon-class="password3" size="23"></svg-icon>
             </div>
-            <el-input
-              class=""
-              :show-password="false"
-              type="password"
-              v-model="registerForm.password"
-              placeholder="请输入密码"
-            />
+            <el-input class="" :show-password="false" type="password" v-model="registerForm.password"
+              placeholder="请输入密码" />
           </el-form-item>
 
-          <el-form-item
-            prop="confirmPassword"
-            v-if="!passwordIsExist || isRegisterPassword"
-          >
+          <el-form-item prop="confirmPassword" v-if="!passwordIsExist || isRegisterPassword">
             <div class="my_login_right_input_img">
               <svg-icon icon-class="password3" size="23"></svg-icon>
             </div>
-            <el-input
-              class=""
-              :show-password="false"
-              type="password"
-              v-model="registerForm.confirmPassword"
-              placeholder="请确认密码"
-            />
+            <el-input class="" :show-password="false" type="password" v-model="registerForm.confirmPassword"
+              placeholder="请确认密码" />
           </el-form-item>
           <div class="Register_btn" v-if="passwordIsExist">
             <div>
-              <span @click="isRegisterPassword = true" class="password_login"
-                >重置密码</span
-              >
+              <span @click="isRegisterPassword = true" class="password_login">重置密码</span>
             </div>
           </div>
 
-          <el-button
-            class="ejUnNt loginButtom"
-            type="primary"
-            :loading="loading"
-            style="width: 100%; margin-bottom: 30px; height: 46px"
-            @click="submit(registerFormRef)"
-          >
+          <el-button class="ejUnNt loginButtom" type="primary" :loading="loading"
+            style="width: 100%; margin-bottom: 30px; height: 46px" @click="submit(registerFormRef)">
             登录/注册为新用户
           </el-button>
         </el-form>
@@ -171,11 +143,12 @@ function submit(FormRef) {
           setresetPassword({
             password: loginForm.registerForm.password,
             email: props.userInfo.email,
-            username:props.userInfo.dmc
+            username: props.userInfo.dmc
           })
             .then(async (res) => {
               if (res.code == 200) {
                 store.commit("clientGlobal/SAVE_PASSWORD", res.data);
+                SAVE_PASSWORD()
                 await importPrivateKey();
               }
               loading.value = false;
@@ -215,6 +188,8 @@ function submit(FormRef) {
             });
         }
       } else {
+        /* 密码不存在 */
+        SAVE_PASSWORD()
         await importPrivateKey();
       }
     } else {
@@ -224,16 +199,20 @@ function submit(FormRef) {
   });
 }
 
+/* 保存密码 */
+
+async function SAVE_PASSWORD() {
+  await store.dispatch("clientGlobal/setSavePassword", {
+    password: loginForm.registerForm.password,
+    email: props.userInfo.email,
+    username: props.userInfo.dmc,
+  });
+}
+
 /* 导入私钥 */
 
 async function importPrivateKey() {
   /* 密码不存在  或 重置密码都需要重新导入私钥 */
-
-  await store.dispatch("clientGlobal/setSavePassword", {
-    password: loginForm.registerForm.password,
-    email: props.userInfo.email,
-  });
-
   ElMessageBox.prompt("请输入私钥", "Tip", {
     "show-close": false,
     confirmButtonText: "OK",
@@ -259,8 +238,8 @@ async function importPrivateKey() {
       }
     },
   })
-    .then(({ value }) => {})
-    .catch(() => {});
+    .then(({ value }) => { })
+    .catch(() => { });
   loading.value = false;
 }
 
@@ -299,11 +278,9 @@ onMounted(() => {
 }
 
 .ejUnNt {
-  background: linear-gradient(
-    91.4deg,
-    rgb(47, 184, 255) 0%,
-    rgb(158, 236, 217) 100%
-  );
+  background: linear-gradient(91.4deg,
+      rgb(47, 184, 255) 0%,
+      rgb(158, 236, 217) 100%);
   border: none;
   border-radius: 30px;
   box-shadow: rgb(147 231 221 / 30%) 0px 20px 40px;
@@ -372,18 +349,18 @@ onMounted(() => {
     transform: scale(1.1);
   }
 
-  & > div {
+  &>div {
     width: 50%;
     height: 25px;
     flex: 1 1 auto;
     margin: 0px 10px;
   }
 
-  & > div:first-child {
+  &>div:first-child {
     text-align: left;
   }
 
-  & > div:last-child {
+  &>div:last-child {
     text-align: right;
   }
 

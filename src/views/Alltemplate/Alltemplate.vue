@@ -2,11 +2,7 @@
   <div class="Alltemplate_boxs" id="Alltemplate_boxs">
     <!-- isInsertBody="app-window" -->
 
-    <login
-      v-if="customDialogIsShow"
-      @closeDialog="closeDialog"
-      :userInfo="userInfo"
-    ></login>
+    <login v-if="customDialogIsShow" @closeDialog="closeDialog" :userInfo="userInfo"></login>
     <template v-else>
       <orderList :orderId="orderId"></orderList>
       <myFiles :orderId="orderId"></myFiles>
@@ -26,7 +22,7 @@ import {
 } from "vue";
 import orderList from "@/components/orders/orderList.vue";
 import myFiles from "@/views/Alltemplate/MyFiles/myFiles";
-import customDialog from "@/components-V3/customDialog";
+// import customDialog from "@/components-V3/customDialog";
 import login from "@/components/login";
 import { useStore } from "vuex";
 
@@ -46,7 +42,7 @@ if (clientPassword.value) {
   customDialogIsShow.value = true;
 }
 
-store.commit("upload/setOrderId", 10);
+store.commit("upload/setOrderId", 21);
 
 // store.commit('upload/setOrderId',orderId)
 
