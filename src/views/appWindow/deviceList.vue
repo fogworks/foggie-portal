@@ -53,7 +53,7 @@
         <div>
           <span> FID: </span>
           <span class="top-value-span">
-            {{ handleID(item.device_id) }}
+            {{ handleID(item.device_id || "") }}
           </span>
           <svg-icon
             icon-class="copy"
@@ -62,7 +62,7 @@
           ></svg-icon>
         </div>
         <div :class="['circle', item.is_active ? 'onlineC' : 'offlineC']"></div>
-        <template v-if="!item.device_type && item.product_custom.length">
+        <template v-if="!item.device_type && item.product_custom && item.product_custom.length">
           <!-- <span class="value-span">
             {{ item.product_custom[0].field_value }} </span
           >-core CPU

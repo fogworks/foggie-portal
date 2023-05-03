@@ -25,7 +25,7 @@
         <div class="item">
           <span>Device ID: &nbsp;</span>
           <span>
-            {{ handleID(item.device_id) }}
+            {{ handleID(item.device_id || "") }}
           </span>
           <svg-icon
             icon-class="copy"
@@ -193,6 +193,13 @@ const search = () => {
   search_foggie({ email: email.value })
     .then((res) => {
       console.log(res, "res");
+      let cur_data = res.data;
+      cur_data.filter((r)=>{
+        if(r.space_order_id) {
+          r.device_type = "foggie_space";
+          r.device_id = r.space_order_id;
+        }
+      })
       deviceList.list = res.data;
       store.dispatch("global/setDeviceList", res.data);
       loading.value = false;
