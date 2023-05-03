@@ -171,7 +171,7 @@ module.exports = {
             return BizResultCode.SAVE_PRIVATE_KEY_FAILED;
         });
     },
-    getToken4UploadFile: async(orderId, email) =>{
+    getToken4UploadFile: async(email, orderId) =>{
 
         var privateKey = await module.exports.getPrivateKeyByEmail(email);
         if (privateKey instanceof BizResultCode) {
