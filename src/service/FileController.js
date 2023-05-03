@@ -144,7 +144,7 @@ class FileController {
         // 获取peerId
         var orderInfo = await orderService.getOrderById(email, orderId);
         if(orderInfo instanceof BizResultCode){
-            response.send(BizResult.fail(orderInfo));
+            res.send(BizResult.fail(orderInfo));
             return;
         }
         var peerId = orderInfo.peer_id;
@@ -307,7 +307,7 @@ class FileController {
         // 获取peerId
         var orderInfo = await orderService.getOrderById(email, orderId);
         if(orderInfo instanceof BizResultCode){
-            response.send(BizResult.fail(orderInfo));
+            res.send(BizResult.fail(orderInfo));
             return;
         }
         var peerId = orderInfo.peer_id;
@@ -402,7 +402,7 @@ class FileController {
         // 获取peerId
         var orderInfo = await orderService.getOrderById(email, orderId);
         if(orderInfo instanceof BizResultCode){
-            response.send(BizResult.fail(orderInfo));
+            res.send(BizResult.fail(orderInfo));
             return;
         }
         var peerId = orderInfo.peer_id;
