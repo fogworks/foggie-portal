@@ -3,6 +3,7 @@ const BizResultCode = require('./BaseResultCode');
 const NeDB = require('nedb');
 const moment = require('moment');
 const config = require('config');
+const retry = require('retry');
 const common = require('./common');
 const net_proto = require('./grpc/net');
 const pow_proto = require('./grpc/pow');
@@ -33,6 +34,11 @@ const fileUploadRecordDB = new NeDB({
     filename: common.getHomePath() + path.sep + fileUploadRecordTableName,
     autoload: true
 })
+
+const retryOperation = retry.operation({
+    retries: 3,
+    maxTimeout: 3000
+});
 
 module.exports = {
     saveFileProp: async (orderId, email, filePath, fileSize, md5) => {

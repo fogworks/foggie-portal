@@ -228,7 +228,7 @@ function syncOrder2RegsiterCenter(){
     console.log(result)
 }
 
-syncOrder2RegsiterCenter()
+// syncOrder2RegsiterCenter()
 
 var body = '{\
     "transaction_id":"35935f9b37f1859ae125b6e23e1410cfac82bd32393c9f48c2af063abc44525d",\
@@ -511,3 +511,27 @@ var body = '{\
 
 // var num = "2";
 // console.log(num*1024*1024);
+const retry = require('retry');
+
+const operation = retry.operation({
+    retries: 3,
+    maxTimeout: 3000
+});
+
+function createGRPCClient() {
+    throw new Error('Something went wrong');
+}
+
+operation.attempt((currentAttempt) => {
+    createGRPCClient((err, result) => {
+        if (operation.retry(err)) {
+            console.log(`Connection failed, retrying... (${currentAttempt+1})`);
+            return;
+        }
+        if (err) {
+            console.error('Connection failed after maximum retries.');
+            return;
+        }
+        console.log(result);
+    });
+});

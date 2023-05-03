@@ -163,7 +163,7 @@ module.exports = {
             var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
             orderDB.update({
                 email: email,
-                order_id: parseInt(orderId),
+                order_id: orderId,
                 bill_id: billId,
             }, {
                 $set: {
@@ -191,7 +191,7 @@ module.exports = {
             var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
             orderDB.update({
                 email: email,
-                order_id: parseInt(orderId),
+                order_id: orderId,
             }, {
                 $set: {
                     update_time: currentTime
@@ -310,7 +310,7 @@ module.exports = {
             // query buy order record from NeDB
             orderDB.findOne({
                 email: email,
-                order_id: parseInt(orderId)
+                order_id: orderId
             }, function (err, data) {
                 if (err) {
                     logger.error('err:', err);
@@ -457,7 +457,7 @@ module.exports = {
                 var orderInfo = _.get(item, 'act.data.order_info');
                 var basicInfo = {};
                 if (orderInfo !== undefined) {
-                    basicInfo['orderId'] = orderInfo.order_id;
+                    basicInfo['orderId'] = orderInfo.order_id.toString();
                     basicInfo['user'] = orderInfo.user;
                     basicInfo['miner'] = orderInfo.miner;
                     resolve(basicInfo);

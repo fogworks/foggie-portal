@@ -342,7 +342,7 @@ class FileController {
             request: request
         };
 
-        client.newMultipartObject(putObjectReq, function (err, data) {
+        client.NewMultipartObject(putObjectReq, function (err, data) {
             if (err) {
                 logger.error('err:', err);
                 res.send(BizResult.fail(BizResultCode.CREATE_FILE_FAILED));
