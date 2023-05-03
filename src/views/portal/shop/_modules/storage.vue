@@ -10,6 +10,14 @@
             <span style="font-size: 16px; margin-left: 5px">周</span>
           </div>
           <div>
+            <div style="
+                margin-top: -20px;
+                color: #ff6e6e;
+                font-size: 12px;
+              
+              ">
+              當前基準價:{{ Number(curReferenceRate).toFixed(4) }} DMC
+            </div>
             <el-input v-model="formLine.quantity" placeholder="請輸入购买数量" style="width: 220px">
               <template #prefix>
                 <svg-icon icon-class="search" size="25"></svg-icon>
@@ -20,15 +28,7 @@
             </el-input>
           </div>
 
-          <div>
-            <div style="
-                margin-top: -20px;
-                color: #ff6e6e;
-                font-size: 12px;
-                margin-left: 20px;
-              ">
-              當前基準價:{{ Number(curReferenceRate).toFixed(4) }} DMC
-            </div>
+          <!-- <div>
             <el-select v-model="formLine.priceSection" placeholder="請選擇理想價格區間" style="width: 360px">
               <el-option :label="`基準價正負20%： 約 ${selectionOption['2'].min} -- ${selectionOption['2'].max} DMC`"
                 value="2" />
@@ -37,8 +37,8 @@
 
               <el-option label="不限價格" :value="0" />
             </el-select>
-          </div>
-          <el-button style="margin-top: 23px" type="primary" round @click="filterOrder" :loading="loading">筛选</el-button>
+          </div> -->
+          <el-button style="margin-top: 10px" type="primary" round @click="filterOrder" :loading="loading">筛选</el-button>
         </div>
         <div class="homeBoxHeader-right clearfix">
           <el-button type="primary" round>重置</el-button>
@@ -165,7 +165,7 @@ import { useStore } from "vuex";
 const store = useStore();
 
 const ChainId = computed(() => store.getters.ChainId);
-const username = computed(() => store.getters.userInfo?.dmc);
+// const username = computed(() => store.getters.userInfo?.dmc);
 const email = computed(() => store.getters.userInfo?.email);
 let loading = ref(false);
 let dialogIsShow = ref(false); // 弹窗是否展示
@@ -175,7 +175,7 @@ const state = reactive({
   formLine: {
     week: "", //购买周期
     quantity: "", //pst数量
-    priceSection: "", // 选择的价格区间 2 3 0
+    priceSection: "3", // 选择的价格区间 2 3 0
     prestoreDMC: "", // 预存DMC
   },
   selectionOption: {

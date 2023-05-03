@@ -536,7 +536,7 @@ export default {
                   let form = new FormData();
                   form.append('fileCategory', '2')
                   form.append('fileName', encodeURIComponent(file.value.urlFileName))
-                  form.append('username', username.value)
+                  form.append('email', email.value)
                   form.append('uploadId', upload_id.value)
                   form.append('md5', spark.end())
                   form.append('partId', currentChunk1)

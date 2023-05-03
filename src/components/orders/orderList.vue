@@ -309,8 +309,7 @@ const { orderList } = toRefs(state);
 
 function loadOrderList() {
   let params = {
-    // orderId: props.orderId,
-    orderId: 10,
+    orderId: props.orderId,
   };
 
   getOrderById(params)
