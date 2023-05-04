@@ -340,8 +340,9 @@ class OrderController {
 
         var orderId = req.body.orderId;
         var email = req.body.email;
+        var deviceType = req.body.deviceType;
 
-        if (!orderId || !email) {
+        if (!orderId || !email || !deviceType) {
             res.send(BizResult.validateFailed());
             return;
         }
@@ -395,8 +396,12 @@ class OrderController {
             body: body
         }).getBody('utf-8')).data.find_order;
         res.send(BizResult.success(order));
-        // var orderInfo = await orderService.getOrderById(email, orderId);
-        // res.send(BizResult.success(orderInfo));
+        var orderInfo = await orderService.getOrderById(email, orderId);
+        order['used_space'] = orderInfo.used_space;
+        order['total_space'] = orderInfo.total_space;
+        var fileCount = await fileService.getFileCount(orderId, email, deviceType);
+        order['file_count'] = fileCount;
+        res.send(BizResult.success(order));
     }
 
     /**
