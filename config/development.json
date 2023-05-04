@@ -24,7 +24,8 @@
         "codebookOffsetTableName":"foggieV/db/fc_codebook_offset.db",
         "fileUploadRecordTableName":"foggieV/db/fc_file_upload_record.db",
         "pushMerkleRecordTableName":"foggieV/db/fc_push_merkle_record.db",
-        "challengeRecordTableName":"foggieV/db/fc_challenge_record.db"
+        "challengeRecordTableName":"foggieV/db/fc_challenge_record.db",
+        "tradeRecordTableName":"foggieV/db/fc_trade_record.db"
     },
     "logConfig":{
         "dbPath":"",

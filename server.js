@@ -14,6 +14,7 @@ app.listen(port, () => {
 const OrderController = require('./src/service/OrderController');
 const UserController = require('./src/service/UserController');
 const FileController = require('./src/service/FileController');
+const AssetsController = require('./src/service/AssetsController');
 const PublishController = require('./src/service/PublishController');
 const OperController = require('./src/service/OperController');
 var jsonParser = bodyParser.json();
@@ -151,6 +152,9 @@ app.post('/file/complete', jsonParser, (req, res) => {
   FileController.complete(req, res);
 });
 
+app.post('/assets/transfer', jsonParser, (req, res) => {
+  AssetsController.transfer(req, res);
+});
 
 const os = require("os").networkInterfaces();
 

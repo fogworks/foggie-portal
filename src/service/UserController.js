@@ -203,7 +203,7 @@ class UserController {
             return;
         }
 
-        var privateKey = userService.getPrivateKeyByEmail(email);
+        var privateKey = await userService.getPrivateKeyByEmail(email);
         if (privateKey instanceof BizResultCode) {
             res.send(BizResult.fail(privateKey));
             return;
