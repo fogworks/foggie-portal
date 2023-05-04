@@ -92,7 +92,6 @@ app.post('/user/save_password', jsonParser, (req, res) => {
 });
 
 app.post('/user/validate_password', jsonParser, (req, res) => {
-  
   UserController.validateUserPassword(req, res);
 });
 
@@ -123,7 +122,8 @@ app.post('/file/list', jsonParser, (req, res) => {
   var email = req.body.email;
   var pageSize = req.body.pageSize;
   var pageNo = req.body.pageNo;
-  FileController.list(orderId, email, pageSize, pageNo, res);
+  var deviceType = req.body.deviceType;
+  FileController.list(orderId, email, deviceType, pageSize, pageNo, res);
 });
 
 app.post('/file/remove', jsonParser, (req, res) => {
@@ -145,7 +145,8 @@ app.post('/file/create', jsonParser, (req, res) => {
   var fileSize = req.body.fileSize;
   var orderId = req.body.orderId;
   var email = req.body.email;
-  FileController.create(email, fileName, md5, fileType, fileSize, orderId, res);
+  var deviceType = req.body.deviceType;
+  FileController.create(email, fileName, md5, fileType, fileSize, orderId, deviceType, res);
 });
 
 app.post('/file/complete', jsonParser, (req, res) => {

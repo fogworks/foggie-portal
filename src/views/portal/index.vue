@@ -2,11 +2,18 @@
   <div class="portal-main" id="portal-main">
     <div class="left-box">
       <div class="collapse" @click="changeCollapse">
-        <svg-icon icon-class="collapse" :class="[isCollapse ? 'isCollapse' : '']"></svg-icon>
+        <svg-icon
+          icon-class="collapse"
+          :class="[isCollapse ? 'isCollapse' : '']"
+        ></svg-icon>
       </div>
 
-
-      <el-menu class="left-menu" :collapse="isCollapse" :default-active="defaultActive" router>
+      <el-menu
+        class="left-menu"
+        :collapse="isCollapse"
+        :default-active="defaultActive"
+        router
+      >
         <el-menu-item index="user" class="user">
           <svg-icon icon-class="user"></svg-icon>
           <!-- <div v-if="userName" :title="userName">
@@ -25,10 +32,6 @@
         <el-menu-item index="discover">
           <svg-icon icon-class="discover"></svg-icon>
           <template #title> Discover </template>
-        </el-menu-item>
-        <el-menu-item index="assets" v-if="userName !== 'Login'">
-          <svg-icon icon-class="income"></svg-icon>
-          <template #title> Assets </template>
         </el-menu-item>
         <el-menu-item index="shop">
           <svg-icon icon-class="shop"></svg-icon>
@@ -167,7 +170,6 @@ const changeCollapse = () => {
       }
 
       &.el-menu--collapse {
-
         // width: 200px;
         // min-height: 400px;
         .user {
@@ -210,7 +212,7 @@ const changeCollapse = () => {
     //   rgba(148, 187, 233, 1) 100%
     // );
 
-    >div {
+    > div {
       z-index: 1;
     }
 
