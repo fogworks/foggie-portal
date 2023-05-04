@@ -229,6 +229,7 @@ module.exports = {
                             resolve(BizResultCode.SAVE_ORDER_FAILED);
                             return;
                         }
+                        logger.info("save order, usedSpace:{}, totalSpace:{}, expire:{}", doc.used_space, doc.total_space, doc.expire);
                         resolve(doc._id);
                     });
                 }
@@ -262,6 +263,7 @@ module.exports = {
                     resolve(BizResultCode.UPDTAE_ORDER_FAILED);
                     return;
                 }
+                logger.info("update order success, usedSpace:{}, totalSpace:{}, expire:{}", usedSpace, totalSpace, expire);
                 resolve(num);
             });
         }).catch((err) => {
