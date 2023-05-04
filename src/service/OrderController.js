@@ -395,12 +395,11 @@ class OrderController {
             },
             body: body
         }).getBody('utf-8')).data.find_order;
-        res.send(BizResult.success(order));
         var orderInfo = await orderService.getOrderById(email, orderId);
-        order['used_space'] = orderInfo.used_space;
-        order['total_space'] = orderInfo.total_space;
+        order[0]['used_space'] = orderInfo.used_space;
+        order[0]['total_space'] = orderInfo.total_space;
         var fileCount = await fileService.getFileCount(orderId, email, deviceType);
-        order['file_count'] = fileCount;
+        order[0]['file_count'] = fileCount;
         res.send(BizResult.success(order));
     }
 
