@@ -107,7 +107,6 @@ class FileController {
         var fileType = req.body.fileType;
         var fileSize = req.body.fileSize;
         var orderId = req.body.orderId;
-        
         var email = req.body.email;
         // 大文件新增的入参
         var partId = req.body.partId;
@@ -156,9 +155,7 @@ class FileController {
         };
         var file = req.files.file;
         // 测试文件服务器端联通性
-        var grpcInfo = orderInfo.rpc;
-        var proxClient = fileService.getProxGrpcClient(grpcInfo);
-        
+        var rpc = orderInfo.rpc;
 
         // 小文件上传
         if (parseInt(fileCategory) == 1) {
@@ -166,7 +163,7 @@ class FileController {
                 res.send(BizResult.validateFailed());
                 return;
             }
-            smallFileUpload(fileName, md5, fileSize, fileType, header, res, fileCategory, orderId, email, peerId, file);
+            smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, res, fileCategory, orderId, email, peerId, file);
         }
         // 大文件上传
         else if (parseInt(fileCategory) == 2) {
@@ -187,7 +184,7 @@ class FileController {
                 request: request
             };
 
-            var netClient = fileService.getNetGrpcClient();
+            var netClient = fileService.getProxGrpcClient(rpc, header);
             let stream = netClient.PutObjectPart(async function (err, data) {
                 if (err) {
                     logger.error('err:', err);
@@ -311,6 +308,7 @@ class FileController {
             return;
         }
         var peerId = orderInfo.peer_id;
+        var rpc = orderInfo.rpc;
         
         // 校验相同的文件是否已经上传过
         var resultData = await fileService.getFileByMd5(orderId, email, fileName, md5)
@@ -325,7 +323,7 @@ class FileController {
             res.send(BizResult.success(duplicateRes));
             return;
         }
-        var client = fileService.getNetGrpcClient();
+        var client = fileService.getProxGrpcClient(rpc, header);
         const header = {
             peerId: peerId,
             Id: orderId,
@@ -406,6 +404,7 @@ class FileController {
             return;
         }
         var peerId = orderInfo.peer_id;
+        var rpc = orderInfo.rpc;
 
         // 根据文件的上传记录，重读一次文件，生成merkle树后 提交
         var fileUploadRecordRes = await fileService.getFileUploadRecord(orderId, email, md5);
@@ -450,7 +449,7 @@ class FileController {
                 request: request
             };
 
-            var netClient = fileService.getNetGrpcClient();
+            var netClient = fileService.getProxGrpcClient(rpc, header);
             netClient.CompleteMultipart(completeMultipartReq, function (err2, data2) {
                 if (err2) {
                     logger.error('err:', err2);
@@ -589,8 +588,8 @@ class FileController {
 
 module.exports = FileController
 
-function smallFileUpload(fileName, md5, fileSize, fileType, header, res, fileCategory, orderId, email, peerId, file) {
-    var netClient = fileService.getNetGrpcClient();
+function smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, res, fileCategory, orderId, email, peerId, file) {
+    var netClient = fileService.getProxGrpcClient(rpc, header);
     const request = {
         key: fileName,
         md5: md5,
