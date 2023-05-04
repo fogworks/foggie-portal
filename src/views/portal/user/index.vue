@@ -43,20 +43,16 @@
         </el-descriptions-item>
       </el-descriptions> -->
 
+      <Assets></Assets>
       <div class="info-content">
-        <div class="info-item">
-          <div>Email</div>
-          <div>{{ userInfo.email }}</div>
-        </div>
-        <div class="info-item">
-          <div>DMC</div>
-          <div>{{ userInfo.dmc }}</div>
-        </div>
         <div class="foot-btn">
           <!-- <el-button type="danger" @click="unbindVisible = true"
             >Unbind</el-button
           > -->
-          <el-button type="primary" @click="logout">Switch Accounts</el-button>
+          <el-button type="primary" @click="logout"
+            ><svg-icon icon-class="switch"></svg-icon> Switch
+            Accounts</el-button
+          >
         </div>
       </div>
     </div>
@@ -88,7 +84,7 @@ import {
   toRefs,
   inject,
 } from "vue";
-import NextButton from "@/components/nextButton";
+import Assets from "./_modules/index";
 import { login, get_foggie_dmc, user, unbind_foggie } from "@/utils/api";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
@@ -224,12 +220,12 @@ const unbind = () => {
   align-items: center;
   img {
     width: 350px;
+    margin-right: 100px;
   }
 }
 .account-form {
   width: 500px;
   // margin: 0 auto;
-  margin-left: 30px;
   padding: 20px 30px;
   background: transparent;
   border-radius: 10px;
@@ -277,10 +273,14 @@ const unbind = () => {
   }
 }
 .info-box {
-  width: 500px;
   margin: 0 auto;
+  :deep {
+    .light-box {
+      margin: 0 auto;
+    }
+  }
   .info-content {
-    background-color: #fff;
+    width: 100%;
     padding: 20px;
     border-radius: 20px;
     .info-item {
@@ -297,6 +297,9 @@ const unbind = () => {
     }
     .foot-btn {
       text-align: center;
+      svg {
+        font-size: 20px;
+      }
     }
   }
 }

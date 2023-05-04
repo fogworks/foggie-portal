@@ -1,21 +1,27 @@
 <template>
   <div class="container" v-loading="loading">
-    <main>
-      <Access v-if="!accessible" v-model:accessible="accessible" @accessCallback="accessCallback"></Access>
-      <template v-else>
-        <Welcome v-if="!hasReady" :haveNet="haveNet"></Welcome>
-        <div v-else>
-          <div class="top-title">
-            <span @click="isInSetup = false">
-              {{ deviceData.device_name }}
-            </span>
-            <svg-icon icon-class="setup" class="setup" @click="toSet"></svg-icon>
-          </div>
-          <MaxHome v-if="!isInSetup" :haveNet="haveNet" :deviceData="deviceData"></MaxHome>
-          <Setting v-else></Setting>
+    <Access
+      v-if="!accessible"
+      v-model:accessible="accessible"
+      @accessCallback="accessCallback"
+    ></Access>
+    <template v-else>
+      <Welcome v-if="!hasReady" :haveNet="haveNet"></Welcome>
+      <div v-else>
+        <div class="top-title">
+          <span @click="isInSetup = false">
+            {{ deviceData.device_name }}
+          </span>
+          <svg-icon icon-class="setup" class="setup" @click="toSet"></svg-icon>
         </div>
-      </template>
-    </main>
+        <MaxHome
+          v-if="!isInSetup"
+          :haveNet="haveNet"
+          :deviceData="deviceData"
+        ></MaxHome>
+        <Setting v-else></Setting>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -26,7 +32,16 @@ import Welcome from "../welcome";
 import Setting from "../setting";
 import { useStore } from "vuex";
 import { get_service_info, detected_net } from "@/utils/api.js";
-import { ref, onMounted, reactive, watch, provide, toRefs, inject, readonly } from "vue";
+import {
+  ref,
+  onMounted,
+  reactive,
+  watch,
+  provide,
+  toRefs,
+  inject,
+  readonly,
+} from "vue";
 export default {
   name: "FoggieMax",
   components: {
@@ -53,14 +68,17 @@ export default {
     provide("requestTarget", requestTarget);
 
     const store = useStore();
-    if (deviceData.device_type == 'foggie_max' || deviceData.device_type == 'foggie' || deviceData.device_type == '') {
-      const orderId = readonly(deviceData.device_id)
-      store.commit('upload/setOrderId', orderId)
+    if (
+      deviceData.device_type == "foggie_max" ||
+      deviceData.device_type == "foggie" ||
+      deviceData.device_type == ""
+    ) {
+      const orderId = readonly(deviceData.device_id);
+      store.commit("upload/setOrderId", orderId);
     } else {
-      const orderId = readonly(deviceData.order_id)
-      store.commit('upload/setOrderId', orderId)
+      const orderId = readonly(deviceData.order_id);
+      store.commit("upload/setOrderId", orderId);
     }
-
 
     const accessible = ref(false);
     const loading = ref(false);
@@ -123,7 +141,7 @@ export default {
           }
           accessible.value = true;
         })
-        .catch(() => { })
+        .catch(() => {})
         .finally(() => {
           loading.value = false;
         });
@@ -171,19 +189,24 @@ export default {
 
 <style lang="scss" scoped>
 .container {
+  position: relative;
   width: 1120px;
   // padding: 0 40px;
+  min-height: 100%;
   margin: 0 auto;
   box-sizing: border-box;
+  z-index: 1;
 
   :deep {
     .el-loading-mask {
       background: transparent;
     }
-  }
-
-  main {
-    z-index: 1;
+    .access-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
   }
 
   .top-title {
