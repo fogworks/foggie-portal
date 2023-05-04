@@ -184,7 +184,7 @@ class UserController {
             return;
         }
 
-        var token = userService.getToken4UploadFile(email, orderId);
+        var token = await userService.getToken4UploadFile(email, orderId);
         if(token instanceof BizResultCode) {
             res.send(BizResult.fail(token));
             return;

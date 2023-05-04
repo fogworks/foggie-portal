@@ -164,7 +164,7 @@ module.exports = {
             return BizResultCode.REMOVE_FILE_FAILED;
         });
     },
-    saveFileCodeBook: async (orderId, email, md5, cid, partId, database64, hashVaule) => {
+    saveFileCodeBook: async (orderId, email, md5, fileSize, cid, partId, database64, hashVaule) => {
         // save file codeBook into NeDB
         return new Promise((resolve, reject) => {
             var now = moment();
@@ -207,6 +207,7 @@ module.exports = {
                         order_id: orderId,
                         email: email,
                         md5: md5,
+                        file_size: fileSize,
                         cid: cid,
                         part_id: partId,
                         data: database64,
@@ -263,13 +264,13 @@ module.exports = {
             return BizResultCode.UPDATE_FILE_CODEBOOK_FAILED;
         });
     },
-    getFileCodeBook: async (orderId, email, md5) => {
+    getFileCodeBook: async (orderId, email, blockSize) => {
         // get file codeBook into NeDB
         return new Promise((resolve, reject) => {
             codeBookDB.find({
                 order_id: orderId,
                 email: email,
-                md5: md5
+                file_size: {$gte: blockSize}
             }, function (err, docs) {
                 if (err) {
                     logger.error('err:', err);
@@ -516,29 +517,25 @@ module.exports = {
         var port = grpcConfig.get("port");
         return new pow_proto.PowService(ip + ':' + port, grpc.credentials.createInsecure());
     },
-    getProxGrpcClient: (rpc, header) => {
-        try {
-            var proxClient = new prox_proto.Service(rpc, grpc.credentials.createInsecure());
-            var proxPingRequest = {
-                header: header
-            }
-
+    getProxGrpcClient: async (rpc, header) => {
+        var proxClient = new prox_proto.Service(rpc, grpc.credentials.createInsecure());
+        var proxPingRequest = {
+            header: header
+        }
+        return new Promise((resolve, reject) => {
             proxClient.Ping(proxPingRequest, function (err, data) {
                 if (err) {
                     logger.error('err:', err);
-                    throw err;
+                    var grpcConfig = config.get('grpcConfig');
+                    var ip = grpcConfig.get("ip");
+                    var port = grpcConfig.get("port");
+                    logger.info('grpc address:', ip + ':' + port);
+                    resolve(new net_proto.API(ip + ':' + port, grpc.credentials.createInsecure()));
+                    return;
                 }
+                logger.info('grpc address:', rpc);
+                resolve(proxClient);
             });
-            logger.info('grpc address:', rpc);
-            return proxClient;
-        }
-        catch (err) {
-            logger.error(err);
-        }
-        var grpcConfig = config.get('grpcConfig');
-        var ip = grpcConfig.get("ip");
-        var port = grpcConfig.get("port");
-        logger.info('grpc address:', ip + ':' + port);
-        return new net_proto.API(ip + ':' + port, grpc.credentials.createInsecure());
+        });
     }
 }

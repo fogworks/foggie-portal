@@ -68,6 +68,9 @@ app.post('/order/push_merkle_record', jsonParser, (req, res) => {
   OrderController.getPushMerkleRecord(orderId, email, pageSize, pageNo, res);
 });
 
+app.post('/order/req_challenge', jsonParser, (req, res) => {
+  OrderController.reqChallenge(req, res);
+});
 
 app.post('/order/challenge_list', jsonParser, (req, res) => {
   var orderId = req.body.orderId;
@@ -127,7 +130,7 @@ app.post('/file/list', jsonParser, (req, res) => {
 });
 
 app.post('/file/remove', jsonParser, (req, res) => {
-  FileController.deleteFileProp(req, res);
+  FileController.removeFileProp(req, res);
 });
 
 app.post('/file/remove_file_codebook_offset', jsonParser, (req, res) => {
@@ -152,11 +155,6 @@ app.post('/file/create', jsonParser, (req, res) => {
 app.post('/file/complete', jsonParser, (req, res) => {
   FileController.complete(req, res);
 });
-
-app.post('/file/req_challenge', jsonParser, (req, res) => {
-  FileController.reqChallenge(req, res);
-});
-
 
 
 const os = require("os").networkInterfaces();
