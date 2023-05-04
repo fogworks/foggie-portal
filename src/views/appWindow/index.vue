@@ -78,7 +78,13 @@ const search = () => {
   search_foggie({ email: email.value })
     .then((res) => {
       console.log(res, "res");
-      store.dispatch("global/setDeviceList", res.data);
+      let cur_data = res.data;
+      cur_data.forEach((r) => {
+        if (r.device_type === "space") {
+          r.expire = r.expire.slice(0, r.expire.length - 3);
+        }
+      });
+      store.dispatch("global/setDeviceList", cur_data);
       loading.value = false;
     })
     .finally(() => {
@@ -96,6 +102,14 @@ const scrollIntoView = (data) => {
   app.scrollTo(0, target.offsetTop);
 };
 const clickItem = (data) => {
+  if (!data.is_active) {
+    proxy.$notify({
+      type: "info",
+      message: "This device is offline",
+      position: "bottom-left",
+    });
+    return false;
+  }
   let target = totalActiveDevice.data.find(
     (el) =>
       (el.device_id && el.device_id === data.device_id) ||

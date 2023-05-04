@@ -25,28 +25,29 @@
         @click="clickItem(item)"
       >
         <svg-icon
-          v-if="isActive(item.device_id) && item.device_type !== 'foggie_max'"
+          v-if="isActive(item.device_id) && item.device_type == ''"
           icon-class="logo-dog"
           class="logo"
         ></svg-icon>
 
         <svg-icon
-          v-else-if="
-            !isActive(item.device_id) && item.device_type !== 'foggie_max'
-          "
+          v-else-if="!isActive(item.device_id) && item.device_type == ''"
           icon-class="logo-dog-black"
           class="logo"
         ></svg-icon>
         <span class="logo logo-text" v-if="item.device_type == 'foggie_max'"
           >MAX</span
         >
+        <span class="logo logo-text" v-if="item.device_type == 'space'">
+          <svg-icon style="font-size: 25px" icon-class="storage"></svg-icon>
+        </span>
         <svg-icon
           v-show="isActive(item.device_id || item.space_order_id)"
           @click.stop="cancelItem(item)"
           icon-class="cancel"
           class="cancel"
         ></svg-icon>
-        <div>
+        <div v-if="item.device_type !== 'space'">
           <span>
             {{ item.device_type ? "Name:" : "IP:" }}
           </span>
@@ -54,7 +55,13 @@
             {{ item.device_name || item.dedicatedip }}
           </span>
         </div>
-        <div>
+        <div v-else>
+          Bill ID:
+          <span class="top-value-span">
+            {{ item.bill_id }}
+          </span>
+        </div>
+        <div v-if="item.device_id">
           <span> FID: </span>
           <span class="top-value-span">
             {{ handleID(item.device_id || "") }}
@@ -66,41 +73,40 @@
           ></svg-icon>
         </div>
         <div :class="['circle', item.is_active ? 'onlineC' : 'offlineC']"></div>
-        <template
-          v-if="
-            !item.device_type &&
-            item.product_custom &&
-            item.product_custom.length
-          "
-        >
-          <!-- <span class="value-span">
-            {{ item.product_custom[0].field_value }} </span
-          >-core CPU
-          <span class="value-span"
-            >{{ item.product_custom[1].field_value }}
-          </span>
-          GB Memory
-          <span class="value-span">
-            {{ item.product_custom[3].field_value }}</span
-          >
-          GB
-          <span> {{ item.product_custom[2].field_value }}</span
-          >-Disk
-          <span class="value-span">
-            {{ item.product_custom[4].field_value }}</span
-          >MB Bandwidth -->
-
+        <template v-if="!item.device_type">
           <div>
             Due
             <span class="value-span value-span2">{{
               handleTimeStamp(item.expire)
             }}</span>
           </div>
-          <div>
+          <!-- <div>
             <span class="value-span">500G</span>
             Storage
+          </div> -->
+        </template>
+        <template v-else-if="item.device_type === 'space'">
+          <div>
+            Due
+            <span class="value-span value-span2">{{
+              handleTimeStamp(item.expire)
+            }}</span>
           </div>
         </template>
+        <div style="height: unset">
+          <span
+            style="
+              white-space: normal;
+              text-overflow: unset;
+              word-break: break-all;
+            "
+            class="value-span value-span2"
+            >{{ getfilesize(item.used_space) || 0 }}/{{
+              getfilesize(item.total_space) || 0
+            }}</span
+          >
+          Space
+        </div>
       </li>
     </ul>
   </div>
@@ -118,7 +124,7 @@ import {
 } from "vue";
 import { useStore } from "vuex";
 import { Search } from "@element-plus/icons-vue";
-import { handleTimeStamp } from "@/utils/util";
+import { handleTimeStamp, getfilesize } from "@/utils/util";
 const store = useStore();
 const props = defineProps({
   totalActiveDevice: {
@@ -163,7 +169,7 @@ const handleID = (str) => {
   );
 };
 const isActive = (id) => {
-  console.log('++++++++++++', list)
+  console.log("++++++++++++", list);
   if (
     totalActiveDevice.value.data.find(
       (el) =>

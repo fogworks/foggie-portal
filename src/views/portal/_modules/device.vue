@@ -7,7 +7,9 @@
         v-else
         :class="[
           'card',
-          item.device_type === 'foggie_max' ? 'max' : 'foggie',
+          !item.device_type ? 'foggie' : '',
+          item.device_type === 'foggie_max' ? 'max' : '',
+          item.device_type === 'space' ? 'space' : '',
           item.is_active ? 'online' : 'offline',
         ]"
         v-for="(item, index) in deviceList.list"
@@ -15,14 +17,19 @@
       >
         <span></span>
         <div :class="['circle', item.is_active ? 'onlineC' : 'offlineC']"></div>
-        <div class="item">
+        <div class="item" v-if="item.device_type !== 'space'">
           <span>{{ item.device_type ? "" : "IP: " }}</span>
           <span :title="item.device_type ? item.device_name : item.dedicatedip">
             {{ item.device_type ? item.device_name : item.dedicatedip }}
           </span>
         </div>
-
-        <div class="item">
+        <div v-else>
+          Bill ID:
+          <span class="top-value-span">
+            {{ item.bill_id }}
+          </span>
+        </div>
+        <div class="item" v-if="item.device_type !== 'space'">
           <span>Device ID: &nbsp;</span>
           <span>
             {{ handleID(item.device_id || "") }}
@@ -33,16 +40,26 @@
             @click.stop="copyLink(item.device_id)"
           ></svg-icon>
         </div>
-        <template v-if="!item.device_type">
+        <template v-if="!item.device_type || item.device_type === 'space'">
           <div>
             Due
             <span class="value-span">{{ handleTimeStamp(item.expire) }}</span>
           </div>
-          <div>
-            <span class="value-span">500G</span>
-            Storage
-          </div>
         </template>
+        <div class="item" style="height: unset">
+          <span
+            style="
+              white-space: normal;
+              text-overflow: unset;
+              word-break: break-all;
+            "
+            class="value-span value-span2"
+            >{{ getfilesize(item.used_space) || 0 }}/{{
+              getfilesize(item.total_space) || 0
+            }}</span
+          >
+          Space
+        </div>
 
         <!-- <el-dropdown
           popper-class="more-popper"
@@ -89,7 +106,7 @@ import WifiSearching from "@/components/wifiSearching";
 import { useRouter } from "vue-router";
 import IPFrom from "./ipForm";
 import { search_foggie } from "@/utils/api";
-import { handleTimeStamp } from "@/utils/util";
+import { handleTimeStamp, getfilesize } from "@/utils/util";
 import { useStore } from "vuex";
 const store = useStore();
 const router = useRouter();
@@ -105,31 +122,19 @@ const deviceList = reactive({
 const visible = ref(false);
 const emit = defineEmits(["next"]);
 const toGuide = (item) => {
-  console.log(item, "item");
-  store.dispatch("global/setDiscoverData", item);
-
-  router.push({
-    // path: "/appWindow",
-    // query: item,
-    name: "AppWindow",
-  });
-  // if (item.device_type === "foggie_max") {
-  //   router.push({
-  //     name: "AppWindow",
-  //   });
-  //   const url = `http://${item.dedicatedip}:8080`;
-  //   window.location.href = url;
-  // } else {
-  //   const url = `https://foggie.fogworks.io/#/fogworks`;
-  //   window.location.href = url;
-  // }
-
-  // if (userInfo.email) {
-  // 绑定且登录
-
-  // } else {
-  // chooseAssociated.value = true;
-  // }
+  if (item.is_active) {
+    console.log(item, "item");
+    store.dispatch("global/setDiscoverData", item);
+    router.push({
+      name: "AppWindow",
+    });
+  } else {
+    proxy.$notify({
+      type: "info",
+      message: "This device is offline",
+      position: "bottom-left",
+    });
+  }
 };
 const copyLink = (text) => {
   var input = document.createElement("input"); // 创建input对象
@@ -192,16 +197,14 @@ const search = () => {
   loading.value = true;
   search_foggie({ email: email.value })
     .then((res) => {
-      console.log(res, "res");
       let cur_data = res.data;
-      cur_data.filter((r)=>{
-        // if(r.space_order_id) {
-        //   r.device_type = "foggie_space";
-        //   r.device_id = r.space_order_id;
-        // }
-      })
-      deviceList.list = res.data;
-      store.dispatch("global/setDeviceList", res.data);
+      cur_data.forEach((r) => {
+        if (r.device_type === "space") {
+          r.expire = r.expire.slice(0, r.expire.length - 3);
+        }
+      });
+      deviceList.list = cur_data;
+      store.dispatch("global/setDeviceList", cur_data);
       loading.value = false;
     })
     .finally(() => {
@@ -379,7 +382,8 @@ search();
       // background-color: #fff;
     }
   }
-  .foggie {
+  .foggie,
+  .space {
     position: relative;
     &::before {
       content: "";
@@ -403,6 +407,14 @@ search();
       font-weight: 500;
       font-size: 16px;
       color: #1973be !important;
+    }
+  }
+  .space {
+    &::before {
+      background: url("~@/assets/storage.svg") no-repeat;
+      background-size: 140px;
+      background-position: center;
+      opacity: 0.3;
     }
   }
   .max {

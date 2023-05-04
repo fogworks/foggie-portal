@@ -107,6 +107,7 @@ const handleActive = (val = "") => {
   background-color: #6b6ecc;
   background: linear-gradient(45deg, #04051dea 0%, #2b566e 100%);
   transition: all 0.3s;
+  cursor: default;
   &:hover {
     transform: scale(1.1);
     svg {
