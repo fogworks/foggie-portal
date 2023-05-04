@@ -401,7 +401,7 @@ search();
     .value-span {
       line-height: 24px;
       font-weight: 500;
-      font-size: 18px;
+      font-size: 16px;
       color: #1973be !important;
     }
   }

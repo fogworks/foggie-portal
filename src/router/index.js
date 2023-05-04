@@ -18,7 +18,7 @@ const router = createRouter({
         {
           path: 'user',
           name: 'User',
-          component: defineAsyncComponent(() => import(`../views/portal/_modules/user`)),
+          component: defineAsyncComponent(() => import(`../views/portal/user/index`)),
           meta: {
             title: 'user',
           },
@@ -37,14 +37,6 @@ const router = createRouter({
           component: defineAsyncComponent(() => import(`../views/portal/_modules/discover`)),
           meta: {
             title: 'discover',
-          },
-        },
-        {
-          path: 'assets',
-          name: 'Assets',
-          component: defineAsyncComponent(() => import(`../views/portal/assets`)),
-          meta: {
-            title: 'assets',
           },
         },
         {
