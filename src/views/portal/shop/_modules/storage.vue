@@ -329,21 +329,21 @@ async function submit() {
       billId: state.orderDetail.orderID, //挂单的id
       period: state.formLine.week, //购买周期，大于等于24
       benchmarkPrice: curReferenceRate.value, //基准价格，单位DMC
-      priceRange: state.formLine.priceSection,      //1  基准价格正负浮动20% ； 2 基准价格正负浮动30%
+      priceRange: '3',     // 基准价格正负浮动30%
       unmatchedAmount: state.formLine.quantity, //购买PST数量
       totalPrice: state.orderDetail.aggregate, //总价，单位 DMC
     };
-    switch (state.formLine.priceSection) {
-      case 0:
-        params.priceRange = 3;
-        break;
-      case "2":
-        params.priceRange = 1;
-        break;
-      case "3":
-        params.priceRange = 2;
-        break;
-    }
+    // switch (state.formLine.priceSection) {
+    //   case 0:
+    //     params.priceRange = 3;
+    //     break;
+    //   case "2":
+    //     params.priceRange = 1;
+    //     break;
+    //   case "3":
+    //     params.priceRange = 2;
+    //     break;
+    // }
 
     buyOrder(params)
       .then((res) => {
