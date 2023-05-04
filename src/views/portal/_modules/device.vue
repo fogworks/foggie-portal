@@ -10,13 +10,20 @@
           !item.device_type ? 'foggie' : '',
           item.device_type === 'foggie_max' ? 'max' : '',
           item.device_type === 'space' ? 'space' : '',
-          item.is_active ? 'online' : 'offline',
+          item.device_type === 'space'
+            ? ''
+            : item.is_active
+            ? 'online'
+            : 'offline',
         ]"
         v-for="(item, index) in deviceList.list"
         @click="toGuide(item)"
       >
         <span></span>
-        <div :class="['circle', item.is_active ? 'onlineC' : 'offlineC']"></div>
+        <div
+          v-if="item.device_type !== 'space'"
+          :class="['circle', item.is_active ? 'onlineC' : 'offlineC']"
+        ></div>
         <div class="item" v-if="item.device_type !== 'space'">
           <span>{{ item.device_type ? "" : "IP: " }}</span>
           <span :title="item.device_type ? item.device_name : item.dedicatedip">
@@ -122,17 +129,24 @@ const deviceList = reactive({
 const visible = ref(false);
 const emit = defineEmits(["next"]);
 const toGuide = (item) => {
-  if (item.is_active) {
-    console.log(item, "item");
+  if (item.device_type !== "space") {
+    if (item.is_active) {
+      console.log(item, "item");
+      store.dispatch("global/setDiscoverData", item);
+      router.push({
+        name: "AppWindow",
+      });
+    } else {
+      proxy.$notify({
+        type: "info",
+        message: "This device is offline",
+        position: "bottom-left",
+      });
+    }
+  } else {
     store.dispatch("global/setDiscoverData", item);
     router.push({
       name: "AppWindow",
-    });
-  } else {
-    proxy.$notify({
-      type: "info",
-      message: "This device is offline",
-      position: "bottom-left",
     });
   }
 };

@@ -102,7 +102,7 @@ const scrollIntoView = (data) => {
   app.scrollTo(0, target.offsetTop);
 };
 const clickItem = (data) => {
-  if (!data.is_active) {
+  if (!data.is_active && data.device_type !== "space") {
     proxy.$notify({
       type: "info",
       message: "This device is offline",
@@ -173,7 +173,7 @@ const init = () => {
   } else {
     isDiscover.value = false;
     search();
-    if (discoverData.value.device_id) {
+    if (discoverData.value.device_id || discoverData.value.space_order_id) {
       nextTick(() => {
         clickItem(discoverData.value);
       });

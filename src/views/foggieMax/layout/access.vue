@@ -8,7 +8,7 @@
           <el-input
             type="password"
             v-model="form.password"
-            placeholder="Password"
+            placeholder="PIN code"
             :maxlength="6"
             :minlength="6"
             show-password
@@ -16,7 +16,7 @@
         </el-form-item>
         <el-form-item v-if="!hasAccessPass" prop="confirmPassword">
           <el-input
-            placeholder="Confirm Password"
+            placeholder="Confirm PIN code"
             type="password"
             :maxlength="6"
             :minlength="6"

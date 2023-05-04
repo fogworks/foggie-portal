@@ -17,8 +17,10 @@
           item.device_type === 'foggie_max' ? 'max' : '',
           item.device_type === 'space' ? 'space' : '',
           isActive(item.device_id || item.space_order_id) ? 'active' : '',
-          deviceData.data.device_id &&
-          deviceData.data.device_id === item.device_id
+          (deviceData.data.device_id &&
+            deviceData.data.device_id === item.device_id) ||
+          (deviceData.data.space_order_id &&
+            deviceData.data.space_order_id === item.space_order_id)
             ? 'currentActive'
             : '',
         ]"
@@ -72,7 +74,10 @@
             @click.stop="copyLink(item.device_id)"
           ></svg-icon>
         </div>
-        <div :class="['circle', item.is_active ? 'onlineC' : 'offlineC']"></div>
+        <div
+          v-if="item.device_type !== 'space'"
+          :class="['circle', item.is_active ? 'onlineC' : 'offlineC']"
+        ></div>
         <template v-if="!item.device_type">
           <div>
             Due

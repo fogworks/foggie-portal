@@ -33,6 +33,10 @@
           <svg-icon icon-class="discover"></svg-icon>
           <template #title> Discover </template>
         </el-menu-item>
+        <el-menu-item index="assets" v-if="userName !== 'Login'">
+          <svg-icon icon-class="income"></svg-icon>
+          <template #title> Assets </template>
+        </el-menu-item>
         <el-menu-item index="shop">
           <svg-icon icon-class="shop"></svg-icon>
           <template #title> Shop </template>
