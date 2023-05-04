@@ -32,9 +32,7 @@
         </div>
         <div v-else>
           Bill ID:
-          <span class="top-value-span">
-            {{ item.bill_id }}
-          </span>
+          {{ item.bill_id }}
         </div>
         <div class="item" v-if="item.device_type !== 'space'">
           <span>Device ID: &nbsp;</span>
