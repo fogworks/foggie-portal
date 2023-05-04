@@ -33,7 +33,8 @@ export default createStore({
           clientPassword: state.clientGlobal.clientPassword,
         },
         upload: {
-          orderId: state.upload.orderId
+          orderId: state.upload.orderId,
+          
         }
       })
     }),

@@ -1,10 +1,6 @@
 <template>
   <div class="container" v-loading="loading">
-    <Access
-      v-if="!accessible"
-      v-model:accessible="accessible"
-      @accessCallback="accessCallback"
-    ></Access>
+    <Access v-if="!accessible" v-model:accessible="accessible" @accessCallback="accessCallback"></Access>
     <template v-else>
       <Welcome v-if="!hasReady" :haveNet="haveNet"></Welcome>
       <div v-else>
@@ -14,11 +10,7 @@
           </span>
           <svg-icon icon-class="setup" class="setup" @click="toSet"></svg-icon>
         </div>
-        <MaxHome
-          v-if="!isInSetup"
-          :haveNet="haveNet"
-          :deviceData="deviceData"
-        ></MaxHome>
+        <MaxHome v-if="!isInSetup" :haveNet="haveNet" :deviceData="deviceData"></MaxHome>
         <Setting v-else></Setting>
       </div>
     </template>
@@ -74,7 +66,7 @@ export default {
       store.commit('upload/setOrderId', orderId)
       if (deviceData.device_type == 'foggie_max') {
         store.commit("upload/setDeviceType", '2');
-      }else{
+      } else {
         store.commit("upload/setDeviceType", '1');
       }
 
@@ -82,7 +74,7 @@ export default {
     } else {
       const orderId = readonly(deviceData.order_id)
       store.commit('upload/setOrderId', orderId)
-
+      store.commit("upload/setDeviceType", '3');
     }
 
     const accessible = ref(false);
@@ -146,7 +138,7 @@ export default {
           }
           accessible.value = true;
         })
-        .catch(() => {})
+        .catch(() => { })
         .finally(() => {
           loading.value = false;
         });
@@ -206,6 +198,7 @@ export default {
     .el-loading-mask {
       background: transparent;
     }
+
     .access-box {
       position: absolute;
       top: 50%;
