@@ -246,8 +246,8 @@ class UserController {
         }, {
             blocksBehind: 3,
             expireSeconds: 30,
-        }).then((res) => {
-            res.send(BizResult.success());
+        }).then((result) => {
+            res.send(BizResult.success(result));
         }).catch((err) => {
             logger.error('err:', err);
             res.send(BizResult.fail(BizResultCode.CLAIM_ORDER_FAILED));

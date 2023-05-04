@@ -570,7 +570,7 @@ async function smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, r
             return;
         }
 
-        // 上传成功后，保存文件上传记录 
+        // 上传成功后，保存文件上传记录 小文件不存在分片，所以partNum为0
         fileService.saveFileUploadRecord(orderId, email, file.path, md5, 0)
 
         // 根据文件的大小，merkle树的块大小 计算密码本的偏移量数组
