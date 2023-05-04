@@ -413,14 +413,14 @@ const initFileData = async (data) => {
       date: "-",
       size: "",
       status: "-",
-      type: "-",
+      type: "application/x-directory",
       file_id: "",
       pubkey: "",
       cid: "",
       imgUrl: "",
       imgUrlLarge: "",
       share: {},
-      isSystemImg,
+      isSystemImg: false,
       canShare: false,
     };
     tableData.data.push(item);

@@ -195,10 +195,10 @@ const search = () => {
       console.log(res, "res");
       let cur_data = res.data;
       cur_data.filter((r)=>{
-        if(r.space_order_id) {
-          r.device_type = "foggie_space";
-          r.device_id = r.space_order_id;
-        }
+        // if(r.space_order_id) {
+        //   r.device_type = "foggie_space";
+        //   r.device_id = r.space_order_id;
+        // }
       })
       deviceList.list = res.data;
       store.dispatch("global/setDeviceList", res.data);
