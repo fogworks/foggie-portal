@@ -4,10 +4,16 @@ const request = require('sync-request')
 const config = require('config')
 const logger = require('./logger')('OrderController.js')
 const DMC = require('dmc.js')
+const zlib = require('zlib')
 const userService = require('./UserService')
 const orderService = require('./OrderService')
+const fileService = require('./FileService')
+const Encrypt = require('./Encrypt')
 const pow_proto = require('./grpc/pow');
 const grpc = require('@grpc/grpc-js');
+
+const fileConfig = config.get('fileConfig');
+const merkleBufferSize = fileConfig.get('merkleBufferSize');
 
 class OrderController {
 
@@ -533,6 +539,92 @@ class OrderController {
         result['count'] = total;
         res.send(BizResult.success(result));
     }
+
+    /**
+     * 发起挑战
+     * @param {*} req 
+     * @param {*} response 
+     * @returns 
+     */
+    static async reqChallenge(req, response) {
+        var orderId = req.body.orderId;
+        var email = req.body.email;
+        var chainId = req.body.chainId;
+
+        if (!orderId || !email || !chainId) {
+            response.send(BizResult.validateFailed());
+            return;
+        }
+
+        var privateKey = await userService.getPrivateKeyByEmail(email);
+        if (privateKey instanceof BizResultCode) {
+            logger.info('private key is null');
+            response.send(BizResult.fail(privateKey));
+            return;
+        }
+
+        var chainConfig = config.get('chainConfig');
+        var httpEndpoint = chainConfig.get("httpEndpoint");
+        var dmc_client = DMC({
+            chainId: chainId,
+            keyProvider: privateKey,
+            httpEndpoint: httpEndpoint,
+            logger: {
+                log: null,
+                error: null
+            }
+        });
+
+        var codebooks = await fileService.getFileCodeBook(orderId.toString(), email, merkleBufferSize);
+        if (codebooks instanceof BizResultCode) {
+            logger.info('codebooks is null');
+            response.send(BizResult.fail(codebooks));
+            return;
+        }
+
+        var codebook = codebooks[Math.floor(Math.random() * codebooks.length)];
+        let originData = zlib.unzipSync(Buffer.from(codebook.data, 'base64'));
+        let randomCharacter = Encrypt.randomString(4);
+        let nonce = randomCharacter + "#" + codebook.cid;
+        var containRandomData = Buffer.concat([originData, Buffer.from(randomCharacter)]);
+        let pre_data_hash = DMC.ecc.sha256(containRandomData);
+        let data_hash = Buffer.from(DMC.ecc.sha256(Buffer.from(pre_data_hash))).toString("hex");
+        logger.info("challenge, orderId:{},cid:{},partId:{},data_hash:{},nonce:{}", codebook.order_id, codebook.cid, codebook.part_id, data_hash, nonce);
+        var userInfo = await userService.getUserInfo(email);
+        if(userInfo instanceof BizResultCode){
+            response.send(BizResult.fail(userInfo));
+            return;
+        }
+        var username = userInfo.username;
+        dmc_client.transact({
+            actions: [{
+                account: "dmc.token",
+                name: 'reqchallenge',
+                authorization: [
+                    {
+                        actor: username,
+                        permission: 'active'
+                    }
+                ],
+                data: {
+                    sender: username,
+                    order_id: orderId,
+                    data_id: codebook.part_id,
+                    hash_data: data_hash,
+                    nonce: nonce
+                }
+            }]
+        }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+        }).then((res) => {
+            response.send(BizResult.success());
+        }).catch((err) => {
+            logger.error('err:', err);
+            response.send(BizResult.fail(BizResultCode.REQ_CHALLENGE_FAILED));
+        })
+    }
+
 
     /**
      * 获取订单的挑战记录

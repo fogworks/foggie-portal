@@ -282,7 +282,6 @@
 import { ElMessage } from "element-plus";
 import { ref, reactive, toRefs, onMounted, computed } from "vue";
 import { useStore } from "vuex";
-// import { useRouter } from "vue-router";
 
 import {  pushMerkle, getOrderById } from "@/api/order/orderList";
 import {
@@ -300,6 +299,7 @@ const props = defineProps({
   },
 });
 const ChainId = computed(() => $state.getters.ChainId);
+const deviceType = computed(() => $state.getters.deviceType);
 
 const email = computed(() => $state.getters.userInfo?.email);
 const state = reactive({
@@ -310,6 +310,8 @@ const { orderList } = toRefs(state);
 function loadOrderList() {
   let params = {
     orderId: props.orderId,
+    email:email.value,
+    deviceType:deviceType.value
   };
 
   getOrderById(params)
