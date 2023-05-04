@@ -216,20 +216,24 @@ const unbind = () => {
 }
 .login-box {
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
+  width: 900px;
+  margin: 0 auto;
+  padding: 50px 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.6);
+
   img {
-    width: 350px;
-    margin-right: 100px;
+    width: 300px;
+    margin: 0 50px;
   }
 }
 .account-form {
-  width: 500px;
+  width: 400px;
   // margin: 0 auto;
   padding: 20px 30px;
   background: transparent;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.6);
   // box-shadow: 0px 0px 9px #ffffff73, 0px 0px 5px rgba(94, 104, 121, 0.288);
   :deep {
     .el-form-item__label {
