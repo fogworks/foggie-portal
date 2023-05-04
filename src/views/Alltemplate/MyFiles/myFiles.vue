@@ -201,6 +201,8 @@ const emits = defineEmits(["currentPrefix"]);
 
 const chainId = computed(() => store.getters.ChainId);
 const email = computed(() => store.getters.userInfo?.email);
+const deviceType = computed(() => store.getters.deviceType);
+
 const orderState = computed(() => {
   let state = route.query.orderState;
   if (state == 0 || state == 4 || state == 5) {
@@ -237,7 +239,7 @@ const taskDisplay = ref(false);
 const closeRightUpload = () => {
   taskDisplay.value = false;
 };
-const { currentOODItem, orderId} = toRefs(props);
+const { currentOODItem, orderId } = toRefs(props);
 const sortList = [
   {
     prop: "create_time",
@@ -284,6 +286,7 @@ function loadFileList() {
     orderId: orderId.value,
     pageSize: tableData.pageSize,
     pageNo: tableData.pageNum,
+    deviceType: deviceType.value
   };
   GetFileList(params).then((res) => {
     for (const item of res.data.list) {

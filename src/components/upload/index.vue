@@ -77,6 +77,7 @@ export default {
     const orderId = computed(() => store.getters.orderId)
 
     const deviceType = computed(() => store.getters.deviceType)
+    
     const uploadFileList = computed(() => store.state.upload.uploadFileList)
 
     const options = ref({
@@ -125,7 +126,6 @@ export default {
       let target = "";
       file.paused = false;
       file.rootPath = currentPath.value;
-      
       file.deviceType = deviceType.value
       file.urlPath = target;
 
