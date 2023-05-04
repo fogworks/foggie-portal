@@ -4,7 +4,7 @@
       <div class="flex justify-between">
         <div class="flex items-center">
           <img class="title-img" src="@/assets/assets-title.png" alt="" />
-          <div class="title">Foggie Max</div>
+          <div class="title">Foggie</div>
         </div>
         <a
           class="flex items-center records"
