@@ -47,14 +47,14 @@ class BizResult {
      * @return {BizResult}
      */
     static fail(bizResultCode, errData) {
-        return new BizResult(bizResultCode.code, bizResultCode.desc, errData);
+        return new BizResult(BizResultCode.SUCCESS.code, BizResultCode.SUCCESS.desc,new BizResult(bizResultCode.code, bizResultCode.desc, errData));
     }
 
     /**
      * 参数校验失败
      */
     static validateFailed(param) {
-        return new BizResult(BizResultCode.VALIDATE_FAILED.code, BizResultCode.VALIDATE_FAILED.desc, param);
+        return new BizResult(BizResultCode.SUCCESS.code, BizResultCode.SUCCESS.desc,new BizResult(BizResultCode.VALIDATE_FAILED.code, BizResultCode.VALIDATE_FAILED.desc, param));
     }
 }
 
