@@ -18,7 +18,7 @@ export function GetFileList(data) {
 /* 发起挑战 */
 export function InitiateChallenge(data) {
   return request({
-    url: baseUrl + '/file/req_challenge',
+    url: baseUrl + '/order/req_challenge',
     method: 'post',
     data,
   });

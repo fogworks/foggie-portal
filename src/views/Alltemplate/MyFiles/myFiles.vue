@@ -534,7 +534,7 @@ const handleCommand = async (val) => {
         chainId: chainId.value,
         email: email.value,
         orderId: item.order_id,
-        md5: item.md5,
+        // md5: item.md5,
       };
       challengeMiner(params);
       break;
