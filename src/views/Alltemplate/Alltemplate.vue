@@ -44,9 +44,19 @@ if (clientPassword.value) {
   customDialogIsShow.value = true;
 }
 
-store.commit("upload/setOrderId", orderId);
+store.commit("upload/setOrderId", orderId);  // 当前点击的订单号
+// if (deviceData.device_type == 'foggie_max' || deviceData.device_type == 'foggie' || deviceData.device_type == '') {
+//   const orderId = readonly(deviceData.device_id)
+//   store.commit('upload/setOrderId', orderId)
+// } else {
+//   const orderId = readonly(deviceData.order_id)
+//   store.commit('upload/setOrderId', orderId)
+// }
+store.commit("upload/setDeviceType", '3');
 
-// store.commit('upload/setOrderId',orderId)
+
+
+
 
 watch(
   () => props.deviceData,

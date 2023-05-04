@@ -108,7 +108,6 @@ export default {
 
 
     const onFileAdded = (file) => {
-      console.log(file);
       if (file.size === 0) return;
       if (file.size > FILE_SIZE) {
         ElMessage({

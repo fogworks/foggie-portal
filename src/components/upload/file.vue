@@ -451,7 +451,7 @@ export default {
       form.append('file', smallFile.file, name)
       form.append('fileCategory', 1)
       form.append('email', email.value)
-
+      form.append('deviceType', smallFile.file.deviceType)
       form.append('fileName', encodeURIComponent(name))
       form.append('md5', fileMd5.value)
       form.append('wholeMd5', fileMd5.value)

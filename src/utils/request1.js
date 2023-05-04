@@ -36,7 +36,7 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   async response => {
-    const _response = _.has(response, 'data') && _.isObject(response.data) && _.has(response.data, 'code') ? response.data : { code: 10001, errmsg: '网络出错' };
+    const _response = _.has(response, 'data') && _.isObject(response.data) && _.has(response.data, 'code') ? response.data.data : { code: 10001, errmsg: '网络出错' };
 
     if (response.config.url.indexOf('validate_user_login') > -1) {
       /* 校验用户的登录状态  code 10001 密码不存在 10002 密码存在*/

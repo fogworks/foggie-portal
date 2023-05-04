@@ -52,13 +52,22 @@ export default {
     provide("deviceData", deviceData);
     provide("requestTarget", requestTarget);
 
+
     const store = useStore();
     if (deviceData.device_type == 'foggie_max' || deviceData.device_type == 'foggie' || deviceData.device_type == '') {
       const orderId = readonly(deviceData.device_id)
       store.commit('upload/setOrderId', orderId)
+      if (deviceData.device_type == 'foggie_max') {
+        store.commit("upload/setDeviceType", '2');
+      }else{
+        store.commit("upload/setDeviceType", '1');
+      }
+
+
     } else {
       const orderId = readonly(deviceData.order_id)
       store.commit('upload/setOrderId', orderId)
+
     }
 
 

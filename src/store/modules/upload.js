@@ -3,6 +3,7 @@
 const state = {
   uploadIsShow: false,
   orderId: '',
+  deviceType:'', //1 foggie 2 foggieMax 3 用户客户端
   uploadFileList: {},
 }
 const mutations = {
@@ -18,6 +19,9 @@ const mutations = {
   openUpload(state, orderId) {
     state.orderId = orderId
     state.uploadIsShow = true
+  },
+  setDeviceType(state, DeviceType){
+    state.deviceType = DeviceType
   }
 }
 const actions = {
