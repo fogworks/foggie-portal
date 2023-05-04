@@ -31,8 +31,8 @@ import { provide, defineExpose, computed, defineProps, readonly } from "vue";
 const store = useStore();
 const props = defineProps(["deviceData"]);
 const { deviceData } = toRefs(props);
-// const orderId = readonly(props.deviceData.order_id);
-const orderId = 19;
+const orderId = readonly(props.deviceData.space_order_id);
+
 
 const userInfo = computed(() => store.getters.userInfo);
 let customDialogIsShow = ref(true); // 是否展示
