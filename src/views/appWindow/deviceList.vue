@@ -15,8 +15,12 @@
           'item',
           !item.device_type ? 'foggie' : '',
           item.device_type === 'foggie_max' ? 'max' : '',
-          isActive(item.device_id) ? 'active' : '',
-          deviceData.data.device_id === item.device_id ? 'currentActive' : '',
+          item.device_type === 'space' ? 'space' : '',
+          isActive(item.device_id || item.space_order_id) ? 'active' : '',
+          deviceData.data.device_id &&
+          deviceData.data.device_id === item.device_id
+            ? 'currentActive'
+            : '',
         ]"
         @click="clickItem(item)"
       >
@@ -37,7 +41,7 @@
           >MAX</span
         >
         <svg-icon
-          v-show="isActive(item.device_id)"
+          v-show="isActive(item.device_id || item.space_order_id)"
           @click.stop="cancelItem(item)"
           icon-class="cancel"
           class="cancel"
@@ -62,7 +66,13 @@
           ></svg-icon>
         </div>
         <div :class="['circle', item.is_active ? 'onlineC' : 'offlineC']"></div>
-        <template v-if="!item.device_type && item.product_custom && item.product_custom.length">
+        <template
+          v-if="
+            !item.device_type &&
+            item.product_custom &&
+            item.product_custom.length
+          "
+        >
           <!-- <span class="value-span">
             {{ item.product_custom[0].field_value }} </span
           >-core CPU
@@ -153,7 +163,14 @@ const handleID = (str) => {
   );
 };
 const isActive = (id) => {
-  if (totalActiveDevice.value.data.find((el) => el.device_id === id)) {
+  console.log('++++++++++++', list)
+  if (
+    totalActiveDevice.value.data.find(
+      (el) =>
+        (el.device_id && el.device_id === id) ||
+        (el.space_order_id && el.space_order_id === id)
+    )
+  ) {
     return true;
   } else {
     return false;
@@ -168,7 +185,8 @@ const list = computed(() => {
       return (
         el.device_name?.indexOf(keyWord.value) > -1 ||
         el.dedicatedip?.indexOf(keyWord.value) > -1 ||
-        el.device_id?.indexOf(keyWord.value) > -1
+        el.device_id?.indexOf(keyWord.value) > -1 ||
+        el.space_order_id?.indexOf(keyWord.value) > -1
       );
     });
   }

@@ -5,14 +5,14 @@
       <div
         :class="[
           'app-left',
-          `app-${item.device_id}`,
+          `app-${item.device_id || item.space_order_id}`,
           isCollapse ? 'left-collapse' : '',
         ]"
-        v-if="item.device_id"
+        v-if="item.device_id || item.space_order_id"
       >
         <FoggieMax
           :deviceData="item"
-          v-if="item.device_type === 'foggie_max'"
+          v-if="item.device_type === 'foggie_max' || !item.device_type"
         ></FoggieMax>
         <FoggieClient :deviceData="item" v-else></FoggieClient>
       </div>
@@ -90,12 +90,16 @@ let totalActiveDevice = reactive({
 });
 const scrollIntoView = (data) => {
   const app = document.getElementById("app-window");
-  const target = app.getElementsByClassName(`app-${data.device_id}`)[0];
+  const target = app.getElementsByClassName(
+    `app-${data.device_id || data.space_order_id}`
+  )[0];
   app.scrollTo(0, target.offsetTop);
 };
 const clickItem = (data) => {
   let target = totalActiveDevice.data.find(
-    (el) => el.device_id === data.device_id
+    (el) =>
+      (el.device_id && el.device_id === data.device_id) ||
+      (el.space_order_id && el.space_order_id === data.space_order_id)
   );
   if (target) {
     scrollIntoView(data);
@@ -119,14 +123,20 @@ const clickItem = (data) => {
 const cancelItem = (data) => {
   console.log("cancelItem");
   let target = totalActiveDevice.data.find(
-    (el) => el.device_id === data.device_id
+    (el) =>
+      (el.device_id && el.device_id === data.device_id) ||
+      (el.space_order_id && el.space_order_id === data.space_order_id)
   );
   let targetIndex = totalActiveDevice.data.findIndex(
-    (el) => el.device_id === data.device_id
+    (el) =>
+      (el.device_id && el.device_id === data.device_id) ||
+      (el.space_order_id && el.space_order_id === data.space_order_id)
   );
   if (target) {
     totalActiveDevice.data = totalActiveDevice.data.filter(
-      (el) => el.device_id !== data.device_id
+      (el) =>
+        (el.device_id && el.device_id !== data.device_id) ||
+        (el.space_order_id && el.space_order_id !== data.space_order_id)
     );
     if (target.device_id === deviceData.data.device_id) {
       deviceData.data =
