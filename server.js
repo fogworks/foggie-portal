@@ -43,10 +43,8 @@ app.post('/order/list', jsonParser, (req, res) => {
 });
 
 app.post('/order/id', jsonParser, (req, res) => {
-  var orderId = req.body.orderId;
-  OrderController.getOrderById(orderId, res);
+  OrderController.getOrderById(req, res);
 });
-
 
 app.get('/order/get_chain_id', (req, res) => {
   res.json(OrderController.getChainId());
@@ -61,11 +59,7 @@ app.post('/order/push_merkle', jsonParser, (req, res) => {
 });
 
 app.post('/order/push_merkle_record', jsonParser, (req, res) => {
-  var orderId = req.body.orderId;
-  var email = req.body.email;
-  var pageSize = req.body.pageSize;
-  var pageNo = req.body.pageNo;
-  OrderController.getPushMerkleRecord(orderId, email, pageSize, pageNo, res);
+  OrderController.getPushMerkleRecord(req, res);
 });
 
 app.post('/order/req_challenge', jsonParser, (req, res) => {
@@ -73,10 +67,7 @@ app.post('/order/req_challenge', jsonParser, (req, res) => {
 });
 
 app.post('/order/challenge_list', jsonParser, (req, res) => {
-  var orderId = req.body.orderId;
-  var limit = req.body.limit;
-  var pageNum = req.body.pageNum;
-  OrderController.getChallengeList(orderId, pageNum, limit, res);
+  OrderController.getChallengeList(req, res);
 });
 
 app.post('/user/encode_user_order', jsonParser, (req, res) => {
@@ -131,6 +122,10 @@ app.post('/file/list', jsonParser, (req, res) => {
 
 app.post('/file/remove', jsonParser, (req, res) => {
   FileController.removeFileProp(req, res);
+});
+
+app.post('/file/get_codebook', jsonParser, (req, res) => {
+  FileController.getCodebook(req, res);
 });
 
 app.post('/file/remove_file_codebook_offset', jsonParser, (req, res) => {
