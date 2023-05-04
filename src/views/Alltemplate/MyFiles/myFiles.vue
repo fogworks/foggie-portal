@@ -289,14 +289,14 @@ function loadFileList() {
     deviceType: deviceType.value
   };
   GetFileList(params).then((res) => {
-    for (const item of res.data.data.list) {
+    for (const item of res.data.list) {
       item.file_path = decodeURIComponent(item.file_path);
       // item.type = item.file_path.substring(item.file_path.lastIndexOf(".") + 1);
       item.icon = getFileType(item.file_path);
       item.file_size = getfilesize(item.file_size);
     }
-    tableData.total = res.data.data.count;
-    tableData.data = tableData.data.concat(res.data.data.list);
+    tableData.total = res.data.count;
+    tableData.data = tableData.data.concat(res.data.list);
     tableSort({ prop: "create_time", order: 1, key: 1 });
   });
 }
