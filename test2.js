@@ -511,27 +511,82 @@ var body = '{\
 
 // var num = "2";
 // console.log(num*1024*1024);
+
 const retry = require('retry');
 
-const operation = retry.operation({
-    retries: 3,
-    maxTimeout: 3000
-});
+// 定义需要重试的函数
+const yourFunctionToRetry = async () => {
+  // 在这里执行您的业务逻辑
+  console.log('执行函数...');
+  // 模拟一个可能失败的操作
+  const success = Math.random() > 0.5;
 
-function createGRPCClient() {
-    throw new Error('Something went wrong');
-}
+  if (!success) {
+    throw new Error('失败，需要重试');
+  }
 
-operation.attempt((currentAttempt) => {
-    createGRPCClient((err, result) => {
-        if (operation.retry(err)) {
-            console.log(`Connection failed, retrying... (${currentAttempt+1})`);
-            return;
+  return '成功执行';
+};
+
+const retryWithOptions = async () => {
+  const retryOptions = {
+    retries: 2, // 最多重试次数
+    factor: 1, // 退避算法的乘数
+    minTimeout: 100, // 两次尝试之间的最短间隔时间，单位：毫秒
+    maxTimeout: 1000, // 两次尝试之间的最长间隔时间，单位：毫秒
+    randomize: false, // 是否随机改变间隔时间
+  };
+
+  const operation = retry.operation(retryOptions);
+
+  return new Promise((resolve, reject) => {
+    operation.attempt(async (currentAttempt) => {
+      try {
+        const result = await yourFunctionToRetry();
+        resolve(result);
+      } catch (error) {
+        console.log(`第 ${currentAttempt} 次尝试失败：${error.message}`);
+        if (operation.retry(error)) {
+          return;
         }
-        if (err) {
-            console.error('Connection failed after maximum retries.');
-            return;
-        }
-        console.log(result);
+        reject(operation.mainError());
+      }
     });
-});
+  });
+};
+
+retryWithOptions()
+  .then((result) => {
+    console.log(`结果：${result}`);
+  })
+  .catch((error) => {
+    console.error(`所有尝试都失败了：${error.message}`);
+  });
+
+
+// let getNum = function () {
+//     console.log("函数执行一次");
+//     return new Promise((res, rej) => {
+//         let num = Math.random() * 10;
+//         num < 2 ? res("数字小于2") : rej("数字大于2");
+//     });
+// };
+
+// const retry = (fn, times) => {
+//     return new Promise((res, rej) => {
+//         const attempt = () => {
+//             fn().then(res).catch((error) => {
+//                 times-- > 0 ? attempt() : rej("机会用光了");
+//             });
+//         };
+//         attempt();
+//     });
+// };
+
+// retry(getNum, 3)
+//     .then((mes) => {
+//         console.log(mes);
+//     })
+//     .catch((err) => {
+//         console.log(err);
+//     });
