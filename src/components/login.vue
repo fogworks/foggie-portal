@@ -2,18 +2,13 @@
   <div class="logincontent">
     <el-card class="box-card">
       <template #header>
-        <div class="card-header">
-          Sign In
-        </div>
+        <div class="card-header">Sign In</div>
       </template>
       <div class="text item my_login_box">
-
-
-
         <!-- 注册 -->
         <el-form ref="registerFormRef" :model="registerForm" :rules="registerRules">
-
-          <el-form-item prop="password" :style="passwordIsExist ? 'margin-bottom:25px  ;margin-top:10px' : ''">
+          <el-form-item prop="password" :style="passwordIsExist ? 'margin-bottom:25px  ;margin-top:10px' : ''
+            ">
             <div class="my_login_right_input_img">
               <svg-icon icon-class="password3" size="23"></svg-icon>
             </div>
@@ -21,46 +16,57 @@
               placeholder="请输入密码" />
           </el-form-item>
 
-          <el-form-item prop="confirmPassword" v-if="!passwordIsExist">
+          <el-form-item prop="confirmPassword" v-if="!passwordIsExist || isRegisterPassword">
             <div class="my_login_right_input_img">
               <svg-icon icon-class="password3" size="23"></svg-icon>
             </div>
             <el-input class="" :show-password="false" type="password" v-model="registerForm.confirmPassword"
               placeholder="请确认密码" />
           </el-form-item>
-
+          <div class="Register_btn" v-if="passwordIsExist">
+            <div>
+              <span @click="isRegisterPassword = true" class="password_login">重置密码</span>
+            </div>
+          </div>
 
           <el-button class="ejUnNt loginButtom" type="primary" :loading="loading"
             style="width: 100%; margin-bottom: 30px; height: 46px" @click="submit(registerFormRef)">
             登录/注册为新用户
           </el-button>
         </el-form>
-
       </div>
     </el-card>
   </div>
 </template>
 <script setup>
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox } from "element-plus";
 import { ref, reactive, watch, toRefs, onMounted } from "vue";
-import { getUserLoginStatus, setImportPrivateKey, getValidatePassword } from "@/api/common";
+import {
+  getUserLoginStatus,
+  setImportPrivateKey,
+  getValidatePassword,
+  setresetPassword,
+} from "@/api/common";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-
-const store = useStore()
-const router = useRouter()
-const registerFormRef = ref()
-let loading = ref(false)
-let passwordIsExist = ref(true)  // 密码是否存在 true 存在  false 不存在
+const emits = defineEmits(["closeDialog"]);
+const store = useStore();
+const router = useRouter();
+const registerFormRef = ref();
+let loading = ref(false);
+let isRegisterPassword = ref(false);
+let passwordIsExist = ref(true); // 密码是否存在 true 存在  false 不存在
+const props = defineProps(["userInfo"]);
 const loginForm = reactive({
   registerForm: {
-    password: '',
-    confirmPassword: ""
+    password: "",
+    confirmPassword: "",
   },
   registerRules: {
     password: [
       {
-        required: true, trigger: "blur",
+        required: true,
+        trigger: "blur",
         validator: (rule, value, callback) => {
           if (passwordIsExist.value) {
             /* 密码存在 */
@@ -82,7 +88,6 @@ const loginForm = reactive({
               callback();
             }
           }
-
         },
       },
     ],
@@ -103,112 +108,165 @@ const loginForm = reactive({
             callback();
           }
         },
-      }
-
+      },
     ],
   },
-})
-const { registerForm, registerRules } = toRefs(loginForm)
+});
+const { registerForm, registerRules } = toRefs(loginForm);
 
-watch(passwordIsExist, (newVal, oldVal) => {
-  console.log(newVal, oldVal);
-  if (newVal) {
-    /* 密码存在 */
-    loginForm.registerRules.confirmPassword[0].required = false
-
-  } else {
-    /* 密码不存在 */
-    loginForm.registerRules.confirmPassword[0].required = true
-  }
-
-}, { immediate: true })
+watch(
+  passwordIsExist,
+  (newVal, oldVal) => {
+    console.log(newVal, oldVal);
+    if (newVal) {
+      /* 密码存在 */
+      loginForm.registerRules.confirmPassword[0].required = false;
+    } else {
+      /* 密码不存在 */
+      loginForm.registerRules.confirmPassword[0].required = true;
+    }
+  },
+  { immediate: true }
+);
 
 function submit(FormRef) {
-
-  if (!FormRef) return
+  if (!FormRef) return;
 
   FormRef.validate(async (valid) => {
-
     if (valid) {
-      loading.value = true
+      loading.value = true;
       if (passwordIsExist.value) {
         //如果密码存在
-        getValidatePassword({ password: loginForm.registerForm.password }).then(res => {
-          if (res.code == 200) {
-            store.commit('global/SAVE_PASSWORD', res.data)
-            loading.value = false
-            router.push({ path: '/Alltemplate/Home' })
 
-          } else {
-            loading.value = false
+        /* 重置密码中 */
+        if (isRegisterPassword.value) {
+          setresetPassword({
+            password: loginForm.registerForm.password,
+            email: props.userInfo.email,
+            username: props.userInfo.dmc
+          })
+            .then(async (res) => {
+              if (res.code == 200) {
+                store.commit("clientGlobal/SAVE_PASSWORD", res.data);
+                SAVE_PASSWORD()
+                await importPrivateKey();
+              }
+              loading.value = false;
+            })
+            .catch((error) => {
+              loading.value = false;
+            });
+        } else {
+          getValidatePassword({
+            password: loginForm.registerForm.password,
+            email: props.userInfo.email
+          })
+            .then((res) => {
+              if (res.code == 200) {
+                store.commit(
+                  "clientGlobal/SAVE_PASSWORD",
+                  res.data.encryptedPassword
+                );
 
-          }
-        }).catch((error) => {
-          loading.value = false
-        })
+                loading.value = false;
 
+                emits("closeDialog");
 
+                // router.push({ path: '/Alltemplate/Home' })
+              } else {
+                ElMessage({
+                  showClose: true,
+                  message: "密码错误",
+                  type: "error",
+                });
+
+                loading.value = false;
+              }
+            })
+            .catch((error) => {
+              loading.value = false;
+            });
+        }
       } else {
         /* 密码不存在 */
-        // await store.dispatch('global/setSavePassword', loginForm.registerForm.password)
-
-        ElMessageBox.prompt('请输入私钥', 'Tip', {
-          'show-close': false,
-          confirmButtonText: 'OK',
-          cancelButtonText: 'Cancel',
-          inputPlaceholder: "请输入私钥",
-          // inputPattern:
-          //   /[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\w](?:[\w-]*[\w])?\.)+[\w](?:[\w-]*[\w])?/,
-          // inputErrorMessage: 'Invalid Email',
-          beforeClose: (action, instance, done) => {
-            if (action === 'confirm') {
-
-              setImportPrivateKey({ privateKey: instance.inputValue }).then(res => {
-                if (res.code == 200) {
-                  done()
-                  router.push({ path: '/Alltemplate/Home' })
-
-                }
-              })
-            } else {
-              done()
-            }
-          },
-        })
-          .then(({ value }) => {
-          })
-          .catch(() => {
-          })
-        loading.value = false;
+        SAVE_PASSWORD()
+        await importPrivateKey();
       }
     } else {
       loading.value = false;
-      return false
+      return false;
     }
   });
 }
 
+/* 保存密码 */
+
+async function SAVE_PASSWORD() {
+  await store.dispatch("clientGlobal/setSavePassword", {
+    password: loginForm.registerForm.password,
+    email: props.userInfo.email,
+    username: props.userInfo.dmc,
+  });
+}
+
+/* 导入私钥 */
+
+async function importPrivateKey() {
+  /* 密码不存在  或 重置密码都需要重新导入私钥 */
+  ElMessageBox.prompt("请输入私钥", "Tip", {
+    "show-close": false,
+    confirmButtonText: "OK",
+    cancelButtonText: "Cancel",
+    inputPlaceholder: "请输入私钥",
+    // inputPattern:
+    //   /[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\w](?:[\w-]*[\w])?\.)+[\w](?:[\w-]*[\w])?/,
+    // inputErrorMessage: 'Invalid Email',
+    beforeClose: (action, instance, done) => {
+      if (action === "confirm") {
+        setImportPrivateKey({
+          privateKey: instance.inputValue,
+          email: props.userInfo.email,
+        }).then((res) => {
+          if (res.code == 200) {
+            emits("closeDialog");
+            // store.commit('global/SAVE_USERNAME', res.data)
+            done();
+          }
+        });
+      } else {
+        done();
+      }
+    },
+  })
+    .then(({ value }) => { })
+    .catch(() => { });
+  loading.value = false;
+}
+
 function loadUserLoginStatus() {
-  getUserLoginStatus().then(res => {
-    
+  let params = {
+    email: props.userInfo.email,
+    // username: props.userInfo.dmc,
+  };
+
+  getUserLoginStatus(params).then((res) => {
     if (res.code == 10001) {
       /* 密码不存在 */
-      passwordIsExist.value = false
-
+      passwordIsExist.value = false;
     } else if (res.code == 10002) {
       /* 密码存在 */
-      passwordIsExist.value = true
+      passwordIsExist.value = true;
+    } else if (res.code == 10007) {
+      /* 私钥不存在 */
+      importPrivateKey();
     }
-  })
+  });
 }
 onMounted(() => {
-  sessionStorage
-  loadUserLoginStatus()
-})
-
-
+  sessionStorage;
+  loadUserLoginStatus();
+});
 </script>
-
 
 <style lang="scss" scoped>
 .logincontent {
@@ -268,13 +326,57 @@ onMounted(() => {
   width: 360px;
 }
 
-
-
 ::v-deep .el-card {
   width: 100%;
   justify-items: center;
   background: rgba(50, 61, 109, 0.2);
+  background: #f2f6ff;
   border-radius: 20px;
   opacity: 1;
+}
+
+.Register_btn {
+  margin-bottom: 10px;
+  width: 100%;
+  text-align: center;
+  color: #ccc;
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  cursor: pointer;
+
+  span:hover {
+    transform: scale(1.1);
+  }
+
+  &>div {
+    width: 50%;
+    height: 25px;
+    flex: 1 1 auto;
+    margin: 0px 10px;
+  }
+
+  &>div:first-child {
+    text-align: left;
+  }
+
+  &>div:last-child {
+    text-align: right;
+  }
+
+  span {
+    color: rgb(47, 184, 255);
+    text-decoration: underline;
+    font-weight: bold;
+  }
+
+  .password_login {
+    color: rgb(47, 184, 255);
+    display: inline-block;
+  }
+
+  .el-checkbox__inner {
+    background: rgba(255, 255, 255, 0.3);
+  }
 }
 </style>

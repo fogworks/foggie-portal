@@ -10,17 +10,33 @@ class UserController {
 
     /**
      * validate user login
+     * @param {*} req   HTTP请求
      * @param {*} res   HTTP响应
      * @returns 10001 密码不存在 10002 密码存在
      */
-    static async validateUserLogin(res) {
-        var result = await userService.getUserInfo();
-        if (result === null) {
+    static async validateUserLogin(req, res) {
+        var email = req.body.email;
+        if (!email) {
+            res.send(BizResult.validateFailed());
+            return;
+        }
+        var result = await userService.getUserInfo(email);
+
+        if (result instanceof BizResultCode) {
+            if (result == BizResultCode.USER_NOT_EXIST) {
+                res.send(BizResult.fail(BizResultCode.PASSWORD_NOT_EXIST));
+                return;
+            }
+            res.send(BizResult.fail(result));
+            return;
+        }
+
+        if (!result.password) {
             res.send(BizResult.fail(BizResultCode.PASSWORD_NOT_EXIST));
             return;
         }
-        else if (result === BizResultCode.VALIDATE_LOGIN_FAILED) {
-            res.send(BizResult.fail(result));
+        if (!result.private_key) {
+            res.send(BizResult.fail(BizResultCode.PRIVATE_KEY_NOT_EXIST));
             return;
         }
         res.send(BizResult.fail(BizResultCode.PASSWORD_EXIST));
@@ -28,17 +44,19 @@ class UserController {
 
     /**
      * save user password
+     * @param {*} email     foggie的邮箱
      * @param {*} password  用户的密码
+     * @param {*} username  用户名
      * @param {*} res       HTTP响应
      * @returns
      */
-    static async saveUserPassword(password, res) {
-        if (!password) {
-            res.send(BizResult.validateFailed(password));
+    static async saveUserPassword(email, password, username, res) {
+        if (!password || !email) {
+            res.send(BizResult.validateFailed());
             return;
         }
-        var resultCode = await userService.saveUserInfo(password);
-        if (resultCode === BizResultCode.SAVE_PASSWORD_FAILED) {
+        var resultCode = await userService.saveUserInfo(email, password, username);
+        if (resultCode instanceof BizResultCode) {
             res.send(BizResult.fail(resultCode));
             return;
         }
@@ -48,42 +66,52 @@ class UserController {
     /**
      * reset user password
      * 
-     * @param {*} password  用户的密码
+     * @param {*} req   HTTP请求
      * @param {*} res       HTTP响应
      * @returns
      */
-    static async resetUserPassword(password, res) {
-        if (!password) {
-            res.send(BizResult.validateFailed(password));
+    static async resetUserPassword(req, res) {
+        var password = req.body.password;
+        var email = req.body.email;
+        var username = req.body.username;
+        if (!password || !email || !username) {
+            res.send(BizResult.validateFailed());
             return;
         }
-        var resultCode = await userService.removeUserInfo();
-        if (resultCode === BizResultCode.SUCCESS) {
-            UserController.saveUserPassword(password, res);
+        var resultCode = await userService.removeUserInfo(email);
+        if (resultCode instanceof BizResultCode) {
+            res.send(BizResult.fail(resultCode));
             return;
         }
-        res.send(BizResult.fail(resultCode));
+        UserController.saveUserPassword(email, password, username, res);
     }
 
     /**
      * validate user password
-     * @param {*} password  用户的密码
+     * @param {*} req    HTTP请求
      * @param {*} res       HTTP响应
      * @returns 10003 密码错误 10004 密码正确
      */
-    static async validateUserPassword(password, res) {
-        if (!password) {
-            res.send(BizResult.validateFailed(password));
+    static async validateUserPassword(req, res) {
+
+        var password = req.body.password;
+        var email = req.body.email;
+        if (!password || !email) {
+            res.send(BizResult.validateFailed());
             return;
         }
-        var encryptedPassword = Encrypt.encrypt(password, '6a4de5');
-        var passwordFromDB = await userService.getUserInfo();
+        
+        var userInfo = await userService.getUserInfo(email);
+        
+        if (userInfo instanceof BizResultCode) {
+            res.send(BizResult.fail(BizResultCode.PASSWORD_VALID_FAILED));
+            return;
+        }
+        var nonce = userInfo.nonce;
+        var encryptedPassword = Encrypt.encrypt(password, nonce);
         // get password from NeDB
-        if (encryptedPassword === passwordFromDB) {
-            var privateKey = await userService.getPrivateKeyByPassword(encryptedPassword);
-            let username = await userService.getUsername(privateKey);
+        if (encryptedPassword === userInfo.password) {
             var result = {};
-            result['username'] = username;
             result['encryptedPassword'] = encryptedPassword;
             res.send(BizResult.success(result));
         }
@@ -94,21 +122,21 @@ class UserController {
 
     /**
      * 获取用户的私钥
-     * @param {*} password  用户的密码
+     * @param {*} req       HTTP请求
      * @param {*} res       HTTP响应
      * @returns 用户的私钥
      */
-    static async getUserPrivateKey(password, res) {
-
-        if (!password) {
-            res.send(BizResult.validateFailed(password));
+    static async getUserPrivateKey(req, res) {
+        var email = req.body.email;
+        if (!email) {
+            res.send(BizResult.validateFailed(email));
             return;
         }
 
-        var privateKey = await userService.getPrivateKeyByPassword(password);
-        if (!privateKey) {
+        var privateKey = await userService.getPrivateKeyByEmail(email);
+        if (privateKey instanceof BizResultCode) {
             logger.info('private key is null');
-            res.send(BizResult.fail(BizResultCode.GET_PRIVATE_KEY_FAILED));
+            res.send(BizResult.fail(privateKey));
             return;
         }
         res.send(BizResult.success(privateKey));
@@ -116,25 +144,26 @@ class UserController {
 
     /** 
      * save user keystore
-     * @param {*} privateKey  用户的私钥
+     * @param {*} req    HTTP请求
      * @param {*} res       HTTP响应
      * @returns
      */
-    static async saveUserPrivateKey(privateKey, res) {
-        if (!privateKey) {
-            res.send(BizResult.validateFailed(privateKey));
+    static async saveUserPrivateKey(req, res) {
+        var privateKey = req.body.privateKey;
+        var email = req.body.email;
+        if (!privateKey || !email) {
+            res.send(BizResult.validateFailed());
             return;
         }
 
-        if(!DMC.ecc.isValidPrivate(privateKey)){
+        if (!DMC.ecc.isValidPrivate(privateKey)) {
             res.send(BizResult.fail(BizResultCode.PRIVATE_KEY_INVALID));
             return;
         }
-        
-        var resultCode = await userService.saveUserPrivateKey(privateKey);
+
+        var resultCode = await userService.saveUserPrivateKey(email, privateKey);
         if (resultCode === BizResultCode.SUCCESS) {
-            var username = await userService.getUsername(privateKey);
-            res.send(BizResult.success(username));
+            res.send(BizResult.success());
             return;
         }
         res.send(BizResult.fail(resultCode));
@@ -143,45 +172,52 @@ class UserController {
     /**
      * 加密 用户的订单信息
      * 源数据格式 用户私钥:用户名:订单id
-     * @param {*} orderId   订单id
-     * @param {*} password  用户的密码
-     * @param {*} username  用户名
+     * @param {*} req       HTTP请求
      * @param {*} res       HTTP响应
      * @returns 加密后的字符串
      */
-    static async encodeUserOrder(orderId, password, username, res) {
-
-        if (!orderId || !password || !username) {
+    static async getToken4UploadFile(req, res) {
+        var orderId = req.body.orderId;
+        var email = req.body.email;
+        if (!orderId || !email) {
             res.send(BizResult.validateFailed(orderId));
             return;
         }
 
-        var privateKey = await userService.getPrivateKeyByPassword(password);
-        if (!privateKey) {
-            logger.info('private key is null');
-            res.send(BizResult.fail(BizResultCode.GET_PRIVATE_KEY_FAILED));
+        var token = userService.getToken4UploadFile(email, orderId);
+        if(token instanceof BizResultCode) {
+            res.send(BizResult.fail(token));
             return;
         }
-        let base64Data = Buffer.from(privateKey + ':' + username + ':' + orderId).toString('base64');
-        res.send(BizResult.success(base64Data));
+        res.send(BizResult.success(token));
     }
 
     // 用户领取奖励
-    static claimOrder(req, res) {
-        var username = req.body.username;
-        var password = req.body.password;
+    static async claimOrder(req, res) {
+        var email = req.body.email;
         var orderId = req.body.orderId;
         var chainId = req.body.chainId;
 
-        if (!username || !password || !orderId || !chainId) {
+        if (!email || !orderId || !chainId) {
             res.send(BizResult.validateFailed());
             return;
         }
 
-        var privateKey = userService.getPrivateKeyByPassword(password);
+        var privateKey = userService.getPrivateKeyByEmail(email);
+        if (privateKey instanceof BizResultCode) {
+            res.send(BizResult.fail(privateKey));
+            return;
+        }
         var chainConfig = config.get('chainConfig');
         var httpEndpoint = chainConfig.get("httpEndpoint");
 
+        var userInfo = await userService.getUserInfo(email);
+        if (userInfo instanceof BizResultCode) {
+            logger.info('userInfo is null');
+            res.send(BizResult.fail(userInfo));
+            return;
+        }
+        var username = userInfo.username;
         var dmc_client = DMC({
             chainId: chainId,
             keyProvider: privateKey,

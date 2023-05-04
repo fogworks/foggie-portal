@@ -5,11 +5,16 @@
       <WifiSearching v-if="loading"></WifiSearching>
       <li
         v-else
-        :class="['card', item.device_type === 'foggie_max' ? 'max' : 'foggie']"
+        :class="[
+          'card',
+          item.device_type === 'foggie_max' ? 'max' : 'foggie',
+          item.is_active ? 'online' : 'offline',
+        ]"
         v-for="(item, index) in deviceList.list"
         @click="toGuide(item)"
       >
         <span></span>
+        <div :class="['circle', item.is_active ? 'onlineC' : 'offlineC']"></div>
         <div class="item">
           <span>{{ item.device_type ? "" : "IP: " }}</span>
           <span :title="item.device_type ? item.device_name : item.dedicatedip">
@@ -20,7 +25,7 @@
         <div class="item">
           <span>Device ID: &nbsp;</span>
           <span>
-            {{ handleID(item.device_id) }}
+            {{ handleID(item.device_id || "") }}
           </span>
           <svg-icon
             icon-class="copy"
@@ -30,32 +35,12 @@
         </div>
         <template v-if="!item.device_type">
           <div>
-            <span class="value-span">{{
-              item.product_custom[0].field_value
-            }}</span
-            >-core CPU
+            Due
+            <span class="value-span">{{ handleTimeStamp(item.expire) }}</span>
           </div>
           <div>
-            <span class="value-span">{{
-              item.product_custom[1].field_value
-            }}</span
-            >GB Memory
-          </div>
-          <div>
-            <span class="value-span">{{
-              item.product_custom[3].field_value
-            }}</span
-            >GB
-            <span class="value-span">{{
-              item.product_custom[2].field_value
-            }}</span
-            >Disk
-          </div>
-          <div>
-            <span class="value-span">{{
-              item.product_custom[4].field_value
-            }}</span
-            >MB Bandwidth
+            <span class="value-span">500G</span>
+            Storage
           </div>
         </template>
 
@@ -104,6 +89,7 @@ import WifiSearching from "@/components/wifiSearching";
 import { useRouter } from "vue-router";
 import IPFrom from "./ipForm";
 import { search_foggie } from "@/utils/api";
+import { handleTimeStamp } from "@/utils/util";
 import { useStore } from "vuex";
 const store = useStore();
 const router = useRouter();
@@ -207,6 +193,13 @@ const search = () => {
   search_foggie({ email: email.value })
     .then((res) => {
       console.log(res, "res");
+      let cur_data = res.data;
+      cur_data.filter((r)=>{
+        if(r.space_order_id) {
+          r.device_type = "foggie_space";
+          r.device_id = r.space_order_id;
+        }
+      })
       deviceList.list = res.data;
       store.dispatch("global/setDeviceList", res.data);
       loading.value = false;
@@ -283,6 +276,25 @@ search();
     color: #3f3c3c;
     // color: #093aed;
     cursor: pointer;
+    &.offline {
+      opacity: 0.8;
+      color: #818181;
+      cursor: not-allowed;
+    }
+    .circle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+    }
+    .onlineC {
+      background: #1eb92a;
+    }
+    .offlineC {
+      background: #999;
+    }
     span {
       display: inline-block;
       z-index: 10;

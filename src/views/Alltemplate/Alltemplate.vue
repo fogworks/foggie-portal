@@ -1,55 +1,52 @@
 <template>
-  <div class="Alltemplate_boxs">
-    <div>
-      <orderList></orderList>
-      <myFiles></myFiles>
-      <teleport to="body">
-        <upload v-show="uploadIsShow"></upload>
-      </teleport>
-      <!-- <el-container>
-        <el-aside :width="asideWidth">
-          <TemplateAside :isMobile="isMobile" />
-        </el-aside>
-        <el-container class="main_header" :class="isMobile ? 'shrinkHeader' : ''">
-          <el-header class="header" :class="isMobile ? 'shrinkHeader' : ''">
-            <TemplateHeader />
-          </el-header>
-          <el-main class="content_body" :class="isMobile ? 'shrinkHeader' : ''">
+  <div class="Alltemplate_boxs" id="Alltemplate_boxs">
+    <!-- isInsertBody="app-window" -->
 
-            <router-view></router-view>
-            <teleport to='body'>
-              <upload v-show="uploadIsShow"></upload>
-            </teleport>
-          </el-main>
-        </el-container>
-      </el-container> -->
-    </div>
+    <login v-if="customDialogIsShow" @closeDialog="closeDialog" :userInfo="userInfo"></login>
+    <template v-else>
+      <orderList :orderId="orderId"></orderList>
+      <myFiles :orderId="orderId"></myFiles>
+    </template>
   </div>
 </template>
 
 <script setup>
 import {
   ref,
+  toRefs,
   reactive,
   onBeforeMount,
   onBeforeUnmount,
   onMounted,
   watch,
 } from "vue";
-import upload from "@/components/upload";
 import orderList from "@/components/orders/orderList.vue";
-
 import myFiles from "@/views/Alltemplate/MyFiles/myFiles";
-// import TemplateHeader from "@/components/layout/header.vue";
-// import TemplateAside from "@/components/layout/aside.vue";
-import { getChain_id } from "@/api/common.js";
-import { provide, defineExpose, computed, defineProps } from "vue";
+// import customDialog from "@/components-V3/customDialog";
+import login from "@/components/login";
 import { useStore } from "vuex";
-const props = defineProps(["deviceData"]);
 
+import { getChain_id } from "@/api/common.js";
+import { provide, defineExpose, computed, defineProps, readonly } from "vue";
 const store = useStore();
+const props = defineProps(["deviceData"]);
+const { deviceData } = toRefs(props);
+// const orderId = readonly(props.deviceData.order_id);
+const orderId = 19;
 
-let uploadIsShow = computed(() => store.getters.uploadIsShow);
+const userInfo = computed(() => store.getters.userInfo);
+let customDialogIsShow = ref(true); // 是否展示
+const clientPassword = computed(() => store.getters.clientPassword);
+
+if (clientPassword.value) {
+  customDialogIsShow.value = false;
+} else {
+  customDialogIsShow.value = true;
+}
+
+store.commit("upload/setOrderId", orderId);
+
+// store.commit('upload/setOrderId',orderId)
 
 watch(
   () => props.deviceData,
@@ -59,16 +56,20 @@ watch(
   { immediate: true, deep: true }
 );
 
+function closeDialog() {
+  customDialogIsShow.value = false;
+}
+
 /* 获取链ID */
 function loadChainId() {
   getChain_id().then((res) => {
     if (res.code == 200) {
-      store.commit("global/SAVE_ChainId", res.data);
+      store.commit("clientGlobal/SAVE_ChainId", res.data);
     }
   });
 }
 onMounted(() => {
-  // loadChainId()
+  loadChainId();
 });
 
 // let isMobile = ref(false);
@@ -113,7 +114,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-// @import "../../static/style/variables.scss";
 @import "@/static/style/variables.scss";
 
 .Alltemplate_boxs {
@@ -121,84 +121,19 @@ onMounted(() => {
   box-sizing: border-box;
   color: #fff;
   font-family: Lucida Fax-Italic, Lucida Fax;
-  // height: 100%;
-  // overflow-y: scroll;
+
   background-size: cover;
   background-position: 50%;
   border-radius: 0 0 0 0;
   z-index: 1;
-  // min-height: 100vh;
   width: 1120px;
-  // padding: 0 40px;
+  // height: 100%;
   margin: 0 auto;
-}
-
-.main_header {
-  height: 100%;
-  min-height: 100vh;
-  width: calc(100vw - #{$sideBarWidth});
-  padding-top: 80px;
-  overflow: hidden;
-  z-index: 999;
-  transition: background 0.3s;
-}
-
-.shrinkHeader {
-  width: calc(100vw - #{$shrinkHeader}) !important;
-  transition: background 0.3s;
-  -webkit-tap-highlight-color: transparent;
+  // position: relative;
 }
 
 .Alltemplate_boxs::-webkit-scrollbar {
   display: none;
   /* Chrome Safari */
-}
-
-.header {
-  border-bottom: 2px solid #8c88a3;
-  height: 80px;
-  line-height: 80px;
-  position: fixed;
-  top: 0px;
-  width: calc(100vw - #{$sideBarWidth});
-  transition: background 0.3s;
-}
-
-.content_body {
-  width: 100%;
-  width: calc(100vw - #{$sideBarWidth});
-  transition: background 0.3s;
-
-  height: calc(100vh - 80px);
-  padding-bottom: 100px;
-  padding: 20px 20px 100px 20px;
-}
-
-.content_body::-webkit-scrollbar {
-  display: none;
-}
-
-.box_content {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 140%;
-  font-weight: bold;
-
-  color: rgb(255, 255, 255);
-  margin: 0px;
-}
-
-.extraTip {
-  font-size: 12px;
-  font-family: PingFangSC-Medium, PingFang SC;
-  font-weight: 500;
-  color: #ff6e6e;
-  line-height: 22px;
 }
 </style>

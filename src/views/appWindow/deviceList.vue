@@ -25,6 +25,7 @@
           icon-class="logo-dog"
           class="logo"
         ></svg-icon>
+
         <svg-icon
           v-else-if="
             !isActive(item.device_id) && item.device_type !== 'foggie_max'
@@ -52,7 +53,7 @@
         <div>
           <span> FID: </span>
           <span class="top-value-span">
-            {{ handleID(item.device_id) }}
+            {{ handleID(item.device_id || "") }}
           </span>
           <svg-icon
             icon-class="copy"
@@ -60,7 +61,8 @@
             @click.stop="copyLink(item.device_id)"
           ></svg-icon>
         </div>
-        <template v-if="!item.device_type && item.product_custom.length">
+        <div :class="['circle', item.is_active ? 'onlineC' : 'offlineC']"></div>
+        <template v-if="!item.device_type && item.product_custom && item.product_custom.length">
           <!-- <span class="value-span">
             {{ item.product_custom[0].field_value }} </span
           >-core CPU
@@ -79,32 +81,14 @@
           >MB Bandwidth -->
 
           <div>
-            <span class="value-span">{{
-              item.product_custom[0].field_value
-            }}</span
-            >-core CPU
+            Due
+            <span class="value-span value-span2">{{
+              handleTimeStamp(item.expire)
+            }}</span>
           </div>
           <div>
-            <span class="value-span">{{
-              item.product_custom[1].field_value
-            }}</span
-            >GB Memory
-          </div>
-          <div>
-            <span class="value-span">{{
-              item.product_custom[3].field_value
-            }}</span
-            >GB
-            <span class="value-span">{{
-              item.product_custom[2].field_value
-            }}</span
-            >Disk
-          </div>
-          <div>
-            <span class="value-span">{{
-              item.product_custom[4].field_value
-            }}</span
-            >MB Bandwidth
+            <span class="value-span">500G</span>
+            Storage
           </div>
         </template>
       </li>
@@ -124,6 +108,7 @@ import {
 } from "vue";
 import { useStore } from "vuex";
 import { Search } from "@element-plus/icons-vue";
+import { handleTimeStamp } from "@/utils/util";
 const store = useStore();
 const props = defineProps({
   totalActiveDevice: {
@@ -230,7 +215,7 @@ const list = computed(() => {
   overflow: hidden;
   width: 205px;
   height: 135px;
-  padding: 5px;
+  padding: 25px 8px;
   margin: 0 auto;
   margin-bottom: 15px;
   background: linear-gradient(rgb(255, 255, 255) 0%, rgb(217, 223, 255) 100%);
@@ -238,6 +223,7 @@ const list = computed(() => {
   cursor: pointer;
   transition: all 0.3s;
   text-align: left;
+
   div {
     height: 20px;
     overflow: hidden;
@@ -270,6 +256,9 @@ const list = computed(() => {
     font-size: 18px;
     color: #29abff !important;
   }
+  .value-span2 {
+    font-size: 16px;
+  }
 
   &.active {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
@@ -290,6 +279,20 @@ const list = computed(() => {
   }
   &.currentActive {
     transform: translateX(-10px);
+  }
+  .circle {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+  }
+  .onlineC {
+    background: #1eb92a;
+  }
+  .offlineC {
+    background: #999;
   }
   .cancel {
     position: absolute;

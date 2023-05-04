@@ -1,4 +1,4 @@
-import request from '@/utils/request_miner';
+import request from '@/utils/request1';
 import setting from '@/setting';
 
 const { baseUrl } = setting;
@@ -25,6 +25,15 @@ export function getOrderFilterList(data) {
 export function buyOrder(data) {
   return request({
     url: baseUrl + '/order/buy',
+    method: 'post',
+    data,
+  });
+}
+
+/* 同步订单至注册中心 */
+export function orderSync(data) {
+  return request({
+    url: baseUrl + '/order/sync',
     method: 'post',
     data,
   });

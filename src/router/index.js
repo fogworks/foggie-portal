@@ -48,6 +48,14 @@ const router = createRouter({
           },
         },
         {
+          path: 'shop',
+          name: 'Shop',
+          component: defineAsyncComponent(() => import(`../views/portal/shop`)),
+          meta: {
+            title: 'shop',
+          },
+        },
+        {
           path: 'appWindow',
           name: 'AppWindow',
           component: defineAsyncComponent(() => import(`../views/appWindow`)),

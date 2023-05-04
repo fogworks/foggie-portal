@@ -70,5 +70,21 @@ class Encrypt {
 
         return decrypted;
     }
+     /**
+    * 生成16进制的随机字符串
+    * @param {*} num 生成字符串的长度 
+    * @returns 
+    */
+    static randomString(num) {
+       if (num <= 0) {
+           return;
+       }
+       const result = [];
+       const characters = '0123456789abcdef';
+       for (let i = 0; i < num; i++) {
+           result.push(characters.charAt(Math.floor(Math.random() * characters.length)));
+       }
+       return result.join('');
+   }
 }
 module.exports = Encrypt

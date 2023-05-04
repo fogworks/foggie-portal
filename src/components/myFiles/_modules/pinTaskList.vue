@@ -1,7 +1,7 @@
 <template>
   <div class="upload_drawer">
     <div :class="maskClass" @click="closeByMask"></div>
-    <div :class="mainClass" :style="mainStyle" class="main">
+    <div :class="mainClass" :style="mainStyle" class="main" >
       <div class="task_drawer_wrap" id="voodTop">
         <div class="task_dialog_title">PIN Task List</div>
         <div class="son_list">

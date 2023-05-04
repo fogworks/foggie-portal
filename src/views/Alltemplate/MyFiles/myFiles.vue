@@ -7,44 +7,24 @@
           <div class="title">Files</div>
         </div>
       </el-breadcrumb-item>
-      <el-breadcrumb-item
-        @click="setPrefix(item)"
-        v-for="item in breadcrumbList.prefix"
-      >
+      <el-breadcrumb-item @click="setPrefix(item)" v-for="item in breadcrumbList.prefix">
         {{ item }}
       </el-breadcrumb-item>
     </el-breadcrumb>
     <div class="flex justify-between items-center">
-      <el-button
-        class="top-btn"
-        @click="openUpload"
-        key="plain"
-        type="primary"
-        link
-        >Upload +</el-button
-      >
+      <el-button class="top-btn" @click="openUpload" key="plain" type="primary" link>Upload +</el-button>
       <el-button class="top-btn refresh" @click="refresh" key="plain" link>
         <svg-icon icon-class="refresh" class="refresh-icon"></svg-icon>
-        Refresh</el-button
-      >
-      <el-dropdown
-        trigger="click"
-        @command="tableSort"
-        popper-class="custom_dropdown"
-      >
+        Refresh</el-button>
+      <el-dropdown trigger="click" @command="tableSort" popper-class="custom_dropdown">
         <span class="el-dropdown-link">
           <el-button class="top-btn refresh" @click="" key="plain" link>
-            Sort By<el-icon class="el-icon--right"> <arrow-down /> </el-icon
-          ></el-button>
+            Sort By<el-icon class="el-icon--right"> <arrow-down /> </el-icon></el-button>
         </span>
         <template #dropdown>
           <el-dropdown-menu class="sort-menu">
-            <el-dropdown-item
-              v-for="item in sortList"
-              :class="[activeSort === item.key && 'activeSort']"
-              :command="{ prop: item.prop, order: item.order, key: item.key }"
-              >{{ item.label }}</el-dropdown-item
-            >
+            <el-dropdown-item v-for="item in sortList" :class="[activeSort === item.key && 'activeSort']"
+              :command="{ prop: item.prop, order: item.order, key: item.key }">{{ item.label }}</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -56,12 +36,7 @@
         <svg-icon icon-class="my-files" style="margin-right: 5px; color: #29abff"></svg-icon>
         PIN Task List</el-button> -->
       <div>
-        <el-input
-          class="search-input"
-          v-model="keyWord"
-          placeholder="Name Or ID"
-          @keyup.enter.native="doSearch"
-        >
+        <el-input class="search-input" v-model="keyWord" placeholder="Name Or ID" @keyup.enter.native="doSearch">
           <template #prefix>
             <img @click="doSearch" src="@/assets/search.svg" alt="" />
           </template>
@@ -69,37 +44,16 @@
       </div>
     </div>
     <div style="height: 100%">
-      <el-table
-        class="table-box"
-        :data="data"
-        :header-cell-style="setNameCell"
-        style="width: 100%; margin-top: 10px; height: 1000px"
-        ref="fileTable"
-        @sort-change="sortChange"
-        v-el-table-infinite-scroll="fileListsInfinite"
-        :infinite-scroll-immediate="false"
-        infinite-scroll-distance="'150px'"
-        :infinite-scroll-disabled="false"
-      >
-        <el-table-column
-          label="Name"
-          show-overflow-tooltip
-          min-width="340"
-          prop="file_path"
-        >
+      <el-table class="table-box" :data="data" :header-cell-style="setNameCell"
+        style="width: 100%; margin-top: 10px; height: 1000px" ref="fileTable" @sort-change="sortChange"
+        v-el-table-infinite-scroll="fileListsInfinite" :infinite-scroll-immediate="false"
+        infinite-scroll-distance="'150px'" :infinite-scroll-disabled="false">
+        <el-table-column label="Name" show-overflow-tooltip min-width="340" prop="file_path">
           <template #default="{ row }">
-            <router-link
-              class="name-link"
-              to="detail"
-              style="display: flex; align-items: center; padding-left: 15px"
-              @click.prevent="toDetail(row)"
-            >
+            <router-link class="name-link" to="detail" style="display: flex; align-items: center; padding-left: 15px"
+              @click.prevent="toDetail(row)">
               <div class="name-img">
-                <img
-                  v-if="row.type === 'application/x-directory'"
-                  src="@/assets/folder.png"
-                  alt=""
-                />
+                <img v-if="row.type === 'application/x-directory'" src="@/assets/folder.png" alt="" />
 
                 <!-- <template v-else-if="row.isSystemImg">
                   <img v-show="theme" src="@/assets/logo-dog-black.svg" alt="" />
@@ -120,30 +74,14 @@
                 <div class="copy" v-if="item.code">
                   <span class="id-name">{{ item.name }}</span>
                   <span class="code">{{ item.code }}</span>
-                  <svg-icon
-                    icon-class="copy"
-                    class="copy-icon"
-                    @click="copyLink(item.code)"
-                  ></svg-icon>
+                  <svg-icon icon-class="copy" class="copy-icon" @click="copyLink(item.code)"></svg-icon>
                 </div>
               </div>
             </template>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="create_time"
-          label="Date"
-          min-width="150"
-          show-overflow-tooltip
-          align="center"
-        />
-        <el-table-column
-          prop="file_size"
-          label="Size"
-          min-width="100"
-          show-overflow-tooltip
-          align="center"
-        />
+        <el-table-column prop="create_time" label="Date" min-width="150" show-overflow-tooltip align="center" />
+        <el-table-column prop="file_size" label="Size" min-width="100" show-overflow-tooltip align="center" />
         <!-- <el-table-column label="Share" min-width="100" header-align="center">
           <template #default="{ row }">
             <div>
@@ -152,28 +90,17 @@
           </template>
         </el-table-column> -->
 
-        <el-table-column
-          label="Actions"
-          class-name="action-btn-column"
-          min-width="150"
-          align="center"
-        >
+        <el-table-column label="Actions" class-name="action-btn-column" min-width="150" align="center">
           <template #default="scope">
-            <el-dropdown
-              trigger="click"
-              @command="handleCommand"
-              popper-class="custom_dropdown"
-            >
+            <el-dropdown trigger="click" @command="handleCommand" popper-class="custom_dropdown">
               <div class="color-box">
-                <img src="@/assets/more.svg" alt="" />
+                <svg-icon icon-class="more"></svg-icon>
+                <!-- <img src="@/assets/more.svg" alt="" /> -->
               </div>
               <template #dropdown>
                 <el-dropdown-menu class="more-dropdown" slot="dropdown">
-                  <el-dropdown-item
-                    :command="{ flag: 'challenge', command: scope.row }"
-                    :disabled="!orderState"
-                    >challenge</el-dropdown-item
-                  >
+                  <el-dropdown-item :command="{ flag: 'challenge', command: scope.row }"
+                    :disabled="!orderState">challenge</el-dropdown-item>
                   <!-- <el-dropdown-item :command="{ flag: 'ipfs', command: scope.row }" :disabled="
                     !(
                       !scope.row.isDir &&
@@ -268,20 +195,12 @@ const store = useStore();
 const route = useRoute();
 const { proxy } = getCurrentInstance();
 const emits = defineEmits(["currentPrefix"]);
-const orderId = ref("161");
-const chainId = ref(
-  "bb6e31180359e169335481bad672aadf57cfb5787379bedb6a5dce916fcb0ac5"
-);
-const password = ref(
-  "5cf3117a4077565dfb273cdba9f0e1ef9cb8a44556a2cb319970bbd10ccf98fe"
-);
-const username = ref("tianbao12345");
+
 
 // const orderId = computed(() => store.getters.orderId);
-// const chainId = computed(() => store.getters.ChainId);
-// const password = computed(() => store.getters.Password);
-// const username = computed(() => store.getters.username);
 
+const chainId = computed(() => store.getters.ChainId);
+const email = computed(() => store.getters.userInfo?.email);
 const orderState = computed(() => {
   let state = route.query.orderState;
   if (state == 0 || state == 4 || state == 5) {
@@ -308,14 +227,17 @@ const showShareDialog = ref(false);
 
 const props = defineProps({
   currentOODItem: Object,
+  orderId: {
+    type: String,
+    default: "",
+  },
 });
 const syncDialog = ref(false);
 const taskDisplay = ref(false);
 const closeRightUpload = () => {
   taskDisplay.value = false;
 };
-const { currentOODItem } = toRefs(props);
-
+const { currentOODItem, orderId} = toRefs(props);
 const sortList = [
   {
     prop: "create_time",
@@ -358,7 +280,7 @@ function openUpload() {
 
 function loadFileList() {
   let params = {
-    username: username.value,
+    email: email.value,
     orderId: orderId.value,
     pageSize: tableData.pageSize,
     pageNo: tableData.pageNum,
@@ -607,15 +529,12 @@ const handleCommand = async (val) => {
     case "challenge":
       let params = {
         chainId: chainId.value,
-        username: username.value,
-        password: password.value,
+        email: email.value,
         orderId: item.order_id,
         md5: item.md5,
       };
       challengeMiner(params);
-
       break;
-
     default:
       break;
   }
@@ -966,10 +885,8 @@ onMounted(() => {
     :deep(.el-input__wrapper) {
       width: 200px;
       height: 40px;
-      background: linear-gradient(
-        rgba(99, 106, 150, 0.8) 0%,
-        rgba(182, 186, 214, 0.6) 100%
-      );
+      background: linear-gradient(rgba(99, 106, 150, 0.8) 0%,
+          rgba(182, 186, 214, 0.6) 100%);
 
       .el-input__prefix {
         img {
@@ -988,10 +905,8 @@ onMounted(() => {
       }
 
       &.is-focus {
-        background: linear-gradient(
-          rgba(24, 32, 79, 0.4) 0%,
-          rgba(24, 32, 79, 0.25) 100%
-        );
+        background: linear-gradient(rgba(24, 32, 79, 0.4) 0%,
+            rgba(24, 32, 79, 0.25) 100%);
       }
     }
   }
@@ -1033,13 +948,13 @@ onMounted(() => {
         }
       }
 
-      --el-table-row-hover-bg-color: rgba(48, 86, 134, 0.4);
+      --el-table-row-hover-bg-color: transparent;
       // --el-table-tr-bg-color:rgba(50, 61, 109, 0.75);
       --el-table-border-color: rgba(50, 61, 109, 0.75);
 
       .el-table__row {
         &:hover {
-          background: rgba(50, 61, 109, 0.75);
+          // background: rgba(50, 61, 109, 0.75);
         }
       }
 
@@ -1116,12 +1031,17 @@ onMounted(() => {
 
     .color-box {
       // .color-box();
-      img {
+      @include color-box;
+
+      svg {
+        font-size: 28px;
+        color: $light_blue;
         transition: all 0.8s cubic-bezier(0.075, 0.82, 0.165, 1) 0s;
       }
 
       &:hover {
-        img {
+        svg {
+          color: #fff;
           transform: scale(1.1);
           cursor: pointer;
         }

@@ -6,6 +6,8 @@
         "browserAddress":"http://156.242.10.10:8632",
         "transactionAddress":"http://156.242.10.10:8361",
         "getOutstandingOrders":"/1.1",
+        "getBill":"/1.1",
+        "getTransaction":"/1.1",
         "getOrders":"/1.1",
         "getChallengeList":"/1.1",
         "httpEndpoint":"http://156.242.10.10:5802",
@@ -34,5 +36,9 @@
     "fileConfig":{
         "merkleBufferSize": 4096,
         "uploadFileBufferSize": 32768
+    },
+    "registerCenterConfig":{
+        "url":"http://154.31.41.36:8001",
+        "syncOrder":"/api/accounts/bind_space_order"
     }
 }
