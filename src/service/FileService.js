@@ -36,7 +36,7 @@ const fileUploadRecordDB = new NeDB({
 })
 
 module.exports = {
-    saveFileProp: async (orderId, email, filePath, fileSize, md5) => {
+    saveFileProp: async (orderId, email, filePath, fileSize, md5, deviceType) => {
         // save file prop into NeDB
         return new Promise((resolve, reject) => {
             var now = moment();
@@ -45,7 +45,8 @@ module.exports = {
                 order_id: orderId,
                 email: email,
                 file_path: filePath,
-                md5: md5
+                md5: md5,
+                device_type: deviceType
             }, function (err, docs) {
                 if (err) {
                     logger.error('err:', err);
@@ -59,6 +60,7 @@ module.exports = {
                         file_path: filePath,
                         file_size: fileSize,
                         md5: md5,
+                        device_type: deviceType,
                         update_time: currentTime,
                         create_time: currentTime
                     }, function (err, doc) {
@@ -76,12 +78,13 @@ module.exports = {
             })
         });
     },
-    getFileList: async (orderId, email, skip, limit) => {
+    getFileList: async (orderId, email, deviceType, skip, limit) => {
         return new Promise((resolve, reject) => {
             // query file list from NeDB
             fileDB.find({
                 order_id: orderId,
-                email: email
+                email: email,
+                device_type: deviceType
             }).skip(skip).limit(limit).sort({ create_time: -1 }).exec(function (err, data) {
                 if (err) {
                     logger.error('err:', err);
@@ -95,13 +98,14 @@ module.exports = {
             return BizResultCode.QUERY_FILE_FAILED;
         });
     },
-    getFileCount: async (orderId, email) => {
+    getFileCount: async (orderId, email, deviceType) => {
 
         return new Promise((resolve, reject) => {
             // query file list from NeDB
             fileDB.find({
                 order_id: orderId,
-                email: email
+                email: email,
+                device_type: deviceType
             }).exec(function (err, data) {
                 if (err) {
                     logger.error('err:', err);
@@ -115,7 +119,7 @@ module.exports = {
             return BizResultCode.QUERY_FILE_FAILED;
         });
     },
-    getFileByMd5: async (orderId, email, fileName, md5) => {
+    getFileByMd5: async (orderId, email, fileName, md5, deviceType) => {
 
         return new Promise((resolve, reject) => {
             // query file list from NeDB
@@ -123,7 +127,8 @@ module.exports = {
                 order_id: orderId,
                 email: email,
                 file_path: fileName,
-                md5: md5
+                md5: md5,
+                device_type: deviceType
             }).exec(function (err, data) {
                 if (err) {
                     logger.error('err:', err);
@@ -137,14 +142,15 @@ module.exports = {
             return BizResultCode.GET_FILE_BY_MD5_FAILED;
         });
     },
-    removeFileByMd5: async (orderId, email, md5) => {
+    removeFileByMd5: async (orderId, email, deviceType, md5) => {
 
         return new Promise((resolve, reject) => {
             // query file list from NeDB
             fileDB.remove({
                 order_id: orderId,
                 email: email,
-                md5: md5
+                md5: md5,
+                device_type: deviceType
             }, { multi: true }, function (err, data) {
                 if (err) {
                     logger.error('err:', err);
@@ -523,6 +529,7 @@ module.exports = {
                     throw err;
                 }
             });
+            logger.info('grpc address:', rpc);
             return proxClient;
         }
         catch (err) {
@@ -531,6 +538,7 @@ module.exports = {
         var grpcConfig = config.get('grpcConfig');
         var ip = grpcConfig.get("ip");
         var port = grpcConfig.get("port");
+        logger.info('grpc address:', ip + ':' + port);
         return new net_proto.API(ip + ':' + port, grpc.credentials.createInsecure());
     }
 }

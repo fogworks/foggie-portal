@@ -36,12 +36,15 @@ class FileController {
         // 文件内容的md5
         var md5 = req.body.md5;
 
-        if (!orderId || !email || !filePath || !fileSize || !md5) {
+        // 设备类型 1 foggie 2 foggieMax 3 用户客户端
+        var deviceType = req.body.deviceType;
+
+        if (!orderId || !email || !filePath || !fileSize || !md5 || !deviceType) {
             res.send(BizResult.validateFailed(orderId));
             return;
         }
 
-        await fileService.saveFileProp(orderId, email, filePath, fileSize, md5);
+        await fileService.saveFileProp(orderId, email, filePath, fileSize, md5, deviceType);
 
         res.send(BizResult.success());
     }
@@ -50,14 +53,15 @@ class FileController {
      * 查询，包含 订单id，文件路径，用户名
      * @param {*} orderId       订单id
      * @param {*} email         foggie的邮箱地址
+     * @param {*} deviceType    设备类型 1 foggie 2 foggieMax 3 用户客户端
      * @param {*} pageSize      每页条数
      * @param {*} pageNo        页数
      * @param {*} res HTTP的response
      * @returns 
      */
-    static async list(orderId, email, pageSize, pageNo, res) {
+    static async list(orderId, email, deviceType, pageSize, pageNo, res) {
 
-        if (!orderId || !email) {
+        if (!orderId || !email || !deviceType) {
             res.send(BizResult.validateFailed(orderId));
             return;
         }
@@ -72,13 +76,13 @@ class FileController {
             skip = (pageNo - 1) * limit
         }
 
-        var resultData = await fileService.getFileList(orderId, email, skip, limit);
+        var resultData = await fileService.getFileList(orderId, email, deviceType, skip, limit);
         if (resultData instanceof BizResultCode) {
             res.send(BizResult.fail(resultData));
             return;
         }
 
-        var total = await fileService.getFileCount(orderId, email);
+        var total = await fileService.getFileCount(orderId, email, deviceType);
         if (total instanceof BizResultCode) {
             res.send(BizResult.fail(total));
             return;
@@ -102,6 +106,8 @@ class FileController {
 
         // 上传文件的类别 1：小文件 2：大文件
         var fileCategory = req.body.fileCategory;
+        // 设备类型 1 foggie 2 foggieMax 3 用户客户端
+        var deviceType = req.body.deviceType;
         var fileName = req.body.fileName;
         var md5 = req.body.md5;
         var fileType = req.body.fileType;
@@ -116,13 +122,13 @@ class FileController {
         var wholeMd5 = req.body.wholeMd5;
         var wholeFileSize = req.body.wholeFileSize;
 
-        if (!fileCategory || !fileName || !md5 || !fileSize || !orderId ||!email || !wholeMd5) {
+        if (!fileCategory || !fileName || !md5 || !fileSize || !orderId ||!email || !wholeMd5 || !deviceType) {
             res.send(BizResult.validateFailed());
             return;
         }
 
         // 校验相同的文件是否已经上传过
-        var resultData = await fileService.getFileByMd5(orderId, email, fileName, wholeMd5)
+        var resultData = await fileService.getFileByMd5(orderId, email, fileName, wholeMd5, deviceType)
 
         if (resultData instanceof BizResultCode) {
             res.send(BizResult.fail(resultData));
@@ -287,7 +293,7 @@ class FileController {
      * @param {*} res      HTTP的response
      * @returns 
      */
-    static async create(email, fileName, md5, fileType, fileSize, orderId, res) {
+    static async create(email, fileName, md5, fileType, fileSize, orderId, deviceType, res) {
         
         if (!fileName || !fileType || !fileSize || !orderId || !md5 || !email) {
             res.send(BizResult.validateFailed());
@@ -311,7 +317,7 @@ class FileController {
         var rpc = orderInfo.rpc;
         
         // 校验相同的文件是否已经上传过
-        var resultData = await fileService.getFileByMd5(orderId, email, fileName, md5)
+        var resultData = await fileService.getFileByMd5(orderId, email, fileName, md5, deviceType)
 
         if (resultData instanceof BizResultCode) {
             res.send(BizResult.fail(resultData));
@@ -358,8 +364,8 @@ class FileController {
         var orderId = req.body.orderId;
         var email = req.body.email;
         var md5 = req.body.md5;
-
-        var resultData = await fileService.removeFileByMd5(orderId, email, md5)
+        var deviceType = req.body.deviceType;
+        var resultData = await fileService.removeFileByMd5(orderId, email, deviceType, md5)
 
         if (resultData instanceof BizResultCode) {
             res.send(BizResult.fail(resultData));
