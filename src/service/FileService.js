@@ -35,11 +35,6 @@ const fileUploadRecordDB = new NeDB({
     autoload: true
 })
 
-const retryOperation = retry.operation({
-    retries: 3,
-    maxTimeout: 3000
-});
-
 module.exports = {
     saveFileProp: async (orderId, email, filePath, fileSize, md5) => {
         // save file prop into NeDB
@@ -515,7 +510,27 @@ module.exports = {
         var port = grpcConfig.get("port");
         return new pow_proto.PowService(ip + ':' + port, grpc.credentials.createInsecure());
     },
-    getProxGrpcClient: (rpc) => {
-        return new prox_proto.Service(rpc, grpc.credentials.createInsecure());
-    },
+    getProxGrpcClient: (rpc, header) => {
+        try {
+            var proxClient = new prox_proto.Service(rpc, grpc.credentials.createInsecure());
+            var proxPingRequest = {
+                header: header
+            }
+
+            proxClient.Ping(proxPingRequest, function (err, data) {
+                if (err) {
+                    logger.error('err:', err);
+                    throw err;
+                }
+            });
+            return proxClient;
+        }
+        catch (err) {
+            logger.error(err);
+        }
+        var grpcConfig = config.get('grpcConfig');
+        var ip = grpcConfig.get("ip");
+        var port = grpcConfig.get("port");
+        return new net_proto.API(ip + ':' + port, grpc.credentials.createInsecure());
+    }
 }
