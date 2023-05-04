@@ -59,7 +59,6 @@ class PublishController {
 
     var client = PublishController.getNetGrpcClient(ip_address, port);
 
-    console.log("~~~~~~~~~~~~~~", GetRequest);
     let call = client.GetObject(GetRequest);
 
     let successfulReports = [];
@@ -145,7 +144,6 @@ class PublishController {
       request: request,
     };
 
-    console.log("~~~~~~~~~~~~~~", putObjectReq);
 
     client.DeleteObject(putObjectReq, (err, data) => {
       console.log("+++++++++++++++++err", err);
@@ -200,7 +198,7 @@ class PublishController {
     let key_marker = req.body.version_id_marker;
 
     //test
-    prefix = "test1/uuu/";
+    prefix = "/";
     // prefix = "";
     delimiter = "/";
     max_keys = "50";
@@ -223,7 +221,6 @@ class PublishController {
       request: request,
     };
 
-    console.log("~~~~~~~~~~~~~~", putObjectReq);
 
     var client = PublishController.getNetGrpcClient(ip_address, port);
 
