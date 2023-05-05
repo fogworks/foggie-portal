@@ -571,5 +571,73 @@ module.exports = {
             logger.error('err:', err);
             return BizResultCode.GET_BILL_MEMO_FAILED;
         });
-    }
+    },
+    release: async (dmc_client, username, orderId, amount) => {
+        var amount = amount + " DMC";
+        // transfer dmc
+        return new Promise((resolve, reject) => {
+            dmc_client.transact({
+                actions: [{
+                    account: "dmc.token",
+                    name: 'subordasset',
+                    authorization: [
+                        {
+                            actor: username,
+                            permission: 'active'
+                        }
+                    ],
+                    data: {
+                        sender: username,
+                        order_id: orderId,
+                        quantity: {quantity: amount, contract: "datamall"}
+                    }
+                }]
+            }, {
+                blocksBehind: 3,
+                expireSeconds: 30,
+            }).then((res) => {
+                resolve(res.transaction_id);
+            }).catch((err) => {
+                logger.error('err:', err);
+                resolve(BizResultCode.RELEASE_FAILED);
+            })
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.RELEASE_FAILED;
+        });
+    },
+    append: async (dmc_client, username, orderId, amount) => {
+        var amount = amount + " DMC";
+        // transfer dmc
+        return new Promise((resolve, reject) => {
+            dmc_client.transact({
+                actions: [{
+                    account: "dmc.token",
+                    name: 'addordasset',
+                    authorization: [
+                        {
+                            actor: username,
+                            permission: 'active'
+                        }
+                    ],
+                    data: {
+                        sender: username,
+                        order_id: orderId,
+                        quantity: {quantity: amount, contract: "datamall"}
+                    }
+                }]
+            }, {
+                blocksBehind: 3,
+                expireSeconds: 30,
+            }).then((res) => {
+                resolve(res.transaction_id);
+            }).catch((err) => {
+                logger.error('err:', err);
+                resolve(BizResultCode.APPEND_FAILED);
+            })
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.APPEND_FAILED;
+        });
+    },
 }
