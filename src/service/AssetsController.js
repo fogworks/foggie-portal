@@ -95,7 +95,7 @@ class AssetsController {
             '    skip: ' + skip + ',\n' +
             '    order: "-create_time,id",\n' +
             '    where: {\n' +
-            '        order_id: "'+order+'",\n' +
+            '        order_id: "' + order + '",\n' +
             '        acc_type: 1,\n' +
             '        rec_type: {ne: 5},\n' +
             '        change_amount: {\n' +
@@ -131,6 +131,149 @@ class AssetsController {
             },
             body: num
         }).getBody('utf-8')).data.count_order_asset_record
+        var result = {}
+        result['count'] = assetsCount
+        result['list'] = assetsList
+
+        res.send(BizResult.success(result));
+    }
+
+    /**
+     * 获取用户资产记录
+     * @param {*} req 
+     * @param {*} res 
+     */
+    static async getAssetsOfUser(req, res) {
+        var email = req.body.email;
+        var pageNum = req.body.pageNum;
+        var limit = req.body.limit;
+
+        if (!email) {
+            res.send(BizResult.validateFailed(email));
+            return;
+        }
+
+        var userInfo = await userService.getUserInfo(email);
+        if (userInfo instanceof BizResultCode) {
+            logger.info('userInfo is null');
+            res.send(BizResult.fail(userInfo));
+            return;
+        }
+        var username = userInfo.username;
+
+        var chainConfig = config.get('chainConfig')
+        var transactionAddress = chainConfig.get('transactionAddress')
+        var getAssets = chainConfig.get('getAssets')
+
+        var pageSize = 10;
+        if (typeof (limit) !== "undefined") {
+            pageSize = limit
+        }
+
+        var skip = 0;
+        if (typeof (pageNum) !== "undefined") {
+            skip = (pageNum - 1) * pageSize
+        }
+
+        let body = '{\n' +
+            'find_tokens_action(\n' +
+            '        skip: ' + skip + ',\n' +
+            '        limit: ' + pageSize + ',\n' +
+            '        order: "-createdAt,id",\n' +
+            '        where: {\n' +
+            '            or: [{\n' +
+            '                and:[{\n' +
+            '                    or:[\n' +
+            '                         {\n' +
+            '                           account_from_id: "' + username + '"\n' +
+            '                         },\n' +
+            '                         {\n' +
+            '                           account_to_id: "' + username + '"\n' +
+            '                         }\n' +
+            '                    ]},\n' +
+            '                    {\n' +
+            '                      contract_action:{\n' +
+            '                          in:[\n' +
+            '                            "dmc.token/transfer",\n' +
+            '                            "dmc.token/extransfer",\n' +
+            '                            "dmc.token/exchange",\n' +
+            '                            "dmc.token/addreserves",\n' +
+            '                            "dmc.token/withdraw",\n' +
+            '                            "dmc.token/outreceipt",\n' +
+            '                            "dmc.token/orderchange",\n' +
+            '                            "dmc.token/incentiverec",\n' +
+            '                            "dmc.token/incentiverec1",\n' +
+            '                            "dmc.token/mint",\n' +
+            '                            "dmc.token/exlocktrans",\n' +
+            '                            "dmc.token/exunlock",\n' +
+            '                            "dmc.token/exretire",\n' +
+            '                            "dmc.token/orderclarec",\n' +
+            '                            "dmc.token/redeemrec",\n' +
+            '                            "dmc.token/traderecord",\n' +
+            '                            "dmc/undelegatebw",\n' +
+            '                            "dmc.token/liqrec",\n' +
+            '                            "dmc.token/subordasset",\n' +
+            '                            "dmc.token/addordasset",\n' +
+            '                            "dmc.token/assetcharec",\n' +
+            '                            "dmc.token/assetrec",\n' +
+            '                          ]\n' +
+            '                    }\n' +
+            '                    }\n' +
+            '                ]\n' +
+            '            },\n' +
+            '            {\n' +
+            '            and:[{\n' +
+            '                or:[\n' +
+            '                     {\n' +
+            '                       account_from_id: "' + username + '"\n' +
+            '                     },\n' +
+            '                ]},\n' +
+            '                {\n' +
+            '                  contract_action:{\n' +
+            '                      in:[\n' +
+            '                        "dmc.token/increase",\n' +
+            '                        "dmc.token/orderrec1",\n' +
+            '                      ]\n' +
+            '                }\n' +
+            '                }\n' +
+            '            ]\n' +
+            '            },\n' +
+            '            ]\n' +
+            '        },\n' +
+            '){\n' +
+            '    account_from{\n' +
+            '      id\n' +
+            '    }\n' +
+            '    account_to{\n' +
+            '      id\n' +
+            '    }\n' +
+            '    contract_action\n' +
+            '    action{\n' +
+            '      rawData\n' +
+            '    }\n' +
+            '    id\n' +
+            '    createdAt\n' +
+            '  }\n' +
+            '    }'
+        var assetsReq = request('POST', transactionAddress + getAssets, {
+            headers: {
+                'Content-Type': 'application/graphql'
+            },
+            body: body
+        }).getBody('utf-8')
+        let assetsList = JSON.parse(assetsReq).data.find_tokens_action
+        // 获取用户订单总数
+        let num = '{\n' +
+            'count_tokens_action(\n' +
+            '    where:{or:[{and:[{or:[{account_from_id:"' + username + '"},{account_to_id:"' + username + '"}]},{contract_action:{in:["dmc.token/transfer","dmc.token/extransfer","dmc.token/exchange","dmc.token/addreserves","dmc.token/withdraw","dmc.token/outreceipt","dmc.token/orderchange","dmc.token/incentiverec","dmc.token/incentiverec1","dmc.token/mint","dmc.token/exlocktrans","dmc.token/exunlock","dmc.token/exretire","dmc.token/orderclarec","dmc.token/redeemrec","dmc.token/traderecord","dmc/undelegatebw","dmc.token/liqrec","dmc.token/subordasset","dmc.token/addordasset","dmc.token/assetcharec","dmc.token/assetrec"]}}]},{and:[{or:[{account_from_id:"' + username + '"}]},{contract_action:{in:["dmc.token/increase","dmc.token/orderrec1"]}}]}]}\n' +
+            '  )\n' +
+            '    }'
+        let assetsCount = JSON.parse(request('POST', transactionAddress + getAssets, {
+            headers: {
+                'Content-Type': 'application/graphql'
+            },
+            body: num
+        }).getBody('utf-8')).data.count_tokens_action
         var result = {}
         result['count'] = assetsCount
         result['list'] = assetsList

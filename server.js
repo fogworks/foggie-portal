@@ -160,6 +160,10 @@ app.post('/assets/list_in_order', jsonParser, (req, res) => {
   AssetsController.getAssetsOfOrder(req, res);
 });
 
+app.post('/assets/list_in_user', jsonParser, (req, res) => {
+  AssetsController.getAssetsOfUser(req, res);
+});
+
 
 const os = require("os").networkInterfaces();
 
