@@ -164,6 +164,10 @@ app.post('/assets/list_in_user', jsonParser, (req, res) => {
   AssetsController.getAssetsOfUser(req, res);
 });
 
+app.post('/assets/user', jsonParser, (req, res) => {
+  AssetsController.userOverview(req, res);
+});
+
 
 const os = require("os").networkInterfaces();
 

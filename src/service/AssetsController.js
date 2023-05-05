@@ -6,6 +6,7 @@ const userService = require('./UserService');
 const DMC = require('dmc.js');
 const config = require('config');
 const request = require('sync-request');
+const common = require('./common');
 
 class AssetsController {
 
@@ -279,6 +280,37 @@ class AssetsController {
         result['list'] = assetsList
 
         res.send(BizResult.success(result));
+    }
+
+    /**
+     * 用户资产概览
+     * @param {*} req   HTTP请求
+     * @param {*} res   HTTP响应
+     */
+    static async userOverview(req, res) {
+        var email = req.body.email
+        if (!email) {
+            res.send(BizResult.validateFailed(email));
+            return;
+        }
+
+        var userInfo = await userService.getUserInfo(email);
+        if (userInfo instanceof BizResultCode) {
+            logger.info('userInfo is null');
+            res.send(BizResult.fail(userInfo));
+            return;
+        }
+        var username = userInfo.username;
+        var scope = common.walletNameToNumber(username);
+
+        var chainConfig = config.get('chainConfig')
+        var httpEndpoint = chainConfig.get('httpEndpoint')
+        var getTableRows = chainConfig.get('getTableRows')
+        let userAssets = JSON.parse(request('POST', httpEndpoint + getTableRows, {
+            json: { "json": true, "code": "dmc.token", "scope": scope, "table": "accounts" }
+        }).getBody('utf-8')).rows
+
+        res.send(BizResult.success(userAssets));
     }
 }
 
