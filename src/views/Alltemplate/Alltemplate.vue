@@ -36,7 +36,6 @@ const store = useStore();
 const props = defineProps(["deviceData"]);
 const { deviceData } = toRefs(props);
 const orderId = readonly(props.deviceData.space_order_id);
-
 const userInfo = computed(() => store.getters.userInfo);
 let customDialogIsShow = ref(true); // 是否展示
 const clientPassword = computed(() => store.getters.clientPassword);

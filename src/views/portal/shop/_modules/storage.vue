@@ -105,7 +105,7 @@
               <el-button
                 type="primary"
                 round
-                style="margin-top: 40px; opacity: 0"
+                style="margin: 40px auto 0; opacity: 0"
                 @click="purchasePST(item)"
                 >Buy</el-button
               >
@@ -141,7 +141,7 @@
                 @blur="blurPrestoreDMC"
               >
                 <template #prefix>
-                  <svg-icon icon-class="search" size="25"></svg-icon>
+                  <svg-icon icon-class="search2" size="25"></svg-icon>
                 </template>
                 <template #suffix>
                   <span style="font-size: 16px">DMC</span>
@@ -644,6 +644,9 @@ onMounted(() => {
 
 .dialogTitle {
   color: #ececec;
+  color: #000;
+  font-weight: 700;
+  font-size: 20px;
   text-align: center;
 }
 
@@ -692,6 +695,11 @@ onMounted(() => {
     justify-content: space-evenly;
     align-items: center;
     margin-top: 30px;
+    :deep {
+      .el-button {
+        border-radius: 99px;
+      }
+    }
   }
 }
 </style>

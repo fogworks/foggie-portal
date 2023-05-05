@@ -1,14 +1,17 @@
 <template>
   <div class="app-window" id="app-window">
     <!-- <div class="app-left-box"> -->
-    <template v-if="!isDiscover" v-for="item in totalActiveDevice.data">
+    <template
+      v-if="!isDiscover"
+      v-for="item in totalActiveDevice.data"
+      :key="item.device_id || item.space_order_id"
+    >
       <div
         :class="[
           'app-left',
           `app-${item.device_id || item.space_order_id}`,
           isCollapse ? 'left-collapse' : '',
         ]"
-        v-if="item.device_id || item.space_order_id"
       >
         <FoggieMax
           :deviceData="item"
@@ -220,7 +223,7 @@ onMounted(() => {
     }
   }
   .app-right {
-    z-index: 1;
+    z-index: 0;
     // position: sticky;
     // top: 0;
     // overflow-x: visible;

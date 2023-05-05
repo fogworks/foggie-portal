@@ -1,18 +1,15 @@
 <template>
   <div>
-    <h2>w3link</h2>
-    <h1>Lightning fast reads from the IPFS network</h1>
+    <h1><svg-icon icon-class="LINK"></svg-icon> w3link</h1>
+    <h2 style="margin-bottom: 20px">
+      Lightning fast reads from the IPFS network
+    </h2>
     <p style="width: 900px; margin: 0 auto; font-size: 20px">
       Read data available on the public IPFS network with w3link using an HTTP
       endpoint (at https://w3s.link), no additional software necessary. Add your
       content ID (CID) below to try it out.
     </p>
-    <el-input
-      clearable
-      class="search-input"
-      v-model="keyWord"
-      placeholder="cid..."
-    >
+    <el-input class="search-input" v-model="keyWord" placeholder="cid...">
       <template #prepend>https://w3s.link/ipfs/</template>
       <template #suffix>
         <el-button type="primary" @click="download">GO</el-button>

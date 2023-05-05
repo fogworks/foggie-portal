@@ -1,14 +1,17 @@
-import { setToken, getToken ,removeToken} from "@/utils/auth";
+import { setToken, getToken, removeToken } from "@/utils/auth";
+import { setTokenMap, getTokenMap } from '@/utils/tokenMap'
 export default {
   // 开启命名空间
   namespaced: true,
   state: {
-    token: getToken()||'',
-    currentUser:window.localStorage.getItem('currentUser')||''
+    token: getToken() || '',
+    currentUser: window.localStorage.getItem('currentUser') || '',
+    tokenMap: window.localStorage.getItem("tokenMap") ? JSON.parse(window.localStorage.getItem("tokenMap")) : {}
   },
   getters: {
     token: (state) => state.token,
     currentUser: (state) => state.currentUser,
+    tokenMap: (state) => state.tokenMap,
   },
   mutations: {
     SET_TOKEN: (state, token) => {
@@ -17,10 +20,13 @@ export default {
     SET_CURRENTUSER: (state, currentUser) => {
       state.currentUser = currentUser;
     },
-    REMOVE_TOKEN: (state, ) => {
+    REMOVE_TOKEN: (state,) => {
       state.token = '';
       state.currentUser = '';
     },
+    SET_tokenMap: (state, data) => {
+      state.tokenMap[data.id] = data.token
+    }
   },
   actions: {
     login({ commit }, userInfo) {
@@ -36,5 +42,9 @@ export default {
       commit("REMOVE_TOKEN");
       window.localStorage.removeItem("currentUser");
     },
+    setTokenMap({ commit }, data) {
+      commit("SET_tokenMap", data);
+      setTokenMap(data.id, data.token)
+    }
   },
 };

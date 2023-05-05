@@ -31,8 +31,8 @@
           </span>
         </div>
         <div v-else>
-          Bill ID:
-          {{ item.bill_id }}
+          Order ID:
+          {{ item.space_order_id }}
         </div>
         <div class="item" v-if="item.device_type !== 'space'">
           <span>Device ID: &nbsp;</span>
