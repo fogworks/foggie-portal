@@ -455,14 +455,19 @@ app.post('/publish', jsonParser, (req, res) => {
   PublishController.doPublish(req, res);
 });
 
-app.get('/file_download', jsonParser, (req, res) => {
-  OperController.doDownload(req, res);
+// app.get('/file_download', jsonParser, (req, res) => {
+//   OperController.doDownload(req, res);
+// });
+app.get('/file_download', (req, res) => {
+  let params = req.query;
+  OperController.doDownload(params, res);
 });
 
 app.delete('/file_delete', jsonParser, (req, res) => {
   OperController.doDelete(req, res);
 });
 
-app.get('/list_files', jsonParser, (req, res) => {
+app.post('/list_files', jsonParser, (req, res) => {
+  console.log('~~~~~~~~~~~~~', req.body)
   OperController.listFiles(req, res);
 });

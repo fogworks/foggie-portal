@@ -280,14 +280,9 @@ import {
 } from "vue";
 import {
   oodFileList,
-  pIN,
-  IPFSPublish,
-  oodFileDel,
   CidShare,
   oodFileSearch,
   shareLink,
-  getIPFSLocalList,
-  oodFileListFoggie,
   publishPin,
   file_delete,
 } from "@/utils/api.js";
@@ -384,7 +379,8 @@ const getFileList = function (scroll, prefix) {
     list_prefix = prefix.join("/") + "/";
   }
   tableLoading.value = true;
-  oodFileList(device_id.value, "", list_prefix)
+  let orderId = orderId?.value || 100;
+  oodFileList(orderId)
     .then((res) => {
       if (res && res.content) {
         initFileData(res);
@@ -427,7 +423,7 @@ const initFileData = async (data) => {
   }
 
   for (let j = 0; j < data.content.length; j++) {
-    let date = data.content[j].lastModified;
+    let date = transferTime(data.content[j].lastModified);
     let isDir = false;
     const type = data.content[j].key.substring(
       data.content[j].key.lastIndexOf(".") + 1
@@ -577,6 +573,8 @@ const handleImg = (type, ID, pubkey, isDir, size) => {
     type = "img";
     // imgHttpLink = `${location}/d/${ID}/${pubkey}?new_w=200`;
     imgHttpLink = `${location}/object?pubkey=${pubkey}&new_w=${size}`;
+
+    // foggie://peerid/spaceid/cid
   } else {
     isSystemImg = true;
     // imgHttpLink =
@@ -611,13 +609,14 @@ const handleCommand = async (val) => {
       break;
     case "ipfs":
       ipfsDialogShow.value = true;
-      // ipfsPin(item);
+
       pinData.item = item;
+      ipfsPin(item);
       break;
     case "cyfs":
       cyfsDialogShow.value = true;
       pinData.item = item;
-      // cyfsPin(item);
+      cyfsPin(item);
       break;
     case "download":
       downloadItem(item);
@@ -642,23 +641,19 @@ const copyContent = ref("");
 const doShare = async (item) => {
   let key = "";
   if (item) {
-    key = item.name;
-    let data = {
-      key: item.pubkey,
-      is_pin: false,
-      new_path: item.key,
-    };
-    await pIN(data);
+    ipfsPin(item);
   }
 
   const isFolder = item.type === "application/x-directory";
   if (key) {
-    let user = window.sessionStorage.getItem("walletUser");
+    // let user = window.sessionStorage.getItem("walletUser");
+    let user = store.getters['global/userInfo'].dmc;
     let ood_id_cyfs = device_id_real ? device_id_real : device_id;
     let _key = encodeURIComponent(key);
     let data = await shareLink(device_id.value, _key);
     let meta = data.meta;
     let httpStr = `http://${deviceData.dedicatedip}/#/detailFog?pubkey=${meta.pubkey}&name=${item.key}&isFolder=${isFolder}`;
+    // httpStr = `foggie://${peerid}/${spaceid}/${cid}`;
     let cyfsStr = item.file_id
       ? `cyfs://o/${ood_id_cyfs.value}/${meta.file_id}`
       : "";
@@ -717,11 +712,17 @@ const doShare = async (item) => {
 const ipfsPin = (checked) => {
   const item = pinData.item;
   let data = {
+    ip_address: "172.16.30.11",
+    port: 8007,
+    token: "11111",
+    // peerId: deviceData.value.peer_id,
+    peerId: "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA",
+    Id: orderId.value,
+    exp: 3 * 24 * 3600,
+    stype: "ipfs",
+    pin: true,
     key: item.pubkey,
-    new_path: item.key,
-    ip_address: "154.37.16.163",
-    port: "9091",
-    type: "ipfs",
+    isDir: item.isDir,
   };
   publishPin(data).then((res) => {
     if (res) {
@@ -731,25 +732,18 @@ const ipfsPin = (checked) => {
 };
 const cyfsPin = () => {
   const item = pinData.item;
-  let key = item.key;
-  var form = new FormData();
-  form.append(
-    "dir",
-    new Blob([key], {
-      type: "application/x-directory",
-    }),
-    key
-  );
-  let pubkey = item.pubkey
-    ? item.pubkey
-    : "QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn";
-
   let data = {
-    key: pubkey,
-    new_path: item.key,
-    ip_address: "154.37.16.163",
-    port: "9091",
-    type: "cyfs",
+    ip_address: "172.16.30.11",
+    port: 8007,
+    token: "11111",
+    // peerId: deviceData.value.peer_id,
+    peerId: "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA",
+    Id: orderId.value,
+    exp: 3 * 24 * 3600,
+    stype: "cyfs",
+    pin: true,
+    key: item.pubkey,
+    isDir: item.isDir,
   };
   publishPin(data).then((res) => {
     if (res) {
@@ -759,10 +753,17 @@ const cyfsPin = () => {
 };
 const downloadItem = (item) => {
   // let ID = device_id.value;
-  let pubkey = item.pubkey;
+  // let pubkey = item.pubkey;
   // let downloadUrl = `/fog/${pubkey}?dl=true`;
-  console.log("~~~~~~~~~~~~~~", item);
-  let downloadUrl = `/file_download/`;
+  let cid = "QmNf82AtemgaHu2Sg3wpiaEFmoy6ym6Sv1Ma9eLJg6dHm3";
+  let key = "test1/uuu/upgrade.sh1";
+
+  let ip = "172.16.30.11";
+  // let ip = "154.31.34.194";
+  let port = 8007;
+  let Id = item.id;
+  let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+  let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
 
   var oA = document.createElement("a");
   oA.download = item.name; // 设置下载的文件名，默认是'下载'

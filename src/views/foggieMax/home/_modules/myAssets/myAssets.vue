@@ -119,7 +119,6 @@ import {
   user,
   ydaReward,
   getAssets,
-  totalReward,
   lastweekReward,
   dmcSwap,
   OwnerBills,

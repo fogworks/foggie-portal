@@ -13,6 +13,14 @@
               :min="24"
               placeholder="Purchase cycle"
             />
+            <span style="font-size: 16px; margin-right: 5px"
+              >*Purchase cycle</span
+            >
+            <el-input-number
+              v-model.number="formLine.week"
+              :min="24"
+              placeholder="Purchase cycle"
+            />
             <span style="font-size: 16px; margin-left: 5px">Week</span>
           </div>
           <div>
@@ -408,22 +416,7 @@ async function submit() {
             type: "warning",
           })
             .then(async () => {
-              orderSync({
-                email: email.value,
-                billId: state.orderDetail.orderID,
-              }).then((req) => {
-                if (req.code == 200) {
-                  state.formLine.prestoreDMC = "";
-                  dialogIsShow.value = false;
-                  loading.value = false;
-
-                  ElMessage({
-                    message: `购买成功！`,
-                    type: "success",
-                    grouping: true,
-                  });
-                }
-              });
+              order_sync();
             })
             .catch(() => {});
         }
@@ -433,6 +426,26 @@ async function submit() {
       });
   }
 }
+const order_sync = async () => {
+  orderSync({
+    email: email.value,
+    billId: state.orderDetail.orderID,
+  }).then((req) => {
+    if (req.code == 200) {
+      state.formLine.prestoreDMC = "";
+      dialogIsShow.value = false;
+      loading.value = false;
+
+      ElMessage({
+        message: `购买成功！`,
+        type: "success",
+        grouping: true,
+      });
+    } else {
+      order_sync();
+    }
+  });
+};
 function loadChainId() {
   getChain_id().then((res) => {
     if (res.code == 200) {

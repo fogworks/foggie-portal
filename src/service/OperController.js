@@ -3,6 +3,7 @@ const BizResultCode = require("./BaseResultCode");
 const logger = require("./logger")("FileController.js");
 const publish_proto = require("./grpc/publish");
 const grpc = require("@grpc/grpc-js");
+const { da } = require("element-plus/es/locale");
 
 class PublishController {
   /**
@@ -14,35 +15,22 @@ class PublishController {
    * @returns
    */
   static async doDownload(req, res) {
-    let ip_address = req.body.ip_address;
-    let port = req.body.port || "80";
-    let token = req.body.token;
-    let peerId = req.body.peerId;
-    let Id = "4321";
-    // test
-    Id = "100";
+    let ip_address = req.ip_address;
+    let port = req.port;
+    let token = req.token;
+    let peerId = req.peerId;
+    let Id = req.Id;
+    let cid = req.cid;
+    let key = req.key;
+    let start = req.start;
+    let length = req.length;
     token = "11111";
-    peerId = "12D3KooWEg8qpg5BfBtxM9kBtzp4RB6VD3dBb2cPxasKuyvKrosC";
-    // peerId = "12D3KooWRybBDQ872y2PBYawD2k14SSwwA6x9JqsHs1Ren3EXWmM";
-
-    // if (!peerId || !Id || !stype || !exp || !pin || !cid) {
-    //   res.send(BizResult.validateFailed());
-    //   return;
-    // }
     const header = {
       peerId,
       Id,
       token,
     };
 
-    let cid = req.body.cid;
-    let key = req.body.key;
-    let start = req.body.start;
-    let length = req.body.length;
-    // test
-    cid = "QmNf82AtemgaHu2Sg3wpiaEFmoy6ym6Sv1Ma9eLJg6dHm3";
-    key = "test1/uuu/upgrade.sh1";
-    key = "";
     start = 0;
     length = 0;
 
@@ -62,41 +50,25 @@ class PublishController {
     let call = client.GetObject(GetRequest);
 
     let successfulReports = [];
+    let totalLength = 0;
     // let failedReports = [];
     call.on('data',(employeeStream)=>{
-      // res.send(employeeStream);
-      successfulReports.push(employeeStream)
+      if (employeeStream?.chunk) {
+        totalLength += employeeStream.chunk.length
+        successfulReports.push(employeeStream.chunk)
+      }
+      
 
     });
-    call.on('end',()=>{
-       res.send()
+    call.on('end',()=>{      
+       res.send(Buffer.concat(successfulReports, totalLength))
     })
-
-    // call.on("data", (response)=>{
-    //   console.log('~~~~~~~~~~~', response)
-    // });
-
-    // call.on('end',()=>{
-    //   console.log('All Salaries have been paid');
-    //   // res.send()
-    // });
-
-    // client.GetObject(GetRequest, (err, data) => {
-    //   console.log("+++++++++++++++++err", err);
-    //   console.log("+++++++++++++++++data", data);
-    //   if (err) {
-    //     res.send({});
-    //     return;
-    //   }
-    //   res.send(BizResult.success(data.cid));
-    //   // res.send({ aa: "bb" });
-    // });
   }
 
   static async doDelete(req, res) {
-    let cids = req.body.key;
+    let cids = req.body.cids;
     // test
-    cids = ["QmcRccgj2rK2e9sVcsf11v7hDdLsKq1kTfrEGAYe2NDuQP"];
+    // cids = ["QmcRccgj2rK2e9sVcsf11v7hDdLsKq1kTfrEGAYe2NDuQP"];
 
     let objects = req.body.objects;
     objects = [];
@@ -114,13 +86,7 @@ class PublishController {
     Id = "100";
 
     token = "11111";
-    peerId = "12D3KooWEg8qpg5BfBtxM9kBtzp4RB6VD3dBb2cPxasKuyvKrosC";
-    // peerId = "12D3KooWRybBDQ872y2PBYawD2k14SSwwA6x9JqsHs1Ren3EXWmM";
-    // console.log("~~~~~~~~~~~ip_address", ip_address);
-    console.log("~~~~~~~~~~~port", port);
-    console.log("~~~~~~~~~~~token", token);
-
-    console.log("~~~~~~~~~~~~~~~~~~~objects", JSON.stringify(objects));
+    peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
 
     if (!object_type || !objects || !cids) {
       res.send(BizResult.validateFailed());
@@ -146,29 +112,12 @@ class PublishController {
 
 
     client.DeleteObject(putObjectReq, (err, data) => {
-      console.log("+++++++++++++++++err", err);
-      console.log("+++++++++++++++++data", data);
       if (err) {
-        // logger.error("err:", err);
-        //   res.send(BizResult.fail(BizResultCode.UPLOAD_FILE_FAILED));
         res.send({});
         return;
       }
       res.send(BizResult.success(data.cid));
-      // res.send({ aa: "bb" });
     });
-
-    // if (parseInt(fileCategory) == 1) {
-    //   if (!fileType) {
-    //     res.send(BizResult.validateFailed());
-    //     return;
-    //   }
-
-    // //   stream.write({ req: putObjectReq });
-
-    // } else {
-    //   res.send(BizResult.fail(BizResultCode.NOT_SUPPORT_FILE_TYPE));
-    // }
   }
 
   static async listFiles(req, res) {
@@ -176,11 +125,11 @@ class PublishController {
     let port = req.body.port || "80";
     let token = req.body.token;
     let peerId = req.body.peerId;
-    let Id = "4321";
+    let Id = req.body.Id;
 
     // test
-    peerId = "12D3KooWEg8qpg5BfBtxM9kBtzp4RB6VD3dBb2cPxasKuyvKrosC";
-    Id = "100";
+    peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+    // Id = "34";
     token = "11111";
 
     const header = {
@@ -198,14 +147,14 @@ class PublishController {
     let key_marker = req.body.version_id_marker;
 
     //test
-    prefix = "/";
     // prefix = "";
-    delimiter = "/";
-    max_keys = "50";
-    start_after = "";
-    continuation_token = ""; // next_marker
-    version_id_marker = "";
-    key_marker = "";
+    // // prefix = "";
+    // delimiter = "/";
+    // max_keys = "50";
+    // start_after = "";
+    // continuation_token = ""; // next_marker
+    // version_id_marker = "";
+    // key_marker = "";
 
     const request = {
       prefix,
@@ -221,12 +170,11 @@ class PublishController {
       request: request,
     };
 
-
     var client = PublishController.getNetGrpcClient(ip_address, port);
 
     client.ListObjects(putObjectReq, (err, data) => {
-      console.log("+++++++++++++++++err", err);
-      console.log("+++++++++++++++++data", data);
+      console.log('+++++++++++', err)
+      console.log('+++++++++++', data)
       if (err) {
         res.send();
         return;
@@ -236,10 +184,10 @@ class PublishController {
   }
 
   static getNetGrpcClient(ip_address, port) {
-    ip_address = "154.31.34.194";
+    // ip_address = "154.31.34.194";
     // ip_address  = "192.168.1.115";
+    ip_address = "172.16.30.11";
     port = 8007;
-    // console.log('@@@@@@@@@@@@@@@@', publish_proto)
     return new publish_proto.API(
       ip_address + ":" + port,
       grpc.credentials.createInsecure()

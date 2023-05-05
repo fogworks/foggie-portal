@@ -186,11 +186,11 @@
             </div>
             <div>
               <div>Files</div>
-              <div>12</div>
+              <div>{{ item.file_count }}</div>
             </div>
             <div>
               <div>Size</div>
-              <div>120GB</div>
+              <div>{{ getfilesize(item.used_space) }}</div>
             </div>
             <div>
               <div>Slots</div>
@@ -235,16 +235,17 @@
               style="margin-right: 10px"
               @click.stop="openUpload(item)"
             ></svg-icon>
-            <svg-icon
+            <!-- <svg-icon
               icon-class="folder"
               size="40"
               style="margin-right: 10px"
               @click.stop="openMyFiles(item)"
-            ></svg-icon>
+            ></svg-icon> -->
             <svg-icon
               icon-class="dinwei"
               size="40"
               style="margin-right: 10px"
+              @click.stop="challengeMiner(item)"
             ></svg-icon>
 
             <el-popover
@@ -283,13 +284,15 @@ import { ElMessage } from "element-plus";
 import { ref, reactive, toRefs, onMounted, computed } from "vue";
 import { useStore } from "vuex";
 
-import {  pushMerkle, getOrderById } from "@/api/order/orderList";
+import { pushMerkle, getOrderById } from "@/api/order/orderList";
+import { InitiateChallenge } from "@/api/myFiles/myfiles";
 import {
   transferTime,
   ChinaTime1,
   getResidueTime,
   ChinaTime4,
 } from "@/utils/ChinaStandardTime";
+import { getfilesize } from "@/utils/util.js";
 const $state = useStore();
 // const router = useRouter();
 const props = defineProps({
@@ -310,8 +313,8 @@ const { orderList } = toRefs(state);
 function loadOrderList() {
   let params = {
     orderId: props.orderId,
-    email:email.value,
-    deviceType:deviceType.value
+    email: email.value,
+    deviceType: deviceType.value,
   };
 
   getOrderById(params)
@@ -376,6 +379,19 @@ function popoverClick(type, item) {
     });
   }
 }
+const challengeMiner = (item) => {
+  let params = {
+    chainId: ChainId.value,
+    email: email.value,
+    orderId: item.id,
+    // md5: item.md5,
+  };
+  InitiateChallenge(params).then((res) => {
+    if (res.code == 200) {
+      console.log(res);
+    }
+  });
+};
 onMounted(() => {
   loadOrderList();
 });

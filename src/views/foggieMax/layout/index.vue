@@ -62,7 +62,9 @@ export default {
 
     const store = useStore();
     if (deviceData.device_type == 'foggie_max' || deviceData.device_type == 'foggie' || deviceData.device_type == '') {
-      const orderId = readonly(deviceData.device_id)
+      let orderId = readonly(deviceData.device_id)
+      // test 
+      orderId = 100;
       store.commit('upload/setOrderId', orderId)
       if (deviceData.device_type == 'foggie_max') {
         store.commit("upload/setDeviceType", '2');

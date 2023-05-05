@@ -9,7 +9,7 @@
     ></login>
     <template v-else>
       <orderList :orderId="orderId"></orderList>
-      <myFiles :orderId="orderId"></myFiles>
+      <myFiles :orderId="orderId" :deviceData="deviceData"></myFiles>
     </template>
   </div>
 </template>

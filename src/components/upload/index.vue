@@ -87,7 +87,8 @@ export default {
       forceChunkSize: true, // 是否强制每个块都小于 chunkSize
       allowDuplicateUploads: true  //如果说一个文件已经上传过了是否还允许再次上传。默认的话如果已经上传了，除非你移除了否则是不会再次重新上传的，所以也就是默认值为 false。
     });
-    const client = new APIClient('http://154.31.34.194:9007')
+    // const client = new APIClient('http://154.31.34.194:9007')
+    const client = new APIClient('http://172.16.30.11:8007');
     // window.client = client
     provide('client', readonly(client))
 
