@@ -58,6 +58,10 @@ class BaseResultCode {
     static GET_PEER_ID_FAILED = new BaseResultCode(20014, 'get peer id failed');
     static GET_RPC_FAILED = new BaseResultCode(20015, 'get rpc failed');
     static ORDER_NOT_EXIST = new BaseResultCode(20016, 'order is not exist');
+    static GET_CHANLLENGE_RECORD_FAILED = new BaseResultCode(20017, 'get challenge record failed');
+    static SAVE_CHANLLLENGE_RECORD_FAILED = new BaseResultCode(20018, 'save challenge record failed');
+    
+    
     // 文件的异常code 30000～39999
     static FILE_NOT_EXIST = new BaseResultCode(30000, 'file is not exist');
     static SAVE_FILE_FAILED = new BaseResultCode(30001, 'save file failed');
@@ -84,6 +88,9 @@ class BaseResultCode {
     static GET_FILE_UPLOAD_RECORD_FAILED = new BaseResultCode(30022, 'get file upload record failed');
     static REMOVE_FILE_FAILED = new BaseResultCode(30023, 'remove file failed');
     static DELETE_CODEBOOK_OFFSET_FAILED = new BaseResultCode(30024, 'delete codebook offset failed');
+
+    // 资产的异常code 40000～49999
+    static TRANSFER_FAILED = new BaseResultCode(40000, 'transfer failed');
 }
 
 module.exports = BaseResultCode

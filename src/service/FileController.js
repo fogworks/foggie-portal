@@ -41,7 +41,17 @@ class FileController {
             return;
         }
 
-        await fileService.saveFileProp(orderId, email, filePath, fileSize, md5, deviceType);
+        orderService.updateOrderUsedSpace(email, orderId, fileSize);
+
+        var codebooks = await fileService.getFileCodeBookByMd5(orderId, email, md5);
+        if (codebooks instanceof BizResultCode) {
+            res.send(BizResult.fail(codebooks));
+            return;
+        }
+
+        var codebook = codebooks[0];
+
+        await fileService.saveFileProp(orderId, email, filePath, fileSize, md5, codebook.cid, deviceType);
 
         // 根据文件的上传记录，重读一次文件，生成merkle树后 提交
         var fileUploadRecordRes = await fileService.getFileUploadRecord(orderId, email, md5);
@@ -386,6 +396,28 @@ class FileController {
     }
 
     /**
+     * 获取密码本
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
+    static async getCodebook(req, res){
+        var orderId = req.body.orderId;
+        var email = req.body.email;
+        var md5 = req.body.md5;
+        if (!orderId || !email || !md5) {
+            res.send(BizResult.validateFailed());
+            return;
+        }
+        var codebook = await fileService.getCodeBookByOrderId(orderId, email, md5);
+        if (codebook instanceof BizResultCode) {
+            res.send(BizResult.fail(codebook));
+            return;
+        }
+        res.send(BizResult.success(codebook));
+    }
+
+    /**
      * 完成文件传输后的提交
      * 
      * @param {*} req HTTP的request
@@ -537,6 +569,9 @@ async function smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, r
             res.send(BizResult.fail(BizResultCode.UPLOAD_FILE_FAILED));
             return;
         }
+
+        // 上传成功后，保存文件上传记录 小文件不存在分片，所以partNum为0
+        fileService.saveFileUploadRecord(orderId, email, file.path, md5, 0)
 
         // 根据文件的大小，merkle树的块大小 计算密码本的偏移量数组
         var offsetArray = await fileService.getCodebookOffset(fileCategory, orderId, email, fileName, md5, fileSize, merkleBufferSize, 2);

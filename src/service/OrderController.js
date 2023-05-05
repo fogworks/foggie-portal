@@ -331,15 +331,19 @@ class OrderController {
     }
 
     /**
-     * 获取用户的订单列表
-     * @param {*} orderId   订单id
+     * 获取用户的订单详情
+     * @param {*} req       HTTP的请求
      * @param {*} res       HTTP的响应
-     * @returns 订单列表
+     * @returns 订单详情
      */
-    static getOrderById(orderId, res) {
+    static async getOrderById(req, res) {
 
-        if (!orderId) {
-            res.send(BizResult.validateFailed())
+        var orderId = req.body.orderId;
+        var email = req.body.email;
+        var deviceType = req.body.deviceType;
+
+        if (!orderId || !email || !deviceType) {
+            res.send(BizResult.validateFailed());
             return;
         }
 
@@ -391,7 +395,11 @@ class OrderController {
             },
             body: body
         }).getBody('utf-8')).data.find_order;
-
+        var orderInfo = await orderService.getOrderById(email, orderId);
+        order[0]['used_space'] = orderInfo.used_space;
+        order[0]['total_space'] = orderInfo.total_space;
+        var fileCount = await fileService.getFileCount(orderId, email, deviceType);
+        order[0]['file_count'] = fileCount;
         res.send(BizResult.success(order));
     }
 
@@ -498,14 +506,16 @@ class OrderController {
 
     /**
      * 查询，包含 订单id，merkleRoot，dataBlockCount，transactionId
-     * @param {*} orderId       订单id
-     * @param {*} email         foggie邮箱
-     * @param {*} pageSize      每页条数
-     * @param {*} pageNo        页数
+     * @param {*} req   HTTP的request
      * @param {*} res HTTP的response
      * @returns 
      */
-    static async getPushMerkleRecord(orderId, email, pageSize, pageNo, res) {
+    static async getPushMerkleRecord(req, res) {
+
+        var orderId = req.body.orderId;
+        var email = req.body.email;
+        var pageSize = req.body.pageSize;
+        var pageNo = req.body.pageNo;
 
         if (!orderId || !email) {
             res.send(BizResult.validateFailed(orderId));
@@ -587,11 +597,11 @@ class OrderController {
         let randomCharacter = Encrypt.randomString(4);
         let nonce = randomCharacter + "#" + codebook.cid;
         var containRandomData = Buffer.concat([originData, Buffer.from(randomCharacter)]);
-        let pre_data_hash = DMC.ecc.sha256(containRandomData);
-        let data_hash = Buffer.from(DMC.ecc.sha256(Buffer.from(pre_data_hash))).toString("hex");
-        logger.info("challenge, orderId:{},cid:{},partId:{},data_hash:{},nonce:{}", codebook.order_id, codebook.cid, codebook.part_id, data_hash, nonce);
+        let preDataHash = DMC.ecc.sha256(containRandomData);
+        let dataHash = Buffer.from(DMC.ecc.sha256(Buffer.from(preDataHash))).toString("hex");
+        logger.info("challenge, orderId:{},cid:{},partId:{},data_hash:{},nonce:{}", orderId, codebook.cid, codebook.part_id, dataHash, nonce);
         var userInfo = await userService.getUserInfo(email);
-        if(userInfo instanceof BizResultCode){
+        if (userInfo instanceof BizResultCode) {
             response.send(BizResult.fail(userInfo));
             return;
         }
@@ -610,7 +620,7 @@ class OrderController {
                     sender: username,
                     order_id: orderId,
                     data_id: codebook.part_id,
-                    hash_data: data_hash,
+                    hash_data: dataHash,
                     nonce: nonce
                 }
             }]
@@ -618,79 +628,56 @@ class OrderController {
             blocksBehind: 3,
             expireSeconds: 30,
         }).then((res) => {
-            response.send(BizResult.success());
+            orderService.saveChallengeRecord(orderId, email, codebook.cid, codebook.part_id, dataHash, nonce, res.transaction_id);
+            response.send(BizResult.success(res.transaction_id));
         }).catch((err) => {
             logger.error('err:', err);
             response.send(BizResult.fail(BizResultCode.REQ_CHALLENGE_FAILED));
         })
     }
 
-
     /**
      * 获取订单的挑战记录
-     * @param {*} orderId   订单id
-     * @param {*} pageNum   页数
-     * @param {*} limit     每页展示的条数
+     * @param {*} req       HTTP请求
      * @param {*} res       HTTP响应
      * @returns 挑战记录列表
      */
-    static getChallengeList(orderId, pageNum, limit, res) {
+    static async getChallengeList(req, res) {
 
-        if (!orderId) {
-            res.send(BizResult.validateFailed());
+        var orderId = req.body.orderId;
+        var email = req.body.email;
+        var limit = req.body.limit;
+        var pageNum = req.body.pageNum;
+
+        if (!orderId || !email) {
+            res.send(BizResult.validateFailed(orderId));
             return;
         }
-        var chainConfig = config.get('chainConfig')
-        var transactionAddress = chainConfig.get('transactionAddress')
-        var getChallengeList = chainConfig.get('getChallengeList')
-
-        var pageSize = 10;
-        if (typeof (limit) !== "undefined") {
-            pageSize = limit
+        if (typeof (limit) == "undefined") {
+            limit = 10
         }
 
         var skip = 0;
         if (typeof (pageNum) !== "undefined") {
-            skip = (pageNum - 1) * pageSize
+            skip = (pageNum - 1) * limit
         }
-        let body = '{\n' +
-            '        find_challenge(\n' +
-            '                skip: ' + skip + ',\n' +
-            '                limit: ' + pageSize + ',\n' +
-            '                where: {\n' +
-            '                    order_id: ' + orderId + ',\n' +
-            '                },\n' +
-            '                order: "-id",\n' +
-            '        ){\n' +
-            '            pre_merkle_root\n' +
-            '            pre_data_block_count\n' +
-            '            merkle_root\n' +
-            '            data_block_count\n' +
-            '            merkle_submitter\n' +
-            '            data_id\n' +
-            '            hash_data\n' +
-            '            challenge_times\n' +
-            '            nonce\n' +
-            '            state\n' +
-            '            user_lock_amount\n' +
-            '            miner_pay_amount\n' +
-            '            challenge_date\n' +
-            '            created_time\n' +
-            '            order {\n' +
-            '                id\n' +
-            '            }\n' +
-            '            challenger {\n' +
-            '                id\n' +
-            '            }\n' +
-            '        }\n' +
-            '    }'
-        let challengeList = JSON.parse(request('POST', transactionAddress + getChallengeList, {
-            headers: {
-                'Content-Type': 'application/graphql'
-            },
-            body: body
-        }).getBody('utf-8')).data.find_challenge;
-        res.send(BizResult.success(challengeList));
+
+        var resultData = await orderService.getChallengeRecord(orderId, email, skip, limit);
+        if (resultData instanceof BizResultCode) {
+            res.send(BizResult.fail(resultData));
+            return;
+        }
+
+        var total = await orderService.getChallengeRecordCount(orderId, email);
+        if (total instanceof BizResultCode) {
+            res.send(BizResult.fail(total));
+            return;
+        }
+
+        var result = {};
+        result['list'] = resultData;
+        result['count'] = total;
+        res.send(BizResult.success(result));
     }
 
     /**

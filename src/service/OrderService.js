@@ -14,6 +14,13 @@ const pushMerkleRecordDB = new NeDB({
     autoload: true,
 })
 
+const challengeRecordTableName = dbConfig.get('challengeRecordTableName');
+const challengeRecordDB = new NeDB({
+    filename: common.getHomePath() + path.sep + challengeRecordTableName,
+    autoload: true,
+})
+
+
 const orderTableName = dbConfig.get('orderTableName');
 const orderDB = new NeDB({
     filename: common.getHomePath() + path.sep + orderTableName,
@@ -87,6 +94,75 @@ module.exports = {
             return BizResultCode.QUERY_PUSH_MERKLE_RECORD_FAILED;
         });
     },
+    saveChallengeRecord: async (orderId, email, cid, partId, dataHash, nonce, transactionId) => {
+
+        // save chanllenge record into NeDB
+        return new Promise((resolve, reject) => {
+            var now = moment();
+            var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
+            challengeRecordDB.insert({
+                order_id: orderId,
+                email: email,
+                cid: cid,
+                part_id: partId,
+                data_hash: dataHash,
+                nonce: nonce,
+                transaction_id: transactionId,
+                update_time: currentTime,
+                create_time: currentTime
+            }, function (err, doc) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.SAVE_CHANLLLENGE_RECORD_FAILED);
+                    return;
+                }
+                resolve(doc._id);
+            });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.SAVE_CHANLLLENGE_RECORD_FAILED;
+        });
+    },
+    getChallengeRecord: async (orderId, email, skip, limit) => {
+
+        return new Promise((resolve, reject) => {
+            // query push merkle record from NeDB
+            challengeRecordDB.find({
+                order_id: orderId,
+                email: email
+            }).skip(skip).limit(limit).sort({ create_time: -1 }).exec(function (err, data) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.GET_CHANLLENGE_RECORD_FAILED);
+                    return;
+                }
+                resolve(data);
+            });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
+        });
+    },
+    getChallengeRecordCount: async (orderId, email) => {
+
+        return new Promise((resolve, reject) => {
+            // query push merkle record count from NeDB
+            challengeRecordDB.find({
+                order_id: orderId,
+                email: email
+            }).exec(function (err, data) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.GET_CHANLLENGE_RECORD_FAILED);
+                    return;
+                }
+                resolve(data.length);
+            });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
+        });
+    },
     saveOrder: async (email, orderId, miner, user, billId, pst, totalPrice, transactionId) => {
         // save buy order record into NeDB
         return new Promise((resolve, reject) => {
@@ -115,6 +191,9 @@ module.exports = {
                             pst: pst,
                             peer_id: '',
                             rpc: '',
+                            used_space: '',
+                            total_space: '',
+                            expire: '',
                             total_price: totalPrice,
                             transaction_id: transactionId,
                             update_time: currentTime,
@@ -137,6 +216,9 @@ module.exports = {
                         pst: pst,
                         peer_id: '',
                         rpc: '',
+                        used_space: '',
+                        total_space: '',
+                        expire: '',
                         total_price: totalPrice,
                         transaction_id: transactionId,
                         update_time: currentTime,
@@ -147,6 +229,7 @@ module.exports = {
                             resolve(BizResultCode.SAVE_ORDER_FAILED);
                             return;
                         }
+                        logger.info("save order, usedSpace:{}, totalSpace:{}, expire:{}", doc.used_space, doc.total_space, doc.expire);
                         resolve(doc._id);
                     });
                 }
@@ -156,7 +239,7 @@ module.exports = {
             return BizResultCode.SAVE_ORDER_FAILED;
         });
     },
-    updateOrder: async (email, orderId, billId, peerId, rpc) => {
+    updateOrder: async (email, orderId, billId, peerId, rpc, usedSpace, totalSpace, expire) => {
         // update buy order record into NeDB
         return new Promise((resolve, reject) => {
             var now = moment();
@@ -169,6 +252,9 @@ module.exports = {
                 $set: {
                     peer_id: peerId,
                     rpc: rpc,
+                    used_space: usedSpace,
+                    total_space: totalSpace,
+                    expire: expire,
                     update_time: currentTime
                 }
             }, {}, function (err, num) {
@@ -177,6 +263,7 @@ module.exports = {
                     resolve(BizResultCode.UPDTAE_ORDER_FAILED);
                     return;
                 }
+                logger.info("update order success, usedSpace:{}, totalSpace:{}, expire:{}", usedSpace, totalSpace, expire);
                 resolve(num);
             });
         }).catch((err) => {
@@ -272,7 +359,7 @@ module.exports = {
             if (result.code == 200) {
                 // 同步成功后，更新订单中的peer_id和rpc
                 logger.info('sync order to register center success, orderId:{}', orderId);
-                var updateBuyOrderRes = await module.exports.updateOrder(email, orderId, billId, peerId, rpc);
+                var updateBuyOrderRes = await module.exports.updateOrder(email, orderId, billId, peerId, rpc, usedSpace, totalSpace, expire);
                 if (updateBuyOrderRes instanceof BizResultCode) {
                     return updateBuyOrderRes;
                 }
@@ -317,7 +404,7 @@ module.exports = {
                     resolve(BizResultCode.QUERY_ORDER_FAILED);
                     return;
                 }
-                if(!data){
+                if (!data) {
                     resolve(BizResultCode.ORDER_NOT_EXIST);
                     return;
                 }
@@ -339,7 +426,7 @@ module.exports = {
                     resolve(BizResultCode.QUERY_ORDER_FAILED);
                     return;
                 }
-                if(!data){
+                if (!data) {
                     resolve(BizResultCode.ORDER_NOT_EXIST);
                     return;
                 }

@@ -203,7 +203,7 @@ class UserController {
             return;
         }
 
-        var privateKey = userService.getPrivateKeyByEmail(email);
+        var privateKey = await userService.getPrivateKeyByEmail(email);
         if (privateKey instanceof BizResultCode) {
             res.send(BizResult.fail(privateKey));
             return;
@@ -246,8 +246,8 @@ class UserController {
         }, {
             blocksBehind: 3,
             expireSeconds: 30,
-        }).then((res) => {
-            res.send(BizResult.success());
+        }).then((result) => {
+            res.send(BizResult.success(result));
         }).catch((err) => {
             logger.error('err:', err);
             res.send(BizResult.fail(BizResultCode.CLAIM_ORDER_FAILED));

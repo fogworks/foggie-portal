@@ -36,7 +36,7 @@ const fileUploadRecordDB = new NeDB({
 })
 
 module.exports = {
-    saveFileProp: async (orderId, email, filePath, fileSize, md5, deviceType) => {
+    saveFileProp: async (orderId, email, filePath, fileSize, md5, cid, deviceType) => {
         // save file prop into NeDB
         return new Promise((resolve, reject) => {
             var now = moment();
@@ -60,6 +60,7 @@ module.exports = {
                         file_path: filePath,
                         file_size: fileSize,
                         md5: md5,
+                        cid: cid,
                         device_type: deviceType,
                         update_time: currentTime,
                         create_time: currentTime
@@ -86,6 +87,26 @@ module.exports = {
                 email: email,
                 device_type: deviceType
             }).skip(skip).limit(limit).sort({ create_time: -1 }).exec(function (err, data) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.QUERY_FILE_FAILED);
+                    return;
+                }
+                resolve(data);
+            });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.QUERY_FILE_FAILED;
+        });
+    },
+    getAllFile: async (orderId, email, deviceType) => {
+        return new Promise((resolve, reject) => {
+            // query file list from NeDB
+            fileDB.find({
+                order_id: orderId,
+                email: email,
+                device_type: deviceType
+            }).exec(function (err, data) {
                 if (err) {
                     logger.error('err:', err);
                     resolve(BizResultCode.QUERY_FILE_FAILED);
@@ -207,7 +228,7 @@ module.exports = {
                         order_id: orderId,
                         email: email,
                         md5: md5,
-                        file_size: fileSize,
+                        file_size: parseInt(fileSize),
                         cid: cid,
                         part_id: partId,
                         data: database64,
@@ -270,7 +291,57 @@ module.exports = {
             codeBookDB.find({
                 order_id: orderId,
                 email: email,
-                file_size: {$gte: blockSize}
+                file_size: { $gte: blockSize}
+            }, function (err, docs) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.GET_FILE_CODEBOOK_FAILED);
+                    return;
+                }
+                if (docs.length === 0) {
+                    resolve(BizResultCode.GET_FILE_CODEBOOK_FAILED);
+                }
+                else {
+                    resolve(docs);
+                }
+            })
+        }).catch(err => {
+            logger.error(err);
+            return BizResultCode.GET_FILE_CODEBOOK_FAILED;
+        });
+    },
+    getFileCodeBookByMd5: async (orderId, email, md5) => {
+        // get file codeBook into NeDB
+        return new Promise((resolve, reject) => {
+            codeBookDB.find({
+                order_id: orderId,
+                email: email,
+                md5: md5
+            }, function (err, docs) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.GET_FILE_CODEBOOK_FAILED);
+                    return;
+                }
+                if (docs.length === 0) {
+                    resolve(BizResultCode.GET_FILE_CODEBOOK_FAILED);
+                }
+                else {
+                    resolve(docs);
+                }
+            })
+        }).catch(err => {
+            logger.error(err);
+            return BizResultCode.GET_FILE_CODEBOOK_FAILED;
+        });
+    },
+    getCodeBookByOrderId: async (orderId, email, md5) => {
+        // get file codeBook into NeDB
+        return new Promise((resolve, reject) => {
+            codeBookDB.find({
+                order_id: orderId,
+                email: email,
+                md5: md5
             }, function (err, docs) {
                 if (err) {
                     logger.error('err:', err);
@@ -518,6 +589,7 @@ module.exports = {
         return new pow_proto.PowService(ip + ':' + port, grpc.credentials.createInsecure());
     },
     getProxGrpcClient: async (rpc, header) => {
+        // var rpc = '192.168.1.127:6007'
         var proxClient = new prox_proto.Service(rpc, grpc.credentials.createInsecure());
         var proxPingRequest = {
             header: header
