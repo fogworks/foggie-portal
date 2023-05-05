@@ -156,6 +156,11 @@ app.post('/assets/transfer', jsonParser, (req, res) => {
   AssetsController.transfer(req, res);
 });
 
+app.post('/assets/list_in_order', jsonParser, (req, res) => {
+  AssetsController.getAssetsOfOrder(req, res);
+});
+
+
 const os = require("os").networkInterfaces();
 
 function getIP() {
