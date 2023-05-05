@@ -10,14 +10,14 @@
     @toggleToUpload="toggleToUpload"
     @currentPrefix="currentPrefix"
   ></MyFiles>
-  <top-upload
+  <!-- <top-upload
     v-show="showTopUpload"
     @closeUploadBox="closeUploadBox"
     :currentOODItem="currentOODItem"
     :oodId="oodId"
     :currentPath="currentPath"
     @fileShare="showShareBox"
-  ></top-upload>
+  ></top-upload> -->
   <ShareDialog
     v-model:visible="showShareDialog"
     :shareRefContent="shareRefContent"

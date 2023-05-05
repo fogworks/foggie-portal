@@ -20,7 +20,7 @@
       <el-button
         :disabled="!hasCBS"
         class="top-btn"
-        @click="emits('toggleToUpload')"
+        @click="upload"
         key="plain"
         type="primary"
         link
@@ -427,9 +427,11 @@ const initFileData = async (data) => {
   }
 
   for (let j = 0; j < data.content.length; j++) {
-    let date = data.content[j].lastModified ;
+    let date = data.content[j].lastModified;
     let isDir = false;
-    const type = data.content[j].key.substring(data.content[j].key.lastIndexOf(".") + 1);
+    const type = data.content[j].key.substring(
+      data.content[j].key.lastIndexOf(".") + 1
+    );
     let { imgHttpLink: url, isSystemImg } = handleImg(
       type,
       device_id.value,
@@ -446,8 +448,6 @@ const initFileData = async (data) => {
     // let _url = require(`@/svg-icons/logo-dog-black.svg`);
     let cid = data.content[j].isIpfs ? data.content[j].cid : "";
     let file_id = data.content[j].isCyfs ? data.content[j].file_id : "";
-
-    
 
     let item = {
       isDir: isDir,
@@ -761,7 +761,7 @@ const downloadItem = (item) => {
   // let ID = device_id.value;
   let pubkey = item.pubkey;
   // let downloadUrl = `/fog/${pubkey}?dl=true`;
-  console.log('~~~~~~~~~~~~~~', item)
+  console.log("~~~~~~~~~~~~~~", item);
   let downloadUrl = `/file_download/`;
 
   var oA = document.createElement("a");
@@ -865,6 +865,9 @@ watch(
   }
 );
 defineExpose({ doSearch });
+const upload = () => {
+  store.commit("upload/openUpload", deviceData.device_id);
+};
 </script>
 
 <style lang="scss" scoped>

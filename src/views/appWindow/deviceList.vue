@@ -58,9 +58,9 @@
           </span>
         </div>
         <div v-else>
-          Bill ID:
+          Order ID:
           <span class="top-value-span">
-            {{ item.bill_id }}
+            {{ item.space_order_id }}
           </span>
         </div>
         <div v-if="item.device_id">
