@@ -60,7 +60,8 @@ class BaseResultCode {
     static ORDER_NOT_EXIST = new BaseResultCode(20016, 'order is not exist');
     static GET_CHANLLENGE_RECORD_FAILED = new BaseResultCode(20017, 'get challenge record failed');
     static SAVE_CHANLLLENGE_RECORD_FAILED = new BaseResultCode(20018, 'save challenge record failed');
-    
+    static RELEASE_FAILED = new BaseResultCode(20019, 'order release dmc failed');
+    static APPEND_FAILED = new BaseResultCode(20020, 'order append dmc failed');
     
     // 文件的异常code 30000～39999
     static FILE_NOT_EXIST = new BaseResultCode(30000, 'file is not exist');

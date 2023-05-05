@@ -681,6 +681,112 @@ class OrderController {
     }
 
     /**
+     * 提取订单的剩余DMC
+     * @param {*} req    HTTP请求
+     * @param {*} res   HTTP响应
+     */
+    static async release(req, res) {
+        var email = req.body.email;
+        var chainId = req.body.chainId;
+        var orderId = req.body.orderId;
+        var amount = req.body.amount;
+
+        if (!email || !chainId || !orderId || !amount) {
+            res.send(BizResult.validateFailed());
+            return;
+        }
+        const regex = /^\d+(\.\d{4})$/;
+        if (!regex.test(amount)) {
+            res.send(BizResult.validateFailed(amount));
+            return;
+        }
+
+        var privateKey = await userService.getPrivateKeyByEmail(email);
+        if (privateKey instanceof BizResultCode) {
+            res.send(BizResult.fail(privateKey));
+            return;
+        }
+        var chainConfig = config.get('chainConfig');
+        var httpEndpoint = chainConfig.get("httpEndpoint");
+
+        var userInfo = await userService.getUserInfo(email);
+        if (userInfo instanceof BizResultCode) {
+            logger.info('userInfo is null');
+            res.send(BizResult.fail(userInfo));
+            return;
+        }
+        var username = userInfo.username;
+        var dmc_client = DMC({
+            chainId: chainId,
+            keyProvider: privateKey,
+            httpEndpoint: httpEndpoint,
+            logger: {
+                log: null,
+                error: null
+            }
+        });
+        var result = await orderService.release(dmc_client, username, orderId, amount);
+        if (result instanceof BizResultCode) {
+            res.send(BizResult.fail(result));
+            return;
+        }
+        res.send(BizResult.success(result));
+    }
+
+    /**
+     * 订单预存DMC
+     * @param {*} req    HTTP请求
+     * @param {*} res   HTTP响应
+     */
+    static async append(req, res) {
+        var email = req.body.email;
+        var chainId = req.body.chainId;
+        var orderId = req.body.orderId;
+        var amount = req.body.amount;
+
+        if (!email || !chainId || !orderId || !amount) {
+            res.send(BizResult.validateFailed());
+            return;
+        }
+        const regex = /^\d+(\.\d{4})$/;
+        if (!regex.test(amount)) {
+            res.send(BizResult.validateFailed(amount));
+            return;
+        }
+
+        var privateKey = await userService.getPrivateKeyByEmail(email);
+        if (privateKey instanceof BizResultCode) {
+            res.send(BizResult.fail(privateKey));
+            return;
+        }
+        var chainConfig = config.get('chainConfig');
+        var httpEndpoint = chainConfig.get("httpEndpoint");
+
+        var userInfo = await userService.getUserInfo(email);
+        if (userInfo instanceof BizResultCode) {
+            logger.info('userInfo is null');
+            res.send(BizResult.fail(userInfo));
+            return;
+        }
+        var username = userInfo.username;
+        var dmc_client = DMC({
+            chainId: chainId,
+            keyProvider: privateKey,
+            httpEndpoint: httpEndpoint,
+            logger: {
+                log: null,
+                error: null
+            }
+        });
+        var result = await orderService.append(dmc_client, username, orderId, amount);
+        if (result instanceof BizResultCode) {
+            res.send(BizResult.fail(result));
+            return;
+        }
+        res.send(BizResult.success(result));
+    }
+
+    /**
      * 获取chainId
      * @returns chainId
      */

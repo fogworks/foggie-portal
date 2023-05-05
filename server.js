@@ -71,6 +71,14 @@ app.post('/order/challenge_list', jsonParser, (req, res) => {
   OrderController.getChallengeList(req, res);
 });
 
+app.post('/order/release', jsonParser, (req, res) => {
+  OrderController.release(req, res);
+});
+
+app.post('/order/append', jsonParser, (req, res) => {
+  OrderController.append(req, res);
+});
+
 app.post('/user/encode_user_order', jsonParser, (req, res) => {
   UserController.getToken4UploadFile(req, res);
 });
@@ -94,9 +102,7 @@ app.post('/user/reset_password', jsonParser, (req, res) => {
   UserController.resetUserPassword(req, res);
 });
 
-// import private key
 app.post('/user/import_private_key', jsonParser, (req, res) => {
-  
   UserController.saveUserPrivateKey(req, res);
 });
 
@@ -155,6 +161,19 @@ app.post('/file/complete', jsonParser, (req, res) => {
 app.post('/assets/transfer', jsonParser, (req, res) => {
   AssetsController.transfer(req, res);
 });
+
+app.post('/assets/list_in_order', jsonParser, (req, res) => {
+  AssetsController.getAssetsOfOrder(req, res);
+});
+
+app.post('/assets/list_in_user', jsonParser, (req, res) => {
+  AssetsController.getAssetsOfUser(req, res);
+});
+
+app.post('/assets/user', jsonParser, (req, res) => {
+  AssetsController.userOverview(req, res);
+});
+
 
 const os = require("os").networkInterfaces();
 
