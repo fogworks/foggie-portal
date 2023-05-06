@@ -119,7 +119,6 @@ import {
   user,
   ydaReward,
   getAssets,
-  totalReward,
   lastweekReward,
   dmcSwap,
   OwnerBills,
@@ -461,6 +460,7 @@ export default {
   overflow: hidden;
   min-width: 500px;
   @include vip-card;
+  margin: 50px auto;
   &::before {
     content: "";
     position: absolute;

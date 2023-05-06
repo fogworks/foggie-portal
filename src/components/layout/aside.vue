@@ -68,11 +68,6 @@ onMounted(() => {
   let headerRoute = localStorage.getItem("headerRoute") || "Home";
   store.commit('global/setActiveIndex', headerRoute)
 
-
-  // getPrivateKey({password:'73d6fd1b3ce399406ca6f3baf1a763ccd4e8222593dcda6fd86d6bc16d5d79ea'}).then(res =>{
-  //   console.log(res);
-  // })
-
 });
 </script>
 

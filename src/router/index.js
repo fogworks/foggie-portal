@@ -40,6 +40,14 @@ const router = createRouter({
           },
         },
         {
+          path: 'assets',
+          name: 'Assets',
+          component: defineAsyncComponent(() => import(`../views/portal/assets`)),
+          meta: {
+            title: 'assets',
+          },
+        },
+        {
           path: 'shop',
           name: 'Shop',
           component: defineAsyncComponent(() => import(`../views/portal/shop`)),
@@ -121,8 +129,6 @@ router.beforeEach((to, from, next) => {
 })
 
 router.afterEach((to, from) => {
-  // console.log(to, from)
-  // console.log('afterEach')
 })
 
 export default router

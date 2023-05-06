@@ -1,32 +1,36 @@
 <template>
   <div v-loading="loading" class="access-box">
-    <el-form class="account-form" :model="form" ref="formRef" :rules="rules">
-      <el-form-item prop="password">
-        <el-input
-          type="password"
-          v-model="form.password"
-          placeholder="Password"
-          :maxlength="6"
-          :minlength="6"
-          show-password
-        ></el-input>
-      </el-form-item>
-      <el-form-item v-if="!hasAccessPass" prop="confirmPassword">
-        <el-input
-          placeholder="Confirm Password"
-          type="password"
-          :maxlength="6"
-          :minlength="6"
-          v-model="form.confirmPassword"
-          show-password
-        ></el-input>
-      </el-form-item>
-    </el-form>
-    <div class="foot-btn">
-      <div class="color-box">
-        <el-button :loading="btnLoading" @click="submit">{{
-          hasAccessPass ? "Login" : "Submit"
-        }}</el-button>
+    <img src="@/assets/login-left.png" alt="" />
+
+    <div>
+      <el-form class="account-form" :model="form" ref="formRef" :rules="rules">
+        <el-form-item prop="password">
+          <el-input
+            type="password"
+            v-model="form.password"
+            placeholder="PIN code"
+            :maxlength="6"
+            :minlength="6"
+            show-password
+          ></el-input>
+        </el-form-item>
+        <el-form-item v-if="!hasAccessPass" prop="confirmPassword">
+          <el-input
+            placeholder="Confirm PIN code"
+            type="password"
+            :maxlength="6"
+            :minlength="6"
+            v-model="form.confirmPassword"
+            show-password
+          ></el-input>
+        </el-form-item>
+      </el-form>
+      <div class="foot-btn">
+        <div class="color-box">
+          <el-button :loading="btnLoading" @click="submit">{{
+            hasAccessPass ? "Login" : "Submit"
+          }}</el-button>
+        </div>
       </div>
     </div>
 
@@ -145,16 +149,19 @@ const submit = () => {
             //   "access_token",
             //   result.token_type + " " + result.token
             // );
-            setTokenMap(
-              deviceData.device_id,
-              result.token_type + " " + result.token
-            );
+            store.dispatch("token/setTokenMap", {
+              id: deviceData.device_id,
+              token: result.token_type + " " + result.token,
+            });
+            // setTokenMap(
+            //   deviceData.device_id,
+            //   result.token_type + " " + result.token
+            // );
             emit("accessCallback");
             // emit("update:accessible", true);
             // router.push("/home");
           })
           .catch((err) => {
-            console.log(err);
             proxy.$notify({
               type: "error",
               message: err.message,
@@ -197,11 +204,18 @@ const submit = () => {
 
 <style lang="scss" scoped>
 .access-box {
-  padding: 50px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 50px 0;
   background-color: var(--bg-color);
   border-radius: 20px;
-  width: 450px;
+  width: 900px;
   margin: 0 auto;
+  > img {
+    width: 300px;
+    margin: 0 50px;
+  }
   :deep {
     .el-loading-mask {
       background: transparent;
@@ -210,11 +224,10 @@ const submit = () => {
   }
 }
 .account-form {
-  // width: 500px;
-  margin: 0 auto;
+  width: 400px;
+  padding: 20px 30px;
   // padding: 40px 30px;
   background: transparent;
-  border-radius: 10px;
   // box-shadow: 0px 0px 9px #ffffff73, 0px 0px 5px rgba(94, 104, 121, 0.288);
   :deep {
     .el-form-item {

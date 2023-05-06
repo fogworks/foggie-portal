@@ -28,6 +28,17 @@
     </div>
 
     <div class="info-box" v-else>
+      <div class="info-content">
+        <div class="foot-btn">
+          <!-- <el-button type="danger" @click="unbindVisible = true"
+            >Unbind</el-button
+          > -->
+          <el-button type="primary" @click="logout"
+            ><svg-icon icon-class="switch"></svg-icon> Switch
+            Accounts</el-button
+          >
+        </div>
+      </div>
       <!-- <el-descriptions :column="3" size="large" border>
         <template #extra>
           <el-button type="default" @click="unbindVisible = true"
@@ -42,19 +53,8 @@
           {{ userInfo.dmc }}
         </el-descriptions-item>
       </el-descriptions> -->
-
-      <Assets></Assets>
-      <div class="info-content">
-        <div class="foot-btn">
-          <!-- <el-button type="danger" @click="unbindVisible = true"
-            >Unbind</el-button
-          > -->
-          <el-button type="primary" @click="logout"
-            ><svg-icon icon-class="switch"></svg-icon> Switch
-            Accounts</el-button
-          >
-        </div>
-      </div>
+      <Web3Link></Web3Link>
+      <!-- <Assets></Assets> -->
     </div>
 
     <!-- <el-button @click="emit('next')">Next</el-button> -->
@@ -84,7 +84,7 @@ import {
   toRefs,
   inject,
 } from "vue";
-import Assets from "./_modules/index";
+import Web3Link from "./_modules/web3Link";
 import { login, get_foggie_dmc, user, unbind_foggie } from "@/utils/api";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
@@ -216,20 +216,24 @@ const unbind = () => {
 }
 .login-box {
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
+  width: 900px;
+  margin: 0 auto;
+  padding: 50px 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.6);
+
   img {
-    width: 350px;
-    margin-right: 100px;
+    width: 300px;
+    margin: 0 50px;
   }
 }
 .account-form {
-  width: 500px;
+  width: 400px;
   // margin: 0 auto;
   padding: 20px 30px;
   background: transparent;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.6);
   // box-shadow: 0px 0px 9px #ffffff73, 0px 0px 5px rgba(94, 104, 121, 0.288);
   :deep {
     .el-form-item__label {
@@ -296,6 +300,7 @@ const unbind = () => {
       }
     }
     .foot-btn {
+      justify-content: flex-end;
       text-align: center;
       svg {
         font-size: 20px;

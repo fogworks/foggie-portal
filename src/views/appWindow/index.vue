@@ -1,14 +1,17 @@
 <template>
   <div class="app-window" id="app-window">
     <!-- <div class="app-left-box"> -->
-    <template v-if="!isDiscover" v-for="item in totalActiveDevice.data">
+    <template
+      v-if="!isDiscover"
+      v-for="item in totalActiveDevice.data"
+      :key="item.device_id || item.space_order_id"
+    >
       <div
         :class="[
           'app-left',
           `app-${item.device_id || item.space_order_id}`,
           isCollapse ? 'left-collapse' : '',
         ]"
-        v-if="item.device_id || item.space_order_id"
       >
         <FoggieMax
           :deviceData="item"
@@ -77,8 +80,13 @@ const search = () => {
   loading.value = true;
   search_foggie({ email: email.value })
     .then((res) => {
-      console.log(res, "res");
-      store.dispatch("global/setDeviceList", res.data);
+      let cur_data = res.data;
+      cur_data.forEach((r) => {
+        if (r.device_type === "space") {
+          r.expire = r.expire.slice(0, r.expire.length - 3);
+        }
+      });
+      store.dispatch("global/setDeviceList", cur_data);
       loading.value = false;
     })
     .finally(() => {
@@ -96,6 +104,14 @@ const scrollIntoView = (data) => {
   app.scrollTo(0, target.offsetTop);
 };
 const clickItem = (data) => {
+  if (!data.is_active && data.device_type !== "space") {
+    proxy.$notify({
+      type: "info",
+      message: "This device is offline",
+      position: "bottom-left",
+    });
+    return false;
+  }
   let target = totalActiveDevice.data.find(
     (el) =>
       (el.device_id && el.device_id === data.device_id) ||
@@ -119,9 +135,13 @@ const clickItem = (data) => {
       });
     }
   }
+  if (data.device_type === 'foggie' || data.device_type === 'foggie_max' || !data.device_type) {
+    // TODO
+  }
+
+
 };
 const cancelItem = (data) => {
-  console.log("cancelItem");
   let target = totalActiveDevice.data.find(
     (el) =>
       (el.device_id && el.device_id === data.device_id) ||
@@ -159,7 +179,7 @@ const init = () => {
   } else {
     isDiscover.value = false;
     search();
-    if (discoverData.value.device_id) {
+    if (discoverData.value.device_id || discoverData.value.space_order_id) {
       nextTick(() => {
         clickItem(discoverData.value);
       });
@@ -206,7 +226,7 @@ onMounted(() => {
     }
   }
   .app-right {
-    z-index: 1;
+    z-index: 0;
     // position: sticky;
     // top: 0;
     // overflow-x: visible;

@@ -440,22 +440,12 @@ const socketIP = () => {
 
 // ipfs pin
 app.post("/s_ipfsops/pin",jsonParser, (req, res) => {
-  console.log('~~~~~~~~~~~',req.url)
-  console.log('_++++++++++++++', req.method)
-  console.log('~~~~~~~~~~~',req.body)
-  console.log('+++++++++++++++++', `http://${req.body.ip_address}:${req.body.port}/ipfsops/pin`)
   let request = require("request");
   request(`http://${req.body.ip_address}:${req.body.port}/ipfsops/pin`, function (err, response, body) {
     if (!err && response.statusCode == 200) {
-      //todoJSON.parse(body)
-      console.log('----------------------', body)
-      console.log('----------------------', response)
       let rr = JSON.parse(body);
       res.send(rr);
     } else {
-      console.log('***************', err)
-      // console.log('***************', response)
-      console.log('***************', body)
       res.send({});
     }
   });
@@ -467,14 +457,18 @@ app.post('/publish', jsonParser, (req, res) => {
   PublishController.doPublish(req, res);
 });
 
-app.get('/file_download', jsonParser, (req, res) => {
-  OperController.doDownload(req, res);
+// app.get('/file_download', jsonParser, (req, res) => {
+//   OperController.doDownload(req, res);
+// });
+app.get('/file_download', (req, res) => {
+  let params = req.query;
+  OperController.doDownload(params, res);
 });
 
 app.delete('/file_delete', jsonParser, (req, res) => {
   OperController.doDelete(req, res);
 });
 
-app.get('/list_files', jsonParser, (req, res) => {
+app.post('/list_files', jsonParser, (req, res) => {
   OperController.listFiles(req, res);
 });

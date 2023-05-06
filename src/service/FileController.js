@@ -169,6 +169,9 @@ class FileController {
 
         // 获取peerId
         var orderInfo = await orderService.getOrderById(email, orderId);
+        
+        // test
+        orderInfo.peer_id = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
         if(orderInfo instanceof BizResultCode){
             res.send(BizResult.fail(orderInfo));
             return;

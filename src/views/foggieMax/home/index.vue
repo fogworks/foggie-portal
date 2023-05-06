@@ -10,14 +10,14 @@
     @toggleToUpload="toggleToUpload"
     @currentPrefix="currentPrefix"
   ></MyFiles>
-  <top-upload
+  <!-- <top-upload
     v-show="showTopUpload"
     @closeUploadBox="closeUploadBox"
     :currentOODItem="currentOODItem"
     :oodId="oodId"
     :currentPath="currentPath"
     @fileShare="showShareBox"
-  ></top-upload>
+  ></top-upload> -->
   <ShareDialog
     v-model:visible="showShareDialog"
     :shareRefContent="shareRefContent"
@@ -91,13 +91,6 @@ export default {
       };
       let oodData = await getActivationVood(data, requestTarget);
       currentOODItem.value.data = oodData.result;
-      console.log(oodData.result, "oodData.result");
-      // store.dispatch("global/setCurrentOODItem", {
-      //   data: oodData.result,
-      // });
-      // if (oodData && oodData.data && oodData.data.length > 0) {
-      //   currentOODItem.value.data = oodData.data[0];
-      // }
     };
     onMounted(() => {
       initFoggieDate();
@@ -179,11 +172,6 @@ export default {
         shareCopyContent = shareCopyContent + shareStr + " \n";
         copyContent.value = shareCopyContent;
         shareRefContent.shareStr = shareStr;
-
-        console.log(
-          "shareCopyContent",
-          `${shareTitle} ${shareContent} ${shareCopyContent}`
-        );
         showShareDialog.value = true;
       }
     };

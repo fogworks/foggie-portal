@@ -8,7 +8,6 @@ export async function createDID(vpsId) {
 	const buildDid = new BuildDid();
 
 	const mnemonicList = buildDid.createMnemonic();
-	// console.log("mnemonicList>>>>>>>>>>>>", JSON.stringify(mnemonicList));
 
 	const peopleInfo = {
 		area: new cyfs.Area(0, 0, 0, 0),
@@ -135,12 +134,7 @@ export async function createDID(vpsId) {
 
 // 激活vood
 export async function activeVOOD(bindInfoObj, vpsId) {
-	// console.log("owner: ", bindInfoObj.owner);
-	// console.log("desc: ", bindInfoObj.desc);
-	// console.log("sec: ", bindInfoObj.sec);
-	// console.log("g_uniqueId: ", bindInfoObj.g_uniqueId);
 	const index = calcIndex(bindInfoObj.g_uniqueId);
-	// console.log("index::", index);
 	const bindInfo = {
 		owner: bindInfoObj.owner,
 		desc: bindInfoObj.desc,
@@ -152,9 +146,7 @@ export async function activeVOOD(bindInfoObj, vpsId) {
 			vps_id: vpsId,
 			bind_info: bindInfo,
 		};
-		console.log("voodActivate req data::", JSON.stringify(reqData));
 		const activeteRet = await voodActivate(reqData);
-		console.log(`activeteRet: ${JOSN.stringify(activeteRet)}`);
 		if (!activeteRet.data.result) {
 			console.error("Activete ood failed");
 			return false;
@@ -163,7 +155,6 @@ export async function activeVOOD(bindInfoObj, vpsId) {
 		}
 	} catch (e) {
 		if (Object.keys(e).length === 0) {
-			console.log('fake error, activate success.');
 			return true;
 		}
 		console.error("Activete ood failed: ", e);
@@ -177,7 +168,6 @@ function calcIndex(uniqueStr) {
 	md5.update(uniqueStr, "utf8");
 	let result = cyfs.forge.util.binary.hex.encode(md5.digest());
 	let index = hashCode(result);
-	console.log(`calc init index: uniqueStr=${uniqueStr}, index=${index}`);
 	return index;
 }
 
@@ -243,7 +233,6 @@ class BuildDid {
 			}
 		);
 		let people_id = people.calculate_id();
-		console.log("create_people", people_id.to_base_58());
 		return cyfs.Ok({
 			objectId: people_id,
 			object: people,
@@ -285,14 +274,12 @@ class BuildDid {
 		);
 		device.set_name(info.nick_name);
 		let device_id = device.calculate_id();
-		console.log("create_device", device_id.to_base_58());
 		let sign_ret = cyfs.sign_and_set_named_object(
 			info.owner_private,
 			device,
 			new cyfs.SignatureRefIndex(254)
 		);
 		if (sign_ret.err) {
-			console.log("sign_ret-err", sign_ret);
 			return sign_ret;
 		}
 		return cyfs.Ok({
@@ -316,11 +303,9 @@ class BuildDid {
 			// 	}
 			// );
 			// const activeteRet = await activeteResponse.json();
-			console.log("checkVoodRet:", checkVoodRet);
 			if (checkVoodRet.result?.data) {
 				isIpCanUse = true;
 				if (!checkVoodRet.result.data?.activation) {
-					// console.log(ip + "check-result", activeteRet);
 					g_uniqueId = String(checkVoodRet.result.data.device_info.mac_address);
 				}
 				// else {
@@ -358,15 +343,8 @@ class BuildDid {
 			const ret = this.transformBuckyResult(
 				await this.meta_client.getReceipt(txId)
 			);
-			console.log("get receipt:", txId, ret);
 			if (ret.code == 0 && ret.value?.is_some()) {
 				const [receipt, block] = ret.value.unwrap();
-				console.log(
-					"create or update desc receipt:",
-					txId.to_base_58(),
-					block,
-					receipt.result
-				);
 				if (receipt && receipt.result == 0) {
 					returnRet = true;
 					hasReturnRet = true;
@@ -380,7 +358,6 @@ class BuildDid {
 			interval = Math.min(interval * 2, 5000);
 		}
 		if (waitTime >= checkTimeoutSecs * 1000) {
-			console.log("update desc time out:", txId);
 			returnRet = false;
 		}
 		return returnRet;
@@ -404,11 +381,6 @@ class BuildDid {
 	async upChain(obj, peopleInfoObj) {
 		// getDesc up chain
 		let check_p_ret = await this.check_object_on_meta(obj.calculate_id());
-		console.log("check_p_ret", obj.calculate_id().to_base_58(), check_p_ret);
-		// console.log(
-		// 	"cyfs.Device.hex",
-		// 	((obj as cyfs.Device) || cyfs.People).to_hex().unwrap()
-		// );
 		let p_tx;
 		if (check_p_ret) {
 			let p_ret = await this.meta_client.update_desc(
@@ -418,7 +390,6 @@ class BuildDid {
 				cyfs.None,
 				peopleInfoObj.privateKey
 			);
-			console.log("update_p_ret", p_ret);
 			p_tx = p_ret.unwrap();
 		} else {
 			let p_ret = await this.meta_client.create_desc(
@@ -429,12 +400,10 @@ class BuildDid {
 				0,
 				peopleInfoObj.privateKey
 			);
-			console.log("create_p_ret", p_ret);
 			p_tx = p_ret.unwrap();
 		}
 		// check up chain
 		let p_meta_success = await this.checkReceipt(p_tx);
-		console.log("people desc on meta:", p_meta_success);
 		return p_meta_success;
 	}
 }

@@ -2,10 +2,14 @@
   <div class="Alltemplate_boxs" id="Alltemplate_boxs">
     <!-- isInsertBody="app-window" -->
 
-    <login v-if="customDialogIsShow" @closeDialog="closeDialog" :userInfo="userInfo"></login>
+    <login
+      v-if="customDialogIsShow"
+      @closeDialog="closeDialog"
+      :userInfo="userInfo"
+    ></login>
     <template v-else>
       <orderList :orderId="orderId"></orderList>
-      <myFiles :orderId="orderId"></myFiles>
+      <myFiles :orderId="orderId" :deviceData="deviceData"></myFiles>
     </template>
   </div>
 </template>
@@ -32,8 +36,6 @@ const store = useStore();
 const props = defineProps(["deviceData"]);
 const { deviceData } = toRefs(props);
 const orderId = readonly(props.deviceData.space_order_id);
-
-
 const userInfo = computed(() => store.getters.userInfo);
 let customDialogIsShow = ref(true); // 是否展示
 const clientPassword = computed(() => store.getters.clientPassword);
@@ -44,7 +46,7 @@ if (clientPassword.value) {
   customDialogIsShow.value = true;
 }
 
-store.commit("upload/setOrderId", orderId);  // 当前点击的订单号
+store.commit("upload/setOrderId", orderId); // 当前点击的订单号
 // if (deviceData.device_type == 'foggie_max' || deviceData.device_type == 'foggie' || deviceData.device_type == '') {
 //   const orderId = readonly(deviceData.device_id)
 //   store.commit('upload/setOrderId', orderId)
@@ -52,16 +54,11 @@ store.commit("upload/setOrderId", orderId);  // 当前点击的订单号
 //   const orderId = readonly(deviceData.order_id)
 //   store.commit('upload/setOrderId', orderId)
 // }
-store.commit("upload/setDeviceType", '3');
-
-
-
-
+store.commit("upload/setDeviceType", "3");
 
 watch(
   () => props.deviceData,
   (newValue) => {
-    console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", newValue);
   },
   { immediate: true, deep: true }
 );
@@ -127,6 +124,7 @@ onMounted(() => {
 @import "@/static/style/variables.scss";
 
 .Alltemplate_boxs {
+  position: relative;
   background-repeat: no-repeat;
   box-sizing: border-box;
   color: #fff;
@@ -137,7 +135,7 @@ onMounted(() => {
   border-radius: 0 0 0 0;
   z-index: 1;
   width: 1120px;
-  // height: 100%;
+  height: 100%;
   margin: 0 auto;
   // position: relative;
 }

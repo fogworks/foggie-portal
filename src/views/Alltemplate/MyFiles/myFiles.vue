@@ -7,24 +7,44 @@
           <div class="title">Files</div>
         </div>
       </el-breadcrumb-item>
-      <el-breadcrumb-item @click="setPrefix(item)" v-for="item in breadcrumbList.prefix">
+      <el-breadcrumb-item
+        @click="setPrefix(item)"
+        v-for="item in breadcrumbList.prefix"
+      >
         {{ item }}
       </el-breadcrumb-item>
     </el-breadcrumb>
     <div class="flex justify-between items-center">
-      <el-button class="top-btn" @click="openUpload" key="plain" type="primary" link>Upload +</el-button>
+      <el-button
+        class="top-btn"
+        @click="openUpload"
+        key="plain"
+        type="primary"
+        link
+        >Upload +</el-button
+      >
       <el-button class="top-btn refresh" @click="refresh" key="plain" link>
         <svg-icon icon-class="refresh" class="refresh-icon"></svg-icon>
-        Refresh</el-button>
-      <el-dropdown trigger="click" @command="tableSort" popper-class="custom_dropdown">
+        Refresh</el-button
+      >
+      <el-dropdown
+        trigger="click"
+        @command="tableSort"
+        popper-class="custom_dropdown"
+      >
         <span class="el-dropdown-link">
           <el-button class="top-btn refresh" @click="" key="plain" link>
-            Sort By<el-icon class="el-icon--right"> <arrow-down /> </el-icon></el-button>
+            Sort By<el-icon class="el-icon--right"> <arrow-down /> </el-icon
+          ></el-button>
         </span>
         <template #dropdown>
           <el-dropdown-menu class="sort-menu">
-            <el-dropdown-item v-for="item in sortList" :class="[activeSort === item.key && 'activeSort']"
-              :command="{ prop: item.prop, order: item.order, key: item.key }">{{ item.label }}</el-dropdown-item>
+            <el-dropdown-item
+              v-for="item in sortList"
+              :class="[activeSort === item.key && 'activeSort']"
+              :command="{ prop: item.prop, order: item.order, key: item.key }"
+              >{{ item.label }}</el-dropdown-item
+            >
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -36,7 +56,12 @@
         <svg-icon icon-class="my-files" style="margin-right: 5px; color: #29abff"></svg-icon>
         PIN Task List</el-button> -->
       <div>
-        <el-input class="search-input" v-model="keyWord" placeholder="Name Or ID" @keyup.enter.native="doSearch">
+        <el-input
+          class="search-input"
+          v-model="keyWord"
+          placeholder="Name Or ID"
+          @keyup.enter.native="doSearch"
+        >
           <template #prefix>
             <img @click="doSearch" src="@/assets/search.svg" alt="" />
           </template>
@@ -44,27 +69,48 @@
       </div>
     </div>
     <div style="height: 100%">
-      <el-table class="table-box" :data="data" :header-cell-style="setNameCell"
-        style="width: 100%; margin-top: 10px; height: 1000px" ref="fileTable" @sort-change="sortChange"
-        v-el-table-infinite-scroll="fileListsInfinite" :infinite-scroll-immediate="false"
-        infinite-scroll-distance="'150px'" :infinite-scroll-disabled="false">
-        <el-table-column label="Name" show-overflow-tooltip min-width="340" prop="file_path">
+      <el-table
+        class="table-box"
+        :data="data"
+        :header-cell-style="setNameCell"
+        style="width: 100%; margin-top: 10px; height: 1000px"
+        ref="fileTable"
+        @sort-change="sortChange"
+        v-el-table-infinite-scroll="fileListsInfinite"
+        :infinite-scroll-immediate="false"
+        infinite-scroll-distance="'150px'"
+        :infinite-scroll-disabled="false"
+      >
+        <el-table-column
+          label="Name"
+          show-overflow-tooltip
+          min-width="340"
+          prop="name"
+        >
           <template #default="{ row }">
-            <router-link class="name-link" to="detail" style="display: flex; align-items: center; padding-left: 15px"
-              @click.prevent="toDetail(row)">
+            <div
+              class="name-link"
+              to="detail"
+              style="display: flex; align-items: center; padding-left: 15px"
+              @click.prevent="toDetail(row)"
+            >
               <div class="name-img">
-                <img v-if="row.type === 'application/x-directory'" src="@/assets/folder.png" alt="" />
+                <img
+                  v-if="row.type === 'application/x-directory'"
+                  src="@/assets/folder.png"
+                  alt=""
+                />
 
                 <!-- <template v-else-if="row.isSystemImg">
                   <img v-show="theme" src="@/assets/logo-dog-black.svg" alt="" />
                   <img v-show="!theme" src="@/assets/logo-dog.svg" alt="" />
                 </template> -->
-                <img v-else :src="row.icon" alt="" />
+                <img v-else :src="row.imgUrl" alt="" />
               </div>
               <div>
-                {{ row.file_path }}
+                {{ row.name }}
               </div>
-            </router-link>
+            </div>
           </template>
         </el-table-column>
         <el-table-column label="Content / File ID" min-width="250">
@@ -74,14 +120,30 @@
                 <div class="copy" v-if="item.code">
                   <span class="id-name">{{ item.name }}</span>
                   <span class="code">{{ item.code }}</span>
-                  <svg-icon icon-class="copy" class="copy-icon" @click="copyLink(item.code)"></svg-icon>
+                  <svg-icon
+                    icon-class="copy"
+                    class="copy-icon"
+                    @click="copyLink(item.code)"
+                  ></svg-icon>
                 </div>
               </div>
             </template>
           </template>
         </el-table-column>
-        <el-table-column prop="create_time" label="Date" min-width="150" show-overflow-tooltip align="center" />
-        <el-table-column prop="file_size" label="Size" min-width="100" show-overflow-tooltip align="center" />
+        <el-table-column
+          prop="date"
+          label="Date"
+          min-width="150"
+          show-overflow-tooltip
+          align="center"
+        />
+        <el-table-column
+          prop="size"
+          label="Size"
+          min-width="100"
+          show-overflow-tooltip
+          align="center"
+        />
         <!-- <el-table-column label="Share" min-width="100" header-align="center">
           <template #default="{ row }">
             <div>
@@ -90,45 +152,40 @@
           </template>
         </el-table-column> -->
 
-        <el-table-column label="Actions" class-name="action-btn-column" min-width="150" align="center">
+        <el-table-column
+          label="Actions"
+          class-name="action-btn-column"
+          min-width="150"
+          align="center"
+        >
           <template #default="scope">
-            <el-dropdown trigger="click" @command="handleCommand" popper-class="custom_dropdown">
+            <el-dropdown trigger="click" @command="handleCommand">
               <div class="color-box">
                 <svg-icon icon-class="more"></svg-icon>
                 <!-- <img src="@/assets/more.svg" alt="" /> -->
               </div>
               <template #dropdown>
                 <el-dropdown-menu class="more-dropdown" slot="dropdown">
-                  <el-dropdown-item :command="{ flag: 'challenge', command: scope.row }"
-                    :disabled="!orderState">challenge</el-dropdown-item>
-                  <!-- <el-dropdown-item :command="{ flag: 'ipfs', command: scope.row }" :disabled="
-                    !(
-                      !scope.row.isDir &&
-                      (currentOODItem.deploy_vood_gateway_state ===
-                        'finish' ||
-                        currentOODItem.deploy_vood_gateway_state ===
-                        'upgrade_finish' ||
-                        currentOODItem.deploy_ipfs_gateway_state ===
-                        'finish') &&
-                      currentOODItem.ipfs_service_state === 'start'
-                    )
-                  ">IPFS PIN</el-dropdown-item> -->
-                  <!-- <el-dropdown-item :command="{ flag: 'cyfs', command: scope.row }" :disabled="
-                    !(
-                      !scope.row.isDir &&
-                      (currentOODItem.deploy_vood_gateway_state ===
-                        'finish' ||
-                        currentOODItem.deploy_vood_gateway_state ===
-                        'upgrade_finish' ||
-                        currentOODItem.deploy_cyfs_gateway_state ===
-                        'finish') &&
-                      currentOODItem.cyfs_service_state === 'start'
-                    )
-                  ">CYFS PIN</el-dropdown-item> -->
-                  <!-- <el-dropdown-item :command="{ flag: 'download', command: scope.row }"
-                    :disabled="scope.row.isDir">Download</el-dropdown-item> -->
-                  <!-- <el-dropdown-item class="delete-item"
-                    :command="{ flag: 'delete', command: scope.row }">Delete</el-dropdown-item> -->
+                  <el-dropdown-item
+                    :command="{ flag: 'share', command: scope.row }"
+                    :disabled="!scope.row.canShare"
+                    >share</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    :command="{ flag: 'ipfs', command: scope.row }"
+                    :disabled="scope.row.isDir"
+                    >IPFS PIN</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    :command="{ flag: 'cyfs', command: scope.row }"
+                    :disabled="scope.row.isDir"
+                    >CYFS PIN</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    :command="{ flag: 'download', command: scope.row }"
+                    :disabled="scope.row.isDir"
+                    >Download</el-dropdown-item
+                  >
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -146,6 +203,19 @@
   <PinDialog v-model:visible="ipfsDialogShow" type="ipfs" :currentFileItem="pinData" :currentOODItems="currentOODItem"
     @confirm="ipfsPin"></PinDialog>
   <PinFormDialog v-model:visible="syncDialog" :currentOODItem="currentOODItem"></PinFormDialog> -->
+  <ShareDialog
+    :shareRefContent="shareRefContent"
+    :copyContent="copyContent"
+    v-model:visible="showShareDialog"
+  >
+  </ShareDialog>
+  <DetailDialog
+    v-if="detailShow"
+    v-model:visible="detailShow"
+    :orderId="orderId"
+    :detailData="detailData"
+    :deviceData="deviceData"
+  ></DetailDialog>
 </template>
 
 <script setup>
@@ -164,38 +234,28 @@ import {
   computed,
   onMounted,
 } from "vue";
+import DetailDialog from "./detailDialog";
 import { GetFileList, InitiateChallenge } from "@/api/myFiles/myfiles";
-import {
-  oodFileList,
-  pIN,
-  IPFSPublish,
-  cyfsPINList,
-  oodFileDel,
-  CidShare,
-  oodFileSearch,
-  shareLink,
-  getIPFSLocalList,
-} from "@/utils/api.js";
+import { oodFileList, CidShare, shareLink, publishPin } from "@/utils/api.js";
 
 import _ from "lodash";
 
 // import MyEcharts from "@/components/echarts/myEcharts";
-// import ShareDialog from "./_modules/shareDialog";
+import ShareDialog from "../../foggieMax/home/_modules/myFiles/shareDialog";
 // import PinDialog from "./_modules/pinDialog";
 // import PinTaskList from "./_modules/pinTaskList";
 // import PinFormDialog from "./_modules/pinFormDialog";
 import { getfilesize } from "@/utils/util.js";
 import { transferTime } from "@/utils/util.js";
 
-import { getFileType } from "@/utils/getFileType";
+// import { getFileType } from "@/utils/getFileType";
 import { useRoute } from "vue-router";
-import router from "@/router";
 import { useStore } from "vuex";
+// import { fa } from "element-plus/es/locale";
 const store = useStore();
 const route = useRoute();
 const { proxy } = getCurrentInstance();
 const emits = defineEmits(["currentPrefix"]);
-
 
 // const orderId = computed(() => store.getters.orderId);
 
@@ -233,13 +293,14 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  deviceData: Object,
 });
 const syncDialog = ref(false);
 const taskDisplay = ref(false);
 const closeRightUpload = () => {
   taskDisplay.value = false;
 };
-const { currentOODItem, orderId } = toRefs(props);
+const { currentOODItem, orderId, deviceData } = toRefs(props);
 const sortList = [
   {
     prop: "create_time",
@@ -268,6 +329,8 @@ const sortList = [
 ];
 // const device_id = computed(() => currentOODItem.value.device_id);
 // const device_id_real = computed(() => currentOODItem.value.device_id_real);
+const device_id = "";
+const device_id_real = "";
 let shareCopyContent = "";
 let tableData = reactive({
   data: [],
@@ -280,26 +343,11 @@ function openUpload() {
   store.commit("upload/openUpload", orderId.value);
 }
 
-function loadFileList() {
-  let params = {
-    email: email.value,
-    orderId: orderId.value,
-    pageSize: tableData.pageSize,
-    pageNo: tableData.pageNum,
-    deviceType: deviceType.value
-  };
-  GetFileList(params).then((res) => {
-    for (const item of res.data.list) {
-      item.file_path = decodeURIComponent(item.file_path);
-      // item.type = item.file_path.substring(item.file_path.lastIndexOf(".") + 1);
-      item.icon = getFileType(item.file_path);
-      item.file_size = getfilesize(item.file_size);
-    }
-    tableData.total = res.data.count;
-    tableData.data = tableData.data.concat(res.data.list);
-    tableSort({ prop: "create_time", order: 1, key: 1 });
-  });
-}
+const loadFileList = async () => {
+  let data = await oodFileList(orderId.value);
+  initFileData(data);
+};
+
 /* 下拉加载文件列表 */
 const fileListsInfinite = _.debounce(() => {
   if (tableData.total > tableData.data.length) {
@@ -315,7 +363,6 @@ const fileListsInfinite = _.debounce(() => {
 function challengeMiner(params) {
   InitiateChallenge(params).then((res) => {
     if (res.code == 200) {
-      console.log(res);
     }
   });
 }
@@ -339,95 +386,131 @@ const refresh = () => {
 };
 
 const initFileData = async (data) => {
+  let params = {
+    email: email.value,
+    orderId: orderId.value,
+    pageSize: tableData.pageSize,
+    pageNo: tableData.pageNum,
+    deviceType: deviceType.value,
+  };
+  let localFiles = [];
+  let r = await GetFileList(params);
+  localFiles = r.data.list;
+
   tableData.data = [];
-  let fileList = await getIPFSLocalList();
-  for (let i = 0; i < data.length; i++) {
-    let date = "-";
-    if (data[i].created_at > 0) {
-      let created_at = new Date(data[i].created_at);
-      let year = created_at.getUTCFullYear();
-      let month = created_at.getUTCMonth() + 1;
-      month = month < 10 ? `0${month}` : month;
-      let day = created_at.getUTCDate();
-      day = day < 10 ? `0${day}` : day;
-      let hour = created_at.getUTCHours();
-      hour = hour < 10 ? `0${hour}` : hour;
-      let minute = created_at.getUTCMinutes();
-      minute = minute < 10 ? `0${minute}` : minute;
-      let second = created_at.getUTCSeconds();
-      second = second < 10 ? `0${second}` : second;
-      date = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
-      date = `${year}-${month}-${day}`;
-    }
-    let isDir =
-      data[i].content_type === "application/x-directory" ||
-      data[i].file_type === 2;
-    const type = data[i].key.substring(data[i].key.lastIndexOf(".") + 1);
+  for (let i = 0; i < data.commonPrefixes.length; i++) {
+    let item = {
+      isDir: true,
+      name: decodeURIComponent(data.commonPrefixes[i]),
+      key: data.commonPrefixes[i],
+      idList: [
+        {
+          name: "IPFS",
+          code: "",
+        },
+        {
+          name: "CYFS",
+          code: "",
+        },
+      ],
+      date: "-",
+      size: "",
+      status: "-",
+      type: "application/x-directory",
+      file_id: "",
+      pubkey: "",
+      cid: "",
+      imgUrl: "",
+      imgUrlLarge: "",
+      share: {},
+      isSystemImg: false,
+      canShare: false,
+    };
+    tableData.data.push(item);
+  }
+
+  for (let j = 0; j < data.content.length; j++) {
+    let date = transferTime(data.content[j].lastModified);
+    let isDir = false;
+    const type = data.content[j].key.substring(
+      data.content[j].key.lastIndexOf(".") + 1
+    );
     let { imgHttpLink: url, isSystemImg } = handleImg(
+      data.content[j],
       type,
-      device_id.value,
-      data[i].pubkey,
-      isDir
+      "",
+      data.content[j].cid,
+      isDir,
+      
     );
     let { imgHttpLink: url_large } = handleImg(
+      data.content[j],
       type,
-      device_id.value,
-      data[i].pubkey,
+      "",
+      data.content[j].cid,
       isDir,
       400
     );
     // let _url = require(`@/svg-icons/logo-dog-black.svg`);
-    let cid = "";
+    let cid = data.content[j].cid;
+    let file_id = data.content[j].file_id;
 
-    if (fileList && fileList.length > 0) {
-      for (let j = 0; j < fileList.length; j++) {
-        if (fileList[j].cid === data[i].cid) {
-          cid = fileList[j].cid;
-          break;
-        }
+    let is_local = false;
+    for (let k = 0; k < localFiles.length; k++) {
+      if (localFiles[k].cid === data.content.cid) {
+        is_local = true;
+        break;
       }
     }
 
     let item = {
       isDir: isDir,
-      name: decodeURIComponent(data[i].key),
-      key: data[i].key,
+      name: decodeURIComponent(data.content[j].key),
+      key: data.content[j].key,
       idList: [
         {
           name: "IPFS",
-          code: cid,
+          code: data.content[j].isPin ? cid : "",
         },
         {
           name: "CYFS",
-          code: data[i].file_id,
+          code: data.content[j].isPinCyfs ? file_id : "",
         },
       ],
       date,
-      size: getfilesize(data[i].content_length),
+      size: getfilesize(data.content[j].size),
       // status: "Published",
-      status: data[i].pubkey || data[i].file_id ? "Published" : "-",
-      type: data[i].content_type,
-      file_id: data[i].file_id,
-      pubkey: data[i].pubkey,
+      status: cid || file_id ? "Published" : "-",
+      type: data.content[j].contentType,
+      file_id: file_id,
+      pubkey: cid,
       cid,
       imgUrl: url,
       imgUrlLarge: url_large,
       // share: getShareOptions(),
       share: {},
       isSystemImg,
-      canShare: data[i].pubkey ? true : false,
+      canShare: cid ? true : false,
+      is_local,
     };
-    getCidShare(device_id.value, data[i].cid);
+    // data[i] = item;
+    // getCidShare(device_id.value, data[i].cid);
     tableData.data.push(item);
-    tableLoading.value = false;
-    if (activeSort.value) {
-      const target = sortList.find((el) => el.key == activeSort.value);
-      const { prop, order, key } = target;
-      nextTick(() => {
-        tableSort({ prop, order, key });
-      });
-    }
   }
+  // tableData.data = data;
+
+  tableLoading.value = false;
+  if (activeSort.value) {
+    const target = sortList.find((el) => el.key == activeSort.value);
+    const { prop, order, key } = target;
+    nextTick(() => {
+      tableSort({ prop, order, key });
+    });
+  }
+
+  // tableData.total += data.commonPrefixes.length + data.content.length;
+  // tableData.data = tableData.data.concat(res.data.list);
+  tableSort({ prop: "date", order: 1, key: 1 });
 };
 const sortChange = ({ column, prop, order }) => {
   // console.log(
@@ -495,7 +578,7 @@ const initMyOption = (xdata, ydata, cid) => {
   }
 };
 
-const handleImg = (type, ID, pubkey, isDir, size) => {
+const handleImg = (item, type, ID, pubkey, isDir, size ) => {
   size = size || 20;
   let location = window.location.origin;
   let imgHttpLink = "";
@@ -512,7 +595,16 @@ const handleImg = (type, ID, pubkey, isDir, size) => {
   ) {
     type = "img";
 
-    imgHttpLink = `${location}/object?pubkey=${pubkey}&new_w=${size}`;
+    // imgHttpLink = `${location}/object?pubkey=${pubkey}&new_w=${size}`;
+    let cid = item.cid;
+    let key = item.key;
+
+    let ip = "218.2.96.99";
+    // let ip = "154.31.34.194";
+    let port = 8007;
+    let Id = orderId.value;
+    let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+    imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
   } else {
     isSystemImg = true;
   }
@@ -529,82 +621,53 @@ const pinData = reactive({
 const handleCommand = async (val) => {
   const item = val.command;
   switch (val.flag) {
-    case "challenge":
-      let params = {
-        chainId: chainId.value,
-        email: email.value,
-        orderId: item.order_id,
-        // md5: item.md5,
-      };
-      challengeMiner(params);
+    case "share":
+      await doShare(item);
+      proxy.$notify({
+        type: "success",
+        message: "Share succeeded",
+        position: "bottom-left",
+      });
+      break;
+    case "ipfs":
+      ipfsDialogShow.value = true;
+      pinData.item = item;
+      ipfsPin(item);
+      break;
+    case "cyfs":
+      cyfsDialogShow.value = true;
+      pinData.item = item;
+      cyfsPin(item);
+      break;
+    case "download":
+      downloadItem(item);
       break;
     default:
       break;
   }
-  console.log(val);
-  // switch (val.flag) {
-  //   case "share":
-  //     await doShare(item);
-  //     proxy.$notify({
-  //       type: "success",
-  //       message: "Share succeeded",
-  //       position: "bottom-left",
-  //     });
-  //     break;
-  //   case "ipfs":
-  //     ipfsDialogShow.value = true;
-  //     // ipfsPin(item);
-  //     pinData.item = item;
-  //     break;
-  //   case "cyfs":
-  //     cyfsDialogShow.value = true;
-  //     pinData.item = item;
-  //     // cyfsPin(item);
-  //     break;
-  //   case "download":
-  //     downloadItem(item);
-  //     break;
-  //   case "delete":
-  //     proxy
-  //       .$confirm("Are you sure to delete it?", "Warning", {
-  //         confirmButtonText: "YES",
-  //         cancelButtonText: "NO",
-  //       })
-  //       .then(() => {
-  //         deleteItem(item);
-  //       });
-  //     // deleteItem(item);
-  //     break;
-  //   default:
-  //     break;
-  // }
 };
 const shareRefContent = reactive({});
 const copyContent = ref("");
 const doShare = async (item) => {
-  let key = "";
+  let key = item.key;
   if (item) {
-    key = item.name;
-    let data = {
-      key: item.pubkey,
-      is_pin: false,
-      new_path: item.key,
-    };
-    await pIN(data);
+    ipfsPin(item);
+    // await pIN(data);
   }
 
   const isFolder = item.type === "application/x-directory";
   if (key) {
-    let user = window.sessionStorage.getItem("walletUser");
+    // let user = window.sessionStorage.getItem("walletUser");
+    let user = store.getters["global/userInfo"].dmc;
     let ood_id_cyfs = device_id_real ? device_id_real : device_id;
     let _key = encodeURIComponent(key);
-    let data = await shareLink(device_id.value, _key);
-    let meta = data.meta;
-    let httpStr = `${location.origin}/#/detailFog?pubkey=${meta.pubkey}&name=${item.key}&isFolder=${isFolder}`;
-    let cyfsStr = item.file_id
-      ? `cyfs://o/${ood_id_cyfs.value}/${meta.file_id}`
-      : "";
-    let ipfsStr = item.cid ? `ipfs://${meta.cid}` : "";
+    // let data = await shareLink(device_id.value, _key);
+    // let meta = data.meta;
+    let peer_id = deviceData.value.peer_id;
+    // let httpStr = `${location.origin}/#/detailFog?pubkey=${meta.pubkey}&name=${item.key}&isFolder=${isFolder}`;
+    let httpStr = `foggie://${peer_id}/${orderId.value}/${item.cid}`;
+    let cyfsStr = item.file_id ? `cyfs://o/${ood_id_cyfs}/${item.file_id}` : "";
+    let ipfsStr = item.cid ? `ipfs://${item.cid}` : "";
 
     // this.shareTitle = this.$t("vood.uploadShareTitle");
     // this.shareContent = this.$t("vood.uploadShareContent");
@@ -617,53 +680,42 @@ const doShare = async (item) => {
     shareCopyContent = shareCopyContent + httpStr + " \n";
     shareCopyContent = shareCopyContent + " " + " \n ";
     shareRefContent.httpStr = httpStr;
-    if (
-      (currentOODItem.value.deploy_vood_gateway_state === "finish" ||
-        currentOODItem.value.deploy_vood_gateway_state === "upgrade_finish" ||
-        currentOODItem.value.deploy_ipfs_gateway_state === "finish") &&
-      currentOODItem.value.ipfs_service_state === "start" &&
-      meta.cid
-    ) {
-      shareCopyContent = shareCopyContent + ipfsStr + " \n";
-      shareCopyContent = shareCopyContent + " " + " \n ";
-      shareRefContent.ipfsStr = ipfsStr;
-      shareRefContent.httpStr = shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
-    }
+    shareCopyContent = shareCopyContent + ipfsStr + " \n";
+    shareCopyContent = shareCopyContent + " " + " \n ";
+    shareRefContent.ipfsStr = ipfsStr;
+    shareRefContent.httpStr = shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
 
-    if (
-      (currentOODItem.value.deploy_vood_gateway_state === "finish" ||
-        currentOODItem.value.deploy_vood_gateway_state === "upgrade_finish" ||
-        currentOODItem.value.deploy_cyfs_gateway_state === "finish") &&
-      currentOODItem.value.cyfs_service_state === "start" &&
-      meta.file_id
-    ) {
-      shareCopyContent = shareCopyContent + cyfsStr + " \n";
-      shareCopyContent = shareCopyContent + " " + " \n ";
-      shareRefContent.cyfsStr = cyfsStr;
-      shareRefContent.httpStr = shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
-    }
+    shareCopyContent = shareCopyContent + cyfsStr + " \n";
+    shareCopyContent = shareCopyContent + " " + " \n ";
+    shareRefContent.cyfsStr = cyfsStr;
+    shareRefContent.httpStr = shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
+
     shareCopyContent = shareCopyContent + shareStr + " \n";
     shareRefContent.shareStr = shareStr;
     copyContent.value = shareCopyContent;
     // shareRefContent.value=shareCopyContent
     showShareDialog.value = true;
     // this.shareBoxShow = true;
-    console.log(
-      "shareCopyContentshareCopyContentshareCopyContent",
-      shareCopyContent
-    );
   } else {
     // this.closeRewardBox();
   }
 };
-const ipfsPin = (checked) => {
+const ipfsPin = () => {
   const item = pinData.item;
   let data = {
+    ip_address: "218.2.96.99",
+    port: 8007,
+    token: "11111",
+    // peerId: deviceData.value.peer_id,
+    peerId: "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA",
+    Id: orderId.value,
+    exp: 3 * 24 * 3600,
+    stype: "ipfs",
+    pin: true,
     key: item.pubkey,
-    is_pin: false,
-    new_path: item.key,
+    isDir: item.isDir,
   };
-  pIN(data).then((res) => {
+  publishPin(data).then((res) => {
     if (res) {
       ipfsDialogShow.value = false;
     }
@@ -671,32 +723,40 @@ const ipfsPin = (checked) => {
 };
 const cyfsPin = () => {
   const item = pinData.item;
-  let key = item.key;
-  var form = new FormData();
-  form.append(
-    "dir",
-    new Blob([key], {
-      type: "application/x-directory",
-    }),
-    key
-  );
-  let pubkey = item.pubkey
-    ? item.pubkey
-    : "QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn";
-
-  cyfsPINList(device_id.value, item.name, pubkey).then((res) => {
-    cyfsDialogShow.value = false;
-    // proxy.$message({
-    //   type: "success",
-    //   message: "CYFS Join queue!",
-    //   position: "bottom left",
-    // });
+  let data = {
+    ip_address: "218.2.96.99",
+    port: 8007,
+    token: "11111",
+    // peerId: deviceData.value.peer_id,
+    peerId: "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA",
+    Id: orderId.value,
+    exp: 3 * 24 * 3600,
+    stype: "cyfs",
+    pin: true,
+    key: item.pubkey,
+    isDir: item.isDir,
+  };
+  publishPin(data).then((res) => {
+    if (res) {
+      cyfsDialogShow.value = false;
+    }
   });
 };
+
 const downloadItem = (item) => {
   // let ID = device_id.value;
-  let pubkey = item.pubkey;
-  let downloadUrl = `/fog/${pubkey}?dl=true`;
+  // let pubkey = item.pubkey;
+  // let downloadUrl = `/fog/${pubkey}?dl=true`;
+  // let cid = "QmNf82AtemgaHu2Sg3wpiaEFmoy6ym6Sv1Ma9eLJg6dHm3";
+  let cid = item.cid;
+  let key = item.key;
+
+  let ip = "218.2.96.99";
+  // let ip = "154.31.34.194";
+  let port = 8007;
+  let Id = orderId.value;
+  let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+  let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
 
   var oA = document.createElement("a");
   oA.download = item.name; // 设置下载的文件名，默认是'下载'
@@ -708,25 +768,6 @@ const downloadItem = (item) => {
     type: "success",
     message: "Download succeeded",
     position: "bottom-left",
-  });
-};
-const deleteItem = (item) => {
-  tableLoading.value = true;
-  oodFileDel(device_id.value, item).then((res) => {
-    if (res && res[0]) {
-      proxy.$notify({
-        type: "success",
-        message: "Delete succeeded",
-        position: "bottom-left",
-      });
-      doSearch();
-    } else {
-      proxy.$notify({
-        type: "error",
-        message: "Delete Error",
-        position: "bottom-left",
-      });
-    }
   });
 };
 
@@ -745,6 +786,8 @@ const copyLink = (text) => {
     position: "bottom-left",
   });
 };
+const detailShow = ref(false);
+const detailData = reactive({ data: {} });
 const toDetail = (item) => {
   localStorage.setItem("currentOODItem", JSON.stringify(currentOODItem.value));
   if (item.type === "application/x-directory") {
@@ -752,16 +795,18 @@ const toDetail = (item) => {
     breadcrumbList.prefix = item.name.split("/");
     emits("currentPrefix", breadcrumbList.prefix);
   } else {
-    localStorage.setItem("detail", JSON.stringify(item));
-    router.push("/detail");
+    detailData.data = item;
+    detailShow.value = true;
+    // localStorage.setItem("detail", JSON.stringify(item));
+    // router.push("/detail");
   }
 };
 const doSearch = async () => {
   if (keyWord.value === "") {
     getFileList("", breadcrumbList.prefix);
   } else {
-    let data = await oodFileSearch(keyWord.value);
-    initFileData(data.data);
+    // let data = await oodFileSearch(keyWord.value);
+    // initFileData(data.data);
   }
 };
 const setPrefix = (item, isTop = false) => {
@@ -888,8 +933,10 @@ onMounted(() => {
     :deep(.el-input__wrapper) {
       width: 200px;
       height: 40px;
-      background: linear-gradient(rgba(99, 106, 150, 0.8) 0%,
-          rgba(182, 186, 214, 0.6) 100%);
+      background: linear-gradient(
+        rgba(99, 106, 150, 0.8) 0%,
+        rgba(182, 186, 214, 0.6) 100%
+      );
 
       .el-input__prefix {
         img {
@@ -908,8 +955,10 @@ onMounted(() => {
       }
 
       &.is-focus {
-        background: linear-gradient(rgba(24, 32, 79, 0.4) 0%,
-            rgba(24, 32, 79, 0.25) 100%);
+        background: linear-gradient(
+          rgba(24, 32, 79, 0.4) 0%,
+          rgba(24, 32, 79, 0.25) 100%
+        );
       }
     }
   }

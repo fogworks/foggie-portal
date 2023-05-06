@@ -7,7 +7,6 @@
           :class="[isCollapse ? 'isCollapse' : '']"
         ></svg-icon>
       </div>
-
       <el-menu
         class="left-menu"
         :collapse="isCollapse"
@@ -16,14 +15,15 @@
       >
         <el-menu-item index="user" class="user">
           <svg-icon icon-class="user"></svg-icon>
-          <!-- <div v-if="userName" :title="userName">
-            {{ userName }}
-          </div> -->
           <template #title v-if="userName">
             <div :title="userName">
               {{ userName }}
             </div>
           </template>
+        </el-menu-item>
+        <el-menu-item index="assets" v-if="userName !== 'Login'">
+          <svg-icon icon-class="income"></svg-icon>
+          <template #title> Assets </template>
         </el-menu-item>
         <el-menu-item index="device" v-if="userName !== 'Login'">
           <svg-icon icon-class="devices"></svg-icon>
@@ -43,9 +43,6 @@
       <upload v-show="uploadIsShow"></upload>
     </teleport>
     <div class="main" id="main">
-      <!-- <User v-if="active === 'User'"></User>
-      <Device v-if="active === 'Device'"></Device>
-      <Discover v-if="active === 'Discover'"></Discover> -->
       <router-view v-slot="{ Component }">
         <component :is="Component" v-if="!$route.meta.keepAlive"></component>
         <keep-alive>

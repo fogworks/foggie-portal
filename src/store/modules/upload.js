@@ -3,7 +3,7 @@
 const state = {
   uploadIsShow: false,
   orderId: '',
-  deviceType:'', //1 foggie 2 foggieMax 3 用户客户端
+  deviceType: '', //1 foggie 2 foggieMax 3 用户客户端
   uploadFileList: {},
 }
 const mutations = {
@@ -20,7 +20,7 @@ const mutations = {
     state.orderId = orderId
     state.uploadIsShow = true
   },
-  setDeviceType(state, DeviceType){
+  setDeviceType(state, DeviceType) {
     state.deviceType = DeviceType
   }
 }

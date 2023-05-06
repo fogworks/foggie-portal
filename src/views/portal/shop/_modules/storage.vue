@@ -5,8 +5,14 @@
       <div class="homeBoxHeader">
         <div class="homeBoxHeader-left">
           <div>
-            <span style="font-size: 16px; margin-right: 5px">*Purchase cycle</span>
-            <el-input-number v-model.number="formLine.week" :min="24" placeholder="Purchase cycle" />
+            <span style="font-size: 16px; margin-right: 5px"
+              >*Purchase cycle</span
+            >
+            <el-input-number
+              v-model.number="formLine.week"
+              :min="24"
+              placeholder="Purchase cycle"
+            />
             <span style="font-size: 16px; margin-left: 5px">Week</span>
           </div>
           <div>
@@ -14,7 +20,11 @@
               Current benchmark price:{{ Number(curReferenceRate).toFixed(4) }}
               DMC
             </div>
-            <el-input v-model="formLine.quantity" placeholder="Purchase quantity" style="width: 220px">
+            <el-input
+              v-model="formLine.quantity"
+              placeholder="Purchase quantity"
+              style="width: 220px"
+            >
               <template #prefix>
                 <svg-icon icon-class="search2" size="25"></svg-icon>
               </template>
@@ -34,17 +44,29 @@
               <el-option label="不限價格" :value="0" />
             </el-select>
           </div> -->
-          <el-button style="margin-top: 10px" type="primary" round @click="filterOrder"
-            :loading="loading">Filter</el-button>
+          <el-button
+            style="margin-top: 10px; border-radius: 30px"
+            type="primary"
+            round
+            @click="filterOrder"
+            :loading="loading"
+            >Filter</el-button
+          >
         </div>
         <div class="homeBoxHeader-right clearfix">
-          <el-button type="primary" round>Reset</el-button>
+          <el-button type="primary" style="border-radius: 30px" round
+            >Reset</el-button
+          >
         </div>
       </div>
       <div class="hr"></div>
 
       <div class="destroyBox">
-        <div class="Img_box" v-for="(item, index) in filterOrderList" :key="index">
+        <div
+          class="Img_box"
+          v-for="(item, index) in filterOrderList"
+          :key="index"
+        >
           <div class="detailImg">
             <div class="detailImg_box" :class="returnBG(index)">
               <!-- <div class="detailImg_box_Img">
@@ -55,7 +77,9 @@
                   Unit price：<span>{{ item.price / 10000 }}DMC</span>
                 </p>
                 <p>
-                  Deposit：<span>{{ (item.price / 10000) * item.deposit_ratio }}DMC</span>
+                  Deposit：<span
+                    >{{ (item.price / 10000) * item.deposit_ratio }}DMC</span
+                  >
                 </p>
                 <p>
                   Purchase quantity：<span>{{ formLine.quantity }}PST</span>
@@ -67,7 +91,9 @@
                   Deposit multiple：<span>{{ item.deposit_ratio }}</span>
                 </p>
                 <p>
-                  Total order price：<span>{{ computeTotalPrices(item) }}DMC</span>
+                  Total order price：<span
+                    >{{ computeTotalPrices(item) }}DMC</span
+                  >
                 </p>
                 <p>
                   Custom Pledge Rate：<span>{{
@@ -76,8 +102,13 @@
                 </p>
                 <p>{{ item.created_time }}</p>
               </div>
-              <el-button type="primary" round style="margin-top: 40px; opacity: 0"
-                @click="purchasePST(item)">Buy</el-button>
+              <el-button
+                type="primary"
+                round
+                style="margin: 40px auto 0; opacity: 0"
+                @click="purchasePST(item)"
+                >Buy</el-button
+              >
             </div>
           </div>
         </div>
@@ -95,37 +126,53 @@
               <div>Total order price：{{ orderDetail.total }} DMC</div>
             </div>
             <label>Deposit amount:</label>
-            <div class="formBox clearfix" style="margin-left: 20px; margin-top: 15px">
-              <el-input v-model="formLine.prestoreDMC" maxlength="6" :placeholder="`Minimum pre-storage${(
+            <div
+              class="formBox clearfix"
+              style="margin-left: 20px; margin-top: 15px"
+            >
+              <el-input
+                v-model="formLine.prestoreDMC"
+                maxlength="6"
+                :placeholder="`Minimum pre-storage${(
                   orderDetail.total - orderDetail.deposit
-                ).toFixed(4)}`" style="width: 270px" @input="inputPrestoreDMC" @blur="blurPrestoreDMC">
+                ).toFixed(4)}`"
+                style="width: 270px"
+                @input="inputPrestoreDMC"
+                @blur="blurPrestoreDMC"
+              >
                 <template #prefix>
-                  <svg-icon icon-class="search" size="25"></svg-icon>
+                  <svg-icon icon-class="search2" size="25"></svg-icon>
                 </template>
                 <template #suffix>
                   <span style="font-size: 16px">DMC</span>
                 </template>
               </el-input>
-              <div style="
+              <div
+                style="
                   margin-left: 15px;
                   font-size: 14px;
                   color: #ff6e6e;
                   margin-top: 5px;
-                ">
+                "
+              >
                 Estimated service time to
                 {{
                   orderDetail.serverTime ? orderDetail.serverTime : "--"
                 }}，about {{ orderDetail.week ? orderDetail.week : "--" }} Week
               </div>
             </div>
-            <label style="margin-top: 15px; display: inline-block">Deposit:{{ orderDetail.deposit }}DMC</label>
+            <label style="margin-top: 15px; display: inline-block"
+              >Deposit:{{ orderDetail.deposit }}DMC</label
+            >
             <div class="total">
               Total:
               {{ orderDetail.aggregate ? orderDetail.aggregate : "--" }} DMC
             </div>
             <div class="button">
               <el-button @click="dialogIsShow = false">Cancel</el-button>
-              <el-button type="primary" :loading="loading" @click="submit">Buy</el-button>
+              <el-button type="primary" :loading="loading" @click="submit"
+                >Buy</el-button
+              >
             </div>
           </div>
         </div>
@@ -230,7 +277,6 @@ function filterOrder() {
         state.filterOrderList = res.data;
       }
       loading.value = false;
-      console.log(res);
     })
     .catch((error) => {
       loading.value = false;
@@ -361,24 +407,9 @@ async function submit() {
             type: "warning",
           })
             .then(async () => {
-              orderSync({
-                email: email.value,
-                billId: state.orderDetail.orderID,
-              }).then((req) => {
-                if (req.code == 200) {
-                  state.formLine.prestoreDMC = "";
-                  dialogIsShow.value = false;
-                  loading.value = false;
-
-                  ElMessage({
-                    message: `购买成功！`,
-                    type: "success",
-                    grouping: true,
-                  });
-                }
-              });
+              order_sync();
             })
-            .catch(() => { });
+            .catch(() => {});
         }
       })
       .catch((error) => {
@@ -386,6 +417,26 @@ async function submit() {
       });
   }
 }
+const order_sync = async () => {
+  orderSync({
+    email: email.value,
+    billId: state.orderDetail.orderID,
+  }).then((req) => {
+    if (req.code == 200) {
+      state.formLine.prestoreDMC = "";
+      dialogIsShow.value = false;
+      loading.value = false;
+
+      ElMessage({
+        message: `购买成功！`,
+        type: "success",
+        grouping: true,
+      });
+    } else {
+      order_sync();
+    }
+  });
+};
 function loadChainId() {
   getChain_id().then((res) => {
     if (res.code == 200) {
@@ -456,7 +507,7 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 
-.homeBoxHeader-left>div {
+.homeBoxHeader-left > div {
   margin-right: 30px;
   margin-top: 15px;
 }
@@ -471,7 +522,7 @@ onMounted(() => {
     .el-button {
       background-color: #ff9b3d;
       border: none;
-      height: 36px;
+      height: 56px;
     }
 
     .el-button:hover {
@@ -484,7 +535,8 @@ onMounted(() => {
   width: 100%;
   height: 6px;
   background: #ececec;
-  background: linear-gradient(120deg, rgb(224, 195, 252), rgb(142, 197, 252)) rgb(255, 255, 255);
+  background: linear-gradient(120deg, rgb(224, 195, 252), rgb(142, 197, 252))
+    rgb(255, 255, 255);
   margin-top: 30px;
 }
 
@@ -553,7 +605,7 @@ onMounted(() => {
     position: relative;
     padding-top: 10px;
 
-    &>p:not(:last-child) {
+    & > p:not(:last-child) {
       font-style: normal;
       font-size: 18px;
       line-height: 160%;
@@ -580,7 +632,7 @@ onMounted(() => {
       white-space: pre-wrap;
     }
 
-    &>p:last-child {
+    & > p:last-child {
       font-style: normal;
       font-weight: normal;
       font-size: 15px;
@@ -596,6 +648,9 @@ onMounted(() => {
 
 .dialogTitle {
   color: #ececec;
+  color: #000;
+  font-weight: 700;
+  font-size: 20px;
   text-align: center;
 }
 
@@ -621,7 +676,7 @@ onMounted(() => {
     flex-wrap: wrap;
     padding: 15px;
 
-    &>div {
+    & > div {
       min-width: 100%;
       flex: 1 0 auto;
       height: 25px;
@@ -644,6 +699,11 @@ onMounted(() => {
     justify-content: space-evenly;
     align-items: center;
     margin-top: 30px;
+    :deep {
+      .el-button {
+        border-radius: 99px;
+      }
+    }
   }
 }
 </style>

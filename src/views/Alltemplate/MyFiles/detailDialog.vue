@@ -66,9 +66,17 @@
 </template>
 
 <script>
-import { reactive, onMounted, ref, computed, inject, toRefs } from "vue";
+import {
+  reactive,
+  onMounted,
+  ref,
+  computed,
+  inject,
+  toRefs,
+  getCurrentInstance,
+} from "vue";
 import ShareDialog from "./shareDialog";
-import { pIN, shareLink } from "@/utils/api.js";
+import { publishPin } from "@/utils/api.js";
 import { ElNotification } from "element-plus";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
@@ -83,16 +91,28 @@ export default {
       type: Object,
       default: { data: {} },
     },
+    deviceData: {
+      type: Object,
+      default: { data: {} },
+    },
+    orderId: {
+      type: String,
+    },
   },
   setup(props, { emit }) {
+    const device_id = "";
+    const device_id_real = "";
+    let shareCopyContent = "";
+    const { proxy } = getCurrentInstance();
     const { visible } = toRefs(props);
     const detailData = reactive(props.detailData);
-    const deviceData = inject("deviceData");
+    const orderId = reactive(props.orderId);
+    const deviceData = reactive(props.deviceData);
     const store = useStore();
     const router = useRouter();
     const theme = computed(() => store.getters.theme);
     // const currentOODItem = JSON.parse(localStorage.getItem("currentOODItem"));
-    const currentOODItem = inject("currentOODItem");
+    // const currentOODItem = inject("currentOODItem");
     // const currentOODItem = computed(() => store.getters.currentOODItem);
     const documentInfo = reactive({
       title: detailData.data.name,
@@ -101,8 +121,8 @@ export default {
     });
     const shareRefContent = reactive({});
     const showShareDialog = ref(false);
-    const device_id = currentOODItem.value.data.device_id;
-    const device_id_real = currentOODItem.value.data.device_id_real;
+    // const device_id = currentOODItem.value.data.device_id;
+    // const device_id_real = currentOODItem.value.data.device_id_real;
     const initDetail = () => {};
     onMounted(initDetail);
     const beforeClose = () => {
@@ -110,43 +130,55 @@ export default {
     };
     const copyContent = ref("");
 
+    const ipfsPin = (item) => {
+      let data = {
+        ip_address: "218.2.96.99",
+        port: 8007,
+        token: "11111",
+        // peerId: deviceData.peer_id,
+        peerId: "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA",
+        Id: orderId.value,
+        exp: 3 * 24 * 3600,
+        stype: "ipfs",
+        pin: true,
+        key: item.pubkey,
+        isDir: item.isDir,
+      };
+      publishPin(data).then((res) => {
+        if (res) {
+          // ipfsDialogShow.value = false;
+        }
+      });
+    };
+
     const doShare = async () => {
-      if (!detailData.data.canShare) {
-        ElNotification({
-          type: "info",
-          message: "This file cannot be shared",
-          position: "bottom-left",
-        });
-        return false;
-      }
       let item = detailData.data;
-      let key = "";
+      let key = item.key;
       if (item) {
-        key = item.name;
-        let data = {
-          key: item.pubkey,
-          is_pin: false,
-          new_path: item.key,
-        };
-        await pIN(data);
+        ipfsPin(item);
+        // await pIN(data);
       }
+
       const isFolder = item.type === "application/x-directory";
       if (key) {
-        let user = window.sessionStorage.getItem("walletUser");
+        // let user = window.sessionStorage.getItem("walletUser");
+        let user = store.getters["global/userInfo"].dmc;
         let ood_id_cyfs = device_id_real ? device_id_real : device_id;
         let _key = encodeURIComponent(key);
-        let data = await shareLink(device_id, _key);
-        let meta = data.meta;
-        let httpStr = `http://${deviceData.dedicatedip}/#/detailFog?pubkey=${meta.pubkey}&name=${item.key}&isFolder=${isFolder}`;
-
-        let cyfsStr = `cyfs://o/${ood_id_cyfs}/${meta.file_id}`;
-        let ipfsStr = `ipfs://${meta.cid}`;
+        // let data = await shareLink(device_id.value, _key);
+        // let meta = data.meta;
+        let peer_id = deviceData.peer_id;
+        // let httpStr = `${location.origin}/#/detailFog?pubkey=${meta.pubkey}&name=${item.key}&isFolder=${isFolder}`;
+        let httpStr = `foggie://${peer_id}/${orderId}/${item.cid}`;
+        let cyfsStr = item.file_id
+          ? `cyfs://o/${ood_id_cyfs}/${item.file_id}`
+          : "";
+        let ipfsStr = item.cid ? `ipfs://${item.cid}` : "";
 
         // this.shareTitle = this.$t("vood.uploadShareTitle");
         // this.shareContent = this.$t("vood.uploadShareContent");
-        let shareCopyContent = `${user} publish ${key} to Web3` + "\n";
+        shareCopyContent = `${user} publish ${key} to Web3` + "\n";
         shareRefContent.user = `${user} publish ${key} to Web3`;
-
         let myQrcode = window.sessionStorage.getItem("myQrcode");
         let code = `http://foggie.fogworks.io/?pcode=${myQrcode}`;
         let shareStr = `The Web3 content I publish with Foggie is my digital asset and cannot be tampered with or deleted without my permission. It can also help us earn $DMC crypto rewards. Let's Web3-to-Earn together! Use my invite link ${code} to adopt a Foggie so we can all earn $DMC and grow Web3 together.Thanks!`;
@@ -154,47 +186,44 @@ export default {
         shareCopyContent = shareCopyContent + httpStr + " \n";
         shareCopyContent = shareCopyContent + " " + " \n ";
         shareRefContent.httpStr = httpStr;
+        shareCopyContent = shareCopyContent + ipfsStr + " \n";
+        shareCopyContent = shareCopyContent + " " + " \n ";
+        shareRefContent.ipfsStr = ipfsStr;
+        shareRefContent.httpStr =
+          shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
 
-        if (
-          (currentOODItem.value.data.cbs_state === "finish" ||
-            currentOODItem.value.data.cbs_state === "upgrade_finish" ||
-            currentOODItem.value.data.ipfs_state === "finish") &&
-          currentOODItem.value.data.ipfs_service_state === "start" &&
-          meta.cid
-        ) {
-          shareCopyContent = shareCopyContent + ipfsStr + " \n";
-          shareCopyContent = shareCopyContent + " " + " \n ";
-          shareRefContent.ipfsStr = ipfsStr;
-          shareRefContent.httpStr =
-            shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
-        }
-
-        if (
-          (currentOODItem.value.data.cbs_state === "finish" ||
-            currentOODItem.value.data.cbs_state === "upgrade_finish" ||
-            currentOODItem.value.data.cyfs_state === "finish") &&
-          currentOODItem.value.data.cyfs_service_state === "start" &&
-          meta.file_id
-        ) {
-          shareCopyContent = shareCopyContent + cyfsStr + " \n";
-          shareCopyContent = shareCopyContent + " " + " \n ";
-          shareRefContent.cyfsStr = cyfsStr;
-          shareRefContent.httpStr =
-            shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
-        }
+        shareCopyContent = shareCopyContent + cyfsStr + " \n";
+        shareCopyContent = shareCopyContent + " " + " \n ";
+        shareRefContent.cyfsStr = cyfsStr;
+        shareRefContent.httpStr =
+          shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
 
         shareCopyContent = shareCopyContent + shareStr + " \n";
         shareRefContent.shareStr = shareStr;
-        showShareDialog.value = true;
         copyContent.value = shareCopyContent;
+        // shareRefContent.value=shareCopyContent
+        showShareDialog.value = true;
+        // this.shareBoxShow = true;
       } else {
+        // this.closeRewardBox();
       }
     };
+
     const downloadItem = () => {
+      // let ID = device_id.value;
+      // let pubkey = item.pubkey;
+      // let downloadUrl = `/fog/${pubkey}?dl=true`;
+      // let cid = "QmNf82AtemgaHu2Sg3wpiaEFmoy6ym6Sv1Ma9eLJg6dHm3";
       let item = detailData.data;
-      let ID = device_id;
-      let pubkey = item.pubkey;
-      let downloadUrl = `/fog/${pubkey}?dl=true`;
+      let cid = item.cid;
+      let key = item.key;
+
+      let ip = "218.2.96.99";
+      // let ip = "154.31.34.194";
+      let port = 8007;
+      let Id = orderId;
+      let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+      let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
 
       var oA = document.createElement("a");
       oA.download = item.name; // 设置下载的文件名，默认是'下载'
@@ -202,6 +231,11 @@ export default {
       document.body.appendChild(oA);
       oA.click();
       oA.remove(); // 下载之后把创建的元素删除
+      proxy.$notify({
+        type: "success",
+        message: "Download succeeded",
+        position: "bottom-left",
+      });
     };
     function copySecret(key) {
       var input = document.createElement("textarea"); // 创建input对象
@@ -221,8 +255,9 @@ export default {
       theme,
       documentInfo,
       detailData,
-      device_id,
-      currentOODItem,
+      orderId,
+      // device_id,
+      // currentOODItem,
       initDetail,
       doShare,
       downloadItem,
@@ -232,8 +267,11 @@ export default {
       showShareDialog,
       shareRefContent,
       visible,
+      proxy,
       copyContent,
+      deviceData,
       beforeClose,
+      ipfsPin,
     };
   },
 };

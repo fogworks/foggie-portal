@@ -6,7 +6,7 @@
         <div>
           <svg-icon icon-class="logo-dog"></svg-icon>
         </div>
-        <div class="price">$399.9</div>
+        <div class="price">$199.9</div>
         <div class="description">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at
           posuere eros. Interdum et malesuada fames ac ante ipsum primis in
@@ -22,7 +22,7 @@
         <div>
           <svg-icon icon-class="logo-dog"></svg-icon>
         </div>
-        <div class="price">$399.9</div>
+        <div class="price">$238</div>
         <div class="description">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at
           posuere eros. Interdum et malesuada fames ac ante ipsum primis in
@@ -38,7 +38,7 @@
         <div>
           <svg-icon icon-class="storage"></svg-icon>
         </div>
-        <div class="price">$399.9</div>
+        <div class="price">$648</div>
         <div class="description">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at
           posuere eros. Interdum et malesuada fames ac ante ipsum primis in
@@ -54,14 +54,14 @@
         <div>
           <svg-icon icon-class="logo-dog"></svg-icon>
         </div>
-        <div class="price">$399.9</div>
+        <div class="price">$68</div>
         <div class="description">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at
           posuere eros. Interdum et malesuada fames ac ante ipsum primis in
           faucibus.
         </div>
       </div>
-      <button>COMING SOON</button>
+      <button class="disabled">COMING SOON</button>
     </div>
   </div>
   <div class="back" v-if="!isShop" @click="handleActive">
@@ -73,6 +73,7 @@
 <script setup>
 import { ref } from "vue";
 import Storage from "./_modules/storage";
+// import Storage from "@/views/Alltemplate/Storage/Storage";
 const isShop = ref(true);
 const active = ref("");
 const handleActive = (val = "") => {
@@ -86,6 +87,7 @@ const handleActive = (val = "") => {
   display: flex;
   justify-content: space-around;
   align-items: center;
+  flex-wrap: wrap;
   width: 100%;
   height: 100%;
 }
@@ -100,13 +102,13 @@ const handleActive = (val = "") => {
   margin: 10px 0;
   text-align: center;
   position: relative;
-  cursor: pointer;
   box-shadow: 0 10px 15px -3px rgba(33, 150, 243, 0.4),
     0 4px 6px -4px rgba(33, 150, 243, 0.4);
   border-radius: 10px;
   background-color: #6b6ecc;
   background: linear-gradient(45deg, #04051dea 0%, #2b566e 100%);
   transition: all 0.3s;
+  cursor: default;
   &:hover {
     transform: scale(1.1);
     svg {
@@ -185,7 +187,7 @@ button {
   width: 90%;
   text-shadow: 0px 4px 18px #2c3442;
   cursor: pointer;
-  &:hover {
+  &:not(.disabled):hover {
     background: #29abff;
   }
 }
