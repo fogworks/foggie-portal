@@ -108,7 +108,15 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted, watchEffect, toRefs, inject } from "vue";
+import {
+  ref,
+  reactive,
+  onMounted,
+  computed,
+  watchEffect,
+  toRefs,
+  inject,
+} from "vue";
 import NftDialog from "./nftDialog";
 import Rewards from "./rewards";
 import Withdraw from "./withDraw";
@@ -123,8 +131,10 @@ import {
   dmcSwap,
   OwnerBills,
 } from "@/utils/api.js";
+import { userAssets } from "@/api/order/orderList.js";
 import * as echarts from "echarts";
 import RippleInk from "@/components/rippleInk";
+import store from "@/store";
 export default {
   components: {
     Rewards,
@@ -154,6 +164,7 @@ export default {
     const WithdrawVisible = ref(false);
     const NftDialogVisible = ref(false);
     const lastweekCount = ref(0);
+    const email = computed(() => store.getters.userInfo.email);
     const lastWeekOptions = reactive({
       color: "#fff",
       grid: {
@@ -203,6 +214,11 @@ export default {
         },
       ],
     });
+    const getUserAssets = () => {
+      userAssets({ email: email.value }).then((res) => {
+        console.log(res, "ressssssssss");
+      });
+    };
     // const estimateDMC = ref(0);
     const adminCategoriesListInit = async () => {
       getDMC();
@@ -410,7 +426,10 @@ export default {
       getUserInfo();
       initAccountMoney();
     });
-    onMounted(adminCategoriesListInit);
+    onMounted(() => {
+      getUserAssets();
+      adminCategoriesListInit();
+    });
     return {
       addNum,
       estimateNum,
