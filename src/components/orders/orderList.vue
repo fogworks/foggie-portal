@@ -320,7 +320,6 @@ function loadOrderList() {
   getOrderById(params)
     .then((res) => {
       if (res.code == 200) {
-        console.log(res);
         for (const item of res.data) {
           item.popoverShow = false;
           item.created_time = ChinaTime1(new Date(item.created_time));
@@ -336,7 +335,6 @@ function loadOrderList() {
       }
     })
     .catch((error) => {
-      console.log(error);
     });
 }
 
@@ -388,7 +386,6 @@ const challengeMiner = (item) => {
   };
   InitiateChallenge(params).then((res) => {
     if (res.code == 200) {
-      console.log(res);
     }
   });
 };

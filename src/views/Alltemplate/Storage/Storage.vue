@@ -451,7 +451,6 @@ function filterOrder() {
         isShow.value = false;
         loading.value = false;
       }
-      console.log(res);
     })
     .catch((error) => {
       loading.value = false;

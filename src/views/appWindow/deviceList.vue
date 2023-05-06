@@ -174,7 +174,6 @@ const handleID = (str) => {
   );
 };
 const isActive = (id) => {
-  console.log("++++++++++++", list);
   if (
     totalActiveDevice.value.data.find(
       (el) =>
@@ -189,7 +188,6 @@ const isActive = (id) => {
 };
 const list = computed(() => {
   if (!keyWord.value) {
-    console.log(deviceList.value, "deviceList.value");
     return deviceList.value;
   } else {
     return deviceList.value.filter((el) => {

@@ -129,7 +129,6 @@ const emit = defineEmits(["next"]);
 const toGuide = (item) => {
   if (item.device_type !== "space") {
     if (item.is_active) {
-      console.log(item, "item");
       store.dispatch("global/setDiscoverData", item);
       router.push({
         name: "AppWindow",
@@ -169,10 +168,8 @@ const handleID = (str) => {
   );
 };
 const handleCommand = ({ flag, data }) => {
-  console.log(flag, data);
   if (flag === "edit") {
     visible.value = true;
-    console.log(visible.value);
   } else if (flag === "delete") {
     proxy
       .$confirm("Are you sure to delete this device record?", "Warning", {

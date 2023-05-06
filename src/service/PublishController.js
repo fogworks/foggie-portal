@@ -3,6 +3,7 @@ const BizResultCode = require("./BaseResultCode");
 const logger = require("./logger")("FileController.js");
 const publish_proto = require("./grpc/publish");
 const grpc = require("@grpc/grpc-js");
+const config = require('config')
 
 class PublishController {
   /**
@@ -29,13 +30,6 @@ class PublishController {
     token = "11111";
     // peerId = '12D3KooWDj1NkJ1DrVvpbBhtJ3nLCNA9CKyg3eynpiUTKsVEDkgx';
     peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
-    console.log('~~~~~~~~~`', req.body)
-    console.log("~~~~~~~~~~~key", cid);
-    console.log("~~~~~~~~~~~is_pin", Id);
-    // console.log("~~~~~~~~~~~new_path", new_path);
-    console.log("~~~~~~~~~~~ip_address", ip_address);
-    console.log("~~~~~~~~~~~port", port);
-    console.log("~~~~~~~~~~~token", token);
 
     if (!peerId || !Id || !stype || !exp || !pin || !cid || !key) {
       res.send(BizResult.validateFailed());
@@ -60,11 +54,7 @@ class PublishController {
       request: request,
     };
 
-    console.log("~~~~~~~~~~~~~~", putObjectReq);
-
     client.Pin(putObjectReq, (err, data) => {
-      console.log("+++++++++++++++++err", err);
-      console.log("+++++++++++++++++data", data);
       if (err) {
         res.send({});
         return;
@@ -76,9 +66,9 @@ class PublishController {
   static getNetGrpcClient(ip_address, port) {
     // ip_address = "154.31.34.194";
     // ip_address  = "192.168.1.115";
-    ip_address = "172.16.30.11";
+    let grpcConfig = config.get('grpcConfig');
+    ip_address = grpcConfig.get("ip");
     port = 8007;
-    // console.log('@@@@@@@@@@@@@@@@', publish_proto)
     return new publish_proto.API(
       ip_address + ":" + port,
       grpc.credentials.createInsecure()

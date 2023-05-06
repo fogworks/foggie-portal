@@ -109,7 +109,6 @@ const resetMethod = async () => {
   rest();
 };
 const change = (item, val) => {
-  console.log(item, val);
   item.loading = true;
   let fetchMethod = item.label === "ipfs" ? op_ipfs : op_cyfs;
   fetchMethod({ op_type: val }, requestTarget)

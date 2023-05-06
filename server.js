@@ -428,22 +428,12 @@ const socketIP = () => {
 
 // ipfs pin
 app.post("/s_ipfsops/pin",jsonParser, (req, res) => {
-  console.log('~~~~~~~~~~~',req.url)
-  console.log('_++++++++++++++', req.method)
-  console.log('~~~~~~~~~~~',req.body)
-  console.log('+++++++++++++++++', `http://${req.body.ip_address}:${req.body.port}/ipfsops/pin`)
   let request = require("request");
   request(`http://${req.body.ip_address}:${req.body.port}/ipfsops/pin`, function (err, response, body) {
     if (!err && response.statusCode == 200) {
-      //todoJSON.parse(body)
-      console.log('----------------------', body)
-      console.log('----------------------', response)
       let rr = JSON.parse(body);
       res.send(rr);
     } else {
-      console.log('***************', err)
-      // console.log('***************', response)
-      console.log('***************', body)
       res.send({});
     }
   });
@@ -468,6 +458,5 @@ app.delete('/file_delete', jsonParser, (req, res) => {
 });
 
 app.post('/list_files', jsonParser, (req, res) => {
-  console.log('~~~~~~~~~~~~~', req.body)
   OperController.listFiles(req, res);
 });

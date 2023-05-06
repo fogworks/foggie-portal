@@ -187,11 +187,6 @@ class FileController {
         // 测试文件服务器端联通性
         var rpc = orderInfo.rpc;
 
-
-        console.log('~~~~~~~~~~~~~~~~',header)
-        console.log('~~~~~~~~~~~~~~~~',rpc)
-        console.log('~~~~~~~~~~~~~~~~',file)
-
         // 小文件上传
         if (parseInt(fileCategory) == 1) {
             if (!fileType) {
@@ -577,9 +572,6 @@ async function smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, r
             res.send(BizResult.fail(BizResultCode.UPLOAD_FILE_FAILED));
             return;
         }
-
-
-        console.log('upload~~~~~~~~~~~~data', data)
 
         // 上传成功后，保存文件上传记录 小文件不存在分片，所以partNum为0
         fileService.saveFileUploadRecord(orderId, email, file.path, md5, 0)

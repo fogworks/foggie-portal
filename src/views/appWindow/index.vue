@@ -80,7 +80,6 @@ const search = () => {
   loading.value = true;
   search_foggie({ email: email.value })
     .then((res) => {
-      console.log(res, "res");
       let cur_data = res.data;
       cur_data.forEach((r) => {
         if (r.device_type === "space") {
@@ -136,9 +135,13 @@ const clickItem = (data) => {
       });
     }
   }
+  if (data.device_type === 'foggie' || data.device_type === 'foggie_max' || !data.device_type) {
+    // TODO
+  }
+
+
 };
 const cancelItem = (data) => {
-  console.log("cancelItem");
   let target = totalActiveDevice.data.find(
     (el) =>
       (el.device_id && el.device_id === data.device_id) ||

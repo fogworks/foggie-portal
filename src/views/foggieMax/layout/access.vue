@@ -162,7 +162,6 @@ const submit = () => {
             // router.push("/home");
           })
           .catch((err) => {
-            console.log(err);
             proxy.$notify({
               type: "error",
               message: err.message,

@@ -93,14 +93,7 @@ const refresh = () => {
       curAddress.value = res?.address;
       loading.value = false;
     });
-    // let data = {
-    //   url: "http://154.37.16.163:9094/",
-    // };
-    // pingUrl(data).then((r) => {
-    //   console.log("~~~~~~", r);
-    // });
     socketIP().then((res) => {
-      console.log("!!!!!!!!", res);
       let rrr = res.data;
       loading.value = false;
       for (let i = 0; i < rrr.length; i++) {
@@ -116,15 +109,6 @@ const refresh = () => {
       }
       // deviceList.list = rrr.data;
     });
-    // portalPing().then((res)=>{
-    //   console.log("res++++++", res)
-    // })
-    // let data1 = {
-    //   ip: "explorer.dmctech.io",
-    // };
-    // getNetStatus(data1).then((dd) => {
-    //   console.log("ddddddd", dd);
-    // });
   }, 3000);
 };
 const userInfo = computed(() => store.getters.userInfo);

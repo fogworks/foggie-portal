@@ -61,7 +61,6 @@ const stepList = reactive({
 const next = () => {
   active.value = ++active.value;
   preShow.value = true;
-  console.log(active.value);
 };
 const pre = () => {
   if (active.value === 1) {

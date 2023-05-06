@@ -108,7 +108,6 @@ service.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.log(error); // for debug
     return Promise.reject(error);
   }
 );
@@ -172,37 +171,10 @@ service.interceptors.response.use(
           //   setToken(token);
           return service(response.config);
         } else {
-          //   Message({
-          //     message: res.data.error || "Error",
-          //     type: "error",
-          //     duration: 5 * 1000,
-          //   });
           return;
         }
-        // refreshToken().then(res => {
-        //   // console.log('getrefreshToken', res, response);
-        //   if (res && res.data) {
-        //     let token = res.data.access_token;
-        //     let type = res.data.token_type;
-        //     token = type + ' ' + token;
-        //     let userInfo = {
-        //       username: "",
-        //       token: token, //res.token
-        //       user_id: "",
-        //     };
-        //     store.dispatch("login", userInfo);
-        //     setToken(token);
-        //     return service(response.config);
-        //   }
-        // })
       } else {
-        // Message({
-        //   message: res.error || "Error",
-        //   type: "error",
-        //   duration: 5 * 1000,
-        // });
         return Promise.reject(res);
-        // return;
       }
     }
     if (response.status === 401 || response.status === 403) {
@@ -254,13 +226,7 @@ service.interceptors.response.use(
     return _response;
   },
   (error) => {
-    console.log("err" + error); // for debug
     if (!error.config.url.indexOf("ping")) {
-      //   Message({
-      //     message: error.message,
-      //     type: "error",
-      //     duration: 5 * 1000,
-      //   });
     }
     loadingInstance ? loadingInstance.close() : ''
 

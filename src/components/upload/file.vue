@@ -396,7 +396,6 @@ export default {
         deviceType:file.value.deviceType
       }
       SaveFile(params).then(res => {
-        console.log(res);
       })
     }
 
@@ -589,7 +588,6 @@ export default {
             }
           })
           .catch((error) => {
-            console.log(error);
             _fileError();
           });
       }
@@ -674,7 +672,6 @@ export default {
                 }
               })
               .catch((error) => {
-                console.log(error);
               });
           } else {
             resolve();
@@ -901,8 +898,6 @@ export default {
         if (abortController.value) abortController.value.abort("Cancel request");
 
         client.deleteObject(deletReq, {}, (error, res) => {
-          console.log(error);
-          console.log(res);
           isPause.value = true;
           paused.value = true;
           aborted.value = false;
@@ -931,7 +926,6 @@ export default {
       try {
         res = JSON.parse(message);
       } catch (e) {
-        console.log(e);
       }
       response.value = res;
     };
@@ -957,7 +951,6 @@ export default {
       _actionCheck();
     };
     const _fileSuccess = (rootFile, file, message) => {
-      // console.log(_fileSuccess, "_fileSuccess_fileSuccess_fileSuccess");
       if (rootFile) {
         processResponse(message);
       }

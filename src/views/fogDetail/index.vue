@@ -68,7 +68,6 @@ export default {
     if(ipfsStr)documentInfo.idList.push({name:'IPFS',code:ipfsStr.substr(7)})
     if(cyfsStr)documentInfo.idList.push({name:'CYFS',code:cyfsStr.substr(7)})
     const downloadItem = () => {
-      console.log("process.env", process.env.VUE_APP_UPLOAD_URL);
       let downloadUrl = `/fog/${pubkey}?dl=true`;
 
       var oA = document.createElement("a");

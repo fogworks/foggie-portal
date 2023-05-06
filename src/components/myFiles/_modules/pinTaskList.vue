@@ -252,12 +252,6 @@ export default {
     },
     //点击头部面包屑
     changeTabSon(item, index) {
-      console.log(
-        this.pathList[index],
-        "changeTabSonchangeTabSonchangeTabSon",
-        this.pathList,
-        this.sonList
-      );
       this.isNextMarket = "";
       this.currentPrefix = "";
       if (this.pathList[index]) {
@@ -274,7 +268,6 @@ export default {
       this.initData("", this.currentPrefix, this.isNextMarket);
     },
     async initData(tree, _prefix, next_marker) {
-      console.log(tree, _prefix, next_marker, "initData");
       const that = this;
       if (!next_marker) {
         that.taskList = [];
@@ -298,7 +291,6 @@ export default {
         } else {
           prefix = tree.cid + "/";
         }
-        console.log(that.sonList, that.pathList);
       }
       //回到根目录
       if (!tree && !_prefix) {

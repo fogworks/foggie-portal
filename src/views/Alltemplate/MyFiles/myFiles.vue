@@ -363,7 +363,6 @@ const fileListsInfinite = _.debounce(() => {
 function challengeMiner(params) {
   InitiateChallenge(params).then((res) => {
     if (res.code == 200) {
-      console.log(res);
     }
   });
 }
@@ -600,7 +599,7 @@ const handleImg = (item, type, ID, pubkey, isDir, size ) => {
     let cid = item.cid;
     let key = item.key;
 
-    let ip = "172.16.30.11";
+    let ip = "218.2.96.99";
     // let ip = "154.31.34.194";
     let port = 8007;
     let Id = orderId.value;
@@ -697,10 +696,6 @@ const doShare = async (item) => {
     // shareRefContent.value=shareCopyContent
     showShareDialog.value = true;
     // this.shareBoxShow = true;
-    console.log(
-      "shareCopyContentshareCopyContentshareCopyContent",
-      shareCopyContent
-    );
   } else {
     // this.closeRewardBox();
   }
@@ -708,7 +703,7 @@ const doShare = async (item) => {
 const ipfsPin = () => {
   const item = pinData.item;
   let data = {
-    ip_address: "172.16.30.11",
+    ip_address: "218.2.96.99",
     port: 8007,
     token: "11111",
     // peerId: deviceData.value.peer_id,
@@ -729,7 +724,7 @@ const ipfsPin = () => {
 const cyfsPin = () => {
   const item = pinData.item;
   let data = {
-    ip_address: "172.16.30.11",
+    ip_address: "218.2.96.99",
     port: 8007,
     token: "11111",
     // peerId: deviceData.value.peer_id,
@@ -756,7 +751,7 @@ const downloadItem = (item) => {
   let cid = item.cid;
   let key = item.key;
 
-  let ip = "172.16.30.11";
+  let ip = "218.2.96.99";
   // let ip = "154.31.34.194";
   let port = 8007;
   let Id = orderId.value;
