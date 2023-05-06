@@ -596,17 +596,17 @@ module.exports = {
         }
         return new Promise((resolve, reject) => {
             proxClient.Ping(proxPingRequest, function (err, data) {
-                if (err) {
-                    logger.error('err:', err);
+                // if (err) {
+                //     logger.error('err:', err);
                     var grpcConfig = config.get('grpcConfig');
                     var ip = grpcConfig.get("ip");
                     var port = grpcConfig.get("port");
                     logger.info('grpc address:', ip + ':' + port);
                     resolve(new net_proto.API(ip + ':' + port, grpc.credentials.createInsecure()));
                     return;
-                }
-                logger.info('grpc address:', rpc);
-                resolve(proxClient);
+                // }
+                // logger.info('grpc address:', rpc);
+                // resolve(proxClient);
             });
         });
     }

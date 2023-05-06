@@ -59,7 +59,6 @@ store.commit("upload/setDeviceType", "3");
 watch(
   () => props.deviceData,
   (newValue) => {
-    console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", newValue);
   },
   { immediate: true, deep: true }
 );

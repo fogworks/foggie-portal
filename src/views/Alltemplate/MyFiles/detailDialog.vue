@@ -132,7 +132,7 @@ export default {
 
     const ipfsPin = (item) => {
       let data = {
-        ip_address: "172.16.30.11",
+        ip_address: "218.2.96.99",
         port: 8007,
         token: "11111",
         // peerId: deviceData.peer_id,
@@ -204,10 +204,6 @@ export default {
         // shareRefContent.value=shareCopyContent
         showShareDialog.value = true;
         // this.shareBoxShow = true;
-        console.log(
-          "shareCopyContentshareCopyContentshareCopyContent",
-          shareCopyContent
-        );
       } else {
         // this.closeRewardBox();
       }
@@ -222,7 +218,7 @@ export default {
       let cid = item.cid;
       let key = item.key;
 
-      let ip = "172.16.30.11";
+      let ip = "218.2.96.99";
       // let ip = "154.31.34.194";
       let port = 8007;
       let Id = orderId;

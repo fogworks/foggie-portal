@@ -92,7 +92,6 @@ const loading = ref(false);
 const finish = ref(false);
 const timeCallback = (max) => {
   return () => {
-    console.log(rate.value >= Number(max), "max");
     if (rate.value >= Number(max)) {
       rate.value = max;
     } else {
@@ -161,11 +160,6 @@ const installCBS = async (isFinish) => {
     }
     installCBS();
   }
-  // try {
-  //   let res = JSON.parse({});
-  // } catch {
-  //   console.log(111);
-  // }
 };
 const installIPFS = async (isFinish) => {
   try {
@@ -196,7 +190,6 @@ const installIPFS = async (isFinish) => {
 const installCYFS = async (isFinish) => {
   try {
     const bindInfoObj = await createDID("");
-    console.log(bindInfoObj, "bindInfoObj");
     if (bindInfoObj && bindInfoObj.g_uniqueId) {
       const index = calcIndex(bindInfoObj.g_uniqueId);
       const bind_info = {
@@ -208,7 +201,6 @@ const installCYFS = async (isFinish) => {
       deploy_cyfs(bind_info, requestTarget)
         .then(async (res) => {
           cyfsTimer = setInterval(timeCallback(99), 1000);
-          console.log("deploy cyfs", res);
           let cyfsFinish = await getInstallStatus("cyfs");
           if (cyfsFinish) {
             clearInterval(cyfsTimer);
@@ -231,9 +223,7 @@ const installCYFS = async (isFinish) => {
         })
         .finally(() => {});
     } else {
-      console.log("check_cyfs失败");
       count.value++;
-      console.log("count.value", count.value);
 
       if (count.value > 3) return false;
       installCYFS();

@@ -117,7 +117,6 @@ const handleSync = () => {
           });
         });
     } else {
-      console.log("error submit!!");
       return false;
     }
   });

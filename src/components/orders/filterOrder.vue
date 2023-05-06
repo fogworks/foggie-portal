@@ -225,7 +225,6 @@ function filterOrder() {
         state.filterOrderList = res.data;
         loading.value = false;
       }
-      console.log(res);
     })
     .catch((error) => {
       loading.value = false;

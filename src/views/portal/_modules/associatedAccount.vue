@@ -269,7 +269,6 @@ const submit = () => {
                 },
               })
                 .then((res) => {
-                  console.log(res, "resresresres");
                   // 获取钱包信息
                   if (!res.data.data.dmc_account) {
                     proxy.$notify({

@@ -3,6 +3,8 @@ const BizResultCode = require("./BaseResultCode");
 const logger = require("./logger")("FileController.js");
 const publish_proto = require("./grpc/publish");
 const grpc = require("@grpc/grpc-js");
+const config = require('config')
+// const { da } = require("element-plus/es/locale");
 
 class PublishController {
   /**
@@ -52,6 +54,7 @@ class PublishController {
     let totalLength = 0;
     // let failedReports = [];
     call.on('data', (employeeStream) => {
+      console.log('++++++++++', employeeStream)
       if (employeeStream?.chunk) {
         totalLength += employeeStream.chunk.length
         successfulReports.push(employeeStream.chunk)
@@ -172,8 +175,6 @@ class PublishController {
     var client = PublishController.getNetGrpcClient(ip_address, port);
 
     client.ListObjects(putObjectReq, (err, data) => {
-      console.log('+++++++++++', err)
-      console.log('+++++++++++', data)
       if (err) {
         res.send();
         return;
@@ -185,7 +186,8 @@ class PublishController {
   static getNetGrpcClient(ip_address, port) {
     // ip_address = "154.31.34.194";
     // ip_address  = "192.168.1.115";
-    ip_address = "172.16.30.11";
+    let grpcConfig = config.get('grpcConfig');
+    ip_address = grpcConfig.get("ip");
     port = 8007;
     return new publish_proto.API(
       ip_address + ":" + port,

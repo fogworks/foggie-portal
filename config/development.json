@@ -33,7 +33,7 @@
         "logFileName":"foggieV/logs/foggiv-client.log"
     },
     "grpcConfig":{
-        "ip":"172.16.30.11",
+        "ip":"218.2.96.99",
         "port":"8007"
     },
     "fileConfig":{
@@ -42,6 +42,7 @@
     },
     "registerCenterConfig":{
         "url":"http://154.31.41.36:8001",
-        "syncOrder":"/api/accounts/bind_space_order"
+        "syncOrder":"/api/accounts/bind_space_order",
+        "getFoggieInfo":"/api/accounts/get_foggie_info"
     }
 }

@@ -65,5 +65,14 @@ export function assetsTransfer(data) {
 }
 
 
+export function sync_device(data) {
+  return request({
+    url: baseUrl + '/order/sync_device',
+    method: 'post',
+    data,
+  });
+}
+
+
 
 

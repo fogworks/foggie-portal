@@ -187,14 +187,7 @@ export default {
         shareRefContent.shareStr = shareStr;
         showShareDialog.value = true;
         copyContent.value = shareCopyContent;
-
-        // this.shareBoxShow = true;
-        console.log(
-          "shareCopyContentshareCopyContentshareCopyContent",
-          shareCopyContent
-        );
       } else {
-        // this.closeRewardBox();
       }
     };
     const downloadItem = () => {

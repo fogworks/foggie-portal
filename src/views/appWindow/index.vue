@@ -65,6 +65,7 @@ import FoggieMax from "@/views/foggieMax/layout";
 import FoggieClient from "@/views/Alltemplate/Alltemplate";
 import DeviceList from "./deviceList";
 import { search_foggie } from "@/utils/api";
+import {sync_device} from "@/api/order/orderList";
 import { useRoute } from "vue-router";
 const store = useStore();
 const route = useRoute();
@@ -80,7 +81,6 @@ const search = () => {
   loading.value = true;
   search_foggie({ email: email.value })
     .then((res) => {
-      console.log(res, "res");
       let cur_data = res.data;
       cur_data.forEach((r) => {
         if (r.device_type === "space") {
@@ -136,9 +136,27 @@ const clickItem = (data) => {
       });
     }
   }
+  if (
+    data.device_type === "foggie" ||
+    data.device_type === "foggie_max" ||
+    !data.device_type
+  ) {
+    // TODO
+    syncDevice(data);
+  }
+};
+const syncDevice = async (data) => {
+  let d = {
+    email: email.value,
+    deviceId: data.device_id,
+  };
+  await sync_device(d)
+    .then(() => {})
+    .catch(() => {
+      // syncDevice(data);
+    });
 };
 const cancelItem = (data) => {
-  console.log("cancelItem");
   let target = totalActiveDevice.data.find(
     (el) =>
       (el.device_id && el.device_id === data.device_id) ||

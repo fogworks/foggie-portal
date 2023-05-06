@@ -9,8 +9,6 @@ const userService = require('./UserService')
 const orderService = require('./OrderService')
 const fileService = require('./FileService')
 const Encrypt = require('./Encrypt')
-const pow_proto = require('./grpc/pow');
-const grpc = require('@grpc/grpc-js');
 
 const fileConfig = config.get('fileConfig');
 const merkleBufferSize = fileConfig.get('merkleBufferSize');
@@ -447,11 +445,19 @@ class OrderController {
             }
         });
 
+        // 获取peerId
+        var orderInfo = await orderService.getOrderById(email, orderId);
+        if(orderInfo instanceof BizResultCode){
+            res.send(BizResult.fail(orderInfo));
+            return;
+        }
+        var foggieId = orderInfo.foggie_id;
+
         const getMerkleRequest = {
-            id: orderId
+            id: foggieId
         };
 
-        var powClient = OrderController.getPowGrpcClient();
+        var powClient = orderService.getPowGrpcClient();
         powClient.GetMerkleRoot(getMerkleRequest, function (err, data) {
             if (err) {
                 logger.error('err:', err);
@@ -495,13 +501,6 @@ class OrderController {
                 res.send(BizResult.fail(BizResultCode.PUSH_MERKLE_FAILED));
             })
         });
-    }
-
-    static getPowGrpcClient() {
-        var grpcConfig = config.get('grpcConfig');
-        var ip = grpcConfig.get("ip");
-        var port = grpcConfig.get("port");
-        return new pow_proto.PowService(ip + ':' + port, grpc.credentials.createInsecure());
     }
 
     /**
@@ -784,6 +783,75 @@ class OrderController {
             return;
         }
         res.send(BizResult.success(result));
+    }
+
+    /**
+     * 订单取消
+     * @param {*} req    HTTP请求
+     * @param {*} res   HTTP响应
+     */
+    static async cancel(req, res) {
+        var email = req.body.email;
+        var chainId = req.body.chainId;
+        var orderId = req.body.orderId;
+
+        if (!email || !chainId || !orderId) {
+            res.send(BizResult.validateFailed());
+            return;
+        }
+
+        var privateKey = await userService.getPrivateKeyByEmail(email);
+        if (privateKey instanceof BizResultCode) {
+            res.send(BizResult.fail(privateKey));
+            return;
+        }
+        var chainConfig = config.get('chainConfig');
+        var httpEndpoint = chainConfig.get("httpEndpoint");
+
+        var userInfo = await userService.getUserInfo(email);
+        if (userInfo instanceof BizResultCode) {
+            logger.info('userInfo is null');
+            res.send(BizResult.fail(userInfo));
+            return;
+        }
+        var username = userInfo.username;
+        var dmc_client = DMC({
+            chainId: chainId,
+            keyProvider: privateKey,
+            httpEndpoint: httpEndpoint,
+            logger: {
+                log: null,
+                error: null
+            }
+        });
+        var result = await orderService.cancel(dmc_client, username, orderId);
+        if (result instanceof BizResultCode) {
+            res.send(BizResult.fail(result));
+            return;
+        }
+        res.send(BizResult.success(result));
+    }
+
+    /**
+     * 同步设备信息（foggie 、 foggie max的peerId、grpc ip和port、以及上传文件的id）
+     * @param {*} req 
+     * @param {*} res 
+     */
+    static async syncDevice(req, res) {
+        var deviceId = req.body.deviceId;
+        var email = req.body.email;
+        if (!deviceId || !email) {
+            res.send(BizResult.validateFailed());
+            return;
+        }
+
+        // 保存在订单表中
+        var saveRes = await orderService.saveDevice2Order(email, deviceId);
+        if (saveRes instanceof BizResultCode) {
+            res.send(BizResult.fail(saveRes));
+            return;
+        }
+        res.send(BizResult.success(saveRes));
     }
 
     /**
