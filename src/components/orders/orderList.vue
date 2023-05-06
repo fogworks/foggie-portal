@@ -104,11 +104,6 @@
             </div>
           </el-col>
           <el-col :span="10" style="text-align: center; padding: 0px 20px">
-            <!-- <svg-icon
-              icon-class="serverTime"
-              size="40"
-              style="margin-right: 10px"
-            ></svg-icon> -->
             <div
               style="
                 display: flex;

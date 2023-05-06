@@ -55,6 +55,15 @@ export function userAssets(data) {
     data,
   });
 }
+//转账
+export function assetsTransfer(data) {
+  return request({
+    url: baseUrl + '/assets/transfer',
+    method: 'post',
+    data,
+  });
+}
+
 
 
 
