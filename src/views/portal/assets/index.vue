@@ -4,7 +4,7 @@
       <div class="flex justify-between">
         <div class="flex items-center">
           <img class="title-img" src="@/assets/assets-title.png" alt="" />
-          <div class="title">Foggie</div>
+          <div class="title">Assets</div>
         </div>
         <a
           class="flex items-center records"
@@ -58,7 +58,7 @@
           <!-- <div class="dmc">DMC</div> -->
         </div>
         <div class="flex today-right">
-          <div @click="rewardsVisible = true">Earn More &nbsp;></div>
+          <!-- <div @click="rewardsVisible = true">Earn More &nbsp;></div> -->
         </div>
       </div>
       <div class="sub-title">Balance</div>
@@ -89,7 +89,6 @@
         v-model:visible="rewardsVisible"
       >
       </Rewards>
-
       <Withdraw
         v-if="WithdrawVisible"
         v-model:visible="WithdrawVisible"
@@ -99,10 +98,7 @@
         :noOrderShow="noOrderShow"
         @reload="reload"
       ></Withdraw>
-      <AssetsRecords
-        v-model:visible="recordsVisible"
-        :currentOODItem="currentOODItem"
-      ></AssetsRecords>
+      <AssetsRecords v-model:visible="recordsVisible"></AssetsRecords>
       <NftDialog
         v-model:visible="NftDialogVisible"
         :nft-link="nftLink"
