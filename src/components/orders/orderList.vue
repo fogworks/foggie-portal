@@ -8,7 +8,7 @@
   >
     <div class="ListTitle">
       <div>
-        <span>订单ID: {{ item.id }} </span>
+        <span>Order ID: {{ item.id }} </span>
         <span
           style="
             font-size: 15px;
@@ -52,14 +52,7 @@
     >
       <div class="BoxContent">
         <el-row class="BoxContent_header">
-          <el-col :span="3" style="line-height: 100px; text-align: center">
-            <span
-              style="margin-right: 10px; font-size: 40px; font-weight: 600"
-              >{{ item.miner_lock_pst_amount }}</span
-            >
-            <span style="font-size: 24px; font-weight: 600">PST</span>
-          </el-col>
-          <el-col :span="11" class="tow_col">
+          <el-col :span="14" class="tow_col">
             <div>
               <div>Price</div>
               <div>
@@ -170,20 +163,27 @@
           style="margin: 12px 0; border-top: 1px #4a4c51 var(--el-border-style)"
         />
         <el-row style="height: 90px">
-          <el-col :span="12" class="bottom_col">
+          <el-col :span="3" style="line-height: 80px; text-align: center">
+            <span
+              style="margin-right: 10px; font-size: 40px; font-weight: 600"
+              >{{ item.miner_lock_pst_amount }}</span
+            >
+            <span style="font-size: 24px; font-weight: 600">GB</span>
+          </el-col>
+          <el-col :span="9" class="bottom_col">
             <svg-icon
               icon-class="left"
               size="40"
               style="margin-right: 10px"
             ></svg-icon>
-            <div>
+            <!-- <div>
               <div>Blocks</div>
               <div>12600</div>
             </div>
             <div style="text-align: center">
               <div>Foggie</div>
               <div>12</div>
-            </div>
+            </div> -->
             <div>
               <div>Files</div>
               <div>{{ item.file_count }}</div>
@@ -192,10 +192,10 @@
               <div>Size</div>
               <div>{{ getfilesize(item.used_space) }}</div>
             </div>
-            <div>
+            <!-- <div>
               <div>Slots</div>
               <div>82600</div>
-            </div>
+            </div> -->
           </el-col>
           <el-col :span="8" class="bottom_col">
             <svg-icon
@@ -207,7 +207,7 @@
               <div>User</div>
               <div><span>12/</span><span style="color: #db001b">1</span></div>
             </div>
-            <div>
+            <!-- <div>
               <div>Chain</div>
               <div><span>12/</span><span style="color: #db001b">0</span></div>
             </div>
@@ -217,7 +217,7 @@
                 <span>300/</span><span style="color: #db001b">12</span
                 ><span style="color: #ffff00">/1</span>
               </div>
-            </div>
+            </div> -->
           </el-col>
           <el-col
             :span="4"
@@ -503,7 +503,7 @@ onMounted(() => {
     .bottom_col {
       display: flex;
       padding: 0px 15px;
-      justify-content: space-between;
+      justify-content: space-around;
       align-items: center;
 
       & > div {

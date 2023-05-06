@@ -9,7 +9,7 @@ export default {
 
     theme: "",
     deviceList: [],
-    currentOODItem: {
+    currentOODItem: window.localStorage.currentOODItem ? { data: JSON.parse(window.localStorage.currentOODItem) } : {
       data: {
         device_id: "",
       },

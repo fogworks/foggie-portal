@@ -30,7 +30,7 @@
         <svg-icon icon-class="refresh" class="refresh-icon"></svg-icon>
         Refresh</el-button
       >
-      <el-dropdown trigger="click" @command="tableSort">
+      <!-- <el-dropdown trigger="click" @command="tableSort">
         <span class="el-dropdown-link">
           <el-button class="top-btn refresh" @click="" key="plain" link>
             Sort By<el-icon class="el-icon--right"> <arrow-down /> </el-icon
@@ -70,7 +70,7 @@
           style="margin-right: 5px; color: #29abff"
         ></svg-icon>
         PIN Task List</el-button
-      >
+      > -->
       <div>
         <el-input
           class="search-input"
@@ -647,7 +647,7 @@ const doShare = async (item) => {
   const isFolder = item.type === "application/x-directory";
   if (key) {
     // let user = window.sessionStorage.getItem("walletUser");
-    let user = store.getters['global/userInfo'].dmc;
+    let user = store.getters["global/userInfo"].dmc;
     let ood_id_cyfs = device_id_real ? device_id_real : device_id;
     let _key = encodeURIComponent(key);
     let data = await shareLink(device_id.value, _key);

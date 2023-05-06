@@ -2,15 +2,32 @@
   <div class="shop-box" v-if="isShop">
     <div class="card">
       <div class="content">
-        <div class="title">Foggie</div>
+        <!-- <div class="title">Foggie</div> -->
         <div>
           <svg-icon icon-class="logo-dog"></svg-icon>
         </div>
-        <div class="price">$199.9</div>
+        <div class="price">$19.9</div>
         <div class="description">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at
-          posuere eros. Interdum et malesuada fames ac ante ipsum primis in
-          faucibus.
+          <div>
+            <svg-icon icon-class="yes" size="20"></svg-icon>
+            Earn crypto rewards while you sleep
+          </div>
+          <div>
+            <svg-icon icon-class="yes" size="20"></svg-icon>
+            Mint NFTs
+          </div>
+          <div>
+            <svg-icon icon-class="yes" size="20"></svg-icon>
+            Avoid censorship
+          </div>
+          <div>
+            <svg-icon icon-class="yes" size="20"></svg-icon>
+            Minimize digital piracy
+          </div>
+          <div>
+            <svg-icon icon-class="yes" size="20"></svg-icon>
+            Run privacy-first dApps
+          </div>
         </div>
       </div>
       <button>Buy now</button>
@@ -18,18 +35,43 @@
 
     <div class="card">
       <div class="content">
-        <div class="title">Foggie Pro Max</div>
-        <div>
-          <svg-icon icon-class="logo-dog"></svg-icon>
+        <div class="title">
+          <img src="@/assets/welcome-asset.png" alt="" />
         </div>
-        <div class="price">$238</div>
         <div class="description">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at
-          posuere eros. Interdum et malesuada fames ac ante ipsum primis in
-          faucibus.
+          <div>
+            <svg-icon icon-class="yes" size="20"></svg-icon>
+            No Monthly Fees
+          </div>
+          <div>
+            <svg-icon icon-class="yes" size="20"></svg-icon>
+            Earn crypto rewards while you sleep
+          </div>
+          <div>
+            <svg-icon icon-class="yes" size="20"></svg-icon>
+            Run privacy-first dApps
+          </div>
+          <div>
+            <svg-icon icon-class="yes" size="20"></svg-icon>
+            Mint NFTs in bulk with no code
+          </div>
+          <div>
+            <svg-icon icon-class="yes" size="20"></svg-icon>
+            Avoid censorship & digital piracy
+          </div>
+          <div>
+            <svg-icon icon-class="yes" size="20"></svg-icon>
+            Escape from Big Tech
+          </div>
         </div>
       </div>
-      <button>Buy now</button>
+      <a
+        style="width: 90%"
+        target="_blank"
+        href="https://www.indiegogo.com/projects/foggie-max-the-world-s-first-personal-web3-server#/"
+      >
+        <button style="width: 100%">Buy now</button>
+      </a>
     </div>
 
     <div class="card">
@@ -160,6 +202,14 @@ const handleActive = (val = "") => {
   color: rgba(255, 255, 255, 0.6);
   margin-top: 10px;
   font-size: 14px;
+  text-align: left;
+  > div {
+    text-align: left;
+  }
+  svg {
+    vertical-align: middle;
+    color: $light_blue;
+  }
 }
 
 .content .title {
@@ -169,6 +219,9 @@ const handleActive = (val = "") => {
   margin-top: 10px;
   font-size: 25px;
   letter-spacing: 1px;
+  img {
+    width: 130px;
+  }
 }
 
 button {

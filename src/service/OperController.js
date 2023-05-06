@@ -3,7 +3,6 @@ const BizResultCode = require("./BaseResultCode");
 const logger = require("./logger")("FileController.js");
 const publish_proto = require("./grpc/publish");
 const grpc = require("@grpc/grpc-js");
-const { da } = require("element-plus/es/locale");
 
 class PublishController {
   /**
@@ -52,16 +51,16 @@ class PublishController {
     let successfulReports = [];
     let totalLength = 0;
     // let failedReports = [];
-    call.on('data',(employeeStream)=>{
+    call.on('data', (employeeStream) => {
       if (employeeStream?.chunk) {
         totalLength += employeeStream.chunk.length
         successfulReports.push(employeeStream.chunk)
       }
-      
+
 
     });
-    call.on('end',()=>{      
-       res.send(Buffer.concat(successfulReports, totalLength))
+    call.on('end', () => {
+      res.send(Buffer.concat(successfulReports, totalLength))
     })
   }
 

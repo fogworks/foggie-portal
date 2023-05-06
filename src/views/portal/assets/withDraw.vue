@@ -280,7 +280,6 @@ export default {
     withDrawMoney: {},
   },
   setup(props, { emit }) {
-    const requestTarget = inject("requestTarget");
     const close = () => {
       emit("reload");
       emit("update:visible", false);
@@ -331,7 +330,7 @@ export default {
         let postdata = {
           account_name: form.receiver,
         };
-        checkAccount(postdata, requestTarget).then(
+        checkAccount(postdata).then(
           (res) => {
             cb();
           },
@@ -530,7 +529,7 @@ export default {
       // withdrawFormRef.value.validate((valid) => {
       if (!showErrorTips.value) {
         loading.value = true;
-        checkAccount(postdata, requestTarget).then(
+        checkAccount(postdata).then(
           (res) => {
             let data = {
               account: walletUser.value,
