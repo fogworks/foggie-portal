@@ -46,7 +46,7 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted, toRefs, watch } from "vue";
+import { ref, reactive, onMounted, toRefs, watch, inject } from "vue";
 import MyEcharts from "@/components/echarts/myEcharts";
 import { oodMonitor } from "@/utils/api.js";
 import { pieOption } from "@/components/echarts/util";
@@ -60,6 +60,7 @@ export default {
     },
   },
   setup(props, { emit }) {
+    const deviceData = inject("deviceData");
     const { currentOODItem } = toRefs(props);
     const spaceAvailable = ref(0);
 

@@ -250,6 +250,7 @@ import {
   withdrawDMC,
   verifyGoogle,
 } from "@/utils/api.js";
+import { assetsTransfer } from "@/api/order/orderList.js";
 import { Base64 } from "js-base64";
 import { ElNotification } from "element-plus";
 import VerificationCode from "./verificationCode";
@@ -280,7 +281,6 @@ export default {
     withDrawMoney: {},
   },
   setup(props, { emit }) {
-    const requestTarget = inject("requestTarget");
     const close = () => {
       emit("reload");
       emit("update:visible", false);
@@ -301,6 +301,9 @@ export default {
     const authorForm = reactive({
       validateToken: "",
     });
+    const chainId = window.localStorage.getItem("FoggieV")
+      ? JSON.parse(window.localStorage.getItem("FoggieV"))?.global?.ChainId
+      : "";
     const formRef = ref(null);
     const withdrawFormRef = ref(null);
     const authorFormRef = ref(null);
@@ -331,7 +334,7 @@ export default {
         let postdata = {
           account_name: form.receiver,
         };
-        checkAccount(postdata, requestTarget).then(
+        checkAccount(postdata).then(
           (res) => {
             cb();
           },
@@ -522,6 +525,7 @@ export default {
         }
       }
     }
+    const email = computed(() => store.getters["token/currentUser"]);
     function handelWithdraw() {
       let postdata = {
         account_name: form.receiver,
@@ -530,15 +534,17 @@ export default {
       // withdrawFormRef.value.validate((valid) => {
       if (!showErrorTips.value) {
         loading.value = true;
-        checkAccount(postdata, requestTarget).then(
+        checkAccount(postdata).then(
           (res) => {
             let data = {
-              account: walletUser.value,
+              chainId,
+              email: email.value,
+              // account: walletUser.value,
               amount: Number(form.walletMoney),
-              receiver: form.receiver, //没有设置OTP的，account和receiver 必须⼀致
+              to: form.receiver, //没有设置OTP的，account和receiver 必须⼀致
               totp_secret: withdrawForm.my_auth_input,
             };
-            withdrawDMC(data).then((res) => {
+            assetsTransfer(data).then((res) => {
               loading.value = false;
               if (res.code !== 400) {
                 // let str = "vood.withdrawSuccess";

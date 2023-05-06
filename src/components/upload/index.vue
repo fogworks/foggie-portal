@@ -10,27 +10,44 @@
           single file is 2GB. If there are large files, you can choose to slice
           them with tools before uploading
         </div>
-        <div class="my_top_uploadText">
-          The OOD you have chosen is:
-          456
-        </div>
+        <div class="my_top_uploadText">The OOD you have chosen is: 456</div>
       </div>
-      <uploader style="position: relative" ref="uploader" class="uploader-app" :multiple='true' :options="options"
-        :auto-start="false" :file-status-text="fileStatusText" @files-added="onFilesAdded" @file-added="onFileAdded">
+      <uploader
+        style="position: relative"
+        ref="uploader"
+        class="uploader-app"
+        :multiple="true"
+        :options="options"
+        :auto-start="false"
+        :file-status-text="fileStatusText"
+        @files-added="onFilesAdded"
+        @file-added="onFileAdded"
+      >
         <uploader-unsupport />
         <uploader-drop>
-          <uploader-btn class="uploader-btn" :single="true">Select File</uploader-btn>
-          <uploader-btn class="uploader-btn" :directory="true" :single="true">Select a folder</uploader-btn>
+          <uploader-btn class="uploader-btn" :single="true"
+            >Select File</uploader-btn
+          >
+          <uploader-btn class="uploader-btn" :directory="true" :single="true"
+            >Select a folder</uploader-btn
+          >
         </uploader-drop>
       </uploader>
 
-      <teplate v-for="(uploadList, key) in uploadFileList" :key="key" style="height: 100%;">
-        <fileList @fileShare="fileShare" @fileDetail="fileDetail" :orderID="key" v-model:uploadLists="uploadFileList[key]"
-          v-show="key == orderId">
+      <template
+        v-for="(uploadList, key) in uploadFileList"
+        :key="key"
+        style="height: 100%"
+      >
+        <fileList
+          @fileShare="fileShare"
+          @fileDetail="fileDetail"
+          :orderID="key"
+          v-model:uploadLists="uploadFileList[key]"
+          v-show="key == orderId"
+        >
         </fileList>
-      </teplate>
-
-
+      </template>
 
       <!-- <div class="uploader-list" v-if="isEmpty">
         <ul>
@@ -46,53 +63,52 @@
 
         </ul>
       </div> -->
-
-
-
-
     </div>
   </div>
 </template>
 
 <script>
-import { ref, reactive, onMounted, toRefs, readonly, provide, computed } from "vue";
+import {
+  ref,
+  reactive,
+  onMounted,
+  toRefs,
+  readonly,
+  provide,
+  computed,
+} from "vue";
 import fileList from "../upload/fileList.vue";
 import uploader from "vue-simple-uploader";
 import { useStore } from "vuex";
 
-
-import { APIClient, } from "@/pb/node_grpc_web_pb";
+import { APIClient } from "@/pb/node_grpc_web_pb";
 
 export default {
   name: "DashBoard",
   components: { fileList },
 
   setup(props, { emit }) {
-
-
-    const currentPath = ref('')
+    const currentPath = ref("");
 
     const FILE_SIZE = readonly(1024 * 1024 * 1024 * 2);
     const store = useStore();
-    const orderId = computed(() => store.getters.orderId)
+    const orderId = computed(() => store.getters.orderId);
 
-    const deviceType = computed(() => store.getters.deviceType)
-    
-    const uploadFileList = computed(() => store.state.upload.uploadFileList)
+    const deviceType = computed(() => store.getters.deviceType);
+
+    const uploadFileList = computed(() => store.state.upload.uploadFileList);
 
     const options = ref({
       simultaneousUploads: 5,
 
       chunkSize: 1024 * 1024 * 5,
       forceChunkSize: true, // 是否强制每个块都小于 chunkSize
-      allowDuplicateUploads: true  //如果说一个文件已经上传过了是否还允许再次上传。默认的话如果已经上传了，除非你移除了否则是不会再次重新上传的，所以也就是默认值为 false。
+      allowDuplicateUploads: true, //如果说一个文件已经上传过了是否还允许再次上传。默认的话如果已经上传了，除非你移除了否则是不会再次重新上传的，所以也就是默认值为 false。
     });
     // const client = new APIClient('http://154.31.34.194:9007')
     const client = new APIClient('http://218.2.96.99:8007');
     // window.client = client
-    provide('client', readonly(client))
-
-
+    provide("client", readonly(client));
 
     const alertTitle = ref("");
     const fileStatusText = ref({
@@ -106,52 +122,53 @@ export default {
     });
     const fileList = ref([]);
 
-
-
-
     const onFileAdded = (file) => {
       if (file.size === 0) return;
       if (file.size > FILE_SIZE) {
         ElMessage({
-          message: "The maximum upload size of a single file should not exceed 2GB.",
+          message:
+            "The maximum upload size of a single file should not exceed 2GB.",
           type: "warning",
           duration: 3000,
-        })
+        });
         return;
       }
-
-
 
       let directory = file.file.webkitRelativePath;
       let directoryPath = directory.substr(0, directory.lastIndexOf("/") + 1);
       let target = "";
       file.paused = false;
       file.rootPath = currentPath.value;
-      file.deviceType = deviceType.value
+      file.deviceType = deviceType.value;
       file.urlPath = target;
 
-      file.urlPrefix = directoryPath ? currentPath.value + directoryPath : currentPath.value || "/";
-      file.urlFileName = directoryPath ? currentPath.value + directoryPath + file.name : currentPath.value + file.name;
+      file.urlPrefix = directoryPath
+        ? currentPath.value + directoryPath
+        : currentPath.value || "/";
+      file.urlFileName = directoryPath
+        ? currentPath.value + directoryPath + file.name
+        : currentPath.value + file.name;
 
-
-
-      let list = store.state.upload.uploadFileList[orderId.value] ?? []
-      if (list.some(item => item.uniqueIdentifier == file.uniqueIdentifier && item.urlPrefix == file.urlPrefix)) {   // 唯一标识  + 文件夹路径如果相同
-        return
+      let list = store.state.upload.uploadFileList[orderId.value] ?? [];
+      if (
+        list.some(
+          (item) =>
+            item.uniqueIdentifier == file.uniqueIdentifier &&
+            item.urlPrefix == file.urlPrefix
+        )
+      ) {
+        // 唯一标识  + 文件夹路径如果相同
+        return;
       }
 
-
-      file.orderId = orderId.value
-
+      file.orderId = orderId.value;
 
       list.unshift(file);
       store.commit("upload/setFileList", list);
     };
     const onFileProgress = (rootFile, file, chunk) => {
     };
-    const onFilesAdded = (files, fileList) => {
-
-    };
+    const onFilesAdded = (files, fileList) => {};
     const onFileSuccess = () => {
     };
     const fileShare = (item) => {
@@ -166,14 +183,9 @@ export default {
     };
 
     const closeUploadBox = () => {
-
-      store.commit('upload/closeUpload')
-
+      store.commit("upload/closeUpload");
     };
-    onMounted(() => {
-
-    })
-
+    onMounted(() => {});
 
     return {
       FILE_SIZE,
@@ -190,7 +202,6 @@ export default {
       fileShare,
       fileDetail,
       closeUploadBox,
-
     };
   },
 };

@@ -61,25 +61,36 @@
           <div @click="rewardsVisible = true">Earn More &nbsp;></div>
         </div>
       </div>
-      <div class="sub-title">Balance</div>
+      <div class="sub-title">Expiration time</div>
       <div class="today-grid Balance-grid">
-        <div class="flex items-center">
-          <div class="plus-num">{{ balanceCount }}</div>
-          <div class="dmc">DMC</div>
-        </div>
-        <div class="flex PST" @click="NftDialogVisible = true">
+        <template v-if="!deviceData.device_type">
+          <div class="flex items-center">
+            <div class="plus-num">{{ handleTimeStamp(deviceData.expire) }}</div>
+          </div>
+          <!-- <div class="flex PST" @click="NftDialogVisible = true">
           <div class="plus-num">{{ nftCount }}</div>
           <div class="dmc nft">NFT</div>
-        </div>
-        <div class="flex today-right">
-          <div class="color-box">
-            <el-button @click="WithdrawVisible = true">
-              <RippleInk></RippleInk>
-              Withdraw</el-button
-            >
+        </div> -->
+          <div class="flex today-right">
+            <div class="color-box">
+              <el-button @click="WithdrawVisible = true">
+                <RippleInk></RippleInk>
+                Renew</el-button
+              >
+            </div>
           </div>
-        </div>
+        </template>
+        <template v-else>
+          <div class="flex items-center">
+            <div class="plus-num">
+              {{ getfilesize(deviceData.used_space) || 0 }}/{{
+                getfilesize(deviceData.total_space) || 0
+              }}
+            </div>
+          </div>
+        </template>
       </div>
+
       <Rewards
         :currentOODItem="currentOODItem"
         v-model:visible="rewardsVisible"
@@ -115,6 +126,7 @@ import Withdraw from "./withDraw";
 import AssetsRecords from "./assetsRecords";
 import BigNumber from "bignumber.js";
 import MyEcharts from "@/components/echarts/myEcharts";
+import { handleTimeStamp, getfilesize } from "@/utils/util";
 import {
   user,
   ydaReward,
@@ -142,6 +154,7 @@ export default {
   },
   setup(props, { emit }) {
     const requestTarget = inject("requestTarget");
+    const deviceData = inject("deviceData");
     const { currentOODItem } = toRefs(props);
     const addNum = ref(0);
     const estimateNum = ref(0);
@@ -429,6 +442,7 @@ export default {
       lastWeekOptions,
       currentOODItem,
       nftLink,
+      deviceData,
       openNoVoodDialog,
       adminCategoriesListInit,
       getDMC,
@@ -436,6 +450,7 @@ export default {
       initBills,
       initAmount,
       reload,
+      handleTimeStamp,
     };
   },
 };
@@ -572,6 +587,8 @@ export default {
     }
   }
   .Balance-grid {
+    grid-template-columns: 450px 1fr;
+
     border-bottom: none;
   }
 }

@@ -59,11 +59,11 @@ class PublishController {
         totalLength += employeeStream.chunk.length
         successfulReports.push(employeeStream.chunk)
       }
-      
+
 
     });
-    call.on('end',()=>{      
-       res.send(Buffer.concat(successfulReports, totalLength))
+    call.on('end', () => {
+      res.send(Buffer.concat(successfulReports, totalLength))
     })
   }
 

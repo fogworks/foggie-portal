@@ -67,10 +67,14 @@
           <div class="plus-num">{{ balanceCount }}</div>
           <div class="dmc">DMC</div>
         </div>
-        <div class="flex PST" @click="NftDialogVisible = true">
+        <div class="flex items-center" style="justify-content: center">
+          <div class="plus-num">{{ balanceCount2 }}</div>
+          <div class="dmc">PST</div>
+        </div>
+        <!-- <div class="flex PST" @click="NftDialogVisible = true">
           <div class="plus-num">{{ nftCount }}</div>
           <div class="dmc nft">NFT</div>
-        </div>
+        </div> -->
         <div class="flex today-right">
           <div class="color-box">
             <el-button @click="WithdrawVisible = true">
@@ -108,7 +112,15 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted, watchEffect, toRefs, inject } from "vue";
+import {
+  ref,
+  reactive,
+  onMounted,
+  computed,
+  watchEffect,
+  toRefs,
+  inject,
+} from "vue";
 import NftDialog from "./nftDialog";
 import Rewards from "./rewards";
 import Withdraw from "./withDraw";
@@ -123,8 +135,10 @@ import {
   dmcSwap,
   OwnerBills,
 } from "@/utils/api.js";
+import { userAssets } from "@/api/order/orderList.js";
 import * as echarts from "echarts";
 import RippleInk from "@/components/rippleInk";
+import { useStore } from "vuex";
 export default {
   components: {
     Rewards,
@@ -134,18 +148,12 @@ export default {
     RippleInk,
     NftDialog,
   },
-  props: {
-    currentOODItem: {
-      type: Object,
-      default: false,
-    },
-  },
   setup(props, { emit }) {
-    const requestTarget = inject("requestTarget");
-    const { currentOODItem } = toRefs(props);
+    const store = useStore();
     const addNum = ref(0);
     const estimateNum = ref(0);
     const balanceCount = ref(0);
+    const balanceCount2 = ref(0);
     const withDrawMoney = ref(0);
     const nftCount = ref(0);
     // const visible = ref(false);
@@ -154,6 +162,10 @@ export default {
     const WithdrawVisible = ref(false);
     const NftDialogVisible = ref(false);
     const lastweekCount = ref(0);
+    const currentOODItem = computed(
+      () => store.getters["global/currentOODItem"]
+    );
+    const email = computed(() => store.getters["token/currentUser"]);
     const lastWeekOptions = reactive({
       color: "#fff",
       grid: {
@@ -203,9 +215,24 @@ export default {
         },
       ],
     });
+    const getUserAssets = () => {
+      userAssets({ email: email.value }).then((res) => {
+        if (res.code == 200) {
+          balanceCount.value = res.data[0].balance.quantity.slice(
+            0,
+            res.data[0].balance.quantity.length - 4
+          );
+          balanceCount2.value = res.data[1].balance.quantity.slice(
+            0,
+            res.data[1].balance.quantity.length - 4
+          );
+        }
+      });
+    };
     // const estimateDMC = ref(0);
     const adminCategoriesListInit = async () => {
       getDMC();
+      getUserAssets();
       initYesterdayScore();
       initBills();
     };
@@ -214,7 +241,7 @@ export default {
         ? sessionStorage.getItem("walletUser")
         : "foggiezzzzz2";
       getAssets(owner_id).then((r) => {
-        balanceCount.value = r.amount;
+        // balanceCount.value = r.amount;
         nftCount.value = r.nft;
       });
 
@@ -409,16 +436,22 @@ export default {
     watchEffect(() => {
       getUserInfo();
       initAccountMoney();
+      getUserAssets();
     });
-    onMounted(adminCategoriesListInit);
+    onMounted(() => {
+      // getUserAssets();
+      adminCategoriesListInit();
+    });
     return {
       addNum,
+      email,
       estimateNum,
       withDrawMoney,
       noOrderShow,
       walletUser,
       walletType,
       balanceCount,
+      balanceCount2,
       nftCount,
       // visible,
       recordsVisible,
@@ -574,6 +607,7 @@ export default {
   }
   .Balance-grid {
     border-bottom: none;
+    // grid-template-columns: repeat(4, 1fr);
   }
 }
 </style>
