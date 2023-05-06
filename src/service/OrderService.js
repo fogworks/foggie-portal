@@ -3,6 +3,8 @@ const BizResultCode = require('./BaseResultCode');
 const NeDB = require('nedb');
 const moment = require('moment');
 const config = require('config');
+const pow_proto = require('./grpc/pow');
+const grpc = require('@grpc/grpc-js');
 const _ = require('lodash');
 const common = require('./common');
 const path = require('path');
@@ -171,7 +173,7 @@ module.exports = {
                 email: email,
                 order_id: orderId,
                 bill_id: billId
-            }, async function (err, doc) {
+            }, function (err, doc) {
                 if (err) {
                     logger.error('err:', err);
                     resolve(BizResultCode.SAVE_ORDER_FAILED);
@@ -194,6 +196,7 @@ module.exports = {
                             used_space: '',
                             total_space: '',
                             expire: '',
+                            foggie_id: '',
                             total_price: totalPrice,
                             transaction_id: transactionId,
                             update_time: currentTime,
@@ -219,6 +222,7 @@ module.exports = {
                         used_space: '',
                         total_space: '',
                         expire: '',
+                        foggie_id: '',
                         total_price: totalPrice,
                         transaction_id: transactionId,
                         update_time: currentTime,
@@ -229,7 +233,6 @@ module.exports = {
                             resolve(BizResultCode.SAVE_ORDER_FAILED);
                             return;
                         }
-                        logger.info("save order, usedSpace:{}, totalSpace:{}, expire:{}", doc.used_space, doc.total_space, doc.expire);
                         resolve(doc._id);
                     });
                 }
@@ -239,7 +242,73 @@ module.exports = {
             return BizResultCode.SAVE_ORDER_FAILED;
         });
     },
-    updateOrder: async (email, orderId, billId, peerId, rpc, usedSpace, totalSpace, expire) => {
+    saveDevice2Order: async (email, orderId) => {
+        // save device info into NeDB order table
+        // 这里的orderID实际是设备的唯一标识
+        var deviceUniqueId = orderId;
+        return new Promise((resolve, reject) => {
+
+            orderDB.findOne({
+                email: email,
+                order_id: deviceUniqueId
+            }, function (err, doc) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.SAVE_ORDER_FAILED);
+                    return;
+                }
+                var now = moment();
+                var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
+                if (!doc) {
+                    // 获取peerId，rpc，foggieId, foggieToken
+                    var registerCenterConfig = config.get('registerCenterConfig');
+                    var registerCenterUrl = registerCenterConfig.get('url');
+                    var getFoggieInfo = registerCenterConfig.get('getFoggieInfo');
+                    var getFoggie = request('GET', registerCenterUrl + getFoggieInfo+'?device_id='+deviceUniqueId)
+                    var foggieTypeRes = JSON.parse(getFoggie.getBody('utf-8'));
+                    var peerId = foggieTypeRes.data.peer_id;
+                    var rpc = foggieTypeRes.data.rpc;
+                    var foggieId = foggieTypeRes.data.foggie_id;
+                    var foggieToken = foggieTypeRes.data.foggie_token;
+
+                    orderDB.insert({
+                        email: email,
+                        order_id: deviceUniqueId,
+                        miner: '',
+                        user: '',
+                        bill_id: '',
+                        pst: '',
+                        peer_id: peerId,
+                        rpc: rpc,
+                        used_space: '',
+                        total_space: '',
+                        expire: '',
+                        total_price: '',
+                        transaction_id: '',
+                        foggie_id: foggieId,
+                        foggie_token: foggieToken,
+                        update_time: currentTime,
+                        create_time: currentTime
+                    }, function (err, doc) {
+                        if (err) {
+                            logger.error('err:', err);
+                            resolve(BizResultCode.SAVE_ORDER_FAILED);
+                            return;
+                        }
+                        logger.info("save device to order, deviceUniqueId:{}, peerId:{}, rpc:{}, foggieId:{}, foggieToken:{}", deviceUniqueId, peerId, rpc, foggieId, foggieToken);
+                        resolve(doc._id);
+                    });
+                }
+                else{
+                    resolve(doc._id);
+                }
+            });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.SAVE_ORDER_FAILED;
+        });
+    },
+    updateOrder: async (email, orderId, billId, peerId, rpc, usedSpace, totalSpace, expire, foggieId) => {
         // update buy order record into NeDB
         return new Promise((resolve, reject) => {
             var now = moment();
@@ -255,6 +324,7 @@ module.exports = {
                     used_space: usedSpace,
                     total_space: totalSpace,
                     expire: expire,
+                    foggie_id: foggieId,
                     update_time: currentTime
                 }
             }, {}, function (err, num) {
@@ -299,39 +369,83 @@ module.exports = {
             return BizResultCode.UPDTAE_ORDER_FAILED;
         });
     },
+    getPowGrpcClient: () => {
+        var grpcConfig = config.get('grpcConfig');
+        var ip = grpcConfig.get("ip");
+        var port = grpcConfig.get("port");
+        return new pow_proto.PowService(ip + ':' + port, grpc.credentials.createInsecure());
+    },
     syncOrder2RegisterCenter: async (email, orderId, billId, totalSpace, usedSpace, transactionId) => {
+        // 获取foggieID
+        async function getFoggieId(orderId) {
+            const getIDRequest = {
+                id: orderId,
+                tid: 3,
+                typ: 0x20
+            };
+
+            return new Promise((resolve, reject) => {
+                var powClient = module.exports.getPowGrpcClient();
+                powClient.GetID(getIDRequest, function (err, data) {
+                    if (err) {
+                        logger.error('err:', err);
+                        resolve(BizResultCode.GET_FOGGIE_ID_FAILED);
+                    }
+                    logger.info("get foggie id success, foggieId:{}", data.fogId);
+                    resolve(data.fogId);
+                });
+            })
+            .catch((err) => {
+                logger.error('err:', err);
+                return BizResultCode.GET_FOGGIE_ID_FAILED;
+            });
+        }
 
         try {
+
+            var foggieId = await getFoggieId(orderId);
+            if(foggieId instanceof BizResultCode) {
+                logger.error('foggieId is null, orderId:{}', orderId);
+                return foggieId;
+            }
+
             var bill = module.exports.getBillById(billId);
             if (bill instanceof BizResultCode) {
+                logger.error('bill is null, orderId:{}', orderId);
                 return bill;
             }
             // 获取挂单时的transaction_id
             var transactionId = bill[0].action[0].trx_id;
             if (!transactionId) {
+                logger.error('transactionId is null, orderId:{}', orderId);
                 return BizResultCode.GET_TRANSACTION_ID_FAILED;
             }
             var expire = bill[0].expire_on;
             if (!expire) {
+                logger.error('expire is null, orderId:{}', orderId);
                 return BizResultCode.GET_EXPIRE_FAILED;
             }
             // 根据挂单时的tranaction_id获取挂单信息
             var transaction = module.exports.getTransactionById(transactionId);
             if (transaction instanceof BizResultCode) {
+                logger.error('transaction is null, orderId:{}', orderId);
                 return transaction;
             }
             // 根据挂单信息，获取memo
             var memo = await module.exports.getMemoByRawData(transaction[0].rawData);
             if (memo instanceof BizResultCode) {
+                logger.error('memo is null, orderId:{}', orderId);
                 return memo;
             }
             var memoArr = memo.split('$');
             var peerId = memoArr[1];
             if (!peerId) {
+                logger.error('peerId is null, orderId:{}', orderId);
                 return BizResultCode.GET_PEER_ID_FAILED;
             }
             var rpc = memoArr[0];
             if (!rpc) {
+                logger.error('rpc is null, orderId:{}', orderId);
                 return BizResultCode.GET_RPC_FAILED;
             }
             // sync order to register center
@@ -359,7 +473,7 @@ module.exports = {
             if (result.code == 200) {
                 // 同步成功后，更新订单中的peer_id和rpc
                 logger.info('sync order to register center success, orderId:{}', orderId);
-                var updateBuyOrderRes = await module.exports.updateOrder(email, orderId, billId, peerId, rpc, usedSpace, totalSpace, expire);
+                var updateBuyOrderRes = await module.exports.updateOrder(email, orderId, billId, peerId, rpc, usedSpace, totalSpace, expire, foggieId);
                 if (updateBuyOrderRes instanceof BizResultCode) {
                     return updateBuyOrderRes;
                 }
@@ -589,7 +703,7 @@ module.exports = {
                     data: {
                         sender: username,
                         order_id: orderId,
-                        quantity: {quantity: amount, contract: "datamall"}
+                        quantity: { quantity: amount, contract: "datamall" }
                     }
                 }]
             }, {
@@ -623,7 +737,7 @@ module.exports = {
                     data: {
                         sender: username,
                         order_id: orderId,
-                        quantity: {quantity: amount, contract: "datamall"}
+                        quantity: { quantity: amount, contract: "datamall" }
                     }
                 }]
             }, {
@@ -638,6 +752,38 @@ module.exports = {
         }).catch((err) => {
             logger.error('err:', err);
             return BizResultCode.APPEND_FAILED;
+        });
+    },
+    cancel: async (dmc_client, username, orderId) => {
+        // transfer dmc
+        return new Promise((resolve, reject) => {
+            dmc_client.transact({
+                actions: [{
+                    account: "dmc.token",
+                    name: 'cancelorder',
+                    authorization: [
+                        {
+                            actor: username,
+                            permission: 'active'
+                        }
+                    ],
+                    data: {
+                        sender: username,
+                        order_id: orderId,
+                    }
+                }]
+            }, {
+                blocksBehind: 3,
+                expireSeconds: 30,
+            }).then((res) => {
+                resolve(res.transaction_id);
+            }).catch((err) => {
+                logger.error('err:', err);
+                resolve(BizResultCode.CANCEL_FAILED);
+            })
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.CANCEL_FAILED;
         });
     },
 }

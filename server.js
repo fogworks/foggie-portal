@@ -79,6 +79,14 @@ app.post('/order/append', jsonParser, (req, res) => {
   OrderController.append(req, res);
 });
 
+app.post('/order/cancel', jsonParser, (req, res) => {
+  OrderController.cancel(req, res);
+});
+
+app.post('/order/sync_device', jsonParser, (req, res) => {
+  OrderController.syncDevice(req, res);
+});
+
 app.post('/user/encode_user_order', jsonParser, (req, res) => {
   UserController.getToken4UploadFile(req, res);
 });
@@ -164,6 +172,10 @@ app.post('/assets/transfer', jsonParser, (req, res) => {
 
 app.post('/assets/list_in_order', jsonParser, (req, res) => {
   AssetsController.getAssetsOfOrder(req, res);
+});
+
+app.post('/assets/income_in_order', jsonParser, (req, res) => {
+  AssetsController.getIncomeOfOrder(req, res);
 });
 
 app.post('/assets/list_in_user', jsonParser, (req, res) => {

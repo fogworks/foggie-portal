@@ -174,10 +174,11 @@ class FileController {
             return;
         }
         var peerId = orderInfo.peer_id;
+        var foggieId = orderInfo.foggie_id;
 
         const header = {
             peerId: peerId,
-            Id: orderId,
+            Id: foggieId,
             token: token
         };
         var file = req.files.file;
@@ -190,7 +191,7 @@ class FileController {
                 res.send(BizResult.validateFailed());
                 return;
             }
-            await smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, res, fileCategory, orderId, email, peerId, file);
+            await smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, res, fileCategory, orderId, email, peerId, file, foggieId);
         }
         // 大文件上传
         else if (parseInt(fileCategory) == 2) {
@@ -336,6 +337,7 @@ class FileController {
         }
         var peerId = orderInfo.peer_id;
         var rpc = orderInfo.rpc;
+        var foggieId = orderInfo.foggie_id;
         
         // 校验相同的文件是否已经上传过
         var resultData = await fileService.getFileByMd5(orderId, email, fileName, md5, deviceType)
@@ -352,7 +354,7 @@ class FileController {
         }
         const header = {
             peerId: peerId,
-            Id: orderId,
+            Id: foggieId,
             token: token
         };
         const request = {
@@ -454,6 +456,7 @@ class FileController {
         }
         var peerId = orderInfo.peer_id;
         var rpc = orderInfo.rpc;
+        var foggieId = orderInfo.foggie_id;
 
         // 根据文件的上传记录，重读一次文件，生成merkle树后 提交
         var fileUploadRecordRes = await fileService.getFileUploadRecord(orderId, email, md5);
@@ -482,7 +485,7 @@ class FileController {
             // 生成merkle树后 提交
             const header = {
                 peerId: peerId,
-                Id: orderId,
+                Id: foggieId,
                 token: token
             };
             const completeUpload = {
@@ -511,7 +514,7 @@ class FileController {
         });
         const mkHeader = {
             peerId: peerId,
-            Id: orderId
+            Id: foggieId
         };
         const putObjectMKRequest = {
             key: fileName,
@@ -550,7 +553,7 @@ class FileController {
 
 module.exports = FileController
 
-async function smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, res, fileCategory, orderId, email, peerId, file) {
+async function smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, res, fileCategory, orderId, email, peerId, file, foggieId) {
     var netClient = await fileService.getProxGrpcClient(rpc, header);
     const request = {
         key: fileName,
@@ -591,7 +594,7 @@ async function smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, r
         });
         const mkHeader = {
             peerId: peerId,
-            Id: orderId
+            Id: foggieId
         };
         const putObjectMKRequest = {
             key: fileName,

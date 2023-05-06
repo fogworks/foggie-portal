@@ -96,7 +96,7 @@ class AssetsController {
             '    skip: ' + skip + ',\n' +
             '    order: "-create_time,id",\n' +
             '    where: {\n' +
-            '        order_id: "' + order + '",\n' +
+            '        order_id: "' + orderId + '",\n' +
             '        acc_type: 1,\n' +
             '        rec_type: {ne: 5},\n' +
             '        change_amount: {\n' +
@@ -121,9 +121,83 @@ class AssetsController {
             body: body
         }).getBody('utf-8')
         let assetsList = JSON.parse(assetsReq).data.find_order_asset_record
-        // 获取用户订单总数
+        // 获取订单资产记录总数
         let num = '{count_order_asset_record(\n' +
             '            where:{order_id:"' + orderId + '",acc_type:1,rec_type:{ne:5},change_amount:{ne:0.0000}}\n' +
+            '        )\n' +
+            '    }'
+        let assetsCount = JSON.parse(request('POST', transactionAddress + getAssets, {
+            headers: {
+                'Content-Type': 'application/graphql'
+            },
+            body: num
+        }).getBody('utf-8')).data.count_order_asset_record
+        var result = {}
+        result['count'] = assetsCount
+        result['list'] = assetsList
+
+        res.send(BizResult.success(result));
+    }
+
+    /**
+     * 获取订单的收益列表
+     * @param {*} req 
+     * @param {*} res 
+     */
+    static getIncomeOfOrder(req, res) {
+
+        var pageNum = req.body.pageNum;
+        var limit = req.body.limit;
+        var orderId = req.body.orderId;
+
+        var chainConfig = config.get('chainConfig')
+        var transactionAddress = chainConfig.get('transactionAddress')
+        var getAssets = chainConfig.get('getAssets')
+
+        var pageSize = 10;
+        if (typeof (limit) !== "undefined") {
+            pageSize = limit
+        }
+
+        var skip = 0;
+        if (typeof (pageNum) !== "undefined") {
+            skip = (pageNum - 1) * pageSize
+        }
+
+        let body = '{\n' +
+            '        find_order_asset_record(\n' +
+            '    limit: ' + pageSize + ',\n' +
+            '    skip: ' + skip + ',\n' +
+            '    order: "-create_time,id",\n' +
+            '    where: {\n' +
+            '        order_id: "' + orderId + '",\n' +
+            '        acc_type: 1,\n' +
+            '        rec_type: {in: [4,5]},\n' +
+            '        change_amount: {\n' +
+            '            ne: "0.0000", \n' +
+            '        },\n' +
+            '    },\n' +
+            '){ \n' +
+            '    change_amount\n' +
+            '    change_symbol\n' +
+            '    acc_type\n' +
+            '    rec_type\n' +
+            '    create_time\n' +
+            '    createdAt\n' +
+            '    updatedAt\n' +
+            '    id\n' +
+            '}\n' +
+            '    }'
+        var assetsReq = request('POST', transactionAddress + getAssets, {
+            headers: {
+                'Content-Type': 'application/graphql'
+            },
+            body: body
+        }).getBody('utf-8')
+        let assetsList = JSON.parse(assetsReq).data.find_order_asset_record
+        // 获取订单收益记录总数
+        let num = '{count_order_asset_record(\n' +
+            '            where:{order_id:"' + orderId + '",acc_type:1,rec_type:{in: [4,5]},change_amount:{ne:0.0000}}\n' +
             '        )\n' +
             '    }'
         let assetsCount = JSON.parse(request('POST', transactionAddress + getAssets, {
