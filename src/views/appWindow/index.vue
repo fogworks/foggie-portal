@@ -65,6 +65,7 @@ import FoggieMax from "@/views/foggieMax/layout";
 import FoggieClient from "@/views/Alltemplate/Alltemplate";
 import DeviceList from "./deviceList";
 import { search_foggie } from "@/utils/api";
+import {sync_device} from "@/api/order/orderList";
 import { useRoute } from "vue-router";
 const store = useStore();
 const route = useRoute();
@@ -135,11 +136,25 @@ const clickItem = (data) => {
       });
     }
   }
-  if (data.device_type === 'foggie' || data.device_type === 'foggie_max' || !data.device_type) {
+  if (
+    data.device_type === "foggie" ||
+    data.device_type === "foggie_max" ||
+    !data.device_type
+  ) {
     // TODO
+    syncDevice(data);
   }
-
-
+};
+const syncDevice = async (data) => {
+  let d = {
+    email: email.value,
+    deviceId: data.device_id,
+  };
+  await sync_device(d)
+    .then(() => {})
+    .catch(() => {
+      // syncDevice(data);
+    });
 };
 const cancelItem = (data) => {
   let target = totalActiveDevice.data.find(
@@ -226,7 +241,7 @@ onMounted(() => {
     }
   }
   .app-right {
-    z-index: 0;
+    z-index: 1;
     // position: sticky;
     // top: 0;
     // overflow-x: visible;

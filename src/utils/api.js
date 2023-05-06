@@ -298,9 +298,8 @@ export const uploadMultipart = (params) => {
   //   }&content_type=${fileType}`;
   // }
 
-  url = `/mp/${encodeURIComponent(fileName)}?upload_id=${
-    upload_id ?? ""
-  }&content_type=${fileType}`;
+  url = `/mp/${encodeURIComponent(fileName)}?upload_id=${upload_id ?? ""
+    }&content_type=${fileType}`;
 
   let obj = {
     url: url,
@@ -548,7 +547,7 @@ export const search_foggie = (data) => {
   });
 };
 //开启主网账号验证
-export const checkAccount = (data, target) => {
+export const checkAccount = (data, target = {}) => {
   return request({
     url: "/v1/chain/get_account",
     method: "POST",

@@ -31,4 +31,48 @@ export function pushMerkle(data) {
     data,
   });
 }
+//单个端的资产列表
+export function orderAssetsList(data) {
+  return request({
+    url: baseUrl + '/assets/list_in_order',
+    method: 'post',
+    data,
+  });
+}
+//总的用户资产信息列表
+export function userAssetsList(data) {
+  return request({
+    url: baseUrl + '/assets/list_in_user',
+    method: 'post',
+    data,
+  });
+}
+//用户资产总览
+export function userAssets(data) {
+  return request({
+    url: baseUrl + '/assets/user',
+    method: 'post',
+    data,
+  });
+}
+//转账
+export function assetsTransfer(data) {
+  return request({
+    url: baseUrl + '/assets/transfer',
+    method: 'post',
+    data,
+  });
+}
+
+
+export function sync_device(data) {
+  return request({
+    url: baseUrl + '/order/sync_device',
+    method: 'post',
+    data,
+  });
+}
+
+
+
 

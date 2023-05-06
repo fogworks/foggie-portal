@@ -9,12 +9,16 @@ export default {
 
     theme: "",
     deviceList: [],
-    currentOODItem: {
-      data: {
-        device_id: "",
-      },
-    },
-    discoverData: {}
+    currentOODItem:
+      window.localStorage.currentOODItem &&
+      window.localStorage.currentOODItem !== "undefined"
+        ? { data: JSON.parse(window.localStorage.getItem("currentOODItem")) }
+        : {
+            data: {
+              device_id: "",
+            },
+          },
+    discoverData: {},
   },
   mutations: {
     SET_THEME: (state, theme) => {
@@ -35,14 +39,12 @@ export default {
       state.theme = theme;
     },
 
-
     SET_DeviceList: (state, data) => {
       state.deviceList = data;
     },
     SET_DiscoverData: (state, data) => {
       state.discoverData = data;
     },
-
   },
   actions: {
     setTheme({ commit }, theme) {

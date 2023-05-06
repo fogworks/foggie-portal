@@ -40,7 +40,7 @@ import {
   watchEffect,
   reactive,
 } from "vue";
-const MAX_UPLOAD_NUM = 4; // 允许同时存在的上传文件个数
+const MAX_UPLOAD_NUM = 1; // 允许同时存在的上传文件个数
 const emits = defineEmits(["fileShare", "fileDetail", "update:uploadLists"]);
 const props = defineProps({
   orderID: {

@@ -29,7 +29,7 @@
                 <svg-icon icon-class="search2" size="25"></svg-icon>
               </template>
               <template #suffix>
-                <span style="font-size: 16px">PST</span>
+                <span style="font-size: 16px">GB</span>
               </template>
             </el-input>
           </div>
@@ -82,7 +82,7 @@
                   >
                 </p>
                 <p>
-                  Purchase quantity：<span>{{ formLine.quantity }}PST</span>
+                  Purchase quantity：<span>{{ formLine.quantity }}GB</span>
                 </p>
                 <p>
                   Buying cycle：<span>{{ formLine.week }}</span>
@@ -121,7 +121,7 @@
             <label>Order details</label>
             <div class="detail_box">
               <div>Unit price：{{ orderDetail.price }}DMC</div>
-              <div>Purchase quantity：{{ formLine.quantity }}PST</div>
+              <div>Purchase quantity：{{ formLine.quantity }}GB</div>
               <div>Buying cycle：{{ formLine.week }}Week</div>
               <div>Total order price：{{ orderDetail.total }} DMC</div>
             </div>
