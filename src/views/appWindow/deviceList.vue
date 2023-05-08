@@ -37,9 +37,9 @@
           icon-class="logo-dog-black"
           class="logo"
         ></svg-icon>
-        <span class="logo logo-text" v-if="item.device_type == 'foggie_max'"
-          >MAX</span
-        >
+        <span class="logo logo-text" v-if="item.device_type == 'foggie_max'">
+          <img style="width: 30px" src="@/assets/max.png" alt="" />
+        </span>
         <span class="logo logo-text" v-if="item.device_type == 'space'">
           <svg-icon style="font-size: 25px" icon-class="storage"></svg-icon>
         </span>
@@ -97,21 +97,21 @@
               handleTimeStamp(item.expire)
             }}</span>
           </div>
+          <div style="height: unset">
+            <span
+              style="
+                white-space: normal;
+                text-overflow: unset;
+                word-break: break-all;
+              "
+              class="value-span value-span2"
+              >{{ getfilesize(item.used_space) || 0 }}/{{
+                getfilesize(item.total_space) || 0
+              }}</span
+            >
+            Space
+          </div>
         </template>
-        <div style="height: unset">
-          <span
-            style="
-              white-space: normal;
-              text-overflow: unset;
-              word-break: break-all;
-            "
-            class="value-span value-span2"
-            >{{ getfilesize(item.used_space) || 0 }}/{{
-              getfilesize(item.total_space) || 0
-            }}</span
-          >
-          Space
-        </div>
       </li>
     </ul>
   </div>

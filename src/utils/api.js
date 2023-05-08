@@ -89,9 +89,9 @@ export const refreshToken = () => {
 };
 
 //⽂件LIST
-export const oodFileList = (orderId) => {
+export const oodFileList = (orderId, peerId, prefix) => {
   let url = "/list_files",
-    prefix = "",
+    // prefix = "",
     delimiter = "/",
     max_keys = "50",
     start_after = "",
@@ -107,6 +107,38 @@ export const oodFileList = (orderId) => {
     version_id_marker,
     key_marker,
     Id: orderId,
+    peerId,
+  };
+
+  return request({
+    url: url,
+    method: "POST",
+    data,
+  });
+};
+
+
+export const find_objects = (orderId, peerId, fileId) => {
+  let url = "/find_objects",
+    prefix = "",
+    delimiter = "/",
+    max_keys = "50",
+    start_after = "",
+    continuation_token = "",
+    version_id_marker = "",
+    key_marker = "";
+
+  let data = {
+    prefix,
+    delimiter,
+    max_keys,
+    start_after,
+    continuation_token,
+    version_id_marker,
+    key_marker,
+    Id: orderId,
+    peerId,
+    fileId,
   };
 
   return request({
@@ -673,3 +705,16 @@ export const getNetStatus = (data) => {
     data,
   });
 };
+
+
+
+export const search_object = (data) => {
+  let url = `/search_object`;
+  return request({
+    url: url,
+    method: "POST",
+    data,
+  });
+};
+
+

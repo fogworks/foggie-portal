@@ -18,6 +18,9 @@
           >{{ item.created_time }}</span
         >
       </div>
+      <el-link class="link" @click="recordsShow = true" :underline="false"
+        >Records
+      </el-link>
       <div style="font-size: 15px; color: rgba(255, 255, 255, 0.7)">
         <el-tag type="info" effect="dark" round v-if="item.state == '0'">
           订单未共识，等待中...</el-tag
@@ -123,9 +126,9 @@
               >
                 <template #default="{ percentage }">
                   <span
-                    >{{ item.serverTime.time.D }}天
-                    {{ item.serverTime.time.H }}时
-                    {{ item.serverTime.time.M }}分</span
+                    >{{ item.serverTime.time.D }}days
+                    {{ item.serverTime.time.H }}hours
+                    {{ item.serverTime.time.M }}minutes</span
                   >
                 </template>
               </el-progress>
@@ -148,7 +151,7 @@
                 :percentage="70"
               >
                 <template #default="{ percentage }">
-                  <span>15days 30min</span>
+                  <span>15days 0 hours 30min</span>
                 </template>
               </el-progress>
             </div>
@@ -270,13 +273,17 @@
       </div>
     </div>
   </div>
+  <AssetsRecords
+    v-model:visible="recordsShow"
+    :orderId="orderId"
+  ></AssetsRecords>
 
   <!-- </div>s -->
 </template>
 
 <script setup>
 import { ElMessage } from "element-plus";
-import { ref, reactive, toRefs, onMounted, computed } from "vue";
+import { ref, reactive, toRefs, onMounted, computed, toRef } from "vue";
 import { useStore } from "vuex";
 
 import { pushMerkle, getOrderById } from "@/api/order/orderList";
@@ -287,6 +294,7 @@ import {
   getResidueTime,
   ChinaTime4,
 } from "@/utils/ChinaStandardTime";
+import AssetsRecords from "./assetsRecords";
 import { getfilesize } from "@/utils/util.js";
 const $state = useStore();
 // const router = useRouter();
@@ -304,7 +312,8 @@ const state = reactive({
   orderList: [],
 });
 const { orderList } = toRefs(state);
-
+const recordsShow = ref(false);
+const { orderId } = toRefs(props);
 function loadOrderList() {
   let params = {
     orderId: props.orderId,
@@ -329,8 +338,7 @@ function loadOrderList() {
         state.orderList = res.data;
       }
     })
-    .catch((error) => {
-    });
+    .catch((error) => {});
 }
 
 function openUpload(item) {
@@ -440,7 +448,11 @@ onMounted(() => {
     color: #fff;
     margin: 20px 0px;
   }
-
+  .link {
+    &:hover {
+      color: #409eff;
+    }
+  }
   .ListBox {
     background-color: #d9001b;
     width: 100%;

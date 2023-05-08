@@ -106,7 +106,7 @@ export default {
       allowDuplicateUploads: true, //如果说一个文件已经上传过了是否还允许再次上传。默认的话如果已经上传了，除非你移除了否则是不会再次重新上传的，所以也就是默认值为 false。
     });
     // const client = new APIClient('http://154.31.34.194:9007')
-    const client = new APIClient('http://218.2.96.99:8007');
+    const client = new APIClient("http://218.2.96.99:8007");
     // window.client = client
     provide("client", readonly(client));
 
@@ -166,11 +166,9 @@ export default {
       list.unshift(file);
       store.commit("upload/setFileList", list);
     };
-    const onFileProgress = (rootFile, file, chunk) => {
-    };
+    const onFileProgress = (rootFile, file, chunk) => {};
     const onFilesAdded = (files, fileList) => {};
-    const onFileSuccess = () => {
-    };
+    const onFileSuccess = () => {};
     const fileShare = (item) => {
       emit("fileShare", item);
     };

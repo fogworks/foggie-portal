@@ -7,6 +7,7 @@
   <MyFiles
     ref="myFile"
     :currentOODItem="currentOODItem.data"
+    :orderId="deviceData.order_id"
     @toggleToUpload="toggleToUpload"
     @currentPrefix="currentPrefix"
   ></MyFiles>

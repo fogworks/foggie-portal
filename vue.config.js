@@ -179,6 +179,22 @@ module.exports = defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      "^/find_objects": {
+        // target: "http://154.31.41.36:880",
+        // target: "http://218.2.96.99:9010",
+        target: "http://127.0.0.1:3000",
+        changeOrigin: true,
+        secure: false,
+      },
+      
+      "^/search_object": {
+        // target: "http://154.31.41.36:880",
+        // target: "http://218.2.96.99:9010",
+        target: "http://127.0.0.1:3000",
+        changeOrigin: true,
+        secure: false,
+      },
+      
       "^/file_download": {
         // target: "http://154.31.41.36:880",
         // target: "http://218.2.96.99:9010",

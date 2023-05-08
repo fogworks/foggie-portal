@@ -94,16 +94,23 @@
       <div class="content">
         <div class="title">NFT</div>
         <div>
-          <svg-icon icon-class="logo-dog"></svg-icon>
+          <img style="width: 170px" src="@/assets/nft.png" alt="" />
+          <!-- <svg-icon icon-class="logo-dog"></svg-icon> -->
         </div>
         <div class="price">$68</div>
         <div class="description">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at
+          <!-- Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at
           posuere eros. Interdum et malesuada fames ac ante ipsum primis in
-          faucibus.
+          faucibus. -->
         </div>
       </div>
-      <button class="disabled">COMING SOON</button>
+      <a
+        style="width: 90%"
+        target="_blank"
+        href="https://opensea.io/collection/foggie-genesis"
+      >
+        <button style="width: 100%">MINTING NOW</button>
+      </a>
     </div>
   </div>
   <div class="back" v-if="!isShop" @click="handleActive">
@@ -132,6 +139,7 @@ const handleActive = (val = "") => {
   flex-wrap: wrap;
   width: 100%;
   height: 100%;
+  overflow-y: auto;
 }
 .card {
   display: flex;
@@ -139,9 +147,10 @@ const handleActive = (val = "") => {
   align-items: center;
   justify-content: space-around;
   width: 300px;
+  height: 415px;
   min-width: 300px;
   padding: 20px 1px;
-  margin: 10px 0;
+  margin: 10px 20px;
   text-align: center;
   position: relative;
   box-shadow: 0 10px 15px -3px rgba(33, 150, 243, 0.4),

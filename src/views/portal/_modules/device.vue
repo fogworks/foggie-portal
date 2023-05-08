@@ -51,7 +51,11 @@
             <span class="value-span">{{ handleTimeStamp(item.expire) }}</span>
           </div>
         </template>
-        <div class="item" style="height: unset">
+        <div
+          class="item"
+          style="height: unset"
+          v-if="item.device_type == 'space'"
+        >
           <span
             style="
               white-space: normal;

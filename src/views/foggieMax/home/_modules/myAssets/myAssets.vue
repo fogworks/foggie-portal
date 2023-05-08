@@ -92,6 +92,7 @@
       </div>
 
       <Rewards
+        v-if="rewardsVisible"
         :currentOODItem="currentOODItem"
         v-model:visible="rewardsVisible"
       >
@@ -107,10 +108,12 @@
         @reload="reload"
       ></Withdraw>
       <AssetsRecords
+        v-if="recordsVisible"
         v-model:visible="recordsVisible"
-        :currentOODItem="currentOODItem"
+        :orderId="deviceData.order_id"
       ></AssetsRecords>
       <NftDialog
+        v-if="NftDialogVisible"
         v-model:visible="NftDialogVisible"
         :nft-link="nftLink"
       ></NftDialog>
@@ -123,7 +126,7 @@ import { ref, reactive, onMounted, watchEffect, toRefs, inject } from "vue";
 import NftDialog from "./nftDialog";
 import Rewards from "./rewards";
 import Withdraw from "./withDraw";
-import AssetsRecords from "./assetsRecords";
+import AssetsRecords from "@/components/orders/assetsRecords";
 import BigNumber from "bignumber.js";
 import MyEcharts from "@/components/echarts/myEcharts";
 import { handleTimeStamp, getfilesize } from "@/utils/util";

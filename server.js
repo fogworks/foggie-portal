@@ -480,3 +480,10 @@ app.delete('/file_delete', jsonParser, (req, res) => {
 app.post('/list_files', jsonParser, (req, res) => {
   OperController.listFiles(req, res);
 });
+app.post('/search_object', jsonParser, (req, res) => {
+  OperController.SearchObject(req, res);
+});
+app.post('/find_objects', jsonParser, (req, res) => {
+  OperController.findObjects(req, res);
+});
+

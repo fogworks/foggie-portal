@@ -58,13 +58,8 @@ export default {
       type: Boolean,
       default: false,
     },
-    currentOODItem: {
-      type: Object,
-      default: false,
-    },
   },
   setup(props, { emit }) {
-    const { currentOODItem } = toRefs(props);
     const store = useStore();
     const activeName = ref("Reward");
     const tabList = ref([
