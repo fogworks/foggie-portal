@@ -1,7 +1,7 @@
 <template>
   <div class="box" v-loading="loading">
     <div v-if="needLogin" class="login-box">
-      <img src="@/assets/welcome-asset.png" alt="" />
+      <img src="@/assets/login-left.png" alt="" />
       <el-form
         class="account-form"
         :model="form"

@@ -305,13 +305,14 @@ const deviceData = inject("deviceData");
 
 const props = defineProps({
   currentOODItem: Object,
+  orderId: [String, Number],
 });
 const syncDialog = ref(false);
 const taskDisplay = ref(false);
 const closeRightUpload = () => {
   taskDisplay.value = false;
 };
-const { currentOODItem } = toRefs(props);
+const { currentOODItem, orderId } = toRefs(props);
 const store = useStore();
 const sortList = [
   {
@@ -379,8 +380,8 @@ const getFileList = function (scroll, prefix) {
     list_prefix = prefix.join("/") + "/";
   }
   tableLoading.value = true;
-  let orderId = orderId?.value || 100;
-  oodFileList(orderId)
+  // let orderId = orderId?.value || 100;
+  oodFileList(orderId?.value || 100)
     .then((res) => {
       if (res && res.content) {
         initFileData(res);
