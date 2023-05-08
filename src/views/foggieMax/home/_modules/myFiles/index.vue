@@ -433,25 +433,33 @@ const initFileData = async (data) => {
     );
     let { imgHttpLink: url, isSystemImg } = handleImg(
       type,
-      device_id.value,
+      deviceData.foggie_id,
       data.content[j].cid,
-      isDir
+      data.content[j].key,
+      isDir,
+      deviceData.rpc.split(':')[0],
+      deviceData.rpc.split(':')[1],
+      deviceData.peer_id,
     );
     let { imgHttpLink: url_large } = handleImg(
       type,
-      device_id.value,
+      deviceData.foggie_id,
       data.content[j].cid,
+      data.content[j].key,
       isDir,
-      400
+      deviceData.rpc.split(':')[0],
+      deviceData.rpc.split(':')[1],
+      deviceData.peer_id,
     );
     // let _url = require(`@/svg-icons/logo-dog-black.svg`);
-    let cid = data.content[j].isIpfs ? data.content[j].cid : "";
-    let file_id = data.content[j].isCyfs ? data.content[j].file_id : "";
+    let cid =data.content[j].cid;
+    let file_id = data.content[j].file_id;
 
     let name = decodeURIComponent(data.content[j].key);
     if (data.prefix) {
       name = name.split(data.prefix)[1];
     }
+
 
     let item = {
       isDir: isDir,
@@ -563,9 +571,7 @@ const initMyOption = (xdata, ydata, cid) => {
   }
 };
 const theme = computed(() => store.getters.theme);
-const handleImg = (type, ID, pubkey, isDir, size) => {
-  size = size || 20;
-  let location = window.location.origin;
+const handleImg = (type, ID, cid, key,isDir, ip ,port,peerId) => {
   let imgHttpLink = "";
   type = type.toLowerCase();
   let isSystemImg = false;
@@ -580,7 +586,8 @@ const handleImg = (type, ID, pubkey, isDir, size) => {
   ) {
     type = "img";
     // imgHttpLink = `${location}/d/${ID}/${pubkey}?new_w=200`;
-    imgHttpLink = `${location}/object?pubkey=${pubkey}&new_w=${size}`;
+    // imgHttpLink = `${location}/object?pubkey=${pubkey}&new_w=${size}`;
+    imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${ID}&peerId=${peerId}`;
 
     // foggie://peerid/spaceid/cid
   } else {
@@ -759,14 +766,16 @@ const downloadItem = (item) => {
   // let ID = device_id.value;
   // let pubkey = item.pubkey;
   // let downloadUrl = `/fog/${pubkey}?dl=true`;
-  let cid = "QmNf82AtemgaHu2Sg3wpiaEFmoy6ym6Sv1Ma9eLJg6dHm3";
-  let key = "test1/uuu/upgrade.sh1";
+  // let cid = "QmNf82AtemgaHu2Sg3wpiaEFmoy6ym6Sv1Ma9eLJg6dHm3";
+  let cid = item.cid;
+  let key = item.key;
 
-  let ip = "218.2.96.99";
+  let ip = deviceData.rpc.split(':')[0];
   // let ip = "154.31.34.194";
-  let port = 8007;
-  let Id = item.id;
-  let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+  let port = deviceData.rpc.split(':')[1];
+  // let Id = item.id;
+  let Id = deviceData.foggie_id;
+  let peerId = deviceData.peer_id;
   let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
 
   var oA = document.createElement("a");

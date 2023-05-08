@@ -55,6 +55,7 @@ class PublishController {
 
     let successfulReports = [];
     let totalLength = 0;
+    console.log('++++++++download',GetRequest )
     // let failedReports = [];
     call.on('data', (employeeStream) => {
       console.log('++++++++++', employeeStream)
