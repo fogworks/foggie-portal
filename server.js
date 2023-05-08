@@ -118,6 +118,10 @@ app.post('/user/get_private_key', jsonParser, (req, res) => {
   UserController.getUserPrivateKey(req, res);
 });
 
+app.post('/user/dividend_list', jsonParser, (req, res) => {
+  UserController.dividendList(req, res);
+});
+
 app.post('/user/claim_order', jsonParser, (req, res) => {
   UserController.claimOrder(req, res);
 });

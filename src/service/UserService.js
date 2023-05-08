@@ -2,6 +2,7 @@ const logger = require('./logger')('UserService.js');
 const BizResultCode = require('./BaseResultCode');
 const NeDB = require('nedb');
 const moment = require('moment');
+const request = require('sync-request')
 const config = require('config');
 const common = require('./common');
 const path = require('path');
@@ -130,15 +131,15 @@ module.exports = {
                 }
             });
         })
-        .catch((err) => {
-            logger.error('err:', err);
-            return BizResultCode.GET_PRIVATE_KEY_FAILED;
-        });
+            .catch((err) => {
+                logger.error('err:', err);
+                return BizResultCode.GET_PRIVATE_KEY_FAILED;
+            });
     },
     saveUserPrivateKey: async (email, privateKey) => {
         return new Promise(async (resolve, reject) => {
             var userInfo = await module.exports.getUserInfo(email);
-            if(userInfo instanceof BizResultCode){
+            if (userInfo instanceof BizResultCode) {
                 resolve(userInfo);
                 return;
             }
@@ -171,7 +172,7 @@ module.exports = {
             return BizResultCode.SAVE_PRIVATE_KEY_FAILED;
         });
     },
-    getToken4UploadFile: async(email, orderId) =>{
+    getToken4UploadFile: async (email, orderId) => {
 
         var privateKey = await module.exports.getPrivateKeyByEmail(email);
         if (privateKey instanceof BizResultCode) {
@@ -184,5 +185,129 @@ module.exports = {
             return userInfo;
         }
         return Buffer.from(privateKey + ':' + userInfo.username + ':' + orderId).toString('base64');
+    },
+    dividendList: (username, skip, limit) => {
+        try {
+            var chainConfig = config.get('chainConfig');
+            var transactionAddress = chainConfig.get('transactionAddress');
+            var getDividend = chainConfig.get('getDividend');
+
+            let body = '{\n' +
+                '        find_order(\n' +
+                '                skip: '+ skip +',\n' +
+                '                limit: '+ limit +',\n' +
+                '                order: "latest_settlement_date",\n' +
+                '                where: {\n' +
+                '                    and: [\n' +
+                '                        {\n' +
+                '                            or: [\n' +
+                '                                {\n' +
+                '                                    miner_id: "'+ username +'",\n' +
+                '                                },\n' +
+                '                                {\n' +
+                '                                    user_id: "'+ username +'",\n' +
+                '                                }\n' +
+                '                            ],\n' +
+                '                        },\n' +
+                '                        {\n' +
+                '                            or: [\n' +
+                '\n' +
+                '                                {\n' +
+                '                                    state: {\n' +
+                '                                        ne: 4\n' +
+                '                                    },\n' +
+                '                                },\n' +
+                '                                {\n' +
+                '                                    and:[\n' +
+                '                                            {\n' +
+                '                                                state: 4,\n' +
+                '                                            },\n' +
+                '                                            {\n' +
+                '                                                settlement_pledge_amount: {\n' +
+                '                                                ne: "0.0000"\n' +
+                '                                            }\n' +
+                '                                        }\n' +
+                '                                    ]\n' +
+                '                                },\n' +
+                '                            ]\n' +
+                '                        },\n' +
+                '                        {\n' +
+                '                            latest_settlement_date: {\n' +
+                '                                ne : "1970-01-01T00:00:00.000Z"\n' +
+                '                            }\n' +
+                '                        }\n' +
+                '                    ],\n' +
+                '                },\n' +
+                '        ){   \n' +
+                '            id\n' +
+                '            user{\n' +
+                '                id\n' +
+                '            }\n' +
+                '            miner{\n' +
+                '                id\n' +
+                '            }\n' +
+                '            bill{\n' +
+                '                id\n' +
+                '            }\n' +
+                '            user_pledge_amount\n' +
+                '            miner_lock_pst_amount\n' +
+                '            miner_lock_dmc_amount\n' +
+                '            price_amount\n' +
+                '            created_time\n' +
+                '            settlement_pledge_amount\n' +
+                '            lock_pledge_amount\n' +
+                '            state\n' +
+                '            deliver_start_date\n' +
+                '            latest_settlement_date\n' +
+                '            miner_lock_rsi_amount\n' +
+                '            miner_rsi_amount\n' +
+                '            user_rsi_amount\n' +
+                '            deposit_amount\n' +
+                '            deposit_valid\n' +
+                '            cancel_date\n' +
+                '            createdAt\n' +
+                '            challenge {\n' +
+                '                state\n' +
+                '                miner_pay_amount\n' +
+                '            }\n' +
+                '            maker_snapshot {\n' +
+                '                rate\n' +
+                '            }\n' +
+                '        }\n' +
+                '    }'
+            return JSON.parse(request('POST', transactionAddress + getDividend, {
+                headers: {
+                    'Content-Type': 'application/graphql'
+                },
+                body: body
+            }).getBody('utf-8')).data.find_order
+        }
+        catch (e) {
+            logger.error('err:', e);
+            return BizResultCode.GET_DIVIDEND_LIST_FAILED;
+        }
+    },
+    dividendCount: (username) => {
+        try {
+            var chainConfig = config.get('chainConfig');
+            var transactionAddress = chainConfig.get('transactionAddress');
+            var getDividend = chainConfig.get('getDividend');
+
+            let body = '{\n' +
+                '        count_order(\n' +
+                '    where:{and:[{or:[{miner_id:"'+ username +'"},{user_id:"'+ username +'"}]},{or:[{state:{ne:4}},{and:[{state:4},{settlement_pledge_amount:{ne:"0.0000"}}]}]},{latest_settlement_date:{ne:"1970-01-01T00:00:00.000Z"}}]}\n' + 
+                '        )\n' +
+                '    }'
+            return JSON.parse(request('POST', transactionAddress + getDividend, {
+                headers: {
+                    'Content-Type': 'application/graphql'
+                },
+                body: body
+            }).getBody('utf-8')).data.count_order
+        }
+        catch (e) {
+            logger.error('err:', e);
+            return BizResultCode.GET_DIVIDEND_COUNT_FAILED;
+        }
     }
 }

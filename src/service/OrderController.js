@@ -641,14 +641,13 @@ class OrderController {
      * @param {*} res       HTTP响应
      * @returns 挑战记录列表
      */
-    static async getChallengeList(req, res) {
+    static getChallengeList(req, res) {
 
         var orderId = req.body.orderId;
-        var email = req.body.email;
         var limit = req.body.limit;
         var pageNum = req.body.pageNum;
 
-        if (!orderId || !email) {
+        if (!orderId) {
             res.send(BizResult.validateFailed(orderId));
             return;
         }
@@ -661,13 +660,13 @@ class OrderController {
             skip = (pageNum - 1) * limit
         }
 
-        var resultData = await orderService.getChallengeRecord(orderId, email, skip, limit);
+        var resultData = orderService.getChallengeRecord(orderId, skip, limit);
         if (resultData instanceof BizResultCode) {
             res.send(BizResult.fail(resultData));
             return;
         }
 
-        var total = await orderService.getChallengeRecordCount(orderId, email);
+        var total = orderService.getChallengeCount(orderId);
         if (total instanceof BizResultCode) {
             res.send(BizResult.fail(total));
             return;
