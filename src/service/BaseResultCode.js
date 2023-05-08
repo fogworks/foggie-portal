@@ -95,6 +95,9 @@ class BaseResultCode {
 
     // 资产的异常code 40000～49999
     static TRANSFER_FAILED = new BaseResultCode(40000, 'transfer failed');
+    static GET_TRANSFER_VALID_FAILED = new BaseResultCode(40001, 'get transfer valid failed');
+    static GENERATE_QR_CODE_FAILED = new BaseResultCode(40002, 'generating QR code failed');
+    static SAVE_TRANSFER_VALID_FAILED = new BaseResultCode(40003, 'save transfer valid failed');
 }
 
 module.exports = BaseResultCode

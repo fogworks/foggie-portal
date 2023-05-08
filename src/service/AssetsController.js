@@ -22,8 +22,9 @@ class AssetsController {
         var to = req.body.to;
         var amount = req.body.amount;
         var memo = req.body.memo;
+        var userToken = req.body.userToken;
 
-        if (!email || !chainId || !to || !amount) {
+        if (!email || !chainId || !to || !amount || !userToken) {
             res.send(BizResult.validateFailed());
             return;
         }
@@ -57,7 +58,30 @@ class AssetsController {
                 error: null
             }
         });
-        var result = await assetsService.transfer(dmc_client, username, to, amount, memo);
+        var result = await assetsService.transfer(dmc_client, email, userToken
+            , username, to, amount, memo);
+        if (result instanceof BizResultCode) {
+            res.send(BizResult.fail(result));
+            return;
+        }
+        res.send(BizResult.success(result));
+    }
+
+    /**
+     * 转账校验
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
+    static async transferValid(req, res) {
+        var email = req.body.email;
+
+        if (!email) {
+            res.send(BizResult.validateFailed());
+            return;
+        }
+
+        var result = await assetsService.transferValid(email);
         if (result instanceof BizResultCode) {
             res.send(BizResult.fail(result));
             return;

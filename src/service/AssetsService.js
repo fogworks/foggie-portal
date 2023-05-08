@@ -2,56 +2,140 @@ const logger = require('./logger')('AssetsService.js');
 const BizResultCode = require('./BaseResultCode');
 const NeDB = require('nedb');
 const moment = require('moment');
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
 const config = require('config');
 const common = require('./common');
 const path = require('path');
 const dbConfig = config.get('dbConfig');
 const tradeRecordTableName = dbConfig.get('tradeRecordTableName');
-const Encrypt = require('./Encrypt');
+const tradeValidTableName = dbConfig.get('tradeValidTableName');
 
-const db = new NeDB({
+const tradeRecordDb = new NeDB({
     filename: common.getHomePath() + path.sep + tradeRecordTableName,
     autoload: true
 });
 
+const tradeValidDb = new NeDB({
+    filename: common.getHomePath() + path.sep + tradeValidTableName,
+    autoload: true
+});
+
 module.exports = {
-    transfer: async (dmc_client, from, to, amount, memo) => {
+    transfer: async (dmc_client, email, userToken, from, to, amount, memo) => {
         var amount = amount + ' DMC';
         // transfer dmc
         return new Promise((resolve, reject) => {
-            dmc_client.transact({
-                actions: [{
-                    account: "dmc.token",
-                    name: 'transfer',
-                    authorization: [
-                        {
-                            actor: from,
-                            permission: 'active'
-                        }
-                    ],
-                    data: {
-                        from: from,
-                        to: to,
-                        quantity: amount,
-                        memo: memo
-                    }
-                }]
-            }, {
-                blocksBehind: 3,
-                expireSeconds: 30,
-            }).then((res) => {
-                module.exports.saveTradeRecord(from, to, amount, memo, 1);
-                resolve(res.transaction_id);
-            }).catch((err) => {
-                logger.error('err:', err);
-                resolve(BizResultCode.TRANSFER_FAILED);
-            })
+
+            tradeValidDb.findOne({ email: email }, (err, doc) => {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.TRANSFER_FAILED);
+                    return;
+                }
+                if (!doc) {
+                    resolve(BizResultCode.TRANSFER_FAILED);
+                    return;
+                }
+                // Verify the TOTP password
+                const verified = speakeasy.totp.verify({
+                    secret: doc.secret,
+                    encoding: 'base32',
+                    token: userToken
+                });
+
+                if (verified) {
+                    dmc_client.transact({
+                        actions: [{
+                            account: "dmc.token",
+                            name: 'transfer',
+                            authorization: [
+                                {
+                                    actor: from,
+                                    permission: 'active'
+                                }
+                            ],
+                            data: {
+                                from: from,
+                                to: to,
+                                quantity: amount,
+                                memo: memo
+                            }
+                        }]
+                    }, {
+                        blocksBehind: 3,
+                        expireSeconds: 30,
+                    }).then((res) => {
+                        module.exports.saveTradeRecord(from, to, amount, memo, 1);
+                        resolve(res.transaction_id);
+                    }).catch((err) => {
+                        logger.error('err:', err);
+                        resolve(BizResultCode.TRANSFER_FAILED);
+                    })
+                } else {
+                    logger.error('transfer failed, userToken is invalid');
+                    resolve(BizResultCode.TRANSFER_FAILED);
+                }
+            });
         }).catch((err) => {
             logger.error('err:', err);
             return BizResultCode.TRANSFER_FAILED;
         });
     },
-    saveTradeRecord(from, to, amount, memo, type){
+    transferValid: async (email) => {
+
+        return new Promise((resolve, reject) => {
+            tradeValidDb.findOne({ email: email }, function (err, doc) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.GET_TRANSFER_VALID_FAILED);
+                    return;
+                }
+                if (!doc) {
+                    // Generate a secret key
+                    const secret = speakeasy.generateSecret({ length: 10, name: 'Foggie(' + email + ')' });
+                    // Save the secret key in your database
+                    logger.log('secret:', secret);
+                    // Generate a TOTP password
+                    // const token = speakeasy.totp({
+                    //     secret: secret.base32,
+                    //     encoding: 'base32'
+                    // });
+
+                    // Generate a QR code for the secret key
+                    QRCode.toDataURL(secret.otpauth_url, function (err, imageUrl) {
+                        if (err) {
+                            logger.error("Error generating QR code , err:{}", err);
+                            resolve(BizResultCode.GENERATE_QR_CODE_FAILED);
+                            return;
+                        } else {
+                            // Display the QR code to the user
+                            logger.info("imageUrl:", imageUrl);
+                            // save to db
+                            var now = moment().format('YYYY-MM-DD HH:mm:ss');
+                            tradeValidDb.insert({ email: email, secret: secret.base32, update_time: now, create_time: now }, function (err, newDoc) {
+                                if (err) {
+                                    logger.error('save transfer valid err:', err);
+                                    resolve(BizResultCode.SAVE_TRANSFER_VALID_FAILED);
+                                    return;
+                                }
+                                resolve(imageUrl);
+                            });
+                        }
+                    });
+                }
+                else {
+                    resolve(null);
+                }
+            });
+        })
+        .catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.GET_TRANSFER_VALID_FAILED;
+        });
+
+    },
+    saveTradeRecord: (from, to, amount, memo, type) => {
         var now = moment().format('YYYY-MM-DD HH:mm:ss');
         var tradeRecord = {
             from: from,
@@ -62,7 +146,7 @@ module.exports = {
             update_time: now,
             create_time: now
         }
-        db.insert(tradeRecord, function (err, newDoc) {
+        tradeRecordDb.insert(tradeRecord, function (err, newDoc) {
             if (err) {
                 logger.error('saveTradeRecord err:', err);
             }

@@ -27,7 +27,8 @@
         "fileUploadRecordTableName":"foggieV/db/fc_file_upload_record.db",
         "pushMerkleRecordTableName":"foggieV/db/fc_push_merkle_record.db",
         "challengeRecordTableName":"foggieV/db/fc_challenge_record.db",
-        "tradeRecordTableName":"foggieV/db/fc_trade_record.db"
+        "tradeRecordTableName":"foggieV/db/fc_trade_record.db",
+        "tradeValidTableName":"foggieV/db/fc_trade_valid.db"
     },
     "logConfig":{
         "dbPath":"",

@@ -536,41 +536,84 @@ function calcCodebookOffset(fileSize, blockSize, growthFactor) {
 // increase();
 // 铸造
 // mint();
-const BigNumber = require('bignumber.js');
+// const BigNumber = require('bignumber.js');
 
 
-function walletNameToNumber(str) {
-    const len = str.length
+// function walletNameToNumber(str) {
+//     const len = str.length
 
-    let value = new BigNumber(0)
+//     let value = new BigNumber(0)
 
-    for (let i = 0; i <= 12; ++i) {
-        let c = 0
-        if (i < len && i <= 12) {
-            c = char_to_symbol(str.charCodeAt(i))
-        }
+//     for (let i = 0; i <= 12; ++i) {
+//         let c = 0
+//         if (i < len && i <= 12) {
+//             c = char_to_symbol(str.charCodeAt(i))
+//         }
 
-        if (i < 12) {
-            c &= 0x1f
-            let b_c = new BigNumber(c)
-            const two = new BigNumber(2)
-            b_c = b_c.times(two.pow(64 - 5 * (i + 1)))
-            value = value.plus(b_c)
-        } else {
-            c &= 0x0f
-            value = value.plus(c)
-        }
+//         if (i < 12) {
+//             c &= 0x1f
+//             let b_c = new BigNumber(c)
+//             const two = new BigNumber(2)
+//             b_c = b_c.times(two.pow(64 - 5 * (i + 1)))
+//             value = value.plus(b_c)
+//         } else {
+//             c &= 0x0f
+//             value = value.plus(c)
+//         }
+//     }
+
+//     function char_to_symbol(c) {
+//         if (c >= 97 && c <= 122) return (c - 97) + 6
+//         if (c >= 49 && c <= 53) return (c - 49) + 1
+//         return 0
+//     }
+
+//     return value.toFixed()
+// }
+
+// const name = "tbliuca12345";
+// console.log(walletNameToNumber(name)); // 用stringToName(name)去查询  函数是这个
+
+
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
+
+// Generate a secret key
+const secret = speakeasy.generateSecret({ length: 10, name: 'Foggie(tbliuca12345)' });
+
+// Save the secret key in your database
+
+console.log('secret:', secret);
+
+// Generate a TOTP password
+const token = speakeasy.totp({
+    secret: secret.base32,
+    encoding: 'base32'
+});
+
+console.log('token:', token);
+// Generate a QR code for the secret key
+QRCode.toDataURL(secret.otpauth_url, function (err, imageUrl) {
+    if (err) {
+        console.log("Error generating QR code");
+    } else {
+        // Display the QR code to the user
+        console.log("imageUrl:" + imageUrl);
     }
+});
 
-    function char_to_symbol(c) {
-        if (c >= 97 && c <= 122) return (c - 97) + 6
-        if (c >= 49 && c <= 53) return (c - 49) + 1
-        return 0
-    }
+// Verify the TOTP password
+const verified = speakeasy.totp.verify({
+    secret: 'NVAXIMZIHFPH2XJ4',
+    encoding: 'base32',
+    token: '869234'
+});
 
-    return value.toFixed()
+if (verified) {
+    console.log('success');
+} else {
+    // Display an error message to the user
+    console.log('failed');
 }
 
-const name = "tbliuca12345";
-console.log(walletNameToNumber(name)); // 用stringToName(name)去查询  函数是这个
 

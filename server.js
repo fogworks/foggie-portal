@@ -174,6 +174,10 @@ app.post('/assets/transfer', jsonParser, (req, res) => {
   AssetsController.transfer(req, res);
 });
 
+app.post('/assets/transfer_valid', jsonParser, (req, res) => {
+  AssetsController.transferValid(req, res);
+});
+
 app.post('/assets/list_in_order', jsonParser, (req, res) => {
   AssetsController.getAssetsOfOrder(req, res);
 });
