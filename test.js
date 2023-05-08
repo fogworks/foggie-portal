@@ -139,15 +139,14 @@ function transfer() {
             name: 'transfer',
             authorization: [
                 {
-                    actor: "tianbao12345",
+                    actor: "tbliuca12345",
                     permission: 'active'
                 }
             ],
             data: {
-                from: "tianbao12345",
-                to: "miner1222222",
-                quantity: "100.0000 DMC",
-                memo: "share test DMC"
+                from: "tbliuca12345",
+                to: "ljktest12345",
+                quantity: "100.0000 DMC"
             }
         }]
     }, {
@@ -396,126 +395,6 @@ function minerPushMerkle() {
     })
 }
 
-
-
-//////////////////////////DB test /////////////////////////
-const NeDB = require('nedb');
-const config = require('config');
-const process = require('node:process');
-const path = require('path');
-const dbConfig = config.get('dbConfig');
-
-
-// var data = Buffer.from('1234567890');
-// db.insert({
-//     primary_key: 'binary',
-//     data: data,
-// }, function (err, doc) {
-//     if (err) {
-//         console.log('err:', err);
-//         // resolve(BizResultCode.SAVE_PASSWORD_FAILED);
-//         return;
-//     }
-//     console.log('doc:', doc);
-// });
-
-// db.find({
-//     primary_key: 'binary'
-// }, function (err, docs) {
-//     if (err) {
-//         console.log('err:', err);
-//         return;
-//     }
-//     var data = Buffer.from(docs[0].data).toString('utf8');
-//     console.log('data:', data);
-// });
-
-
-
-/**
- * 计算密码本的偏移量
- * 文件大小小于分块大小，返回 [0]
- * 完整的分块数量 小于等于3，则随机取一个分块的偏移量
- * 完整的分块数量 大于3，则先随机从前3个中取一个分块的偏移量，
- * 然后根据增长因子，计算出后续的分块，每次增长一次offset = offset + blockSize * growthFactor
- * 增长的次数N 越大，存入偏移量数组的概率越小
- * 
- * @param {*} fileSize  文件大小
- * @param {*} blockSize     分块大小
- * @param {*} growthFactor  增长因子
- * @returns 偏移量的数组
- */
-function calcCodebookOffset(fileSize, blockSize, growthFactor) {
-    var offsetArr = [];
-    var offset = 0;
-    // 如果文件大小小于分块大小，则直接返回
-    if (fileSize < blockSize) {
-        return offsetArr;
-    }
-    // 计算完整的分块数量
-    var blockNum = Math.floor(fileSize / blockSize);
-
-    // 如果 完整的分块数量 小于等于3，则随机取一个分块
-    if (blockNum <= 3) {
-        var rand = Math.floor(Math.random() * blockNum);
-        offsetArr.push(rand * blockSize);
-        return offsetArr;
-    }
-
-    // 如果 完整的分块数量 大于3，则先随机从前3个 中 取一个分块
-    var rand = Math.floor(Math.random() * 3);
-    offset = rand * blockSize;
-    offsetArr.push(offset);
-
-    var i = 1;
-    // 然后根据增长因子，计算出后续的分块，每次增长一次offset = offset + blockSize * growthFactor
-    while (true) {
-        blockSize *= growthFactor;
-        offset += blockSize;
-        if (offset > fileSize) {
-            break;
-        }
-        // 增长的次数N 越大，存入偏移量数组的概率越小
-        if (Math.random() < 1 / i) {
-            offsetArr.push(offset);
-        }
-        i++;
-    }
-    return offsetArr;
-}
-
-// for (var i = 0; i < 5; i++) {
-//     calcCodebookOffset(5622, 4096, 2).forEach((arr) => {
-//         console.log("arr:", arr);
-//     });
-// }
-
-// const array = [1, 2];
-
-// function getRandomElement(arr) {
-//   const randomIndex = Math.floor(Math.random() * arr.length);
-//   return arr[randomIndex];
-// }
-
-// console.log(getRandomElement(array));
-
-// function testNull() {
-//     return new Promise((resolve, reject) => {
-//         resolve(null);
-//     });
-// }
-
-// async function test(){
-//     var res = await testNull().catch((err) => {
-//         console.log('err:', err);
-//     });
-//     if(!res){
-//         console.log('res:', res);
-//     }
-// } 
-
-// test();
-
 // 发起挑战
 // reqChallenge();
 // 领取奖励
@@ -537,83 +416,5 @@ function calcCodebookOffset(fileSize, blockSize, growthFactor) {
 // 铸造
 // mint();
 // const BigNumber = require('bignumber.js');
-
-
-// function walletNameToNumber(str) {
-//     const len = str.length
-
-//     let value = new BigNumber(0)
-
-//     for (let i = 0; i <= 12; ++i) {
-//         let c = 0
-//         if (i < len && i <= 12) {
-//             c = char_to_symbol(str.charCodeAt(i))
-//         }
-
-//         if (i < 12) {
-//             c &= 0x1f
-//             let b_c = new BigNumber(c)
-//             const two = new BigNumber(2)
-//             b_c = b_c.times(two.pow(64 - 5 * (i + 1)))
-//             value = value.plus(b_c)
-//         } else {
-//             c &= 0x0f
-//             value = value.plus(c)
-//         }
-//     }
-
-//     function char_to_symbol(c) {
-//         if (c >= 97 && c <= 122) return (c - 97) + 6
-//         if (c >= 49 && c <= 53) return (c - 49) + 1
-//         return 0
-//     }
-
-//     return value.toFixed()
-// }
-
-// const name = "tbliuca12345";
-// console.log(walletNameToNumber(name)); // 用stringToName(name)去查询  函数是这个
-
-
-const speakeasy = require('speakeasy');
-const QRCode = require('qrcode');
-
-// Generate a secret key
-const secret = speakeasy.generateSecret({ length: 10, name: 'Foggie(tbliuca12345)' });
-
-// Save the secret key in your database
-
-console.log('secret:', secret);
-
-// Generate a TOTP password
-const token = speakeasy.totp({
-    secret: secret.base32,
-    encoding: 'base32'
-});
-
-console.log('token:', token);
-// Generate a QR code for the secret key
-QRCode.toDataURL(secret.otpauth_url, function (err, imageUrl) {
-    if (err) {
-        console.log("Error generating QR code");
-    } else {
-        // Display the QR code to the user
-        console.log("imageUrl:" + imageUrl);
-    }
-});
-
-// Verify the TOTP password
-const verified = speakeasy.totp.verify({
-    secret: 'NVAXIMZIHFPH2XJ4',
-    encoding: 'base32',
-    token: '869234'
-});
-
-if (verified) {
-    console.log('success');
-} else {
-    // Display an error message to the user
-    console.log('failed');
-}
 
 
