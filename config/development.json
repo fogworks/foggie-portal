@@ -7,6 +7,7 @@
         "transactionAddress":"http://156.242.10.10:8361",
         "getOutstandingOrders":"/1.1",
         "getBill":"/1.1",
+        "getDividend":"/1.1",
         "getTransaction":"/1.1",
         "getOrders":"/1.1",
         "getAssets":"/1.1",

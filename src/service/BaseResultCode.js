@@ -39,7 +39,8 @@ class BaseResultCode {
     static PRIVATE_KEY_INVALID = new BaseResultCode(10011, 'private key is invalid');
     static CLAIM_ORDER_FAILED = new BaseResultCode(10012, 'claim order failed'); 
     static GET_USERINFO_FAILED = new BaseResultCode(10013, 'get userinfo failed');
-
+    static GET_DIVIDEND_LIST_FAILED = new BaseResultCode(10014, 'get dividend list failed');
+    static GET_DIVIDEND_COUNT_FAILED = new BaseResultCode(10015, 'get dividend count failed');
 
     // 订单的异常code 20000～29999
     static ORDER_BUY_FAILED = new BaseResultCode(20000, 'buy failed');

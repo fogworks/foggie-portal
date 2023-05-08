@@ -267,21 +267,24 @@ class UserController {
      */
     static async dividendList(req, res) {
         var email = req.body.email;
-        var orderId = req.body.orderId;
-        var chainId = req.body.chainId;
 
-        if (!email || !orderId || !chainId) {
+        var pageSize = req.body.pageSize;
+        var pageNo = req.body.pageNo;
+
+        var limit = 10;
+        if (typeof (pageSize) !== "undefined") {
+            limit = pageSize
+        }
+
+        var skip = 0;
+        if (typeof (pageNo) !== "undefined") {
+            skip = (pageNo - 1) * limit
+        }
+
+        if (!email) {
             res.send(BizResult.validateFailed());
             return;
         }
-
-        var privateKey = await userService.getPrivateKeyByEmail(email);
-        if (privateKey instanceof BizResultCode) {
-            res.send(BizResult.fail(privateKey));
-            return;
-        }
-        var chainConfig = config.get('chainConfig');
-        var httpEndpoint = chainConfig.get("httpEndpoint");
 
         var userInfo = await userService.getUserInfo(email);
         if (userInfo instanceof BizResultCode) {
@@ -290,6 +293,23 @@ class UserController {
             return;
         }
         var username = userInfo.username;
+
+        var list = userService.dividendList(username, skip, limit);
+        if (list instanceof BizResultCode) {
+            res.send(BizResult.fail(list));
+            return;
+        }
+
+        var count = userService.dividendCount(username);
+        if (count instanceof BizResultCode) {
+            res.send(BizResult.fail(count));
+            return;
+        }
+
+        var result = {};
+        result['list'] = list;
+        result['count'] = count;
+        res.send(BizResult.success(result));
     }
 }
 

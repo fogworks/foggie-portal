@@ -125,45 +125,81 @@ module.exports = {
             return BizResultCode.SAVE_CHANLLLENGE_RECORD_FAILED;
         });
     },
-    getChallengeRecord: async (orderId, email, skip, limit) => {
+    getChallengeRecord: (orderId, skip, limit) => {
 
-        return new Promise((resolve, reject) => {
-            // query push merkle record from NeDB
-            challengeRecordDB.find({
-                order_id: orderId,
-                email: email
-            }).skip(skip).limit(limit).sort({ create_time: -1 }).exec(function (err, data) {
-                if (err) {
-                    logger.error('err:', err);
-                    resolve(BizResultCode.GET_CHANLLENGE_RECORD_FAILED);
-                    return;
-                }
-                resolve(data);
-            });
-        }).catch((err) => {
+        try {
+            var chainConfig = config.get('chainConfig');
+            var transactionAddress = chainConfig.get('transactionAddress');
+            var getChallengeList = chainConfig.get('getChallengeList');
+
+            let body = '{\n' +
+                '        find_challenge(\n' +
+                '                skip: ' + skip + ',\n' +
+                '                limit: ' + limit + ',\n' +
+                '                where: {\n' +
+                '                    order_id: ' + orderId + ',\n' +
+                '                },\n' +
+                '                order: "-id",\n' +
+                '        ){\n' +
+                '            pre_merkle_root\n' +
+                '            pre_data_block_count\n' +
+                '            merkle_root\n' +
+                '            data_block_count\n' +
+                '            merkle_submitter\n' +
+                '            data_id\n' +
+                '            hash_data\n' +
+                '            challenge_times\n' +
+                '            nonce\n' +
+                '            state\n' +
+                '            user_lock_amount\n' +
+                '            miner_pay_amount\n' +
+                '            challenge_date\n' +
+                '            created_time\n' +
+                '            order {\n' +
+                '                id\n' +
+                '            }\n' +
+                '            challenger {\n' +
+                '                id\n' +
+                '            }\n' +
+                '        }\n' +
+                '    }'
+            return JSON.parse(request('POST', transactionAddress + getChallengeList, {
+                headers: {
+                    'Content-Type': 'application/graphql'
+                },
+                body: body
+            }).getBody('utf-8')).data.find_challenge;
+        }
+        catch (err) {
             logger.error('err:', err);
             return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
-        });
+        }
     },
-    getChallengeRecordCount: async (orderId, email) => {
+    getChallengeCount: (orderId) => {
 
-        return new Promise((resolve, reject) => {
-            // query push merkle record count from NeDB
-            challengeRecordDB.find({
-                order_id: orderId,
-                email: email
-            }).exec(function (err, data) {
-                if (err) {
-                    logger.error('err:', err);
-                    resolve(BizResultCode.GET_CHANLLENGE_RECORD_FAILED);
-                    return;
-                }
-                resolve(data.length);
-            });
-        }).catch((err) => {
+        try {
+            var chainConfig = config.get('chainConfig');
+            var transactionAddress = chainConfig.get('transactionAddress');
+            var getChallengeList = chainConfig.get('getChallengeList');
+
+            let body = '{\n' +
+                '        count_challenge(\n' +
+                '                where: {\n' +
+                '                    order_id: ' + orderId + ',\n' +
+                '                },\n' +
+                '        )\n' +
+                '    }'
+            return JSON.parse(request('POST', transactionAddress + getChallengeList, {
+                headers: {
+                    'Content-Type': 'application/graphql'
+                },
+                body: body
+            }).getBody('utf-8')).data.count_challenge;
+        }
+        catch (err) {
             logger.error('err:', err);
             return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
-        });
+        }
     },
     saveOrder: async (email, orderId, miner, user, billId, pst, totalPrice, transactionId) => {
         // save buy order record into NeDB
@@ -264,7 +300,7 @@ module.exports = {
                     var registerCenterConfig = config.get('registerCenterConfig');
                     var registerCenterUrl = registerCenterConfig.get('url');
                     var getFoggieInfo = registerCenterConfig.get('getFoggieInfo');
-                    var getFoggie = request('GET', registerCenterUrl + getFoggieInfo+'?device_id='+deviceUniqueId)
+                    var getFoggie = request('GET', registerCenterUrl + getFoggieInfo + '?device_id=' + deviceUniqueId)
                     var foggieTypeRes = JSON.parse(getFoggie.getBody('utf-8'));
                     var peerId = foggieTypeRes.data.peer_id;
                     var rpc = foggieTypeRes.data.rpc;
@@ -299,7 +335,7 @@ module.exports = {
                         resolve(doc._id);
                     });
                 }
-                else{
+                else {
                     resolve(doc._id);
                 }
             });
@@ -395,16 +431,16 @@ module.exports = {
                     resolve(data.fogId);
                 });
             })
-            .catch((err) => {
-                logger.error('err:', err);
-                return BizResultCode.GET_FOGGIE_ID_FAILED;
-            });
+                .catch((err) => {
+                    logger.error('err:', err);
+                    return BizResultCode.GET_FOGGIE_ID_FAILED;
+                });
         }
 
         try {
 
             var foggieId = await getFoggieId(orderId);
-            if(foggieId instanceof BizResultCode) {
+            if (foggieId instanceof BizResultCode) {
                 logger.error('foggieId is null, orderId:{}', orderId);
                 return foggieId;
             }
