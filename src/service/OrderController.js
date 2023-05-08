@@ -130,6 +130,12 @@ class OrderController {
         })
     }
 
+    /**
+     * 同步订单信息到注册中心
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
     static async syncOrder(req, res) {
         var email = req.body.email;
         var billId = req.body.billId;

@@ -431,10 +431,10 @@ module.exports = {
                     resolve(data.fogId);
                 });
             })
-                .catch((err) => {
-                    logger.error('err:', err);
-                    return BizResultCode.GET_FOGGIE_ID_FAILED;
-                });
+            .catch((err) => {
+                logger.error('err:', err);
+                return BizResultCode.GET_FOGGIE_ID_FAILED;
+            });
         }
 
         try {
@@ -489,7 +489,11 @@ module.exports = {
             var registerCenterUrl = registerCenterConfig.get('url');
             var syncOrder = registerCenterConfig.get('syncOrder');
             var expire = new Date(expire).getTime();
-
+            var orderInfo = await module.exports.getOrderById(email, orderId);
+            if(orderInfo instanceof BizResultCode) {
+                logger.error('orderInfo is null, orderId:{}', orderId);
+                return orderInfo;
+            }
             let body = {};
             body['email'] = email;
             body['bill_id'] = billId;
@@ -500,6 +504,7 @@ module.exports = {
             body['total_space'] = totalSpace;
             body['used_space'] = usedSpace;
             body['expire'] = expire;
+            body['space_created_time'] = new Date(orderInfo.create_time).getTime();
             let result = JSON.parse(request('POST', registerCenterUrl + syncOrder, {
                 headers: {
                     'Content-Type': 'application/json'
