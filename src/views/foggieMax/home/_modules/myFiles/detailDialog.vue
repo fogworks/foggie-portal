@@ -191,10 +191,20 @@ export default {
       }
     };
     const downloadItem = () => {
+      // let ID = device_id.value;
+      // let pubkey = item.pubkey;
+      // let downloadUrl = `/fog/${pubkey}?dl=true`;
+      // let cid = "QmNf82AtemgaHu2Sg3wpiaEFmoy6ym6Sv1Ma9eLJg6dHm3";
       let item = detailData.data;
-      let ID = device_id;
-      let pubkey = item.pubkey;
-      let downloadUrl = `/fog/${pubkey}?dl=true`;
+      let cid = item.cid;
+      let key = item.key;
+
+      let ip = "218.2.96.99";
+      // let ip = "154.31.34.194";
+      let port = 8007;
+      let Id = orderId;
+      let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+      let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
 
       var oA = document.createElement("a");
       oA.download = item.name; // 设置下载的文件名，默认是'下载'
@@ -202,6 +212,11 @@ export default {
       document.body.appendChild(oA);
       oA.click();
       oA.remove(); // 下载之后把创建的元素删除
+      proxy.$notify({
+        type: "success",
+        message: "Download succeeded",
+        position: "bottom-left",
+      });
     };
     function copySecret(key) {
       var input = document.createElement("textarea"); // 创建input对象
