@@ -90,6 +90,30 @@ class AssetsController {
     }
 
     /**
+     * 绑定google的校验
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
+    static async bindValid(req, res){
+        var email = req.body.email;
+        var userToken = req.body.userToken;
+        var secret = req.body.secret;
+
+        if (!email || !userToken || !secret) {
+            res.send(BizResult.validateFailed());
+            return;
+        }
+
+        var result = await assetsService.bindValid(email, secret, userToken);
+        if (result instanceof BizResultCode) {
+            res.send(BizResult.fail(result));
+            return;
+        }
+        res.send(BizResult.success(result));
+    }
+
+    /**
      * 获取订单中的资产记录
      * @param {*} req 
      * @param {*} res 
