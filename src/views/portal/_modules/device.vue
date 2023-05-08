@@ -48,6 +48,7 @@
         <template v-if="!item.device_type || item.device_type === 'space'">
           <div>
             Due
+            <!-- <el-progress :percentage="handleProgress(item)" /> -->
             <span class="value-span">{{ handleTimeStamp(item.expire) }}</span>
           </div>
         </template>
@@ -205,6 +206,13 @@ const showClick = () => {
   //   dropMenuRef.value.handleOpen();
   // }
 };
+const handleProgress = (item) => {
+  if (!item.device_type) {
+    return 50;
+  } else {
+  }
+};
+const currentTimeStamp = ref(Date.parse(new Date()));
 const email = computed(() => store.getters["token/currentUser"]);
 const search = () => {
   loading.value = true;

@@ -848,7 +848,7 @@ const doSearch = async () => {
     tableLoading.value = true;
     let orderId = deviceData.foggie_id;
     let peer_id = deviceData.peer_id;
-    breadcrumbList.prefix = []
+    breadcrumbList.prefix = [];
     let data = await find_objects(orderId, peer_id, keyWord.value);
     tableData.data = [];
     initFileData(data);

@@ -218,6 +218,7 @@ export default {
             0,
             res.data[0].balance.quantity.length - 4
           );
+          withDrawMoney.value = +balanceCount.value;
           balanceCount2.value = res.data[1].balance.quantity.slice(
             0,
             res.data[1].balance.quantity.length - 4
@@ -431,7 +432,7 @@ export default {
     };
     watchEffect(() => {
       getUserInfo();
-      initAccountMoney();
+      // initAccountMoney();
       getUserAssets();
     });
     onMounted(() => {

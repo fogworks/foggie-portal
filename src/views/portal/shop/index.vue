@@ -80,7 +80,7 @@
         <div>
           <svg-icon icon-class="storage"></svg-icon>
         </div>
-        <div class="price">$648</div>
+        <!-- <div class="price">$</div> -->
         <div class="description">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at
           posuere eros. Interdum et malesuada fames ac ante ipsum primis in
@@ -145,7 +145,7 @@ const handleActive = (val = "") => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-between;
   width: 300px;
   height: 415px;
   min-width: 300px;
@@ -162,7 +162,8 @@ const handleActive = (val = "") => {
   cursor: default;
   &:hover {
     transform: scale(1.1);
-    svg {
+    svg,
+    img {
       transform: scale(0.9);
     }
   }
@@ -196,6 +197,9 @@ const handleActive = (val = "") => {
     // color: rgba(255, 255, 255, 0.64);
     color: #fff;
     opacity: 0.64;
+    transition: all 0.3s;
+  }
+  img {
     transition: all 0.3s;
   }
 }

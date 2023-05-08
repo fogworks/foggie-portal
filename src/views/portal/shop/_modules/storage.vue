@@ -85,7 +85,7 @@
                   Purchase quantity：<span>{{ formLine.quantity }}GB</span>
                 </p>
                 <p>
-                  Buying cycle：<span>{{ formLine.week }}</span>
+                  Buying cycle：<span>{{ formLine.week }} Weeks</span>
                 </p>
                 <p>
                   Deposit multiple：<span>{{ item.deposit_ratio }}</span>
@@ -400,6 +400,7 @@ async function submit() {
             type: "success",
             grouping: true,
           });
+          filterOrder();
         } else {
           ElMessageBox.confirm("买单失败是否重试！", "Warning", {
             confirmButtonText: "OK",
@@ -417,7 +418,14 @@ async function submit() {
       });
   }
 }
+const maxRetry = ref(0);
 const order_sync = async () => {
+  maxRetry.value++;
+  if (maxRetry.value > 5) {
+    maxRetry.value = 0;
+    loading.value = false;
+    return false;
+  }
   orderSync({
     email: email.value,
     billId: state.orderDetail.orderID,

@@ -63,3 +63,21 @@ export function getPrivateKey(data) {
     data,
   });
 }
+//谷歌验证校验
+export function transfer_valid(data) {
+  return request({
+    url: baseUrl + '/assets/transfer_valid',
+    method: 'POST',
+    data,
+  });
+}
+//绑定校验
+export function bind_valid(data) {
+  return request({
+    url: baseUrl + '/assets/bind_valid',
+    method: 'POST',
+    data,
+  });
+}
+
+

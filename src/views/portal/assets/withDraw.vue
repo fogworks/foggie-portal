@@ -12,11 +12,8 @@
       @close="close"
     >
       <div v-loading="dialogLoading">
-        <div class="no_auth_withdraw" v-if="no_auth_withdraw">
-          {{ no_auth_withdraw }}!
-        </div>
         <el-form
-          v-if="!dialogLoading && !no_auth_withdraw"
+          v-if="!dialogLoading"
           label-position="left"
           class="withdraw-form"
           ref="formRef"
@@ -24,16 +21,16 @@
           :rules="rules"
           label-width="220px"
         >
-          <el-form-item label="From DMC" v-if="!isWalletUser">
+          <!-- <el-form-item label="From DMC" v-if="!isWalletUser">
             <span>{{ walletUser }}</span>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item label="Balance">
             <span>{{ oldWalletMoney }} DMC</span>
           </el-form-item>
           <el-form-item label="To DMC" prop="receiver">
-            <span v-if="isWalletUser">{{ form.receiver }} (Owner)</span>
+            <!-- <span v-if="isWalletUser">{{ form.receiver }} (Owner)</span> -->
             <el-input
-              v-if="!isWalletUser"
+              style="width: 500px"
               v-model.trim="form.receiver"
               placeholder="Please enter your username in the DMC wallet"
             ></el-input>
@@ -71,7 +68,7 @@
           </el-form-item>
         </el-form>
       </div>
-      <template v-if="!dialogLoading && !no_auth_withdraw" #footer>
+      <template v-if="!dialogLoading" #footer>
         <div class="color-box">
           <el-button :loading="loading" type="primary" @click="next">
             <RippleInk></RippleInk>
@@ -241,7 +238,7 @@
 </template>
 
 <script>
-import { ref, reactive, toRefs, watch, computed, inject } from "vue";
+import { ref, reactive, toRefs, watch, computed, inject, nextTick } from "vue";
 import {
   getGoogle,
   getWithdrawGoogle,
@@ -250,6 +247,8 @@ import {
   withdrawDMC,
   verifyGoogle,
 } from "@/utils/api.js";
+import { transfer_valid, bind_valid } from "@/api/common.js";
+import { useStore } from "vuex";
 import { assetsTransfer } from "@/api/order/orderList.js";
 import { Base64 } from "js-base64";
 import { ElNotification } from "element-plus";
@@ -278,9 +277,13 @@ export default {
     noOrderShow: {
       type: Boolean,
     },
-    withDrawMoney: {},
+    withDrawMoney: {
+      type: [String, Number],
+      default: 0,
+    },
   },
   setup(props, { emit }) {
+    const store = useStore();
     const close = () => {
       emit("reload");
       emit("update:visible", false);
@@ -291,7 +294,7 @@ export default {
       did: "hhvk3oti4qlr",
       balance: "3.00",
       receiver: "",
-      walletMoney: "",
+      walletMoney: 0,
       gasfee: "0.0",
       total: "",
     });
@@ -301,6 +304,7 @@ export default {
     const authorForm = reactive({
       validateToken: "",
     });
+    const email = computed(() => store.getters["token/currentUser"]);
     const chainId = window.localStorage.getItem("FoggieV")
       ? JSON.parse(window.localStorage.getItem("FoggieV"))?.global?.ChainId
       : "";
@@ -351,7 +355,7 @@ export default {
     const validateWalletMoney = (rule, value, cb) => {
       if (!value) {
         cb(new Error("Please enter the withdrawal amount"));
-      } else if (value > Number(actualMoeny.value)) {
+      } else if (Number(value) > Number(actualMoeny.value)) {
         cb(new Error("Exceeds the withdrawal amount"));
       } else if (Number(value) < 0.01) {
         cb(new Error("The minimum withdrawal amount is 0.01"));
@@ -380,10 +384,10 @@ export default {
       my_auth_input: [{ validator: validateAuthInput, trigger: "blur" }],
     };
     watch(
-      walletUser,
+      email,
       (data) => {
         if (visible.value) {
-          initGoogle(data);
+          initGoogle();
         }
       },
       {
@@ -395,7 +399,7 @@ export default {
       visible,
       (data) => {
         if (data) {
-          initGoogle(walletUser.value);
+          initGoogle();
         }
       },
       {
@@ -407,7 +411,7 @@ export default {
       walletType,
       (data) => {
         if (data === "wallet" && walletUser.value) {
-          form.receiver = walletUser.value;
+          form.receiver = "";
           isWalletUser.value = true;
         } else {
           form.receiver = "";
@@ -427,7 +431,7 @@ export default {
           actualMoeny.value = Number(
             Number(oldWalletMoney.value) / 1.01
           ).toFixed(4);
-          form.walletMoney = actualMoeny.value;
+          form.walletMoney = +actualMoeny.value;
         }
       },
       {
@@ -436,30 +440,28 @@ export default {
       }
     );
     function getAll() {
-      form.walletMoney = actualMoeny.value;
+      form.walletMoney = +actualMoeny.value;
     }
+    const account = ref("");
     //初始化google二维码
     async function initGoogle() {
-      if (walletUser.value) {
+      if (email.value) {
         dialogLoading.value = true;
-        let res = await getGoogle(walletUser.value);
-        if (res && res.status === "Verification succeeded" && !res.OTP) {
-          let data = {
-            account: walletUser.value,
-          };
-          let res = await getWithdrawGoogle(data);
-          scret_keyOld.value = res.secret;
-          scret_key.value = Base64.decode(res.secret);
-          authQrcode.value = "data:image/jpg;base64," + res.qrcode;
-          dialogLoading.value = false;
-        } else if (res && res.status === "Verification succeeded" && res.OTP) {
-          withDrawBtn.value = true;
+        let res = await transfer_valid({ email: email.value });
+        if (res?.data?.imageUrl) {
+          // let data = {
+          //   account: walletUser.value,
+          // };
+          // let res = await getWithdrawGoogle(data);
+          scret_keyOld.value = res.data.secret;
+          scret_key.value = Base64.decode(res.data.secret);
+          // "data:image/jpg;base64," +
+          authQrcode.value = res.data.imageUrl;
+          account.value = res.data.account;
           dialogLoading.value = false;
         } else {
-          showGoogleBtn.value = false;
+          withDrawBtn.value = true;
           dialogLoading.value = false;
-          withDrawBtn.value = false;
-          no_auth_withdraw.value = res.status;
         }
       }
     }
@@ -487,12 +489,13 @@ export default {
         loading.value = true;
         //验证是否手机操作google并开启google验证
         let postData = {
-          token: authorForm.validateToken,
+          email: email.value,
+          userToken: authorForm.validateToken,
           // secret: Base64.encode(this.scret_key),
           secret: scret_keyOld.value,
         };
-        let data = await verifyGoogle(postData);
-        if (data.code === 400 || data.error === "Invalid OTP token!") {
+        let data = await bind_valid(postData);
+        if (data.code !== 200 || data.error === "Invalid OTP token!") {
           loading.value = false;
           ElNotification({
             type: "error",
@@ -502,8 +505,12 @@ export default {
           });
           return;
         } else {
-          setGoogle();
+          // setGoogle();
           authorForm.validateToken = "";
+          showGoogleQrcode.value = false;
+          showGoogleBtn.value = true;
+          withDrawBtn.value = true;
+          loading.value = false;
         }
       }
       // });
@@ -525,7 +532,6 @@ export default {
         }
       }
     }
-    const email = computed(() => store.getters["token/currentUser"]);
     function handelWithdraw() {
       let postdata = {
         account_name: form.receiver,
@@ -540,13 +546,14 @@ export default {
               chainId,
               email: email.value,
               // account: walletUser.value,
-              amount: Number(form.walletMoney),
+              amount: form.walletMoney.toFixed(4),
               to: form.receiver, //没有设置OTP的，account和receiver 必须⼀致
-              totp_secret: withdrawForm.my_auth_input,
+              userToken: withdrawForm.my_auth_input,
             };
             assetsTransfer(data).then((res) => {
               loading.value = false;
-              if (res.code !== 400) {
+              console.log(res, "ressssssss");
+              if (res.code == 200) {
                 // let str = "vood.withdrawSuccess";
                 // this.$message.success(str);
                 showGoogleBtn.value = false;
