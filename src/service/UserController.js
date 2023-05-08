@@ -192,7 +192,12 @@ class UserController {
         res.send(BizResult.success(token));
     }
 
-    // 用户领取奖励
+    /**
+     * 用户领取奖励
+     * @param {*} req   HTTP请求
+     * @param {*} res   HTTP响应
+     * @returns 
+     */
     static async claimOrder(req, res) {
         var email = req.body.email;
         var orderId = req.body.orderId;
@@ -252,6 +257,39 @@ class UserController {
             logger.error('err:', err);
             res.send(BizResult.fail(BizResultCode.CLAIM_ORDER_FAILED));
         })
+    }
+
+    /**
+     * 用户的分红列表
+     * @param {*} req   HTTP请求
+     * @param {*} res   HTTP响应
+     * @returns 
+     */
+    static async dividendList(req, res) {
+        var email = req.body.email;
+        var orderId = req.body.orderId;
+        var chainId = req.body.chainId;
+
+        if (!email || !orderId || !chainId) {
+            res.send(BizResult.validateFailed());
+            return;
+        }
+
+        var privateKey = await userService.getPrivateKeyByEmail(email);
+        if (privateKey instanceof BizResultCode) {
+            res.send(BizResult.fail(privateKey));
+            return;
+        }
+        var chainConfig = config.get('chainConfig');
+        var httpEndpoint = chainConfig.get("httpEndpoint");
+
+        var userInfo = await userService.getUserInfo(email);
+        if (userInfo instanceof BizResultCode) {
+            logger.info('userInfo is null');
+            res.send(BizResult.fail(userInfo));
+            return;
+        }
+        var username = userInfo.username;
     }
 }
 
