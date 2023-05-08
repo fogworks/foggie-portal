@@ -1,7 +1,11 @@
 <template>
   <div v-loading="loading" class="access-box">
-    <img src="@/assets/login-left.png" alt="" />
-
+    <img
+      v-if="deviceData.device_type === 'foggie_max'"
+      src="@/assets/welcome-asset.png"
+      alt=""
+    />
+    <img v-else src="@/assets/login-left.png" alt="" />
     <div>
       <el-form class="account-form" :model="form" ref="formRef" :rules="rules">
         <el-form-item prop="password">
