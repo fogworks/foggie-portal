@@ -76,7 +76,7 @@ const getAccessPass = () => {
       }
     })
     .catch((err) => {
-      getAccessPass();
+      // getAccessPass();
     });
 };
 getAccessPass();

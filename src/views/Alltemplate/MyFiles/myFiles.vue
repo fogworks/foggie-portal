@@ -105,7 +105,7 @@
                   <img v-show="theme" src="@/assets/logo-dog-black.svg" alt="" />
                   <img v-show="!theme" src="@/assets/logo-dog.svg" alt="" />
                 </template> -->
-                <img v-else :src="row.imgUrl" alt="" />
+                <!-- <img v-else :src="row.imgUrl" alt="" /> -->
               </div>
               <div>
                 {{ row.name }}
@@ -236,7 +236,7 @@ import {
 } from "vue";
 import DetailDialog from "./detailDialog";
 import { GetFileList, InitiateChallenge } from "@/api/myFiles/myfiles";
-import { oodFileList, CidShare, shareLink, publishPin } from "@/utils/api.js";
+import { oodFileList, CidShare, find_objects, publishPin } from "@/utils/api.js";
 
 import _ from "lodash";
 
@@ -344,7 +344,7 @@ function openUpload() {
 }
 
 const loadFileList = async () => {
-  let data = await oodFileList(orderId.value);
+  let data = await oodFileList(orderId.value, deviceData.value.peer_id, breadcrumbList.prefix.join('/'));
   initFileData(data);
 };
 
@@ -462,10 +462,14 @@ const initFileData = async (data) => {
         break;
       }
     }
+    let name = decodeURIComponent(data.content[j].key);
+    if (data.prefix) {
+      name = name.split(data.prefix)[1];
+    }
 
     let item = {
       isDir: isDir,
-      name: decodeURIComponent(data.content[j].key),
+      name,
       key: data.content[j].key,
       idList: [
         {
@@ -707,7 +711,7 @@ const ipfsPin = () => {
     port: 8007,
     token: "11111",
     // peerId: deviceData.value.peer_id,
-    peerId: "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA",
+    peerId: deviceData.value.peer_id,
     Id: orderId.value,
     exp: 3 * 24 * 3600,
     stype: "ipfs",
@@ -728,7 +732,7 @@ const cyfsPin = () => {
     port: 8007,
     token: "11111",
     // peerId: deviceData.value.peer_id,
-    peerId: "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA",
+    peerId: deviceData.value.peer_id,
     Id: orderId.value,
     exp: 3 * 24 * 3600,
     stype: "cyfs",
@@ -801,10 +805,34 @@ const toDetail = (item) => {
     // router.push("/detail");
   }
 };
+const getFileList = function (scroll, prefix) {
+  let list_prefix = "";
+  if (prefix?.length) {
+    list_prefix = prefix.join("/");
+  }
+  tableLoading.value = true;
+  let orderId = deviceData.foggie_id;
+  let peer_id = deviceData.peer_id;
+  oodFileList(orderId, peer_id, list_prefix)
+    .then((res) => {
+      if (res && res.content) {
+        initFileData(res);
+      }
+    })
+    .finally(() => (tableLoading.value = false));
+};
 const doSearch = async () => {
   if (keyWord.value === "") {
     getFileList("", breadcrumbList.prefix);
   } else {
+    tableLoading.value = true;
+    // let orderId = deviceData.value.space_order_id;
+    let peer_id = deviceData.value.peer_id;
+    breadcrumbList.prefix = []
+    let data = await find_objects(orderId.value, peer_id, keyWord.value);
+    tableData.data = [];
+    initFileData(data);
+
     // let data = await oodFileSearch(keyWord.value);
     // initFileData(data.data);
   }

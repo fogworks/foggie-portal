@@ -120,7 +120,7 @@
                     alt=""
                   />
                 </template>
-                <img v-else :src="row.imgUrl" alt="" />
+                <!-- <img v-else :src="row.imgUrl" alt="" /> -->
               </div>
               {{ row.name }}
             </div>
@@ -281,7 +281,7 @@ import {
 import {
   oodFileList,
   CidShare,
-  oodFileSearch,
+  find_objects,
   shareLink,
   publishPin,
   file_delete,
@@ -341,8 +341,8 @@ const sortList = [
   },
 ];
 const device_id = computed(() => currentOODItem.value.device_id);
-const device_id_real = computed(() => currentOODItem.value.device_id_real);
-const hasCBS = computed(() => currentOODItem.value.cbs_state === "finish");
+let device_id_real = computed(() => currentOODItem.value.device_id_real);
+let hasCBS = computed(() => currentOODItem.value.cbs_state === "finish");
 const hasIPFS = computed(
   () =>
     currentOODItem.value.ipfs_state === "finish" &&
@@ -377,11 +377,12 @@ const refresh = () => {
 const getFileList = function (scroll, prefix) {
   let list_prefix = "";
   if (prefix?.length) {
-    list_prefix = prefix.join("/") + "/";
+    list_prefix = prefix.join("/");
   }
   tableLoading.value = true;
-  // let orderId = orderId?.value || 100;
-  oodFileList(orderId?.value || 100)
+  let orderId = deviceData.foggie_id;
+  let peer_id = deviceData.peer_id;
+  oodFileList(orderId, peer_id, list_prefix)
     .then((res) => {
       if (res && res.content) {
         initFileData(res);
@@ -393,9 +394,10 @@ const getFileList = function (scroll, prefix) {
 const initFileData = async (data) => {
   tableData.data = [];
   for (let i = 0; i < data.commonPrefixes.length; i++) {
+    let name = decodeURIComponent(data.commonPrefixes[i]);
     let item = {
       isDir: true,
-      name: decodeURIComponent(data.commonPrefixes[i]),
+      name,
       key: data.commonPrefixes[i],
       idList: [
         {
@@ -446,9 +448,14 @@ const initFileData = async (data) => {
     let cid = data.content[j].isIpfs ? data.content[j].cid : "";
     let file_id = data.content[j].isCyfs ? data.content[j].file_id : "";
 
+    let name = decodeURIComponent(data.content[j].key);
+    if (data.prefix) {
+      name = name.split(data.prefix)[1];
+    }
+
     let item = {
       isDir: isDir,
-      name: decodeURIComponent(data.content[j].key),
+      name,
       key: data.content[j].key,
       idList: [
         {
@@ -713,8 +720,8 @@ const ipfsPin = (checked) => {
     port: 8007,
     token: "11111",
     // peerId: deviceData.value.peer_id,
-    peerId: "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA",
-    Id: orderId.value,
+    peerId: deviceData.peer_id,
+    Id: deviceData.foggie_id,
     exp: 3 * 24 * 3600,
     stype: "ipfs",
     pin: true,
@@ -734,8 +741,8 @@ const cyfsPin = () => {
     port: 8007,
     token: "11111",
     // peerId: deviceData.value.peer_id,
-    peerId: "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA",
-    Id: orderId.value,
+    peerId: deviceData.peer_id,
+    Id: deviceData.foggie_id,
     exp: 3 * 24 * 3600,
     stype: "cyfs",
     pin: true,
@@ -830,9 +837,12 @@ const doSearch = async () => {
     getFileList("", breadcrumbList.prefix);
   } else {
     tableLoading.value = true;
-    let data = await oodFileSearch(keyWord.value);
+    let orderId = deviceData.foggie_id;
+    let peer_id = deviceData.peer_id;
+    breadcrumbList.prefix = []
+    let data = await find_objects(orderId, peer_id, keyWord.value);
     tableData.data = [];
-    initFileData(data.data);
+    initFileData(data);
   }
 };
 const setPrefix = (item, isTop = false) => {

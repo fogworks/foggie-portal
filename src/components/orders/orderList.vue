@@ -126,9 +126,9 @@
               >
                 <template #default="{ percentage }">
                   <span
-                    >{{ item.serverTime.time.D }}天
-                    {{ item.serverTime.time.H }}时
-                    {{ item.serverTime.time.M }}分</span
+                    >{{ item.serverTime.time.D }}days
+                    {{ item.serverTime.time.H }}hours
+                    {{ item.serverTime.time.M }}minutes</span
                   >
                 </template>
               </el-progress>
@@ -151,7 +151,7 @@
                 :percentage="70"
               >
                 <template #default="{ percentage }">
-                  <span>15days 30min</span>
+                  <span>15days 0 hours 30min</span>
                 </template>
               </el-progress>
             </div>
