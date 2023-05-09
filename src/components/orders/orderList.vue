@@ -351,15 +351,15 @@ function openMyFiles(item) {
 
 function popoverClick(type, item) {
   if (type == "submitMerkle") {
-    if (item.state == "1") {
-      ElMessage({
-        showClose: true,
-        message: "订单正在交付中，不能提交merKle,请等待。",
-        type: "warning",
-        grouping: true,
-      });
-      return;
-    }
+    // if (item.state == "1") {
+    //   ElMessage({
+    //     showClose: true,
+    //     message: "订单正在交付中，不能提交merKle,请等待。",
+    //     type: "warning",
+    //     grouping: true,
+    //   });
+    //   return;
+    // }
 
     let params = {
       chainId: ChainId.value,

@@ -1,13 +1,13 @@
-// const BizResult = require("./BizResult");
-// const BizResultCode = require("./BaseResultCode");
-// const logger = require("./logger")("FileController.js");
-// const publish_proto = require("./grpc/publish");
-// const grpc = require("@grpc/grpc-js");
-// const config = require('config');
-// const { chunk } = require("lodash");
+const BizResult = require("./BizResult");
+const BizResultCode = require("./BaseResultCode");
+const logger = require("./logger")("FileController.js");
+const publish_proto = require("./grpc/publish");
+const grpc = require("@grpc/grpc-js");
+const config = require('config');
+const { chunk } = require("lodash");
 // const FileType = require('file-type');
-// // const {fileTypeFromStream} = 'file-type';
-// // const { da } = require("element-plus/es/locale");
+// const {fileTypeFromStream} = 'file-type';
+// const { da } = require("element-plus/es/locale");
 
 // class PublishController {
 //   /**
@@ -53,15 +53,15 @@
 
 //     let call = client.GetObject(GetRequest);
 
-//     let successfulReports = [];
-//     let totalLength = 0;
-//     console.log('++++++++download',GetRequest )
-//     // let failedReports = [];
-//     call.on('data', (employeeStream) => {
-//       console.log('++++++++++', employeeStream)
-//       if (employeeStream?.chunk) {
-//         res.write(employeeStream.chunk)
-//       }
+    // let successfulReports = [];
+    // let totalLength = 0;
+    console.log('++++++++download',GetRequest )
+    // let failedReports = [];
+    call.on('data', (employeeStream) => {
+      console.log('++++++++++data', employeeStream)
+      if (employeeStream?.chunk) {
+        res.write(employeeStream.chunk)
+      }
       
 //       // if (employeeStream?.chunk) {
 //       //   totalLength += employeeStream.chunk.length
@@ -69,12 +69,13 @@
 //       // }
       
 
-//     });
-//     call.on('end',()=>{      
-//       res.end()
-//       //  res.send(Buffer.concat(successfulReports, totalLength))
-//     })
-//   }
+    });
+    call.on('end',()=>{      
+      console.log('++++++++++end')
+      res.end()
+      //  res.send(Buffer.concat(successfulReports, totalLength))
+    })
+  }
 
 //   static async doDelete(req, res) {
 //     let cids = req.body.cids;
@@ -92,12 +93,14 @@
 //     let token = req.body.token;
 //     let peerId = req.body.peerId;
 
-//     let Id = "4321";
-//     // test
-//     Id = "100";
+    let Id = req.body.Id;
 
-//     token = "11111";
-//     peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+    // let Id = "4321";
+    // test
+    // Id = "100";
+
+    token = "11111";
+    // peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
 
 //     if (!object_type || !objects || !cids) {
 //       res.send(BizResult.validateFailed());
@@ -111,16 +114,15 @@
 //     };
 //     var client = PublishController.getNetGrpcClient(ip_address, port);
 
-//     const request = {
-//       cids,
-//       objects,
-//       object_type,
-//     };
-//     const putObjectReq = {
-//       header: header,
-//       request: request,
-//     };
-
+    const request = {
+      cids,
+      objects,
+      object_type,
+    };
+    const putObjectReq = {
+      header: header,
+      request: request,
+    };
 
 //     client.DeleteObject(putObjectReq, (err, data) => {
 //       if (err) {
@@ -138,10 +140,10 @@
 //     let peerId = req.body.peerId;
 //     let Id = req.body.Id;
 
-//     // test
-//     peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
-//     // Id = "34";
-//     token = "11111";
+    // test
+    // peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+    // Id = "34";
+    token = "11111";
 
 //     const header = {
 //       peerId,
@@ -246,15 +248,14 @@
 
 //     var client = PublishController.getNetGrpcClient(ip_address, port);
 
-//     client.ListObjects(putObjectReq, (err, data) => {
-//       console.log('list+++++++', data)
-//       if (err) {
-//         res.send();
-//         return;
-//       }
-//       res.send(data);
-//     });
-//   }
+    client.ListObjects(putObjectReq, (err, data) => {
+      if (err) {
+        res.send();
+        return;
+      }
+      res.send(data);
+    });
+  }
 
 
 //   static async SearchObject(req, res) {
@@ -292,27 +293,27 @@
 
 //     let call = client.SearchObject(putObjectReq);
 
-//     let successfulReports = [];
-//     let totalLength = 0;
-//     // let failedReports = [];
-//     console.log('+++++++++++putObjectReq', putObjectReq)
-//     call.on('data',async (employeeStream)=>{
-//       console.log('~~~~~~~~~~~~~~~employeeStream', employeeStream)
-//       // successfulReports.push(employeeStream);
-//       if (employeeStream?.chunk) {
-//         console.log(FileType)
-//         console.log('+++++++type',await FileType.fromBuffer(employeeStream.chunk));
-//         // console.log(await fileTypeFromStream(employeeStream.chunk))
-//         // let type = await FileType.fromBuffer(employeeStream.chunk);
-//         // if (type) {
-//         //   res.write({type, employeeStream: employeeStream.chunk})
-//         // } else {
-//         //   res.write({type: "", employeeStream: employeeStream.chunk})
-//         // }
-//         res.write(employeeStream.chunk)
-//       } else if (employeeStream.Option === 'links') {
-//         res.send(employeeStream.links)
-//       }
+    let successfulReports = [];
+    let totalLength = 0;
+    // let failedReports = [];
+    console.log('+++++++++++putObjectReq', putObjectReq)
+    call.on('data',async (employeeStream)=>{
+      console.log('~~~~~~~~~~~~~~~employeeStream', employeeStream)
+      // successfulReports.push(employeeStream);
+      if (employeeStream?.chunk) {
+        // console.log(FileType)
+        // console.log('+++++++type',await FileType.fromBuffer(employeeStream.chunk));
+        // console.log(await fileTypeFromStream(employeeStream.chunk))
+        // let type = await FileType.fromBuffer(employeeStream.chunk);
+        // if (type) {
+        //   res.write({type, employeeStream: employeeStream.chunk})
+        // } else {
+        //   res.write({type: "", employeeStream: employeeStream.chunk})
+        // }
+        res.write(employeeStream.chunk)
+      } else if (employeeStream.Option === 'links') {
+        res.send(employeeStream.links)
+      }
       
 //     });
 //     call.on('end',()=>{      

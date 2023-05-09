@@ -260,7 +260,9 @@
   <DetailDialog
     v-if="detailShow"
     v-model:visible="detailShow"
+    :orderId="orderId"
     :detailData="detailData"
+    :deviceData="deviceData"
   ></DetailDialog>
 </template>
 
@@ -792,15 +794,19 @@ const downloadItem = (item) => {
 };
 const deleteItem = (item) => {
   tableLoading.value = true;
-  file_delete(item).then((res) => {
+  let peerId = deviceData.peer_id;
+  let Id = deviceData.foggie_id
+  file_delete(item, peerId, Id).then((res) => {
     if (res && res.data) {
       proxy.$notify({
         type: "success",
         message: "Delete succeeded",
         position: "bottom-left",
       });
+      tableLoading.value = false;
       doSearch();
     } else {
+      tableLoading.value = false;
       proxy.$notify({
         type: "error",
         message: "Delete Error",

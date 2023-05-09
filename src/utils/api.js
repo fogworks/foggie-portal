@@ -178,7 +178,7 @@ export const oodFileStatus = (ID, type) => {
 };
 
 
-export const file_delete = (item) => {
+export const file_delete = (item,peerId, Id) => {
   let objects = [
     { pubkey: item.pubkey ? item.pubkey : encodeURIComponent(item.key) },
   ];
@@ -186,6 +186,8 @@ export const file_delete = (item) => {
   let object_type = item.type;
   let url = `/file_delete`;
   let data = {
+    Id,
+    peerId,
     cids,
     objects,
     object_type,
