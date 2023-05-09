@@ -5,7 +5,6 @@
         <div class="card-header">Sign In</div>
       </template>
       <div class="text item my_login_box">
-        <!-- 注册 -->
         <el-form
           ref="registerFormRef"
           :model="registerForm"
@@ -83,7 +82,7 @@ const router = useRouter();
 const registerFormRef = ref();
 let loading = ref(false);
 let isRegisterPassword = ref(false);
-let passwordIsExist = ref(true); // 密码是否存在 true 存在  false 不存在
+let passwordIsExist = ref(true); 
 const props = defineProps(["userInfo"]);
 const loginForm = reactive({
   registerForm: {
@@ -97,7 +96,6 @@ const loginForm = reactive({
         trigger: "blur",
         validator: (rule, value, callback) => {
           if (passwordIsExist.value) {
-            /* 密码存在 */
             if (loginForm.registerForm.password != "") {
               callback();
             } else {
@@ -147,10 +145,8 @@ watch(
   (newVal, oldVal) => {
     console.log(newVal, oldVal);
     if (newVal) {
-      /* 密码存在 */
       loginForm.registerRules.confirmPassword[0].required = false;
     } else {
-      /* 密码不存在 */
       loginForm.registerRules.confirmPassword[0].required = true;
     }
   },
@@ -164,9 +160,6 @@ function submit(FormRef) {
     if (valid) {
       loading.value = true;
       if (passwordIsExist.value) {
-        //如果密码存在
-
-        /* 重置密码中 */
         if (isRegisterPassword.value) {
           setresetPassword({
             password: loginForm.registerForm.password,
@@ -216,7 +209,6 @@ function submit(FormRef) {
             });
         }
       } else {
-        /* 密码不存在 */
         SAVE_PASSWORD();
         await importPrivateKey();
       }
@@ -227,7 +219,6 @@ function submit(FormRef) {
   });
 }
 
-/* 保存密码 */
 
 async function SAVE_PASSWORD() {
   await store.dispatch("clientGlobal/setSavePassword", {
@@ -237,10 +228,8 @@ async function SAVE_PASSWORD() {
   });
 }
 
-/* 导入私钥 */
 
 async function importPrivateKey() {
-  /* 密码不存在  或 重置密码都需要重新导入私钥 */
   ElMessageBox.prompt("Please enter the private key", "Tip", {
     "show-close": false,
     confirmButtonText: "OK",
@@ -279,13 +268,10 @@ function loadUserLoginStatus() {
 
   getUserLoginStatus(params).then((res) => {
     if (res.code == 10001) {
-      /* 密码不存在 */
       passwordIsExist.value = false;
     } else if (res.code == 10002) {
-      /* 密码存在 */
       passwordIsExist.value = true;
     } else if (res.code == 10007) {
-      /* 私钥不存在 */
       importPrivateKey();
     }
   });

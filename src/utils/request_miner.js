@@ -114,7 +114,7 @@ service.interceptors.request.use(
 
 // response interceptor
 let loadingInstance = null
-const blackList = ['/file/upload', '/file/save','/file/create']  // 加载黑名单
+const blackList = ['/file/upload', '/file/save','/file/create']  
 service.interceptors.response.use(
   async (response) => {
      loadingInstance ? loadingInstance.close() : ''
@@ -212,7 +212,7 @@ service.interceptors.response.use(
     const _response = _.has(response, 'data') && _.isObject(response.data) && _.has(response.data, 'code') ? response.data : { code: 10001, errmsg: '网络出错' };
 
     if (response.config.url.indexOf('validate_user_login') > -1) {
-      /* 校验用户的登录状态  code 10001 密码不存在 10002 密码存在*/
+      /* Verify the user's login status code 10001 Password does not exist 10002 Password exists*/
     } else {
       if (_response.code !== 200) {
         ElMessage({
@@ -236,7 +236,7 @@ service.interceptors.response.use(
   }
 );
 
-//base64，js原生方法btoa()实现
+
 function b64EncodeUnicode(str) {
   return btoa(
     encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {

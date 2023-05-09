@@ -67,7 +67,7 @@ function ping(ip, timeout, success, callback) {
   img.src = /^(http|https)/.test(ip)
     ? ip + "?t=" + start
     : "http://" + ip + "?t=" + start;
-  var flag = false; //无法访问
+  var flag = false; 
   img.onload = function () {
     flag = true;
     success();
@@ -78,7 +78,6 @@ function ping(ip, timeout, success, callback) {
   };
   var timer = setTimeout(function () {
     if (!flag) {
-      //如果真的无法访问
       flag = false;
       callback();
     }
@@ -101,7 +100,6 @@ const confirm = () => {
     //     form.ip,
     //     1000,
     //     () => {
-    //       // 成功
     //       proxy.$notify({
     //         type: "success",
     //         message: "Successfully added",

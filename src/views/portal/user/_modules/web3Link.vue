@@ -45,11 +45,11 @@ const download = () => {
     // test Qmay112YzDqKkRWZKh8dChv32Fifcz4L7kWmTXZ2GAixLo
     let downloadUrl = `https://w3s.link/ipfs/${keyWord.value}`;
     var oA = document.createElement("a");
-    oA.download = name; // 设置下载的文件名，默认是'下载'
+    oA.download = name; 
     oA.href = downloadUrl;
     document.body.appendChild(oA);
     oA.click();
-    oA.remove(); // 下载之后把创建的元素删除
+    oA.remove(); 
   } else {
     proxy.$notify({
       type: "warning",
@@ -119,11 +119,11 @@ const downloadItem = () => {
         document.body.removeChild(link);
 
         // var oA = document.createElement("a");
-        // oA.download = ''; // 设置下载的文件名，默认是'下载'
+        // oA.download = ''; 
         // oA.href = r;
         // document.body.appendChild(oA);
         // oA.click();
-        // oA.remove(); // 下载之后把创建的元素删除
+        // oA.remove(); 
         proxy.$notify({
           type: "success",
           message: "Download succeeded",

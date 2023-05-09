@@ -17,7 +17,6 @@ const mutations = {
 
 }
 const actions = {
-  /* 保存密码 */
   async setSavePassword({ commit }, password) {
     const res = await savePassword(password)
     commit("SAVE_PASSWORD", res.data);

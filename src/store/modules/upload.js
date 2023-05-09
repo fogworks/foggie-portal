@@ -3,7 +3,7 @@
 const state = {
   uploadIsShow: false,
   orderId: '',
-  deviceType: '', //1 foggie 2 foggieMax 3 用户客户端
+  deviceType: '', //1 foggie 2 foggieMax 3 client
   uploadFileList: {},
 }
 const mutations = {

@@ -65,7 +65,7 @@ import FoggieMax from "@/views/foggieMax/layout";
 import FoggieClient from "@/views/Alltemplate/Alltemplate";
 import DeviceList from "./deviceList";
 import { search_foggie } from "@/utils/api";
-import {sync_device} from "@/api/order/orderList";
+import { sync_device } from "@/api/order/orderList";
 import { useRoute } from "vue-router";
 const store = useStore();
 const route = useRoute();
@@ -156,6 +156,7 @@ const syncDevice = async (data) => {
       // syncDevice(data);
     });
 };
+const uploadFileList = computed(() => store.getters.uploadFileList);
 const cancelItem = (data) => {
   let target = totalActiveDevice.data.find(
     (el) =>
@@ -168,6 +169,12 @@ const cancelItem = (data) => {
       (el.space_order_id && el.space_order_id === data.space_order_id)
   );
   if (target) {
+    uploadFileList.value[target.order_id || target.space_order_id]?.forEach(
+      (el) => {
+        console.log(el, "elllllllllll");
+      }
+    );
+
     totalActiveDevice.data = totalActiveDevice.data.filter(
       (el) =>
         (el.device_id && el.device_id !== data.device_id) ||

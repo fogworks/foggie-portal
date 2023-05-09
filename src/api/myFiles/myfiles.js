@@ -5,7 +5,6 @@ import setting from '@/setting';
 const { baseUrl } = setting;
 
 
-// 获取文件列表
 
 export function GetFileList(data) {
   return request({
@@ -15,7 +14,6 @@ export function GetFileList(data) {
   });
 }
 
-/* 发起挑战 */
 export function InitiateChallenge(data) {
   return request({
     url: baseUrl + '/order/req_challenge',

@@ -2,14 +2,12 @@
   <div class="card-box">
     <div class="flex justify-between">
       <div class="flex items-center">
-        <!-- <img class="title-img" src="@/assets/dashboard.png" alt="" /> -->
         <svg-icon icon-class="dashboard" class="title-img"></svg-icon>
         <div class="title">Space</div>
       </div>
     </div>
     <div class="flex justify-around">
       <div class="dashboard-item">
-        <!-- <div class="dashboard-name">Space Usage</div> -->
         <div class="chart-box">
           <div class="chart-value-title">
             <div class="chart-value">{{ spaceAvailable }} GB</div>
@@ -23,24 +21,6 @@
         <div class="use-rate">Use Rate: {{ spaceUseRate }}%</div>
         <div class="total">Total space {{ spaceTotal }}GB</div>
       </div>
-      <!-- <div class="dashboard-item">
-            <div class="dashboard-name">
-                Bandwidth Usage
-            </div>
-            <div class="chart-box">
-                <div class="chart-value-title">
-                    <div class="chart-value">{{bandwidthAvailable}} GB</div>
-                    <div>Available</div>
-                </div>
-                <MyEcharts style="width: 180px;height: 180px;" :options="bandwidthOption"></MyEcharts>
-            </div>
-            <div class="use-rate">
-                Use Rate: {{bandwidthUseRate}}%
-            </div>
-            <div class="total">
-                Total bandwidth this month  {{bandwidthTotal}} GB
-            </div>
-        </div> -->
     </div>
   </div>
 </template>

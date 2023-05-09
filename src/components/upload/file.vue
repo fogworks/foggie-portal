@@ -55,10 +55,9 @@ import { useStore } from 'vuex'
 import { ref, watch, onMounted, onUnmounted, toRefs, computed, inject } from "vue";
 import {
   Header,
-  /* 提交 */
   DeleteObjectRequest,
   Upload,
-  DeleteObjectReq   //请求体
+  DeleteObjectReq  
 
 } from "@/pb/node_pb";
 
@@ -67,10 +66,10 @@ import { fileUpload, uploadMultipart, fileComplete, SaveFile } from "@/api/uploa
 
 
 const COMPONENT_NAME = "uploader-file";
-const CHUNK_SIZE = 1024 * 1024 * 5; // 每块大小10M
-const FILE_SIZE = 10 * 1024 * 1024; //文件超过 10M 需要分片上传
-const simultaneousUploads = 4; // 文件并发上传数量
-const maxChunkRetries = 3; // 最大重试次数
+const CHUNK_SIZE = 1024 * 1024 * 5; 
+const FILE_SIZE = 10 * 1024 * 1024; 
+const simultaneousUploads = 4; 
+const maxChunkRetries = 3; 
 const peerId = '12D3KooWDj1NkJ1DrVvpbBhtJ3nLCNA9CKyg3eynpiUTKsVEDkgx'
 const token = '58df9379402ab6c87a51be426290e0f752ba5be4fe45736674a05dc12e642c50'
 
@@ -157,12 +156,10 @@ export default {
     const fileMd5 = ref(null)
 
 
-    /* 设置Header */
     const header = new Header()
     header.setId(file.value.orderId)
     header.setPeerid(peerId)
     header.setToken(token)
-    /*  Header 设置结束 */
 
     const username = computed(() => store.getters.userInfo?.dmc)
     const email = computed(() => store.getters.userInfo?.email);
@@ -340,14 +337,14 @@ export default {
         paused.value = false;
         file.value.paused = false;
         aborted.value = false;
-        //001上传第一步，前端先制作文件CID,调用后端接口，判断该文件是否已经上传过该文件
+      
         if (file.value.size > FILE_SIZE) {
           isUploading.value = false;
           fileLoad(file);
         } else {
           isUploading.value = true;
           isBigFile.value = false;
-          smallLoad(file.value); //小文件上传
+          smallLoad(file.value); 
         }
       }, 600);
     };
@@ -407,7 +404,6 @@ export default {
       error.value = file.value.error;
       isUploading.value = file.value.isUploading();
     };
-    /* 计算文件MD5值 */
     function getFileMd5(file) {
       return new Promise((resolve, reject) => {
         let fileReader = new FileReader()
@@ -508,7 +504,6 @@ export default {
           .then((res) => {
             if (res.code == 200) {
               if (res.data.duplicateUpload) {
-                // 数据库中有该文件 无须上传 直接秒传
                 completed.value = true;
                 progress.value = 100;
                 let data = {
@@ -522,9 +517,9 @@ export default {
 
                 upload_id.value = res.data.uploadId;
                 ISCIDING.value = true;
-                let spark = new SparkMD5.ArrayBuffer(); //追加数组缓冲区。
+                let spark = new SparkMD5.ArrayBuffer(); 
                 let blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
-                let chunks = Math.ceil(file.value.size / CHUNK_SIZE); //文件分为chunks 块
+                let chunks = Math.ceil(file.value.size / CHUNK_SIZE);
                 let currentChunk1 = 0;
                 let fileReader = new FileReader();
                 file.value.totalChunkCounts = chunks;
@@ -593,14 +588,14 @@ export default {
       }
     };
     const multipartUpload = (file) => {
-      let retrNum = 0; // 重传次数
-      let retrNumber = 0; // 如果第一条线三次失败 那就用这条线
+      let retrNum = 0; 
+      let retrNumber = 0; 
       if (abortController.value) {
         abortController.value = null;
       }
       abortController.value = new AbortController();
       let blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
-      let chunks = Math.ceil(file.value.size / CHUNK_SIZE); // 文件被分成 总块数
+      let chunks = Math.ceil(file.value.size / CHUNK_SIZE); 
       let fileReader = new FileReader();
       async function loadNext() {
         let start = currentChunk.value * CHUNK_SIZE;
@@ -609,10 +604,9 @@ export default {
         fileReader.readAsArrayBuffer(blobSlice.call(file.value.file, start, end));
       }
 
-      /* 切片上传 */
       async function uploadChunk() {
         return new Promise(async (resolve, reject) => {
-          let isLast = false; // 是否是最后一个
+          let isLast = false; 
 
           if (currentChunk.value + 1 == blobFileArray.value.length) {
             isLast = true;
@@ -620,12 +614,12 @@ export default {
 
           if ((currentChunk.value + 1) % simultaneousUploads == 0 || isLast) {
             let request = [];
-            let curUploadIndex = []; // 当前上传的索引 数组
+            let curUploadIndex = []; 
             for (const item of blobFileArray.value) {
               if (!item[1]) {
                 if (request.length >= simultaneousUploads) break;
                 request.push(item);
-                curUploadIndex.push(item[0].get('partId') - 1); // part_number - 1 是索引值
+                curUploadIndex.push(item[0].get('partId') - 1);
               }
             }
             request = request.map((item) => {
@@ -658,10 +652,9 @@ export default {
                   resolve(res);
                 } else {
                   if (abortController.value.signal.aborted) return;
-                  let isPass = await retrLoadNext(errorUploadArray); //错误重传
+                  let isPass = await retrLoadNext(errorUploadArray);
                   if (typeof isPass === "string") {
-                    // 此时表示用户主动暂停了 重传
-                    // 这里不需要做操作 不 resolve(); 在文件的onload 生命周期中  执行到uploadChunk 方法 会被阻塞
+                  
                   } else {
                     if (isPass) {
                       resolve();
@@ -679,7 +672,7 @@ export default {
         });
       }
       /**
-       * @param {Boolean} isSecond 不传默认为false true 说明原来是第一条线路现在要从第二条线路重传3次
+       * @param {Boolean} isSecond alse trueExplain that it was originally the first line and now needs to be retransmitted three times from the second line
        *
        *  */
       async function retrLoadNext(errorUploadArray, isSecond = false) {
@@ -709,39 +702,32 @@ export default {
 
         isPass = await retryUpload(request, errorUploadArray);
         if (typeof isPass === "string") {
-          // 此时表示用户主动暂停了 重传
-          // 这里不需要做操作 不 resolve(); 在文件的onload 生命周期中  执行到uploadChunk 方法 会被阻塞
         } else {
           if (isPass) {
             return true;
           } else {
             if (isSecond) {
-              // 第一条线没有走通 现在走第二条线
               retrNumber += 1;
               if (retrNumber >= maxChunkRetries) {
                 return false;
               } else {
                 if (abortController.value.signal.aborted)
-                  return "Cancel request"; // 如果 在重传的时候 取消请求（此时重传可能还是失败状态 但是没有 重传三次）
+                  return "Cancel request"; 
                 await retrLoadNext(errorUploadArray, true);
               }
             } else {
-              //正在走 第一条线
               retrNum += 1;
               if (retrNum >= maxChunkRetries) {
-                // 第一条线重试了三次
                 if (file.value.isGateway) {
-                  // 第一条线重试了三次以后 如果 isGateway 为true 表示可以重试第二条线
                   if (abortController.value.signal.aborted)
-                    return "Cancel request"; // 如果 在重传的时候 取消请求（此时重传可能还是失败状态 但是没有 重传三次）
+                    return "Cancel request"; 
                   await retrLoadNext(errorUploadArray, true);
                 } else {
-                  // 否则直接 弹出错误
                   return false;
                 }
               } else {
                 if (abortController.value.signal.aborted)
-                  return "Cancel request"; // 如果 在重传的时候 取消请求（此时重传可能还是失败状态 但是没有 重传三次）
+                  return "Cancel request"; 
                 await retrLoadNext(errorUploadArray);
               }
             }
@@ -767,7 +753,7 @@ export default {
             )
             .catch((error) => {
               if (abortController.value.signal.aborted) {
-                return "Cancel request"; // 如果 在重传的时候 取消请求（此时重传可能还是失败状态 但是没有 重传三次）
+                return "Cancel request"; 
               } else {
                 resolve(false);
               }
@@ -830,7 +816,6 @@ export default {
     const UploadProgress = (progressEvent, part_number) => {
 
       if (part_number) {
-        /* 大文件 */
         let number = ArrayProgress.value[part_number - 1];
         if (number < (progressEvent.loaded / progressEvent.total) * 100) {
           ArrayProgress.value[part_number - 1] = (progressEvent.loaded / progressEvent.total) * 100;
@@ -864,7 +849,6 @@ export default {
           averageSpeed.value = (Math.random() / 1000) * file.value.size;
         }, 1000);
       } else {
-        /* 小文件 */
 
         let uploadProgress = (progressEvent.loaded / progressEvent.total).toFixed(2) * 100;
         progress.value = uploadProgress < 100 ? uploadProgress : 99;

@@ -4,7 +4,7 @@ import { defineAsyncComponent } from 'vue'
 import store from "@/store";
 
 const router = createRouter({
-  history: createWebHashHistory(),  // hash 模式
+  history: createWebHashHistory(),  // hash 
   routes: [
     {
       path: "/",
@@ -85,13 +85,13 @@ const router = createRouter({
           path: 'Home',
           name: 'Home',
           component: () => defineAsyncComponent(() => import(`@/views/Alltemplate/Home/Home.vue`)),
-          meta: { title: '首页', headerRoute: 'Home' }
+          meta: { title: 'Home', headerRoute: 'Home' }
         },
         {
           path: 'Orders',
           name: 'Orders',
           component: () => defineAsyncComponent(() => import(`@/views/Alltemplate/Orders/orders.vue`)),
-          meta: { title: '订单', headerRoute: 'Orders' }
+          meta: { title: 'Orders', headerRoute: 'Orders' }
         },
         {
           path: 'MyFiles',
@@ -104,7 +104,7 @@ const router = createRouter({
           path: 'Storage',
           name: 'Storage',
           component: () => defineAsyncComponent(() => import(`@/views/Alltemplate/Storage/Storage.vue`)),
-          meta: { title: '存储空间', headerRoute: 'Storage' }
+          meta: { title: 'Storage', headerRoute: 'Storage' }
         },
 
       ]
@@ -116,7 +116,6 @@ const router = createRouter({
   ]
 })
 
-// 全局路由守卫
 router.beforeEach((to, from, next) => {
 
   if (to.meta.title) {

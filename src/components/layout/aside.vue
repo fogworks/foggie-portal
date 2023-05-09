@@ -17,7 +17,7 @@
         <el-icon>
           <Memo />
         </el-icon>
-        <template #title>订单</template>
+        <template #title>Order</template>
       </el-menu-item>
 
 

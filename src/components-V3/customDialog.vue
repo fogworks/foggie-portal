@@ -45,39 +45,32 @@ export default {
     },
   },
   props: {
-    /* dialog 显示隐藏 */
     modelValue: {
       type: Boolean,
       default: true,
     },
-    /* 是否可以通过点击 modal 关闭 dialog */
     closeClickModal: {
       type: Boolean,
       default: true,
     },
-    /* dialog 宽度 */
     width: {
       type: String,
       default: "400px",
     },
-    /* dialog 宽度 */
     height: {
       type: String,
       default: "500px",
     },
-    /* 是否需要 Box */
     isBox: {
       type: Boolean,
       default: true,
     },
-    /* 是否需要 Box */
     isInsertBody: {
       type: String,
       default: "body",
     },
   },
   methods: {
-    /* 关闭Dialog */
     closeDialog() {
       this.isShow = false;
       this.$emit("update:modelValue", this.isShow);

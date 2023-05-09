@@ -240,7 +240,7 @@ export default {
     const getDMC = () => {
       let owner_id = sessionStorage.getItem("walletUser")
         ? sessionStorage.getItem("walletUser")
-        : "foggiezzzzz2";
+        : "";
       getAssets(owner_id).then((r) => {
         // balanceCount.value = r.amount;
         nftCount.value = r.nft;
@@ -261,12 +261,11 @@ export default {
     const initYesterdayScore = async () => {
       let account = sessionStorage.getItem("walletUser")
         ? sessionStorage.getItem("walletUser")
-        : "foggiezzzzz2";
+        : "";
       let data = await ydaReward(account, "account");
       if (!data) {
         return;
       }
-      // source1 代表自己的，source2 代表分享的
       let owner_total = data.owner_total;
       let rewardDMC = 0.0;
       if (owner_total) {
@@ -297,7 +296,7 @@ export default {
       }
       let account = sessionStorage.getItem("walletUser")
         ? sessionStorage.getItem("walletUser")
-        : "foggiezzzzz2";
+        : "";
       let data = await OwnerBills(account);
       if (!data) {
         return;

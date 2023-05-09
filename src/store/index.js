@@ -17,7 +17,6 @@ const modules = modulesFiles.keys().reduce((modules, modulePath) => {
 
 
 export default createStore({
-  // 公共模板直接在这里展开就可以
   // ...global,
   modules,
   getters,

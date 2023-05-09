@@ -1,5 +1,4 @@
 import { savePassword } from "@/api/common";
-// 全局
 export default {
   namespaced: true,
   state: {

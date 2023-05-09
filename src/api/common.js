@@ -3,7 +3,6 @@ import setting from '@/setting';
 
 const { baseUrl } = setting;
 
-//获取链id
 export function getChain_id() {
   return request({
     url: baseUrl + '/order/get_chain_id',
@@ -11,7 +10,6 @@ export function getChain_id() {
   });
 }
 
-//校验用户的登录状态
 export function getUserLoginStatus(data) {
   return request({
     url: baseUrl + '/user/validate_user_login',
@@ -20,7 +18,6 @@ export function getUserLoginStatus(data) {
   });
 }
 
-//导入秘钥
 export function setImportPrivateKey(data) {
   return request({
     url: baseUrl + '/user/import_private_key',
@@ -29,7 +26,6 @@ export function setImportPrivateKey(data) {
   });
 }
 
-//重置密码
 export function setresetPassword(data) {
   return request({
     url: baseUrl + '/user/reset_password',
@@ -38,7 +34,6 @@ export function setresetPassword(data) {
   });
 }
 
-//校验密码
 export function getValidatePassword(data) {
   return request({
     url: baseUrl + '/user/validate_password',
@@ -47,7 +42,6 @@ export function getValidatePassword(data) {
   });
 }
 
-//保存密码
 export function savePassword(data) {
   return request({
     url: baseUrl + '/user/save_password',
@@ -55,7 +49,6 @@ export function savePassword(data) {
     data,
   });
 }
-//获取私钥
 export function getPrivateKey(data) {
   return request({
     url: baseUrl + '/user/get_private_key',
@@ -63,7 +56,6 @@ export function getPrivateKey(data) {
     data,
   });
 }
-//谷歌验证校验
 export function transfer_valid(data) {
   return request({
     url: baseUrl + '/assets/transfer_valid',
@@ -71,7 +63,6 @@ export function transfer_valid(data) {
     data,
   });
 }
-//绑定校验
 export function bind_valid(data) {
   return request({
     url: baseUrl + '/assets/bind_valid',
@@ -79,7 +70,6 @@ export function bind_valid(data) {
     data,
   });
 }
-//监测dmc账户是否存在
 export function check_account(data) {
   return request({
     url: baseUrl + '/user/check_account',

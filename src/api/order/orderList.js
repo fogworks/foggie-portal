@@ -3,7 +3,6 @@ import setting from '@/setting';
 
 const { baseUrl } = setting;
 
-//获取用户的订单列表
 export function getOrderList(data) {
   return request({
     url: baseUrl + '/order/list',
@@ -13,7 +12,6 @@ export function getOrderList(data) {
 }
 
 
-/* 根据订单id获取订单 */
 export function getOrderById(data) {
   return request({
     url: baseUrl + '/order/id',
@@ -23,7 +21,6 @@ export function getOrderById(data) {
 }
 
 
-//提交merkle树
 export function pushMerkle(data) {
   return request({
     url: baseUrl + '/order/push_merkle',
@@ -31,7 +28,6 @@ export function pushMerkle(data) {
     data,
   });
 }
-//单个端的资产列表
 export function orderAssetsList(data) {
   return request({
     url: baseUrl + '/assets/list_in_order',
@@ -39,7 +35,6 @@ export function orderAssetsList(data) {
     data,
   });
 }
-//总的用户资产信息列表
 export function userAssetsList(data) {
   return request({
     url: baseUrl + '/assets/list_in_user',
@@ -47,7 +42,6 @@ export function userAssetsList(data) {
     data,
   });
 }
-//用户资产总览
 export function userAssets(data) {
   return request({
     url: baseUrl + '/assets/user',
@@ -55,7 +49,6 @@ export function userAssets(data) {
     data,
   });
 }
-//转账
 export function assetsTransfer(data) {
   return request({
     url: baseUrl + '/assets/transfer',

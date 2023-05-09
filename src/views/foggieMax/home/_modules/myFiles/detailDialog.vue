@@ -207,11 +207,11 @@ export default {
       let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
 
       var oA = document.createElement("a");
-      oA.download = item.name; // 设置下载的文件名，默认是'下载'
+      oA.download = item.name; 
       oA.href = downloadUrl;
       document.body.appendChild(oA);
       oA.click();
-      oA.remove(); // 下载之后把创建的元素删除
+      oA.remove(); 
       proxy.$notify({
         type: "success",
         message: "Download succeeded",
@@ -219,12 +219,12 @@ export default {
       });
     };
     function copySecret(key) {
-      var input = document.createElement("textarea"); // 创建input对象
-      input.value = key; // 设置复制内容
-      document.body.appendChild(input); // 添加临时实例
-      input.select(); // 选择实例内容
-      document.execCommand("Copy"); // 执行复制
-      document.body.removeChild(input); // 删除临时实例
+      var input = document.createElement("textarea");
+      input.value = key; 
+      document.body.appendChild(input); 
+      input.select(); 
+      document.execCommand("Copy"); 
+      document.body.removeChild(input); 
       ElNotification({
         type: "success",
         message: "Copy succeeded",

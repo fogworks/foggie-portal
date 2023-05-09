@@ -155,17 +155,6 @@
           width="100"
           show-overflow-tooltip
         />
-        <!-- <el-table-column label="Share" width="100">
-          <template #default="{ row }">
-            <div>
-              <MyEcharts
-                style="width: 40px; height: 40px"
-                :options="row.share"
-              ></MyEcharts>
-            </div>
-          </template>
-        </el-table-column> -->
-        <!-- <el-table-column prop="status" label="Status" width="140" /> -->
         <el-table-column
           label="Actions"
           class-name="action-btn-column"
@@ -778,11 +767,11 @@ const downloadItem = (item) => {
   let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
 
   var oA = document.createElement("a");
-  oA.download = item.name; // 设置下载的文件名，默认是'下载'
+  oA.download = item.name;
   oA.href = downloadUrl;
   document.body.appendChild(oA);
   oA.click();
-  oA.remove(); // 下载之后把创建的元素删除
+  oA.remove();
   proxy.$notify({
     type: "success",
     message: "Download succeeded",
@@ -810,12 +799,12 @@ const deleteItem = (item) => {
 };
 
 const copyLink = (text) => {
-  var input = document.createElement("input"); // 创建input对象
-  input.value = text; // 设置复制内容
-  document.body.appendChild(input); // 添加临时实例
-  input.select(); // 选择实例内容
-  document.execCommand("Copy"); // 执行复制
-  document.body.removeChild(input); // 删除临时实例
+  var input = document.createElement("input");
+  input.value = text;
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand("Copy");
+  document.body.removeChild(input);
   // let str = `Copying  ${type} successful!`;
   // this.$message.success(str);
   proxy.$notify({

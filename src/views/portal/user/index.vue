@@ -88,24 +88,15 @@
 </template>
 
 <script setup>
-import {
-  ref,
-  reactive,
-  defineEmits,
-  defineProps,
-  getCurrentInstance,
-  computed,
-  toRefs,
-  inject,
-} from "vue";
+import { ref, reactive, getCurrentInstance, computed, inject } from "vue";
 import Web3Link from "./_modules/web3Link";
-import { login, get_foggie_dmc, user, unbind_foggie } from "@/utils/api";
+import { login, user, unbind_foggie } from "@/utils/api";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 const bcryptjs = require("bcryptjs");
 const store = useStore();
 const router = useRouter();
-const isNew = ref(false); //是否是新用户
+const isNew = ref(false); //
 // const form = reactive(props.form);
 const { proxy } = getCurrentInstance();
 const requestTarget = inject("requestTarget");
@@ -124,11 +115,10 @@ const handleThemeChange = (val) => {
 };
 
 const getTimeState = () => {
-  // 获取当前时间
   let timeNow = new Date();
-  // 获取当前小时
+
   let hours = timeNow.getHours();
-  // 判断当前时间段
+
   if (hours >= 0 && hours <= 18) {
     handleThemeChange(currentTheme.value || "light");
   } else if (hours > 18 && hours <= 24) {

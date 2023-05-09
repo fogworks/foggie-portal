@@ -1,6 +1,5 @@
 // import * as cyfs from "cyfs-sdk";
-// 创建did和激活vood流程,取 'api/vps/ood_active'接口返回对象的data.ip和data.access_token
-// ip":["154.64.63.133:1320"],"access_token":"ZKtO7dWHmh5U"
+// Create a DID and activate the VOD process, taking 'API/VPS/OOD'_ The 'active' interface returns the data.ip and data.access of the object_ token
 import { voodInfoCheck, voodActivate } from "./api";
 export async function createDID(vpsId) {
 	const g_oodName = "";
@@ -132,7 +131,6 @@ export async function createDID(vpsId) {
 	};
 }
 
-// 激活vood
 export async function activeVOOD(bindInfoObj, vpsId) {
 	const index = calcIndex(bindInfoObj.g_uniqueId);
 	const bindInfo = {
@@ -163,7 +161,6 @@ export async function activeVOOD(bindInfoObj, vpsId) {
 }
 
 function calcIndex(uniqueStr) {
-	// 示例用了cyfs sdk依赖的node-forge库进行计算
 	const md5 = cyfs.forge.md.md5.create();
 	md5.update(uniqueStr, "utf8");
 	let result = cyfs.forge.util.binary.hex.encode(md5.digest());

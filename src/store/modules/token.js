@@ -1,7 +1,6 @@
 import { setToken, getToken, removeToken } from "@/utils/auth";
 import { setTokenMap, getTokenMap } from '@/utils/tokenMap'
 export default {
-  // 开启命名空间
   namespaced: true,
   state: {
     token: getToken() || '',

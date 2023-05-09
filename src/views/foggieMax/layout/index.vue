@@ -121,7 +121,6 @@ export default {
       get_service_info(requestTarget)
         .then(async ({ result }) => {
           if (haveNet.value) {
-            // 有外网
             if (
               result.cbs_state === "finish" &&
               result.ipfs_state === "finish" &&
@@ -130,7 +129,6 @@ export default {
               hasReady.value = true;
             }
           } else {
-            // 无外网
             if (
               result.cbs_state === "finish" &&
               result.ipfs_state === "finish"
