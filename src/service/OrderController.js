@@ -671,10 +671,12 @@ class OrderController {
     var email = req.body.email;
     var chainId = req.body.chainId;
 
-    if (!orderId || !email || !chainId) {
-      response.send(BizResult.validateFailed());
-      return;
-    }
+        if (!orderId || !email || !chainId) {
+            response.send(BizResult.validateFailed());
+            return;
+        }
+
+        // todo valid order status and challenge status
 
     var privateKey = await userService.getPrivateKeyByEmail(email);
     if (privateKey instanceof BizResultCode) {

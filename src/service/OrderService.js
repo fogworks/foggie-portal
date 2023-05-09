@@ -598,6 +598,7 @@ module.exports = {
             body['total_space'] = totalSpace;
             body['used_space'] = usedSpace;
             body['expire'] = expire;
+            body['foggie_id'] = foggieId;
             body['space_created_time'] = new Date(orderInfo.create_time).getTime();
             let result = JSON.parse(request('POST', registerCenterUrl + syncOrder, {
                 headers: {

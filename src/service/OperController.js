@@ -182,7 +182,7 @@ class PublishController {
     };
 
     var client = PublishController.getNetGrpcClient(ip_address, port);
-
+    console.log("putObjectReq", putObjectReq);
     client.ListObjects(putObjectReq, (err, data) => {
       if (err) {
         res.send();
