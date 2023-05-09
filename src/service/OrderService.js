@@ -6,9 +6,11 @@ const config = require('config');
 const pow_proto = require('./grpc/pow');
 const grpc = require('@grpc/grpc-js');
 const _ = require('lodash');
+const Joi = require('joi');
 const common = require('./common');
 const path = require('path');
 const request = require('sync-request');
+const { log } = require('console');
 const dbConfig = config.get('dbConfig');
 const pushMerkleRecordTableName = dbConfig.get('pushMerkleRecordTableName');
 const pushMerkleRecordDB = new NeDB({
@@ -202,7 +204,15 @@ module.exports = {
         }
     },
     getChallengeCountByState: (orderId, state) => {
-        // todo 
+        var schema = Joi.array().items(Joi.number());
+        var result = schema.validate(state)
+        if(result.error){
+            logger.error(result.error);
+            return BizResultCode.VALIDATE_FAILED;
+        }
+
+        var stateCondition = state.join(',');
+
         try {
             var chainConfig = config.get('chainConfig');
             var transactionAddress = chainConfig.get('transactionAddress');
@@ -212,6 +222,7 @@ module.exports = {
                 '        count_challenge(\n' +
                 '                where: {\n' +
                 '                    order_id: ' + orderId + ',\n' +
+                '                    state: [' + stateCondition + '],\n' +
                 '                },\n' +
                 '        )\n' +
                 '    }'
@@ -221,6 +232,63 @@ module.exports = {
                 },
                 body: body
             }).getBody('utf-8')).data.count_challenge;
+        }
+        catch (err) {
+            logger.error('err:', err);
+            return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
+        }
+    },
+    getChallengeByState: (orderId, state) => {
+
+        var schema = Joi.array().items(Joi.number());
+        var result = schema.validate(state)
+        if(result.error){
+            logger.error(result.error);
+            return BizResultCode.VALIDATE_FAILED;
+        }
+
+        // todo
+        var stateCondition = state.join(',');
+        try {
+            var chainConfig = config.get('chainConfig');
+            var transactionAddress = chainConfig.get('transactionAddress');
+            var getChallengeList = chainConfig.get('getChallengeList');
+
+            let body = '{\n' +
+                '        find_challenge(\n' +
+                '                where: {\n' +
+                '                    order_id: ' + orderId + ',\n' +
+                '                },\n' +
+                '                order: "-id",\n' +
+                '        ){\n' +
+                '            pre_merkle_root\n' +
+                '            pre_data_block_count\n' +
+                '            merkle_root\n' +
+                '            data_block_count\n' +
+                '            merkle_submitter\n' +
+                '            data_id\n' +
+                '            hash_data\n' +
+                '            challenge_times\n' +
+                '            nonce\n' +
+                '            state\n' +
+                '            user_lock_amount\n' +
+                '            miner_pay_amount\n' +
+                '            challenge_date\n' +
+                '            created_time\n' +
+                '            order {\n' +
+                '                id\n' +
+                '            }\n' +
+                '            challenger {\n' +
+                '                id\n' +
+                '            }\n' +
+                '        }\n' +
+                '    }'
+            return JSON.parse(request('POST', transactionAddress + getChallengeList, {
+                headers: {
+                    'Content-Type': 'application/graphql'
+                },
+                body: body
+            }).getBody('utf-8')).data.find_challenge;
         }
         catch (err) {
             logger.error('err:', err);
@@ -306,7 +374,7 @@ module.exports = {
     },
     saveDevice2Order: async (email, orderId) => {
         // save device info into NeDB order table
-        // 这里的orderID实际是设备的唯一标识
+        // this orderID is unique device id
         var deviceUniqueId = orderId;
         return new Promise((resolve, reject) => {
 
@@ -322,7 +390,7 @@ module.exports = {
                 var now = moment();
                 var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
                 if (!doc) {
-                    // 获取peerId，rpc，foggieId, foggieToken
+                    // get peerId，rpc，foggieId, foggieToken
                     var registerCenterConfig = config.get('registerCenterConfig');
                     var registerCenterUrl = registerCenterConfig.get('url');
                     var getFoggieInfo = registerCenterConfig.get('getFoggieInfo');
@@ -476,7 +544,7 @@ module.exports = {
                 logger.error('bill is null, orderId:{}', orderId);
                 return bill;
             }
-            // 获取挂单时的transaction_id
+            // get bill transaction_id
             var transactionId = bill[0].action[0].trx_id;
             if (!transactionId) {
                 logger.error('transactionId is null, orderId:{}', orderId);
@@ -487,13 +555,13 @@ module.exports = {
                 logger.error('expire is null, orderId:{}', orderId);
                 return BizResultCode.GET_EXPIRE_FAILED;
             }
-            // 根据挂单时的tranaction_id获取挂单信息
+            // get bill info by transaction_id
             var transaction = module.exports.getTransactionById(transactionId);
             if (transaction instanceof BizResultCode) {
                 logger.error('transaction is null, orderId:{}', orderId);
                 return transaction;
             }
-            // 根据挂单信息，获取memo
+            // get memo by transaction
             var memo = await module.exports.getMemoByRawData(transaction[0].rawData);
             if (memo instanceof BizResultCode) {
                 logger.error('memo is null, orderId:{}', orderId);
@@ -538,7 +606,7 @@ module.exports = {
                 body: JSON.stringify(body)
             }).getBody('utf-8'))
             if (result.code == 200) {
-                // 同步成功后，更新订单中的peer_id和rpc
+                // sync success，update peer_id and rpc in order
                 logger.info('sync order to register center success, orderId:{}', orderId);
                 var updateBuyOrderRes = await module.exports.updateOrder(email, orderId, billId, peerId, rpc, usedSpace, totalSpace, expire, foggieId);
                 if (updateBuyOrderRes instanceof BizResultCode) {

@@ -187,7 +187,7 @@ class OrderController {
             return;
         }
         var username = userInfo.username;
-        // minPrice & maxPrice同时有值
+        // minPrice & maxPrice is not null
         var price = ""
         if (typeof (minPrice) !== "undefined" && typeof (maxPrice) !== "undefined") {
             price = "price: { between: [" + parseInt(minPrice * 10000) + "," + parseInt(maxPrice * 10000) + "]}";
@@ -234,14 +234,21 @@ class OrderController {
         res.send(BizResult.success(outstandingOrders));
     }
 
-    /**
-     * 获取用户的订单列表
-     * @param {*} email     foggie的邮箱 
-     * @param {*} pageNum   页数
-     * @param {*} limit     每页展示的条数
-     * @param {*} res       HTTP的响应
-     * @returns 订单列表
-     */
+    static getChallengeCount(req, res) {
+        var orderId = req.body.orderId;
+        var state = req.body.state;
+        if (!orderId || !state) {
+            res.send(BizResult.validateFailed())
+            return;
+        }
+        var result = orderService.getChallengeCountByState(orderId, state);
+        if (result instanceof BizResultCode) {
+            res.send(BizResult.fail(result));
+            return;
+        }
+        res.send(BizResult.success(result));
+    }
+
     static async orderList(email, pageNum, limit, res) {
 
         if (!email) {
@@ -334,12 +341,6 @@ class OrderController {
         res.send(BizResult.success(result));
     }
 
-    /**
-     * 获取用户的订单详情
-     * @param {*} req       HTTP的请求
-     * @param {*} res       HTTP的响应
-     * @returns 订单详情
-     */
     static async getOrderById(req, res) {
 
         var orderId = req.body.orderId;
@@ -407,12 +408,6 @@ class OrderController {
         res.send(BizResult.success(order));
     }
 
-    /**
-     * 上传merkle树
-     * @param {*} req HTTP的request 
-     * @param {*} res HTTP的response
-     * @returns 
-     */
     static async pushMerkle(req, res) {
 
         var chainId = req.body.chainId;
@@ -451,9 +446,8 @@ class OrderController {
             }
         });
 
-        // 获取peerId
         var orderInfo = await orderService.getOrderById(email, orderId);
-        if(orderInfo instanceof BizResultCode){
+        if (orderInfo instanceof BizResultCode) {
             res.send(BizResult.fail(orderInfo));
             return;
         }
@@ -509,12 +503,6 @@ class OrderController {
         });
     }
 
-    /**
-     * 查询，包含 订单id，merkleRoot，dataBlockCount，transactionId
-     * @param {*} req   HTTP的request
-     * @param {*} res HTTP的response
-     * @returns 
-     */
     static async getPushMerkleRecord(req, res) {
 
         var orderId = req.body.orderId;
@@ -555,12 +543,6 @@ class OrderController {
         res.send(BizResult.success(result));
     }
 
-    /**
-     * 发起挑战
-     * @param {*} req 
-     * @param {*} response 
-     * @returns 
-     */
     static async reqChallenge(req, response) {
         var orderId = req.body.orderId;
         var email = req.body.email;
@@ -600,7 +582,7 @@ class OrderController {
         var codebook = codebooks[Math.floor(Math.random() * codebooks.length)];
         let originData = zlib.unzipSync(Buffer.from(codebook.data, 'base64'));
         let randomCharacter = Encrypt.randomString(4);
-        let nonce = randomCharacter + "#" + codebook.cid;
+        let nonce = randomCharacter + "#" + codebook.cid + "#" + codebook.part_id;
         var containRandomData = Buffer.concat([originData, Buffer.from(randomCharacter)]);
         let preDataHash = DMC.ecc.sha256(containRandomData);
         let dataHash = Buffer.from(DMC.ecc.sha256(Buffer.from(preDataHash))).toString("hex");
@@ -612,8 +594,13 @@ class OrderController {
         }
         var username = userInfo.username;
 
-        // 根据文件的cid和part_id，查询该数据块在整个订单空间中的partId
-        var partId = await orderService.getPartIdByCidAndPartId(orderId, codebook.cid, codebook.part_id);
+        var orderInfo = await orderService.getOrderById(email, orderId);
+        if(orderInfo instanceof BizResultCode){
+            res.send(BizResult.fail(orderInfo));
+            return;
+        }
+        // get idx in order by cid and part_id
+        var partId = await orderService.getPartIdByCidAndPartId(orderInfo.foggie_id, codebook.cid, codebook.part_id);
         dmc_client.transact({
             actions: [{
                 account: "dmc.token",
@@ -644,12 +631,6 @@ class OrderController {
         })
     }
 
-    /**
-     * 获取订单的挑战记录
-     * @param {*} req       HTTP请求
-     * @param {*} res       HTTP响应
-     * @returns 挑战记录列表
-     */
     static getChallengeList(req, res) {
 
         var orderId = req.body.orderId;
@@ -687,11 +668,6 @@ class OrderController {
         res.send(BizResult.success(result));
     }
 
-    /**
-     * 提取订单的剩余DMC
-     * @param {*} req    HTTP请求
-     * @param {*} res   HTTP响应
-     */
     static async release(req, res) {
         var email = req.body.email;
         var chainId = req.body.chainId;
@@ -740,11 +716,6 @@ class OrderController {
         res.send(BizResult.success(result));
     }
 
-    /**
-     * 订单预存DMC
-     * @param {*} req    HTTP请求
-     * @param {*} res   HTTP响应
-     */
     static async append(req, res) {
         var email = req.body.email;
         var chainId = req.body.chainId;
@@ -793,11 +764,6 @@ class OrderController {
         res.send(BizResult.success(result));
     }
 
-    /**
-     * 订单取消
-     * @param {*} req    HTTP请求
-     * @param {*} res   HTTP响应
-     */
     static async cancel(req, res) {
         var email = req.body.email;
         var chainId = req.body.chainId;
@@ -841,7 +807,7 @@ class OrderController {
     }
 
     /**
-     * 同步设备信息（foggie 、 foggie max的peerId、grpc ip和port、以及上传文件的id）
+     * sync device info（foggie 、 foggie max peerId、grpc、ip、port、token）
      * @param {*} req 
      * @param {*} res 
      */
@@ -853,7 +819,7 @@ class OrderController {
             return;
         }
 
-        // 保存在订单表中
+        // save device info to order
         var saveRes = await orderService.saveDevice2Order(email, deviceId);
         if (saveRes instanceof BizResultCode) {
             res.send(BizResult.fail(saveRes));
@@ -862,10 +828,6 @@ class OrderController {
         res.send(BizResult.success(saveRes));
     }
 
-    /**
-     * 获取chainId
-     * @returns chainId
-     */
     static getChainId() {
         var chainConfig = config.get('chainConfig')
         var httpEndpoint = chainConfig.get('httpEndpoint')
@@ -875,10 +837,6 @@ class OrderController {
         return BizResult.success(chainId);
     }
 
-    /**
-     * 获取基准价格
-     * @returns 基准价格
-     */
     static getBenchmarkPrice() {
         var chainConfig = config.get('chainConfig')
         var httpEndpoint = chainConfig.get('httpEndpoint')

@@ -30,7 +30,7 @@
           </div>
         </div>
       </div>
-      <button>Buy now</button>
+      <button @click="handleActive('foggie')">Buy now</button>
     </div>
 
     <div class="card">
@@ -117,11 +117,14 @@
     <svg-icon icon-class="back"></svg-icon>
   </div>
   <Storage v-if="!isShop && active === 'storage'"></Storage>
+  <Foggie v-if="!isShop && active === 'foggie'"></Foggie>
+
 </template>
 
 <script setup>
 import { ref } from "vue";
 import Storage from "./_modules/storage";
+import Foggie from "./_modules/foggie"
 // import Storage from "@/views/Alltemplate/Storage/Storage";
 const isShop = ref(true);
 const active = ref("");

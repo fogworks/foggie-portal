@@ -351,6 +351,18 @@ message SearchResponse {
 
 }
 
+message RequestSummaryIds {
+  Header header = 1;
+  repeated string ids = 2;
+}
+message SummaryInfo {
+  string id = 1;
+  int64 total = 2;
+  int64 count = 3;
+}
+message SummaryInfos{
+  repeated SummaryInfo contents = 1;
+}
 service API {
   rpc Pin(PinReq)returns(PinResp){}
   rpc Ping(PingRequest)returns(PingResponse){}
@@ -374,4 +386,5 @@ service API {
   rpc DeleteObject(DeleteObjectReq)returns(DeleteResp){}
   rpc SearchObject(SearchRequest) returns (stream SearchResponse) {}
   rpc FindObjects(FindRequest) returns (Objects) {}
+  rpc SummaryInfo(RequestSummaryIds)returns(SummaryInfos){}
 }

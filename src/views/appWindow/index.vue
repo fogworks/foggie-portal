@@ -102,7 +102,7 @@ const scrollIntoView = (data) => {
   const target = app.getElementsByClassName(
     `app-${data.device_id || data.space_order_id}`
   )[0];
-  app.scrollTo(0, target.offsetTop);
+  app.scrollTo(0, target?.offsetTop);
 };
 const clickItem = (data) => {
   if (!data.is_active && data.device_type !== "space") {

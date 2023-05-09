@@ -66,7 +66,7 @@
 </template>
 
 <script>
-import { reactive, onMounted, ref, computed, inject, toRefs } from "vue";
+import { reactive, onMounted, ref, computed, inject, toRefs ,getCurrentInstance} from "vue";
 import ShareDialog from "./shareDialog";
 import { pIN, shareLink } from "@/utils/api.js";
 import { ElNotification } from "element-plus";
@@ -83,11 +83,20 @@ export default {
       type: Object,
       default: { data: {} },
     },
+    deviceData: {
+      type: Object,
+      default: { data: {} },
+    },
+    orderId: {
+      type: String,
+    },
   },
   setup(props, { emit }) {
+    const { proxy } = getCurrentInstance();
     const { visible } = toRefs(props);
     const detailData = reactive(props.detailData);
-    const deviceData = inject("deviceData");
+    const orderId = reactive(props.orderId);
+    const deviceData = reactive(props.deviceData);
     const store = useStore();
     const router = useRouter();
     const theme = computed(() => store.getters.theme);
@@ -238,10 +247,12 @@ export default {
       detailData,
       device_id,
       currentOODItem,
+      orderId,
       initDetail,
       doShare,
       downloadItem,
       copySecret,
+      proxy,
       router,
       shareRefContent,
       showShareDialog,

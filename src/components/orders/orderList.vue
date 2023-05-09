@@ -29,10 +29,11 @@
           >Order status delivery in progress</el-tag
         >
         <el-tag type="warning" effect="dark" round v-if="item.state == '2'">
-         Insufficient deposit, order is about to end
+          Insufficient deposit, order is about to end
         </el-tag>
         <el-tag effect="dark" round v-if="item.state == '3'">
-          There is sufficient deposit and the order is still in delivery for the next cycle
+          There is sufficient deposit and the order is still in delivery for the
+          next cycle
         </el-tag>
         <el-tag type="success" effect="dark" round v-if="item.state == '4'">
           The order has ended</el-tag
@@ -351,15 +352,15 @@ function openMyFiles(item) {
 
 function popoverClick(type, item) {
   if (type == "submitMerkle") {
-    if (item.state == "1") {
-      ElMessage({
-        showClose: true,
-        message: "The order is currently being delivered and cannot be submitted to merKle. Please wait.",
-        type: "warning",
-        grouping: true,
-      });
-      return;
-    }
+    // if (item.state == "1") {
+    //   ElMessage({
+    //     showClose: true,
+    //     message: "订单正在交付中，不能提交merKle,请等待。",
+    //     type: "warning",
+    //     grouping: true,
+    //   });
+    //   return;
+    // }
 
     let params = {
       chainId: ChainId.value,
