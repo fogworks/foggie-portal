@@ -202,6 +202,25 @@ module.exports = {
         }
         return Buffer.from(privateKey + ':' + userInfo.username + ':' + orderId).toString('base64');
     },
+    generateToken4UploadFile: async (orderId) => {
+
+        var privateKey = await module.exports.getPrivateKeyByEmail(email);
+        if (privateKey instanceof BizResultCode) {
+            logger.info('private key is null');
+            return privateKey;
+        }
+        var userInfo = await module.exports.getUserInfo(email);
+        if (userInfo instanceof BizResultCode) {
+            logger.info('userInfo is null');
+            return userInfo;
+        }
+
+        var encryptor = crypto.createCipher('RSA-OAEP', privateKey);
+        let encrypted = encryptor.update(userInfo.username + ':' + orderId, 'utf8', 'base64');
+        encrypted += encryptor.final('base64');
+
+        return encrypted;
+    },
     dividendList: (username, skip, limit) => {
         try {
             var chainConfig = config.get('chainConfig');

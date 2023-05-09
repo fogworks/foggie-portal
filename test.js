@@ -209,7 +209,7 @@ function order() {
 
 // 用户提交merkle树
 function userPushMerkle() {
-    var tree = merkle('sha256').sync(['123', '456', '789','432','765']);
+    var tree = merkle('sha256').sync(['123', '456', '789', '432', '765']);
     console.log('tree_root:', tree.root());
     dmc_client.transact({
         actions: [{
@@ -365,7 +365,7 @@ function bill() {
 
 // 矿工提交merkle树
 function minerPushMerkle() {
-    var tree = merkle('sha256').sync(['000','123', '456', '789','432','765']);
+    var tree = merkle('sha256').sync(['000', '123', '456', '789', '432', '765']);
     console.log('tree_root:', tree.root());
     miner_dmc_client.transact({
         actions: [{
@@ -433,7 +433,7 @@ function ansChallenge() {
 }
 
 // 用户发起挑战
-reqChallenge();
+// reqChallenge();
 // 矿工响应挑战
 // ansChallenge();
 // 领取奖励
@@ -457,3 +457,42 @@ reqChallenge();
 // const BigNumber = require('bignumber.js');
 
 
+// var encryptor = crypto.createCipher('RSA-OAEP', privateKey);
+// let encrypted = encryptor.update("EncryptPKCS1v15" + ':' + orderId, 'utf8', 'base64');
+// encrypted += encryptor.final('base64');
+const crypto = require('crypto');
+
+function encrypt(privateKey) {
+    var encryptedData = crypto.privateEncrypt({
+        key: privateKey,
+        padding: crypto.constants.RSA_PKCS1_PADDING
+      }, Buffer.from('tbliuca12345:12434'));
+      
+      console.log(encryptedData.toString('base64'));
+}
+
+
+
+  function getKeyPair(passphrase) {
+    return crypto.generateKeyPairSync('rsa', {
+        modulusLength: 2048, // 模数的位数，即密钥的位数，2048 或以上一般是安全的
+        publicExponent: 0x10001, // 指数值，必须为奇数，默认值为 0x10001，即 65537
+        publicKeyEncoding: {
+            type: 'spki',
+            format: 'pem'
+        },
+        privateKeyEncoding: {
+            type: 'pkcs8', // 用于存储私钥信息的标准语法标准
+            format: 'pem', // base64 编码的 DER 证书格式
+            cipher: 'aes-256-cbc', // 加密算法和操作模式
+            passphrase
+        }
+    });
+}
+
+function test(){
+    var private_key = getKeyPair('5HsrwqjEJHsvqKgh4LDKwWQsfKK9UZygPYCspRaVfwM3recZCMn').privateKey;
+    console.log("private_key:", private_key);
+    encrypt(Buffer.from(private_key,'utf-8'))
+}
+test()

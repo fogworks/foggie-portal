@@ -553,6 +553,8 @@ class OrderController {
             return;
         }
 
+        // todo valid order status and challenge status
+
         var privateKey = await userService.getPrivateKeyByEmail(email);
         if (privateKey instanceof BizResultCode) {
             logger.info('private key is null');
