@@ -87,12 +87,17 @@ app.post('/order/sync_device', jsonParser, (req, res) => {
   OrderController.syncDevice(req, res);
 });
 
+
 app.post('/user/encode_user_order', jsonParser, (req, res) => {
   UserController.getToken4UploadFile(req, res);
 });
 
 app.post('/user/validate_user_login', jsonParser, (req, res) => {
   UserController.validateUserLogin(req, res);
+});
+
+app.post('/user/check_account', jsonParser, (req, res) => {
+  UserController.checkAccount(req, res);
 });
 
 app.post('/user/save_password', jsonParser, (req, res) => {

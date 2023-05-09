@@ -43,6 +43,25 @@ class UserController {
     }
 
     /**
+     * check account
+     * @param {*} req   HTTP请求
+     * @param {*} res   HTTP响应
+     */
+    static checkAccount(req, res) {
+        var username = req.body.username;
+        if (!username) {
+            res.send(BizResult.validateFailed());
+            return;
+        }
+        var result = userService.checkAccount(username);
+        if (result !== username) {
+            res.send(BizResult.fail(BizResultCode.ACCOUNT_NOT_EXIST));
+            return;
+        }
+        res.send(BizResult.success(result));
+    }
+
+    /**
      * save user password
      * @param {*} email     foggie的邮箱
      * @param {*} password  用户的密码
@@ -100,9 +119,9 @@ class UserController {
             res.send(BizResult.validateFailed());
             return;
         }
-        
+
         var userInfo = await userService.getUserInfo(email);
-        
+
         if (userInfo instanceof BizResultCode) {
             res.send(BizResult.fail(BizResultCode.PASSWORD_VALID_FAILED));
             return;
@@ -185,7 +204,7 @@ class UserController {
         }
 
         var token = await userService.getToken4UploadFile(email, orderId);
-        if(token instanceof BizResultCode) {
+        if (token instanceof BizResultCode) {
             res.send(BizResult.fail(token));
             return;
         }

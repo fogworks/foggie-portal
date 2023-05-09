@@ -160,6 +160,9 @@ class FileController {
             return;
         }
 
+        // 上传文件时，校验挑战状态
+        var challengeStatus = await orderService.getChallengeStatus(orderId, email);
+
         // 获取token
         var token = await userService.getToken4UploadFile(email, orderId);
         if(token instanceof BizResultCode) {

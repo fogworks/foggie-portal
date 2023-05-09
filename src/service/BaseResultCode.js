@@ -41,6 +41,8 @@ class BaseResultCode {
     static GET_USERINFO_FAILED = new BaseResultCode(10013, 'get userinfo failed');
     static GET_DIVIDEND_LIST_FAILED = new BaseResultCode(10014, 'get dividend list failed');
     static GET_DIVIDEND_COUNT_FAILED = new BaseResultCode(10015, 'get dividend count failed');
+    static ACCOUNT_NOT_EXIST = new BaseResultCode(10016, 'account is not exist');
+    static CHECK_ACCOUNT_FAILED = new BaseResultCode(10017, 'check account failed');
 
     // 订单的异常code 20000～29999
     static ORDER_BUY_FAILED = new BaseResultCode(20000, 'buy failed');
