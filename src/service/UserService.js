@@ -4,6 +4,7 @@ const NeDB = require('nedb');
 const moment = require('moment');
 const request = require('sync-request')
 const config = require('config');
+const DMC = require('dmc.js');
 const common = require('./common');
 const path = require('path');
 const dbConfig = config.get('dbConfig');
@@ -195,31 +196,7 @@ module.exports = {
             logger.info('private key is null');
             return privateKey;
         }
-        var userInfo = await module.exports.getUserInfo(email);
-        if (userInfo instanceof BizResultCode) {
-            logger.info('userInfo is null');
-            return userInfo;
-        }
-        return Buffer.from(privateKey + ':' + userInfo.username + ':' + orderId).toString('base64');
-    },
-    generateToken4UploadFile: async (orderId) => {
-
-        var privateKey = await module.exports.getPrivateKeyByEmail(email);
-        if (privateKey instanceof BizResultCode) {
-            logger.info('private key is null');
-            return privateKey;
-        }
-        var userInfo = await module.exports.getUserInfo(email);
-        if (userInfo instanceof BizResultCode) {
-            logger.info('userInfo is null');
-            return userInfo;
-        }
-
-        var encryptor = crypto.createCipher('RSA-OAEP', privateKey);
-        let encrypted = encryptor.update(userInfo.username + ':' + orderId, 'utf8', 'base64');
-        encrypted += encryptor.final('base64');
-
-        return encrypted;
+        return DMC.ecc.sign(Buffer.from(orderId, 'utf8'), privateKey)
     },
     dividendList: (username, skip, limit) => {
         try {

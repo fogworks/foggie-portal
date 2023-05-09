@@ -432,7 +432,17 @@ class OrderController {
         }
 
         // valid challenge state
-        // var challengeState = await orderService.getChallengeState(orderId, email);
+        // get user challenge count miner not response challenge count
+        var challengeState = await orderService.getChallengeCountByState(orderId, [3]);
+        if (challengeState instanceof BizResultCode) {
+            res.send(BizResult.fail(challengeState));
+            return;
+        }
+
+        if (challengeState > 0) {
+            res.send(BizResult.fail(BizResultCode.CHALLENGE_NO_RESPONSE));
+            return;
+        }
 
         var userInfo = await userService.getUserInfo(email);
         if (userInfo instanceof BizResultCode) {

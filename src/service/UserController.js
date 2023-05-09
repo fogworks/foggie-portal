@@ -5,6 +5,7 @@ const Encrypt = require('./Encrypt');
 const userService = require('./UserService');
 const DMC = require('dmc.js');
 const config = require('config');
+const OrderService = require('./OrderService');
 
 class UserController {
 
@@ -195,12 +196,12 @@ class UserController {
      */
     static async getToken4UploadFile(req, res) {
         var orderId = req.body.orderId;
-        var email = req.body.email;
-        if (!orderId || !email) {
+        if (!orderId) {
             res.send(BizResult.validateFailed(orderId));
             return;
         }
 
+        var email = await OrderService.getEmailByOrderId(orderId);
         var token = await userService.getToken4UploadFile(email, orderId);
         if (token instanceof BizResultCode) {
             res.send(BizResult.fail(token));

@@ -665,6 +665,28 @@ module.exports = {
             return BizResultCode.QUERY_ORDER_FAILED;
         });
     },
+    getEmailByOrderId: async (orderId) => {
+        return new Promise((resolve, reject) => {
+            // query buy order record from NeDB
+            orderDB.findOne({
+                order_id: orderId
+            }, function (err, data) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.QUERY_ORDER_FAILED);
+                    return;
+                }
+                if (!data) {
+                    resolve(BizResultCode.ORDER_NOT_EXIST);
+                    return;
+                }
+                resolve(data.email);
+            });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.QUERY_ORDER_FAILED;
+        });
+    },
     getOrderByBillId: async (email, billId) => {
         return new Promise((resolve, reject) => {
             orderDB.findOne({
