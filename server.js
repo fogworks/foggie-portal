@@ -71,6 +71,10 @@ app.post('/order/challenge_list', jsonParser, (req, res) => {
   OrderController.getChallengeList(req, res);
 });
 
+app.post('/order/challenge_count', jsonParser, (req, res) => {
+  OrderController.getChallengeCount(req, res);
+});
+
 app.post('/order/release', jsonParser, (req, res) => {
   OrderController.release(req, res);
 });
