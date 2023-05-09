@@ -419,6 +419,22 @@ class OrderController {
             return;
         }
 
+        // valid file count 
+        var fileCount = await fileService.getFileCount(orderId, email, 1);
+        
+        if(fileCount instanceof BizResultCode){
+            res.send(BizResult.fail(fileCount));
+            return;
+        }
+
+        if (fileCount == 0) {
+            res.send(BizResult.fail(BizResultCode.FILE_NOT_EXIST));
+            return;
+        }
+
+        // valid challenge state
+        // var challengeState = await orderService.getChallengeState(orderId, email);
+
         var userInfo = await userService.getUserInfo(email);
         if (userInfo instanceof BizResultCode) {
             logger.info('userInfo is null');
