@@ -611,6 +611,9 @@ class OrderController {
             return;
         }
         var username = userInfo.username;
+
+        // 根据文件的cid和part_id，查询该数据块在整个订单空间中的partId
+        var partId = await orderService.getPartIdByCidAndPartId(orderId, codebook.cid, codebook.part_id);
         dmc_client.transact({
             actions: [{
                 account: "dmc.token",
@@ -624,7 +627,7 @@ class OrderController {
                 data: {
                     sender: username,
                     order_id: orderId,
-                    data_id: codebook.part_id,
+                    data_id: partId,
                     hash_data: dataHash,
                     nonce: nonce
                 }

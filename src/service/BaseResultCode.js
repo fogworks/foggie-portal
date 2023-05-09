@@ -41,6 +41,8 @@ class BaseResultCode {
     static GET_USERINFO_FAILED = new BaseResultCode(10013, 'get userinfo failed');
     static GET_DIVIDEND_LIST_FAILED = new BaseResultCode(10014, 'get dividend list failed');
     static GET_DIVIDEND_COUNT_FAILED = new BaseResultCode(10015, 'get dividend count failed');
+    static ACCOUNT_NOT_EXIST = new BaseResultCode(10016, 'account is not exist');
+    static CHECK_ACCOUNT_FAILED = new BaseResultCode(10017, 'check account failed');
 
     // 订单的异常code 20000～29999
     static ORDER_BUY_FAILED = new BaseResultCode(20000, 'buy failed');
@@ -92,6 +94,7 @@ class BaseResultCode {
     static REMOVE_FILE_FAILED = new BaseResultCode(30023, 'remove file failed');
     static DELETE_CODEBOOK_OFFSET_FAILED = new BaseResultCode(30024, 'delete codebook offset failed');
     static GET_FOGGIE_ID_FAILED = new BaseResultCode(30025, 'get foggie id failed');
+    static GET_FILE_IDX_FAILED = new BaseResultCode(30026, 'get file idx failed');
 
     // 资产的异常code 40000～49999
     static TRANSFER_FAILED = new BaseResultCode(40000, 'transfer failed');

@@ -201,6 +201,32 @@ module.exports = {
             return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
         }
     },
+    getChallengeCountByState: (orderId, state) => {
+        // todo 
+        try {
+            var chainConfig = config.get('chainConfig');
+            var transactionAddress = chainConfig.get('transactionAddress');
+            var getChallengeList = chainConfig.get('getChallengeList');
+
+            let body = '{\n' +
+                '        count_challenge(\n' +
+                '                where: {\n' +
+                '                    order_id: ' + orderId + ',\n' +
+                '                },\n' +
+                '        )\n' +
+                '    }'
+            return JSON.parse(request('POST', transactionAddress + getChallengeList, {
+                headers: {
+                    'Content-Type': 'application/graphql'
+                },
+                body: body
+            }).getBody('utf-8')).data.count_challenge;
+        }
+        catch (err) {
+            logger.error('err:', err);
+            return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
+        }
+    },
     saveOrder: async (email, orderId, miner, user, billId, pst, totalPrice, transactionId) => {
         // save buy order record into NeDB
         return new Promise((resolve, reject) => {
@@ -431,10 +457,10 @@ module.exports = {
                     resolve(data.fogId);
                 });
             })
-            .catch((err) => {
-                logger.error('err:', err);
-                return BizResultCode.GET_FOGGIE_ID_FAILED;
-            });
+                .catch((err) => {
+                    logger.error('err:', err);
+                    return BizResultCode.GET_FOGGIE_ID_FAILED;
+                });
         }
 
         try {
@@ -490,7 +516,7 @@ module.exports = {
             var syncOrder = registerCenterConfig.get('syncOrder');
             var expire = new Date(expire).getTime();
             var orderInfo = await module.exports.getOrderById(email, orderId);
-            if(orderInfo instanceof BizResultCode) {
+            if (orderInfo instanceof BizResultCode) {
                 logger.error('orderInfo is null, orderId:{}', orderId);
                 return orderInfo;
             }
@@ -827,4 +853,26 @@ module.exports = {
             return BizResultCode.CANCEL_FAILED;
         });
     },
+    getPartIdByCidAndPartId: async (orderId, cid, partId) => {
+
+        var merkleIDRequest = {
+            id: orderId,
+            cid: cid,
+            idx: partId
+        }
+        return new Promise((resolve, reject) => {
+            var powClient = module.exports.getPowGrpcClient();
+            powClient.GetMerkleID(merkleIDRequest, function (err, data) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.GET_FILE_IDX_FAILED);
+                }
+                logger.info("get idx in order space success, idx:{}", data.idx);
+                resolve(data.idx);
+            });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.GET_FILE_IDX_FAILED;
+        });
+    }
 }

@@ -16,6 +16,22 @@ const db = new NeDB({
 });
 
 module.exports = {
+    checkAccount: (username) => {
+        var chainConfig = config.get('chainConfig');
+        var httpEndpoint = chainConfig.get("httpEndpoint");
+        var getAccount = chainConfig.get("getAccount");
+
+        var url = httpEndpoint + getAccount;
+        try {
+            let account = JSON.parse(request('POST', url, {
+                json: { "account_name": username }
+            }).getBody('utf-8')).account_name
+            return account;
+        } catch (err) {
+            logger.error('err:', err);
+            return BizResultCode.CHECK_ACCOUNT_FAILED;
+        }
+    },
     getUserInfo: async (email) => {
         // get userInfo from NeDB
         return new Promise((resolve, reject) => {
@@ -194,18 +210,18 @@ module.exports = {
 
             let body = '{\n' +
                 '        find_order(\n' +
-                '                skip: '+ skip +',\n' +
-                '                limit: '+ limit +',\n' +
+                '                skip: ' + skip + ',\n' +
+                '                limit: ' + limit + ',\n' +
                 '                order: "latest_settlement_date",\n' +
                 '                where: {\n' +
                 '                    and: [\n' +
                 '                        {\n' +
                 '                            or: [\n' +
                 '                                {\n' +
-                '                                    miner_id: "'+ username +'",\n' +
+                '                                    miner_id: "' + username + '",\n' +
                 '                                },\n' +
                 '                                {\n' +
-                '                                    user_id: "'+ username +'",\n' +
+                '                                    user_id: "' + username + '",\n' +
                 '                                }\n' +
                 '                            ],\n' +
                 '                        },\n' +
@@ -295,7 +311,7 @@ module.exports = {
 
             let body = '{\n' +
                 '        count_order(\n' +
-                '    where:{and:[{or:[{miner_id:"'+ username +'"},{user_id:"'+ username +'"}]},{or:[{state:{ne:4}},{and:[{state:4},{settlement_pledge_amount:{ne:"0.0000"}}]}]},{latest_settlement_date:{ne:"1970-01-01T00:00:00.000Z"}}]}\n' + 
+                '    where:{and:[{or:[{miner_id:"' + username + '"},{user_id:"' + username + '"}]},{or:[{state:{ne:4}},{and:[{state:4},{settlement_pledge_amount:{ne:"0.0000"}}]}]},{latest_settlement_date:{ne:"1970-01-01T00:00:00.000Z"}}]}\n' +
                 '        )\n' +
                 '    }'
             return JSON.parse(request('POST', transactionAddress + getDividend, {
