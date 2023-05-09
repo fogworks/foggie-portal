@@ -1,8 +1,5 @@
 import request from "@/utils/request";
 
-
-
-// 注册用户
 export const register = (data) => {
   return request({
     url: "/api/accounts/user",
@@ -11,7 +8,6 @@ export const register = (data) => {
   });
 };
 
-// 登录用户
 export const login = (data) => {
   return request({
     url: "/api/accounts/login",
@@ -21,7 +17,6 @@ export const login = (data) => {
   });
 };
 
-//退出登录
 export const logouts = (data) => {
   return request({
     url: "/api/accounts/logout",
@@ -36,8 +31,6 @@ export const user = () => {
   });
 };
 
-
-//支付方式和比例
 export const paynode = () => {
   return request({
     url: "/api/paynode",
@@ -45,7 +38,6 @@ export const paynode = () => {
   });
 };
 
-//支付方式和比例
 export const createPayments = (data) => {
   return request({
     url: "/api/payments",
@@ -54,7 +46,6 @@ export const createPayments = (data) => {
   });
 };
 
-//获取订单状态
 export const checkpayment = (uuid) => {
   return request({
     url: "/api/checkpayment?uuid=" + uuid,
@@ -62,7 +53,6 @@ export const checkpayment = (uuid) => {
   });
 };
 
-//获取订单状态
 export const completepayment = (data) => {
   return request({
     url: "/api/completepayment",
@@ -71,7 +61,6 @@ export const completepayment = (data) => {
   });
 };
 
-//生成交易
 export const transactions = (data) => {
   return request({
     url: "/api/oms/transactions",
@@ -88,8 +77,8 @@ export const refreshToken = () => {
   });
 };
 
-//⽂件LIST
-export const oodFileList = (orderId, peerId, prefix) => {
+//File LIST
+export const oodFileList = (deviceData, prefix) => {
   let url = "/list_files",
     // prefix = "",
     delimiter = "/",
@@ -106,8 +95,7 @@ export const oodFileList = (orderId, peerId, prefix) => {
     continuation_token,
     version_id_marker,
     key_marker,
-    Id: orderId,
-    peerId,
+    deviceData,
   };
 
   return request({
@@ -116,7 +104,6 @@ export const oodFileList = (orderId, peerId, prefix) => {
     data,
   });
 };
-
 
 export const find_objects = (orderId, peerId, fileId) => {
   let url = "/find_objects",
@@ -167,7 +154,7 @@ export const oodTaskList = (ID, next_marker, prefix) => {
     method: "GET",
   });
 };
-//⽂件STATUS
+//File STATUS
 export const oodFileStatus = (ID, type) => {
   let url = `/stats?st_type=${type}`;
   // let url = '/ping?t=1111';
@@ -177,8 +164,7 @@ export const oodFileStatus = (ID, type) => {
   });
 };
 
-
-export const file_delete = (item,peerId, Id) => {
+export const file_delete = (item, peerId, Id) => {
   let objects = [
     { pubkey: item.pubkey ? item.pubkey : encodeURIComponent(item.key) },
   ];
@@ -199,8 +185,7 @@ export const file_delete = (item,peerId, Id) => {
   });
 };
 
-
-//⽂件Search
+// FileSearch
 export const oodFileSearch = (key) => {
   // let url = `/o/${ID}/find?key=${key}`;
   let url = `/find?key=${key}`;
@@ -210,7 +195,6 @@ export const oodFileSearch = (key) => {
   });
 };
 
-//监控信息
 export const oodMonitor = (item) => {
   let url = `/metrics/Info?size=${item.size}&field_value=${item.field_value}&miner_ids=${item.miner_ids}&metrics_type=${item.metrics_type}&by_date=${item.date}`;
   return request({
@@ -219,8 +203,6 @@ export const oodMonitor = (item) => {
   });
 };
 
-
-//VOOD总容量和健康度信息获取
 export const getActivationVood = (data, target) => {
   let url = `/v1/get_service_info`;
   return request({
@@ -229,7 +211,6 @@ export const getActivationVood = (data, target) => {
     target,
   });
 };
-
 
 //ipns publish list
 export const pIN = (data) => {
@@ -251,7 +232,6 @@ export const publishPin = (data) => {
   });
 };
 
-
 //ipns publish list
 export const IPFSSync = (ood_id, data) => {
   let url = `ipfsops/sync`;
@@ -262,8 +242,6 @@ export const IPFSSync = (ood_id, data) => {
   });
 };
 
-
-//检查VOOD的信息
 export const voodInfoCheck = (vpsId) => {
   return request({
     url: `/v1/service/check_cyfs`,
@@ -271,7 +249,6 @@ export const voodInfoCheck = (vpsId) => {
   });
 };
 
-//激活VOOD
 export const voodActivate = (data) => {
   return request({
     url: `/api/vps/vood_activate`,
@@ -279,7 +256,6 @@ export const voodActivate = (data) => {
     data: data,
   });
 };
-
 
 export const OwnerBills = (account) => {
   if (account && account !== null) {
@@ -299,15 +275,13 @@ export const dmcSwap = () => {
   });
 };
 
-
 /**
- * @param {String} fileName 文件名称
- * @param {String} upload_id 创建时不需要传入,上传完成时需要传入
- * @param {String} cid  文件唯一表示
- * @param {object} data  创建时不需要传入,上传完成时需要传入格式为  parts:[{"part_number":1,"etag":"60f3efd9111f7a19c23d6045b15e8a2b"}]
- * @param {String} fileType  文件类型 this.file.fileType
+ * @param {String} fileName
+ * @param {String} upload_id
+ * @param {String} cid
+ * @param {object} data  parts:[{"part_number":1,"etag":"60f3efd9111f7a19c23d6045b15e8a2b"}]
+ * @param {String} fileType this.file.fileType
  *  */
-/* 大文件 上传 开始上传/上传结束 */
 export const uploadMultipart = (params) => {
   const {
     dedicatedip,
@@ -332,8 +306,9 @@ export const uploadMultipart = (params) => {
   //   }&content_type=${fileType}`;
   // }
 
-  url = `/mp/${encodeURIComponent(fileName)}?upload_id=${upload_id ?? ""
-    }&content_type=${fileType}`;
+  url = `/mp/${encodeURIComponent(fileName)}?upload_id=${
+    upload_id ?? ""
+  }&content_type=${fileType}`;
 
   let obj = {
     url: url,
@@ -348,8 +323,6 @@ export const uploadMultipart = (params) => {
   return request(obj);
 };
 
-
-//文件分享
 export const fileShare = (ood_id, data) => {
   let url = `o/${ood_id}/presignurl`;
   return request({
@@ -359,8 +332,6 @@ export const fileShare = (ood_id, data) => {
   });
 };
 
-
-//002  获取当前任务的状态
 export const awardTaskList = (ood_id) => {
   if (ood_id && ood_id !== null) {
     return request({
@@ -370,7 +341,7 @@ export const awardTaskList = (ood_id) => {
   }
 };
 
-//003  完成任务
+//003
 export const finishTask = (data) => {
   return request({
     url: "/x/reward_active",
@@ -379,7 +350,6 @@ export const finishTask = (data) => {
   });
 };
 
-//004  领取奖励
 export const rewardReceive = (data) => {
   return request({
     url: "/x/reward_receive",
@@ -388,7 +358,6 @@ export const rewardReceive = (data) => {
   });
 };
 
-//005 查看昨⽇奖励
 export const ydaReward = (owner_id, type) => {
   if (owner_id && owner_id !== null) {
     let url = "";
@@ -405,7 +374,6 @@ export const ydaReward = (owner_id, type) => {
   }
 };
 
-//006 获取ood 历史获取奖励
 export const historyReward = (ID, page, limit) => {
   if (ID && ID !== null) {
     let url = `/x/${ID}/reward?page=${page}&limit=${limit}`;
@@ -416,7 +384,6 @@ export const historyReward = (ID, page, limit) => {
   }
 };
 
-//007 获取单个keyfile信息
 export const shareLink = (ID, key) => {
   if (ID && ID !== null) {
     let url = `/lookup?key=${key}`;
@@ -426,7 +393,6 @@ export const shareLink = (ID, key) => {
     });
   }
 };
-
 
 export const withdrawDMC = (data) => {
   return request({
@@ -462,8 +428,6 @@ export const getWithdrawList = (owner_id, page, limit) => {
   }
 };
 
-
-//获取account 最近7天奖励
 export const lastweekReward = (account) => {
   if (account && account !== null) {
     let url = `/x/lastweek_reward?owner_id=${account}`;
@@ -474,7 +438,6 @@ export const lastweekReward = (account) => {
   }
 };
 
-//获取⽂件分享 最近7天统计信息
 export const CidShare = (OODID, CID) => {
   if (OODID && CID) {
     let url = `/o/${OODID}/${CID}/share`;
@@ -486,7 +449,6 @@ export const CidShare = (OODID, CID) => {
   }
 };
 
-//获取otp的secret和qrcode
 export const getWithdrawGoogle = (data) => {
   return request({
     url: "/x/otp",
@@ -495,7 +457,6 @@ export const getWithdrawGoogle = (data) => {
   });
 };
 
-//验证google验证
 export const verifyGoogle = (data) => {
   return request({
     url: "/x/verify_otp",
@@ -503,7 +464,6 @@ export const verifyGoogle = (data) => {
     data: data,
   });
 };
-//开启google验证
 export const withdrawGoogle = (data) => {
   return request({
     url: "/x/withdraw_otp",
@@ -512,7 +472,6 @@ export const withdrawGoogle = (data) => {
   });
 };
 
-// cbs服务激活
 export const deploy_cbs = (target) => {
   return request({
     url: `/v1/service/deploy_cbs`,
@@ -520,7 +479,6 @@ export const deploy_cbs = (target) => {
     target,
   });
 };
-// ipfs服务激活
 export const deploy_ipfs = (target) => {
   return request({
     url: `/v1/service/deploy_ipfs`,
@@ -528,7 +486,6 @@ export const deploy_ipfs = (target) => {
     target,
   });
 };
-// cyfs服务激活
 export const deploy_cyfs = (data, target) => {
   return request({
     url: `/v1/service/deploy_cyfs`,
@@ -537,7 +494,6 @@ export const deploy_cyfs = (data, target) => {
     target,
   });
 };
-// 服务状态查询
 export const get_service_info = (target) => {
   return request({
     url: `/v1/get_service_info`,
@@ -546,7 +502,6 @@ export const get_service_info = (target) => {
   });
 };
 
-// 探测绑定的 foggie 账户 DMC 信息
 export const get_foggie_dmc = (data) => {
   return request({
     url: `/api/accounts/get_foggie_dmc`,
@@ -554,7 +509,6 @@ export const get_foggie_dmc = (data) => {
     data,
   });
 };
-//  绑定/注册 foggie 账户
 export const bind_foggie = (data, target) => {
   return request({
     url: `/v1/account/bind_foggie`,
@@ -563,7 +517,6 @@ export const bind_foggie = (data, target) => {
     target,
   });
 };
-//  解绑 foggie 账户
 export const unbind_foggie = (target) => {
   return request({
     url: `/v1/account/unbind_foggie`,
@@ -572,7 +525,6 @@ export const unbind_foggie = (target) => {
   });
 };
 
-//  搜索设备
 export const search_foggie = (data) => {
   return request({
     url: `/api/accounts/search_foggie`,
@@ -580,7 +532,6 @@ export const search_foggie = (data) => {
     data,
   });
 };
-//开启主网账号验证
 export const checkAccount = (data, target = {}) => {
   return request({
     url: "/v1/chain/get_account",
@@ -589,7 +540,6 @@ export const checkAccount = (data, target = {}) => {
     target,
   });
 };
-// 修改访问密码
 export const modify_access_password = (data, target) => {
   return request({
     url: `/v1/account/modify_access_password`,
@@ -598,7 +548,6 @@ export const modify_access_password = (data, target) => {
     target,
   });
 };
-// 访问密码是否存在监测
 export const check_access_pass = (target) => {
   return request({
     url: `/v1/account/check_access_pass`,
@@ -606,7 +555,6 @@ export const check_access_pass = (target) => {
     target,
   });
 };
-// 访问密码设置
 export const access_pass = (data, target) => {
   return request({
     url: `/v1/account/access_pass`,
@@ -615,7 +563,6 @@ export const access_pass = (data, target) => {
     target,
   });
 };
-// 访问密码登录
 export const access_pass_login = (data, target) => {
   return request({
     url: `/v1/account/access_pass_login`,
@@ -624,7 +571,6 @@ export const access_pass_login = (data, target) => {
     target,
   });
 };
-// IPFS 服务开启/关闭
 export const op_ipfs = (data, target) => {
   return request({
     url: `/v1/service/op_ipfs`,
@@ -633,7 +579,6 @@ export const op_ipfs = (data, target) => {
     target,
   });
 };
-// cyFS 服务开启/关闭
 export const op_cyfs = (data, target) => {
   return request({
     url: `/v1/service/op_cyfs`,
@@ -642,7 +587,6 @@ export const op_cyfs = (data, target) => {
     target,
   });
 };
-// 服务一键重置
 export const reset_vood = (target) => {
   return request({
     url: `/v1/service/reset_vood`,
@@ -650,7 +594,6 @@ export const reset_vood = (target) => {
     target,
   });
 };
-//  探测设备是否可以外网访问
 export const detected_net = (target) => {
   return request({
     url: `/v1/detected_net`,
@@ -708,8 +651,6 @@ export const getNetStatus = (data) => {
   });
 };
 
-
-
 export const search_object = (data) => {
   let url = `/search_object`;
   return request({
@@ -718,5 +659,3 @@ export const search_object = (data) => {
     data,
   });
 };
-
-

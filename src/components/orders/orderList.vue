@@ -23,25 +23,26 @@
       </el-link>
       <div style="font-size: 15px; color: rgba(255, 255, 255, 0.7)">
         <el-tag type="info" effect="dark" round v-if="item.state == '0'">
-          订单未共识，等待中...</el-tag
+          Subscription not agreed, waiting...</el-tag
         >
         <el-tag effect="dark" round v-if="item.state == '1'"
-          >订单状态交付中</el-tag
+          >order status delivery</el-tag
         >
         <el-tag type="warning" effect="dark" round v-if="item.state == '2'">
-          没有足够的预存金，订单即将结束
+          Insufficient deposit, the order is about to end
         </el-tag>
         <el-tag effect="dark" round v-if="item.state == '3'">
-          有足够的预存金，订单下个周期依然处于交付中
+          With sufficient deposit, the order is still in delivery in the next
+          cycle
         </el-tag>
         <el-tag type="success" effect="dark" round v-if="item.state == '4'">
-          订单已经结束</el-tag
+          Order has ended</el-tag
         >
         <el-tag type="danger" effect="dark" round v-if="item.state == '5'">
-          订单已取消</el-tag
+          Order has been canceled</el-tag
         >
         <el-tag type="warning" effect="dark" round v-if="item.state == '6'">
-          订单下个周期将要取消
+          The order will be canceled in the next cycle
         </el-tag>
       </div>
     </div>
@@ -169,11 +170,11 @@
             <span style="font-size: 24px; font-weight: 600">GB</span>
           </el-col>
           <el-col :span="9" class="bottom_col">
-            <svg-icon
+            <!-- <svg-icon
               icon-class="left"
               size="40"
               style="margin-right: 10px"
-            ></svg-icon>
+            ></svg-icon> -->
             <!-- <div>
               <div>Blocks</div>
               <div>12600</div>
@@ -259,7 +260,7 @@
                   class="popoverBox_item"
                   @click.stop="popoverClick('submitMerkle', item)"
                 >
-                  上传Merkle
+                  Upload Merkle
                 </div>
               </div>
               <template #reference>
@@ -354,7 +355,7 @@ function popoverClick(type, item) {
     // if (item.state == "1") {
     //   ElMessage({
     //     showClose: true,
-    //     message: "订单正在交付中，不能提交merKle,请等待。",
+    //     message: "The order is being delivered, merKle cannot be submitted, please wait.",
     //     type: "warning",
     //     grouping: true,
     //   });
@@ -372,7 +373,7 @@ function popoverClick(type, item) {
         item.popoverShow = false;
         ElMessage({
           showClose: true,
-          message: "merKle树上传成功！",
+          message: "The merKle tree is uploaded successfully!",
           type: "success",
           grouping: true,
         });

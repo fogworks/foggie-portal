@@ -3,6 +3,7 @@ node_modules
 /dist
 /out
 .VSCodeCounter
+/target
 
 # local env files
 .env.local

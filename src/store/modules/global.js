@@ -1,5 +1,4 @@
 import { savePassword } from "@/api/common";
-// 全局
 export default {
   namespaced: true,
   state: {
@@ -11,13 +10,13 @@ export default {
     deviceList: [],
     currentOODItem:
       window.localStorage.currentOODItem &&
-        window.localStorage.currentOODItem !== "undefined"
+      window.localStorage.currentOODItem !== "undefined"
         ? { data: JSON.parse(window.localStorage.getItem("currentOODItem")) }
         : {
-          data: {
-            device_id: "",
+            data: {
+              device_id: "",
+            },
           },
-        },
     discoverData: {},
   },
   mutations: {

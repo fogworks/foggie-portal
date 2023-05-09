@@ -48,7 +48,7 @@
 import { reactive, onMounted, ref, computed } from "vue";
 import { ElNotification } from "element-plus";
 import { useStore } from "vuex";
-import { useRouter,useRoute } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 export default {
   setup() {
     const store = useStore();
@@ -56,34 +56,36 @@ export default {
     const route = useRoute();
     const theme = computed(() => store.getters.theme);
     const pubkey = route.query.pubkey || "";
-    const name= route.query.name;
-    const isFolder= route.query.isFolder;
-    const ipfsStr= route.query.ipfsStr||'';
-    const cyfsStr= route.query.cyfsStr||'';
+    const name = route.query.name;
+    const isFolder = route.query.isFolder;
+    const ipfsStr = route.query.ipfsStr || "";
+    const cyfsStr = route.query.cyfsStr || "";
     const documentInfo = reactive({
       title: name,
       idList: [],
       url: `/object?pubkey=${pubkey}`,
     });
-    if(ipfsStr)documentInfo.idList.push({name:'IPFS',code:ipfsStr.substr(7)})
-    if(cyfsStr)documentInfo.idList.push({name:'CYFS',code:cyfsStr.substr(7)})
+    if (ipfsStr)
+      documentInfo.idList.push({ name: "IPFS", code: ipfsStr.substr(7) });
+    if (cyfsStr)
+      documentInfo.idList.push({ name: "CYFS", code: cyfsStr.substr(7) });
     const downloadItem = () => {
       let downloadUrl = `/fog/${pubkey}?dl=true`;
 
       var oA = document.createElement("a");
-      oA.download = name; // 设置下载的文件名，默认是'下载'
+      oA.download = name;
       oA.href = downloadUrl;
       document.body.appendChild(oA);
       oA.click();
-      oA.remove(); // 下载之后把创建的元素删除
+      oA.remove();
     };
     function copySecret(key) {
-      var input = document.createElement("textarea"); // 创建input对象
-      input.value = key; // 设置复制内容
-      document.body.appendChild(input); // 添加临时实例
-      input.select(); // 选择实例内容
-      document.execCommand("Copy"); // 执行复制
-      document.body.removeChild(input); // 删除临时实例
+      var input = document.createElement("textarea");
+      input.value = key;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("Copy");
+      document.body.removeChild(input);
       ElNotification({
         type: "success",
         message: "Copy succeeded",

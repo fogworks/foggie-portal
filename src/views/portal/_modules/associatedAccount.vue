@@ -101,7 +101,7 @@ const props = defineProps({
   },
 });
 const store = useStore();
-const isNew = ref(false); //是否是新用户
+const isNew = ref(false);
 const tipTitle = computed(() => {
   if (isNew.value) {
     return "Already have an account? Disassociation";
@@ -269,7 +269,7 @@ const submit = () => {
                 },
               })
                 .then((res) => {
-                  // 获取钱包信息
+                  //
                   if (!res.data.data.dmc_account) {
                     proxy.$notify({
                       type: "info",
@@ -282,7 +282,6 @@ const submit = () => {
                     form.dmc_account = res.data.data.dmc_account;
                     loading.value = false;
                     showDMC.value = true;
-                    // 绑定
                   }
                 })
                 .catch((err) => {

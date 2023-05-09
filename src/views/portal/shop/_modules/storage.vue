@@ -35,13 +35,13 @@
           </div>
 
           <!-- <div>
-            <el-select v-model="formLine.priceSection" placeholder="請選擇理想價格區間" style="width: 360px">
-              <el-option :label="`基準價正負20%： 約 ${selectionOption['2'].min} -- ${selectionOption['2'].max} DMC`"
+            <el-select v-model="formLine.priceSection" placeholder="Please select the desired price range" style="width: 360px">
+              <el-option :label="`Base price plus or minus 20%： about ${selectionOption['2'].min} -- ${selectionOption['2'].max} DMC`"
                 value="2" />
-              <el-option :label="`基準價正負30%： 約 ${selectionOption['3'].min} -- ${selectionOption['3'].max} DMC`"
+              <el-option :label="`Base price plus or minus 30%： about ${selectionOption['3'].min} -- ${selectionOption['3'].max} DMC`"
                 value="3" />
 
-              <el-option label="不限價格" :value="0" />
+              <el-option label="unlimited price" :value="0" />
             </el-select>
           </div> -->
           <el-button
@@ -213,15 +213,15 @@ const ChainId = computed(() => store.getters.ChainId);
 // const username = computed(() => store.getters.userInfo?.dmc);
 const email = computed(() => store.getters.userInfo?.email);
 let loading = ref(false);
-let dialogIsShow = ref(false); // 弹窗是否展示
-let curReferenceRate = ref(0); //当前基准率
+let dialogIsShow = ref(false); //
+let curReferenceRate = ref(0); //
 
 const state = reactive({
   formLine: {
-    week: "", //购买周期
-    quantity: "", //pst数量
-    priceSection: "3", // 选择的价格区间 2 3 0
-    prestoreDMC: "", // 预存DMC
+    week: "", //
+    quantity: "", //
+    priceSection: "3", //  2 3 0
+    prestoreDMC: "", //
   },
   selectionOption: {
     2: {
@@ -233,16 +233,16 @@ const state = reactive({
       max: "",
     },
   },
-  filterOrderList: [], // 筛选出来的订单列表
+  filterOrderList: [], //
   orderDetail: {
     orderID: "",
-    price: "", // 订单单价
-    total: "", //订单总价
-    deposit: "", //订单押金
-    aggregate: "", // 总计
-    week: "", //预计多少周
-    serverTime: "", //预计服务时间
-  }, //订单详情
+    price: "", //
+    total: "", //
+    deposit: "", //
+    aggregate: "", //
+    week: "", //
+    serverTime: "", //
+  }, //
 });
 const { formLine, selectionOption, filterOrderList, orderDetail } =
   toRefs(state);
@@ -253,18 +253,17 @@ watch(curReferenceRate, (newVal) => {
   state.selectionOption["3"].min = Math.round(newVal * 1000 * 0.7) / 1000;
   state.selectionOption["3"].max = Math.round(newVal * 1000 * 1.3) / 1000;
 });
-/* 筛选订单 */
 function filterOrder() {
   let params = {
-    email: email.value, //测试时可以为空，空则取默认的用户名tianbao12345
+    email: email.value, //
     chainId: ChainId.value,
     benchmarkPrice: curReferenceRate.value,
-    unmatchedAmount: state.formLine.quantity, //pst数量
-    period: state.formLine.week, //购买周期
+    unmatchedAmount: state.formLine.quantity, //
+    period: state.formLine.week, //
   };
   if (state.formLine.priceSection) {
-    params.minPrice = state.selectionOption[state.formLine.priceSection].min; //最低价，单位DMC
-    params.maxPrice = state.selectionOption[state.formLine.priceSection].max; //最高价，单位DMC
+    params.minPrice = state.selectionOption[state.formLine.priceSection].min; //
+    params.maxPrice = state.selectionOption[state.formLine.priceSection].max; //
   }
   loading.value = true;
   getOrderFilterList(params)
@@ -285,7 +284,7 @@ function filterOrder() {
 function blurPrestoreDMC() {
   if (state.formLine.prestoreDMC == "") {
     ElMessage({
-      message: `预存金额不能为空`,
+      message: `The deposit amount cannot be empty`,
       type: "warning",
       grouping: true,
     });
@@ -295,7 +294,7 @@ function blurPrestoreDMC() {
     state.orderDetail.total - state.orderDetail.deposit
   ) {
     ElMessage({
-      message: `预存金额不能小于${(
+      message: `The deposit amount cannot be less than${(
         state.orderDetail.total - state.orderDetail.deposit
       ).toFixed(4)}`,
       type: "warning",
@@ -307,7 +306,6 @@ function blurPrestoreDMC() {
   }
 }
 
-/* 当预存金额改变时触发 处理总计 和预计服务时间 */
 function inputPrestoreDMC(text) {
   text = text.replace(/[^0-9\.]/g, "");
   state.formLine.prestoreDMC = text;
@@ -326,7 +324,6 @@ function inputPrestoreDMC(text) {
   ).toFixed(4);
 }
 
-/* 计算 总价 */
 function computeTotalPrices(item) {
   let total =
     (item.price / 10000) * state.formLine.week +
@@ -335,7 +332,6 @@ function computeTotalPrices(item) {
   return total.toFixed(4);
 }
 
-/* 获取基准率 */
 function loadCurReferenceRate() {
   getCurReferenceRate().then((res) => {
     if (res.code == 200) {
@@ -343,7 +339,6 @@ function loadCurReferenceRate() {
     }
   });
 }
-/* 购买PST */
 function purchasePST(item) {
   state.orderDetail.orderID = item.id;
   state.orderDetail.price = (item.price / 10000).toFixed(4);
@@ -370,12 +365,12 @@ async function submit() {
     let params = {
       chainId: ChainId.value, //chainId
       email: email.value,
-      billId: state.orderDetail.orderID, //挂单的id
-      period: state.formLine.week, //购买周期，大于等于24
-      benchmarkPrice: curReferenceRate.value, //基准价格，单位DMC
-      priceRange: "3", // 基准价格正负浮动30%
-      unmatchedAmount: state.formLine.quantity, //购买PST数量
-      totalPrice: state.orderDetail.aggregate, //总价，单位 DMC
+      billId: state.orderDetail.orderID, //
+      period: state.formLine.week, //>24
+      benchmarkPrice: curReferenceRate.value, //
+      priceRange: "3", // 30%
+      unmatchedAmount: state.formLine.quantity, //
+      totalPrice: state.orderDetail.aggregate, // DMC
     };
     // switch (state.formLine.priceSection) {
     //   case 0:
@@ -396,16 +391,20 @@ async function submit() {
           dialogIsShow.value = false;
           loading.value = false;
           ElMessage({
-            message: `购买成功！`,
+            message: `Successful Purchase!`,
             type: "success",
             grouping: true,
           });
         } else {
-          ElMessageBox.confirm("买单失败是否重试！", "Warning", {
-            confirmButtonText: "OK",
-            cancelButtonText: "Cancel",
-            type: "warning",
-          })
+          ElMessageBox.confirm(
+            "Whether to retry if the order fails!",
+            "Warning",
+            {
+              confirmButtonText: "OK",
+              cancelButtonText: "Cancel",
+              type: "warning",
+            }
+          )
             .then(async () => {
               order_sync();
             })
@@ -428,7 +427,7 @@ const order_sync = async () => {
       loading.value = false;
 
       ElMessage({
-        message: `购买成功！`,
+        message: `Successful Purchase!`,
         type: "success",
         grouping: true,
       });

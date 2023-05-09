@@ -91,7 +91,7 @@ import { useRouter } from "vue-router";
 const bcryptjs = require("bcryptjs");
 const store = useStore();
 const router = useRouter();
-const isNew = ref(false); //是否是新用户
+const isNew = ref(false); //
 // const form = reactive(props.form);
 const { proxy } = getCurrentInstance();
 const requestTarget = inject("requestTarget");

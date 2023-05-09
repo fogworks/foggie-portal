@@ -154,12 +154,12 @@ const keyWord = ref("");
 const deviceList = computed(() => store.getters["global/deviceList"]);
 
 const copyLink = (text) => {
-  var input = document.createElement("input"); // 创建input对象
-  input.value = text; // 设置复制内容
-  document.body.appendChild(input); // 添加临时实例
-  input.select(); // 选择实例内容
-  document.execCommand("Copy"); // 执行复制
-  document.body.removeChild(input); // 删除临时实例
+  var input = document.createElement("input");
+  input.value = text;
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand("Copy");
+  document.body.removeChild(input);
   // let str = `Copying  ${type} successful!`;
   // this.$message.success(str);
   proxy.$notify({
@@ -229,7 +229,6 @@ const list = computed(() => {
     height: 0px;
   }
   &::-webkit-scrollbar-thumb {
-    /*滚动条里面小方块*/
     width: 0;
     height: 0;
     border-radius: 5px;
