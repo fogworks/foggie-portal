@@ -79,5 +79,14 @@ export function bind_valid(data) {
     data,
   });
 }
+//监测dmc账户是否存在
+export function check_account(data) {
+  return request({
+    url: baseUrl + '/user/check_account',
+    method: 'POST',
+    data,
+  });
+}
+
 
 

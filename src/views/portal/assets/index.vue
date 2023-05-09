@@ -98,11 +98,15 @@
         :noOrderShow="noOrderShow"
         @reload="reload"
       ></Withdraw>
-      <AssetsRecords v-model:visible="recordsVisible"></AssetsRecords>
-      <NftDialog
+
+      <AssetsRecords
+        v-if="recordsVisible"
+        v-model:visible="recordsVisible"
+      ></AssetsRecords>
+      <!-- <NftDialog
         v-model:visible="NftDialogVisible"
         :nft-link="nftLink"
-      ></NftDialog>
+      ></NftDialog> -->
     </div>
   </div>
 </template>

@@ -212,7 +212,7 @@ const submit = () => {
   justify-content: space-around;
   align-items: center;
   padding: 50px 0;
-  background-color: var(--bg-color);
+  background-color: #f2f6ff;
   border-radius: 20px;
   width: 900px;
   margin: 0 auto;

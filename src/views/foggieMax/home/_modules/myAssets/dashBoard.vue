@@ -153,8 +153,8 @@ export default {
 
   color: #000;
 
-  background: var(--card-bg);
   @include card-box;
+  background: var(--bg-color);
 
   .title {
     font-size: 30px;

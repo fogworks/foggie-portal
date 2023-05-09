@@ -437,9 +437,9 @@ const initFileData = async (data) => {
       data.content[j].cid,
       data.content[j].key,
       isDir,
-      deviceData.rpc.split(':')[0],
-      deviceData.rpc.split(':')[1],
-      deviceData.peer_id,
+      deviceData.rpc.split(":")[0],
+      deviceData.rpc.split(":")[1],
+      deviceData.peer_id
     );
     let { imgHttpLink: url_large } = handleImg(
       type,
@@ -447,19 +447,18 @@ const initFileData = async (data) => {
       data.content[j].cid,
       data.content[j].key,
       isDir,
-      deviceData.rpc.split(':')[0],
-      deviceData.rpc.split(':')[1],
-      deviceData.peer_id,
+      deviceData.rpc.split(":")[0],
+      deviceData.rpc.split(":")[1],
+      deviceData.peer_id
     );
     // let _url = require(`@/svg-icons/logo-dog-black.svg`);
-    let cid =data.content[j].cid;
+    let cid = data.content[j].cid;
     let file_id = data.content[j].file_id;
 
     let name = decodeURIComponent(data.content[j].key);
     if (data.prefix) {
       name = name.split(data.prefix)[1];
     }
-
 
     let item = {
       isDir: isDir,
@@ -571,7 +570,7 @@ const initMyOption = (xdata, ydata, cid) => {
   }
 };
 const theme = computed(() => store.getters.theme);
-const handleImg = (type, ID, cid, key,isDir, ip ,port,peerId) => {
+const handleImg = (type, ID, cid, key, isDir, ip, port, peerId) => {
   let imgHttpLink = "";
   type = type.toLowerCase();
   let isSystemImg = false;
@@ -770,9 +769,9 @@ const downloadItem = (item) => {
   let cid = item.cid;
   let key = item.key;
 
-  let ip = deviceData.rpc.split(':')[0];
+  let ip = deviceData.rpc.split(":")[0];
   // let ip = "154.31.34.194";
-  let port = deviceData.rpc.split(':')[1];
+  let port = deviceData.rpc.split(":")[1];
   // let Id = item.id;
   let Id = deviceData.foggie_id;
   let peerId = deviceData.peer_id;
@@ -902,7 +901,7 @@ const upload = () => {
   margin: 24px 0 50px 0;
   // .card-box();
   color: #000;
-  background: var(--card-bg);
+  background: var(--bg-color);
   border: var(--theme-border);
   @include card-box;
 

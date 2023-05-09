@@ -236,7 +236,12 @@ import {
 } from "vue";
 import DetailDialog from "./detailDialog";
 import { GetFileList, InitiateChallenge } from "@/api/myFiles/myfiles";
-import { oodFileList, CidShare, find_objects, publishPin } from "@/utils/api.js";
+import {
+  oodFileList,
+  CidShare,
+  find_objects,
+  publishPin,
+} from "@/utils/api.js";
 
 import _ from "lodash";
 
@@ -344,7 +349,11 @@ function openUpload() {
 }
 
 const loadFileList = async () => {
-  let data = await oodFileList(orderId.value, deviceData.value.peer_id, breadcrumbList.prefix.join('/'));
+  let data = await oodFileList(
+    orderId.value,
+    deviceData.value.peer_id,
+    breadcrumbList.prefix.join("/")
+  );
   initFileData(data);
 };
 
@@ -440,8 +449,7 @@ const initFileData = async (data) => {
       type,
       "",
       data.content[j].cid,
-      isDir,
-      
+      isDir
     );
     let { imgHttpLink: url_large } = handleImg(
       data.content[j],
@@ -582,7 +590,7 @@ const initMyOption = (xdata, ydata, cid) => {
   }
 };
 
-const handleImg = (item, type, ID, pubkey, isDir, size ) => {
+const handleImg = (item, type, ID, pubkey, isDir, size) => {
   size = size || 20;
   let location = window.location.origin;
   let imgHttpLink = "";
@@ -828,7 +836,7 @@ const doSearch = async () => {
     tableLoading.value = true;
     // let orderId = deviceData.value.space_order_id;
     let peer_id = deviceData.value.peer_id;
-    breadcrumbList.prefix = []
+    breadcrumbList.prefix = [];
     let data = await find_objects(orderId.value, peer_id, keyWord.value);
     tableData.data = [];
     initFileData(data);
@@ -901,7 +909,7 @@ onMounted(() => {
   max-width: 1960px;
   border: var(--theme-border);
   min-height: calc(100vh - 200px);
-  background: #f2f6ff;
+  background: var(--bg-color);
 
   ::v-deep {
     .el-breadcrumb {

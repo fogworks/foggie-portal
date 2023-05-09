@@ -78,25 +78,35 @@
           v-if="item.device_type !== 'space'"
           :class="['circle', item.is_active ? 'onlineC' : 'offlineC']"
         ></div>
-        <template v-if="!item.device_type">
-          <div>
+        <template v-if="item.device_type !== 'foggie_max'">
+          <div
+            :class="[
+              'due',
+              isActive(item.device_id || item.space_order_id) ? 'isActive' : '',
+            ]"
+          >
             Due
-            <span class="value-span value-span2">{{
+            <!-- <span class="value-span value-span2">{{
               handleTimeStamp(item.expire)
-            }}</span>
+            }}</span> -->
+            <el-progress
+              style="width: 150px; margin-left: 5px"
+              :percentage="handleProgress(item)"
+              :color="handleProgress(item) == 100 ? '#e6a23c' : '#409eff'"
+            />
           </div>
           <!-- <div>
             <span class="value-span">500G</span>
             Storage
           </div> -->
         </template>
-        <template v-else-if="item.device_type === 'space'">
-          <div>
+        <template v-if="item.device_type === 'space'">
+          <!-- <div>
             Due
             <span class="value-span value-span2">{{
               handleTimeStamp(item.expire)
             }}</span>
-          </div>
+          </div> -->
           <div style="height: unset">
             <span
               style="
@@ -186,6 +196,19 @@ const isActive = (id) => {
     return false;
   }
 };
+const handleProgress = (item) => {
+  if (!item.device_type) {
+    let created = new Date(item.created_at).getTime() / 1000;
+    let now = new Date().getTime() / 1000 - created;
+    let end = +item.expire - created;
+    return +(now / end).toFixed(2) > 100 ? 100 : +(now / end).toFixed(2);
+  } else {
+    let created = +item.created_at;
+    let now = new Date().getTime() - created;
+    let end = +item.expire - created;
+    return +(now / end).toFixed(2) > 100 ? 100 : +(now / end).toFixed(2);
+  }
+};
 const list = computed(() => {
   if (!keyWord.value) {
     return deviceList.value;
@@ -272,6 +295,25 @@ const list = computed(() => {
   }
   div:first-of-type {
     width: 180px;
+  }
+  .due {
+    display: flex;
+    height: unset;
+    overflow: visible;
+    text-overflow: unset;
+    white-space: normal;
+    :deep {
+      .el-progress-bar__outer {
+        background: #ccc;
+      }
+    }
+    &.isActive {
+      :deep {
+        .el-progress__text {
+          color: #fff;
+        }
+      }
+    }
   }
   .top-value-span {
     font-size: 16px;

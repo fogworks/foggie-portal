@@ -30,6 +30,7 @@
           <el-form-item label="To DMC" prop="receiver">
             <!-- <span v-if="isWalletUser">{{ form.receiver }} (Owner)</span> -->
             <el-input
+              :disabled="loading"
               style="width: 500px"
               v-model.trim="form.receiver"
               placeholder="Please enter your username in the DMC wallet"
@@ -47,6 +48,7 @@
                 </template>
               </el-input> -->
               <el-input-number
+                :disabled="loading"
                 v-model="form.walletMoney"
                 :min="0.01"
                 :precision="4"
@@ -243,11 +245,10 @@ import {
   getGoogle,
   getWithdrawGoogle,
   withdrawGoogle,
-  checkAccount,
   withdrawDMC,
   verifyGoogle,
 } from "@/utils/api.js";
-import { transfer_valid, bind_valid } from "@/api/common.js";
+import { check_account, transfer_valid, bind_valid } from "@/api/common.js";
 import { useStore } from "vuex";
 import { assetsTransfer } from "@/api/order/orderList.js";
 import { Base64 } from "js-base64";
@@ -291,8 +292,7 @@ export default {
     const { visible, title, walletUser, walletType, withDrawMoney } =
       toRefs(props);
     const form = reactive({
-      did: "hhvk3oti4qlr",
-      balance: "3.00",
+      balance: "0.00",
       receiver: "",
       walletMoney: 0,
       gasfee: "0.0",
@@ -305,9 +305,7 @@ export default {
       validateToken: "",
     });
     const email = computed(() => store.getters["token/currentUser"]);
-    const chainId = window.localStorage.getItem("FoggieV")
-      ? JSON.parse(window.localStorage.getItem("FoggieV"))?.global?.ChainId
-      : "";
+    const chainId = computed(() => store.getters.ChainId);
     const formRef = ref(null);
     const withdrawFormRef = ref(null);
     const authorFormRef = ref(null);
@@ -336,11 +334,19 @@ export default {
         cb(new Error("Please enter the account address to withdraw"));
       } else {
         let postdata = {
-          account_name: form.receiver,
+          username: form.receiver,
         };
-        checkAccount(postdata).then(
+        check_account(postdata).then(
           (res) => {
-            cb();
+            if (res.code == 200) {
+              cb();
+            } else {
+              cb(
+                new Error(
+                  "The account does not exist. Please enter the correct account address"
+                )
+              );
+            }
           },
           (err) => {
             cb(
@@ -440,6 +446,7 @@ export default {
       }
     );
     function getAll() {
+      if (loading.value) return false;
       form.walletMoney = +actualMoeny.value;
     }
     const account = ref("");
@@ -516,64 +523,80 @@ export default {
       // });
     }
     //验证google
-    async function setGoogle() {
-      if (walletUser.value) {
-        let data = {
-          account: walletUser.value,
-          // secret: Base64.encode(this.scret_key),
-          secret: scret_keyOld.value,
-        };
-        let res = await withdrawGoogle(data);
-        if (res) {
-          showGoogleQrcode.value = false;
-          showGoogleBtn.value = true;
-          withDrawBtn.value = true;
-          loading.value = false;
-        }
-      }
-    }
+    // async function setGoogle() {
+    //   if (walletUser.value) {
+    //     let data = {
+    //       account: walletUser.value,
+    //       // secret: Base64.encode(this.scret_key),
+    //       secret: scret_keyOld.value,
+    //     };
+    //     let res = await withdrawGoogle(data);
+    //     if (res) {
+    //       showGoogleQrcode.value = false;
+    //       showGoogleBtn.value = true;
+    //       withDrawBtn.value = true;
+    //       loading.value = false;
+    //     }
+    //   }
+    // }
     function handelWithdraw() {
       let postdata = {
-        account_name: form.receiver,
+        username: form.receiver,
       };
       checkValidate(withdrawForm.my_auth_input);
       // withdrawFormRef.value.validate((valid) => {
       if (!showErrorTips.value) {
         loading.value = true;
-        checkAccount(postdata).then(
+        check_account(postdata).then(
           (res) => {
+            if (res.code !== 200) {
+              loading.value = false;
+              ElNotification({
+                title: "Withdrawal failed",
+                message:
+                  "The account does not exist. Please enter the correct account address",
+                position: "bottom-left",
+                type: "error",
+              });
+              return;
+            }
             let data = {
-              chainId,
+              chainId: chainId.value,
               email: email.value,
               // account: walletUser.value,
               amount: form.walletMoney.toFixed(4),
               to: form.receiver, //没有设置OTP的，account和receiver 必须⼀致
               userToken: withdrawForm.my_auth_input,
             };
-            assetsTransfer(data).then((res) => {
-              loading.value = false;
-              console.log(res, "ressssssss");
-              if (res.code == 200) {
-                // let str = "vood.withdrawSuccess";
-                // this.$message.success(str);
-                showGoogleBtn.value = false;
-                withdrawForm.my_auth_input = "";
-                close();
-                ElNotification({
-                  title: "Withdrawal succeeded",
-                  message: "Withdrawal succeeded",
-                  position: "bottom-left",
-                  type: "success",
-                });
-              } else {
-                ElNotification({
-                  title: "Withdrawal failed",
-                  message: res.error,
-                  position: "bottom-left",
-                  type: "error",
-                });
-              }
-            });
+            assetsTransfer(data)
+              .then((res) => {
+                loading.value = false;
+                if (res.code == 200) {
+                  // let str = "vood.withdrawSuccess";
+                  // this.$message.success(str);
+                  showGoogleBtn.value = false;
+                  withdrawForm.my_auth_input = "";
+                  close();
+                  ElNotification({
+                    title: "Withdrawal succeeded",
+                    message: "Withdrawal succeeded",
+                    position: "bottom-left",
+                    type: "success",
+                  });
+                } else {
+                  loading.value = false;
+
+                  ElNotification({
+                    title: "Withdrawal failed",
+                    message: res.error,
+                    position: "bottom-left",
+                    type: "error",
+                  });
+                }
+              })
+              .catch(() => {
+                loading.value = false;
+              });
           },
           (err) => {
             loading.value = false;

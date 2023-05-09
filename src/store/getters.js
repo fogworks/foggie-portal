@@ -7,6 +7,6 @@ const getters = {
   userInfo: state => state.global.userInfo,
   ChainId: state => state.clientGlobal.ChainId, //链ID
   clientPassword: state => state.clientGlobal.clientPassword,  // 用户加密密码
-  
+
 }
 export default getters

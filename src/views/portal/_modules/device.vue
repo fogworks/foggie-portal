@@ -45,13 +45,6 @@
             @click.stop="copyLink(item.device_id)"
           ></svg-icon>
         </div>
-        <template v-if="!item.device_type || item.device_type === 'space'">
-          <div>
-            Due
-            <!-- <el-progress :percentage="handleProgress(item)" /> -->
-            <span class="value-span">{{ handleTimeStamp(item.expire) }}</span>
-          </div>
-        </template>
         <div
           class="item"
           style="height: unset"
@@ -70,6 +63,17 @@
           >
           Space
         </div>
+        <template v-if="!item.device_type || item.device_type === 'space'">
+          <div>
+            Due
+            <el-progress
+              style="width: 150px; margin-left: 5px"
+              :percentage="handleProgress(item)"
+              :status="handleProgress(item) == 100 ? 'warning' : ''"
+            />
+            <!-- <span class="value-span">{{ handleTimeStamp(item.expire) }}</span> -->
+          </div>
+        </template>
 
         <!-- <el-dropdown
           popper-class="more-popper"
@@ -208,8 +212,15 @@ const showClick = () => {
 };
 const handleProgress = (item) => {
   if (!item.device_type) {
-    return 50;
+    let created = new Date(item.created_at).getTime() / 1000;
+    let now = new Date().getTime() / 1000 - created;
+    let end = +item.expire - created;
+    return +(now / end).toFixed(2) > 100 ? 100 : +(now / end).toFixed(2);
   } else {
+    let created = +item.created_at;
+    let now = new Date().getTime() - created;
+    let end = +item.expire - created;
+    return +(now / end).toFixed(2) > 100 ? 100 : +(now / end).toFixed(2);
   }
 };
 const currentTimeStamp = ref(Date.parse(new Date()));
@@ -219,11 +230,11 @@ const search = () => {
   search_foggie({ email: email.value })
     .then((res) => {
       let cur_data = res.data;
-      cur_data.forEach((r) => {
-        if (r.device_type === "space") {
-          r.expire = r.expire.slice(0, r.expire.length - 3);
-        }
-      });
+      // cur_data.forEach((r) => {
+      //   if (r.device_type === "space") {
+      //     r.expire = r.expire.slice(0, r.expire.length - 3);
+      //   }
+      // });
       deviceList.list = cur_data;
       store.dispatch("global/setDeviceList", cur_data);
       loading.value = false;

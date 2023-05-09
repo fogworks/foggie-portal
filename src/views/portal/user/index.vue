@@ -33,6 +33,20 @@
           <!-- <el-button type="danger" @click="unbindVisible = true"
             >Unbind</el-button
           > -->
+          <div
+            class="theme"
+            @click="
+              handleThemeChange(currentTheme === 'light' ? 'dark' : 'light')
+            "
+          >
+            <el-icon
+              class="light"
+              color="#000"
+              v-if="currentTheme === 'light' || ''"
+              ><Sunny
+            /></el-icon>
+            <el-icon class="dark" color="#fff" v-else><Moon /></el-icon>
+          </div>
           <el-button type="primary" @click="logout"
             ><svg-icon icon-class="switch"></svg-icon> Switch
             Accounts</el-button
@@ -102,6 +116,25 @@ const form = reactive({
 const formRef = ref(null);
 const unbindVisible = ref(false);
 const needLogin = ref(true);
+const currentTheme = computed(() => store.getters.theme);
+const handleThemeChange = (val) => {
+  document.documentElement.setAttribute("class", val);
+  // window.localStorage.setItem("theme", val);
+  store.dispatch("global/setTheme", val);
+};
+
+const getTimeState = () => {
+  // 获取当前时间
+  let timeNow = new Date();
+  // 获取当前小时
+  let hours = timeNow.getHours();
+  // 判断当前时间段
+  if (hours >= 0 && hours <= 18) {
+    handleThemeChange(currentTheme.value || "light");
+  } else if (hours > 18 && hours <= 24) {
+    handleThemeChange(currentTheme.value || "dark");
+  }
+};
 const userInfo = computed(() => store.getters["global/userInfo"]);
 const validatePass = (rule, value, callback) => {
   if (value === "") {
@@ -264,9 +297,27 @@ const unbind = () => {
     }
   }
 }
+.theme {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 25px;
+  height: 25px;
+  margin-right: 25px;
+  background-color: var(--theme-box-bg);
+  border-radius: 50%;
+  cursor: pointer;
+  .light {
+    color: #fff;
+  }
+  .dark {
+    color: #000;
+  }
+}
 .foot-btn {
   display: flex;
   justify-content: center;
+  align-items: center;
   :deep {
     .el-button {
       min-width: 100px;
