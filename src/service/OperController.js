@@ -53,12 +53,12 @@ class PublishController {
 
     let call = client.GetObject(GetRequest);
 
-    let successfulReports = [];
-    let totalLength = 0;
+    // let successfulReports = [];
+    // let totalLength = 0;
     console.log('++++++++download',GetRequest )
     // let failedReports = [];
     call.on('data', (employeeStream) => {
-      console.log('++++++++++', employeeStream)
+      console.log('++++++++++data', employeeStream)
       if (employeeStream?.chunk) {
         res.write(employeeStream.chunk)
       }
@@ -71,6 +71,7 @@ class PublishController {
 
     });
     call.on('end',()=>{      
+      console.log('++++++++++end')
       res.end()
       //  res.send(Buffer.concat(successfulReports, totalLength))
     })
@@ -92,12 +93,14 @@ class PublishController {
     let token = req.body.token;
     let peerId = req.body.peerId;
 
-    let Id = "4321";
+    let Id = req.body.Id;
+
+    // let Id = "4321";
     // test
-    Id = "100";
+    // Id = "100";
 
     token = "11111";
-    peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+    // peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
 
     if (!object_type || !objects || !cids) {
       res.send(BizResult.validateFailed());
@@ -139,7 +142,7 @@ class PublishController {
     let Id = req.body.Id;
 
     // test
-    peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+    // peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
     // Id = "34";
     token = "11111";
 
@@ -247,7 +250,6 @@ class PublishController {
     var client = PublishController.getNetGrpcClient(ip_address, port);
 
     client.ListObjects(putObjectReq, (err, data) => {
-      console.log('list+++++++', data)
       if (err) {
         res.send();
         return;

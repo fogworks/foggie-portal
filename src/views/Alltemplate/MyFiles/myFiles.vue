@@ -386,6 +386,9 @@ const refresh = () => {
 };
 
 const initFileData = async (data) => {
+  if (!data) {
+    return;
+  }
   let params = {
     email: email.value,
     orderId: orderId.value,
@@ -759,7 +762,7 @@ const downloadItem = (item) => {
   // let ip = "154.31.34.194";
   let port = 8007;
   let Id = orderId.value;
-  let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+  let peerId = deviceData.value.peer_id;
   let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
 
   var oA = document.createElement("a");
