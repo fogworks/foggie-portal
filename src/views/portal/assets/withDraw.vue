@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- 体现第一步 -->
     <el-dialog
       class="withdraw-dialog"
       :model-value="visible"
@@ -80,7 +79,6 @@
         </div>
       </template>
     </el-dialog>
-    <!-- 谷歌二维码 -->
     <el-dialog
       width="700px"
       class="withdraw-dialog"
@@ -141,7 +139,7 @@
           {{ googleErrorTip }}
         </div>
       </div>
-      <!-- //验证是否手机操作google -->
+      <!-- /google -->
       <template #footer>
         <div class="color-box google">
           <!-- <el-button :loading="loading" type="primary" @click="next">
@@ -173,7 +171,7 @@
         > -->
       </template>
     </el-dialog>
-    <!-- 谷歌验证码提现框 -->
+    <!-- -->
     <el-dialog
       top="25vh"
       width="700px"
@@ -438,7 +436,6 @@ export default {
     function getAll() {
       form.walletMoney = actualMoeny.value;
     }
-    //初始化google二维码
     async function initGoogle() {
       if (walletUser.value) {
         dialogLoading.value = true;
@@ -468,7 +465,6 @@ export default {
       formRef.value.validate((valid) => {
         if (valid) {
           if (withDrawBtn.value) {
-            // 可提现
             showGoogleBtn.value = true;
             withdrawForm.my_auth_input = "";
             showErrorTips.value = false;
@@ -485,7 +481,6 @@ export default {
       // authorFormRef.value.validate(async (valid) => {
       if (!showErrorTips.value) {
         loading.value = true;
-        //验证是否手机操作google并开启google验证
         let postData = {
           token: authorForm.validateToken,
           // secret: Base64.encode(this.scret_key),
@@ -508,7 +503,6 @@ export default {
       }
       // });
     }
-    //验证google
     async function setGoogle() {
       if (walletUser.value) {
         let data = {
@@ -541,7 +535,7 @@ export default {
               email: email.value,
               // account: walletUser.value,
               amount: Number(form.walletMoney),
-              to: form.receiver, //没有设置OTP的，account和receiver 必须⼀致
+              to: form.receiver,
               totp_secret: withdrawForm.my_auth_input,
             };
             assetsTransfer(data).then((res) => {
@@ -584,12 +578,12 @@ export default {
       // });
     }
     function copySecret(key) {
-      var input = document.createElement("textarea"); // 创建input对象
-      input.value = key; // 设置复制内容
-      document.body.appendChild(input); // 添加临时实例
-      input.select(); // 选择实例内容
-      document.execCommand("Copy"); // 执行复制
-      document.body.removeChild(input); // 删除临时实例
+      var input = document.createElement("textarea");
+      input.value = key;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("Copy");
+      document.body.removeChild(input);
       ElNotification({
         type: "success",
         message: "Copy succeeded",

@@ -40,7 +40,7 @@ import {
   watchEffect,
   reactive,
 } from "vue";
-const MAX_UPLOAD_NUM = 1; // 允许同时存在的上传文件个数
+const MAX_UPLOAD_NUM = 1;
 const emits = defineEmits(["fileShare", "fileDetail", "update:uploadLists"]);
 const props = defineProps({
   orderID: {
@@ -68,7 +68,6 @@ watch(
   () => fileList.uploadLists,
   (newVal, oldVal) => {
     let oldLength = oldVal?.length ?? 0;
-    // 新增文件
     if (newVal.length >= oldLength) {
       if (newVal.length >= MAX_UPLOAD_NUM) {
         if (curFileList.value.length == 0) {

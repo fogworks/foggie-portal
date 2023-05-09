@@ -261,7 +261,6 @@ export default {
       if (!data) {
         return;
       }
-      // source1 代表自己的，source2 代表分享的
       let owner_total = data.owner_total;
       let rewardDMC = 0.0;
       if (owner_total) {

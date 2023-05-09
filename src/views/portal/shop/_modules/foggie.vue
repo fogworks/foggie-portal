@@ -46,12 +46,11 @@ const token = computed(() => store.getters["token/login"]);
 // const username = computed(() => store.getters.userInfo?.dmc);
 const email = computed(() => store.getters.userInfo?.email);
 
-let iframeRef = ref(null); // 和iframe标签的ref绑定
+let iframeRef = ref(null);
 let iframeWindow = ref(null);
 const handleMessage = (event) => {
   console.log(event.data);
 };
-// 向iframe传参
 const sendMessage = () => {
   iframeRef.value.onload = function () {
     iframeWindow.postMessage({ token: token.value });
@@ -59,8 +58,7 @@ const sendMessage = () => {
 };
 
 onMounted(() => {
-  window.addEventListener("message", handleMessage); // 监听iframe的事件
-  //vue3使用ref定义的变量需要使用.value获取值， vue2直接iframeRef.contentWindow
+  window.addEventListener("message", handleMessage);
   iframeWindow = iframeRef.value.contentWindow;
   sendMessage();
 });

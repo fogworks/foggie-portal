@@ -117,11 +117,8 @@ export default {
     };
 
     const getTimeState = () => {
-      // 获取当前时间
       let timeNow = new Date();
-      // 获取当前小时
       let hours = timeNow.getHours();
-      // 判断当前时间段
       if (hours >= 0 && hours <= 18) {
         handleThemeChange(window.localStorage.getItem("theme") || "light");
       } else if (hours > 18 && hours <= 24) {

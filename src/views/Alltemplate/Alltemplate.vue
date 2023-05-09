@@ -37,7 +37,7 @@ const props = defineProps(["deviceData"]);
 const { deviceData } = toRefs(props);
 const orderId = readonly(props.deviceData.space_order_id);
 const userInfo = computed(() => store.getters.userInfo);
-let customDialogIsShow = ref(true); // 是否展示
+let customDialogIsShow = ref(true);
 const clientPassword = computed(() => store.getters.clientPassword);
 
 if (clientPassword.value) {
@@ -46,7 +46,7 @@ if (clientPassword.value) {
   customDialogIsShow.value = true;
 }
 
-store.commit("upload/setOrderId", orderId); // 当前点击的订单号
+store.commit("upload/setOrderId", orderId);
 // if (deviceData.device_type == 'foggie_max' || deviceData.device_type == 'foggie' || deviceData.device_type == '') {
 //   const orderId = readonly(deviceData.device_id)
 //   store.commit('upload/setOrderId', orderId)
@@ -58,8 +58,7 @@ store.commit("upload/setDeviceType", "3");
 
 watch(
   () => props.deviceData,
-  (newValue) => {
-  },
+  (newValue) => {},
   { immediate: true, deep: true }
 );
 
@@ -67,7 +66,6 @@ function closeDialog() {
   customDialogIsShow.value = false;
 }
 
-/* 获取链ID */
 function loadChainId() {
   getChain_id().then((res) => {
     if (res.code == 200) {
