@@ -32,7 +32,7 @@ const orderDB = new NeDB({
 })
 
 module.exports = {
-    savePuskMerkleRecord: async (orderId, email, merkleRoot, blockNum, transactionId, blockNum) => {
+    savePuskMerkleRecord: async (orderId, email, merkleRoot, blockNum, transactionId, chainBlockNum) => {
         // save push merkle record into NeDB
         return new Promise((resolve, reject) => {
             var now = moment();
@@ -43,7 +43,7 @@ module.exports = {
                 merkle_root: merkleRoot,
                 block_num: blockNum,
                 transaction_id: transactionId,
-                block_num: blockNum,
+                chain_block_num: chainBlockNum,
                 update_time: currentTime,
                 create_time: currentTime
             }, function (err, doc) {
@@ -361,7 +361,6 @@ module.exports = {
                 body: body
             }).getBody('utf-8')).data.find_order;
 
-            logger.info("order:{}", order);
             if (order.length == 0) {
                 return BizResultCode.GET_ORDER_FROM_CHAIN_FAILED;
             }
@@ -426,7 +425,7 @@ module.exports = {
             let body = '{\n' +
                 '        find_challenge(\n' +
                 '                where: {\n' +
-                '                    order_id: ' + orderId + ',\n' +
+                '                    state: [' + stateCondition + '],\n' +
                 '                },\n' +
                 '                order: "-id",\n' +
                 '        ){\n' +
@@ -723,6 +722,7 @@ module.exports = {
                 logger.error('transactionId is null, orderId:{}', orderId);
                 return BizResultCode.GET_TRANSACTION_ID_FAILED;
             }
+            logger.info("get transactionId success, transactionId:{}", transactionId);
             var expire = bill[0].expire_on;
             if (!expire) {
                 logger.error('expire is null, orderId:{}', orderId);
@@ -743,7 +743,7 @@ module.exports = {
             var memoArr = memo.split('$');
             var peerId = memoArr[1];
             if (!peerId) {
-                logger.error('peerId is null, orderId:{}', orderId);
+                logger.error('peerId is null, orderId:{},memo:{}', orderId, memo);
                 return BizResultCode.GET_PEER_ID_FAILED;
             }
             var rpc = memoArr[0];
@@ -911,7 +911,7 @@ module.exports = {
                 '        find_bill(\n' +
                 '                order: "-created_time",\n' +
                 '                where: {\n' +
-                '                    id: { ne : "' + billId + '"}\n' +
+                '                    id:  "' + billId + '"\n' +
                 '                },\n' +
                 '        ){\n' +
                 '            owner\n' +

@@ -18,7 +18,7 @@ class OrderTimer {
             return;
         }
 
-        for (chanllenge of challengeList) {
+        for (const chanllenge of challengeList) {
 
             // compare timeout period
             var createTimestamp = new Date(chanllenge.create_time).getTime();
@@ -27,7 +27,7 @@ class OrderTimer {
             var payChallengeTimeout = challengeConfig.get("payChallengeTimeout");
 
             if ((now - createTimestamp) < payChallengeTimeout) {
-                logger.info("challenge is not timeout, orderId:{}", orderId);
+                logger.info("challenge is not timeout, orderId:{}", chanllenge.order_id);
                 continue;
             }
 
