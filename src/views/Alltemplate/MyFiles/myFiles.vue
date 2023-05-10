@@ -350,8 +350,7 @@ function openUpload() {
 
 const loadFileList = async () => {
   let data = await oodFileList(
-    orderId.value,
-    deviceData.value.peer_id,
+    deviceData.value,
     breadcrumbList.prefix.join("/")
   );
   initFileData(data);
