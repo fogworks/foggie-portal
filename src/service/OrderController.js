@@ -111,7 +111,7 @@ class OrderController {
                 return;
             }
             // 保存订单到neDB
-            var saveRes = await orderService.saveOrder(email, orderBasic.orderId, orderBasic.miner, orderBasic.user, billId, unmatchedAmount, totalPrice, res.transaction_id);
+            var saveRes = await orderService.saveOrder(email, orderBasic.orderId, orderBasic.miner, orderBasic.user, billId, unmatchedAmount, totalPrice, res.transaction_id, res.processed.block_num);
             if (saveRes instanceof BizResultCode) {
                 response.send(BizResult.fail(saveRes));
                 return;
@@ -352,58 +352,19 @@ class OrderController {
             return;
         }
 
-        var chainConfig = config.get('chainConfig')
-        var transactionAddress = chainConfig.get('transactionAddress')
-        var getOrders = chainConfig.get('getOrders')
+        var order = orderService.getOrderFromChain(orderId);
+        if (order instanceof BizResultCode) {
+            logger.info("get order from chain failed, orderId:{}", orderId);
+            res.send(BizResult.fail(order));
+            return;
+        }
 
-        let body = '{\n' +
-            '        find_order(\n' +
-            '                where: {\n' +
-            '                    id: "' + orderId + '",\n' +
-            '                },\n' +
-            '                order: "-created_time,id",\n' +
-            '        ){\n' +
-            '            id\n' +
-            '            user {\n' +
-            '                id\n' +
-            '            }\n' +
-            '            miner {\n' +
-            '                id\n' +
-            '            }\n' +
-            '            bill {\n' +
-            '                id\n' +
-            '            }\n' +
-            '            created_time\n' +
-            '            epoch\n' +
-            '            user_pledge_amount\n' +
-            '            miner_lock_pst_amount\n' +
-            '            miner_lock_dmc_amount\n' +
-            '            price_amount\n' +
-            '            settlement_pledge_amount\n' +
-            '            lock_pledge_amount\n' +
-            '            state\n' +
-            '            deliver_start_date\n' +
-            '            latest_settlement_date\n' +
-            '            miner_lock_rsi_amount\n' +
-            '            miner_rsi_amount\n' +
-            '            user_rsi_amount\n' +
-            '            deposit_amount\n' +
-            '            deposit_valid\n' +
-            '            cancel_date\n' +
-            '            createdAt\n' +
-            '        }\n' +
-            '    }'
-        let order = JSON.parse(request('POST', transactionAddress + getOrders, {
-            headers: {
-                'Content-Type': 'application/graphql'
-            },
-            body: body
-        }).getBody('utf-8')).data.find_order;
         var orderInfo = await orderService.getOrderById(email, orderId);
         order[0]['used_space'] = orderInfo.used_space;
         order[0]['total_space'] = orderInfo.total_space;
         var fileCount = await fileService.getFileCount(orderId, email, deviceType);
         order[0]['file_count'] = fileCount;
+
         res.send(BizResult.success(order));
     }
 
@@ -419,9 +380,8 @@ class OrderController {
         }
 
         // valid file count 
-        var fileCount = await fileService.getFileCount(orderId, email, 1);
-        
-        if(fileCount instanceof BizResultCode){
+        var fileCount = await fileService.getFileCount(orderId, email, "3");
+        if (fileCount instanceof BizResultCode) {
             res.send(BizResult.fail(fileCount));
             return;
         }
@@ -489,7 +449,6 @@ class OrderController {
                 res.send(BizResult.fail(BizResultCode.GET_MERKLE_FAILED));
                 return;
             }
-            logger.info("GetMerkleRoot, data:{}", data.root);
             var merkleRootBytes = data.root.normalRoot;
             var merkleRoot = Buffer.from(merkleRootBytes).toString('hex');
             var dataBlockCount = data.root.totalBlocks;
@@ -515,7 +474,7 @@ class OrderController {
                 blocksBehind: 3,
                 expireSeconds: 30,
             }).then(async (result) => {
-                var savePushMerkleRecordRes = await orderService.savePuskMerkleRecord(orderId, username, merkleRoot, dataBlockCount, result.transaction_id);
+                var savePushMerkleRecordRes = await orderService.savePuskMerkleRecord(orderId, username, merkleRoot, dataBlockCount, result.transaction_id, result.processed.block_num);
                 if (savePushMerkleRecordRes instanceof BizResultCode) {
                     res.send(BizResult.fail(savePushMerkleRecordRes));
                     return;
@@ -622,7 +581,7 @@ class OrderController {
         var username = userInfo.username;
 
         var orderInfo = await orderService.getOrderById(email, orderId);
-        if(orderInfo instanceof BizResultCode){
+        if (orderInfo instanceof BizResultCode) {
             res.send(BizResult.fail(orderInfo));
             return;
         }
@@ -650,7 +609,7 @@ class OrderController {
             blocksBehind: 3,
             expireSeconds: 30,
         }).then((res) => {
-            orderService.saveChallengeRecord(orderId, email, codebook.cid, codebook.part_id, dataHash, nonce, res.transaction_id);
+            orderService.saveChallengeRecord(orderId, email, username, codebook.cid, codebook.part_id, dataHash, nonce, res.transaction_id, res.processed.block_num);
             response.send(BizResult.success(res.transaction_id));
         }).catch((err) => {
             logger.error('err:', err);
@@ -856,22 +815,18 @@ class OrderController {
     }
 
     static getChainId() {
-        var chainConfig = config.get('chainConfig')
-        var httpEndpoint = chainConfig.get('httpEndpoint')
-        var getChainInfo = chainConfig.get('getChainInfo')
-        let chainId = JSON.parse(request('POST', httpEndpoint + getChainInfo, {}).getBody('utf-8')).chain_id
-
+        var chainId = orderService.getChainId();
+        if(chainId instanceof BizResultCode){
+            return BizResult.fail(chainId);
+        }
         return BizResult.success(chainId);
     }
 
     static getBenchmarkPrice() {
-        var chainConfig = config.get('chainConfig')
-        var httpEndpoint = chainConfig.get('httpEndpoint')
-        var getTableRows = chainConfig.get('getTableRows')
-        let benchmarkPrice = JSON.parse(request('POST', httpEndpoint + getTableRows, {
-            json: { "json": true, "code": "dmc.token", "scope": "dmc.token", "table": "bcprice" }
-        }).getBody('utf-8')).rows[0].benchmark_price
-
+        var benchmarkPrice = orderService.getBenchmarkPrice();
+        if(benchmarkPrice instanceof BizResultCode){
+            return BizResult.fail(benchmarkPrice);
+        }
         return BizResult.success(benchmarkPrice);
     }
 }

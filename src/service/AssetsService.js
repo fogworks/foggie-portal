@@ -66,7 +66,7 @@ module.exports = {
                         blocksBehind: 3,
                         expireSeconds: 30,
                     }).then((res) => {
-                        module.exports.saveTradeRecord(from, to, amount, memo, 1);
+                        module.exports.saveTradeRecord(from, to, amount, memo, 1, res.transaction_id, res.processed.block_num);
                         resolve(res.transaction_id);
                     }).catch((err) => {
                         logger.error('err:', err);
@@ -155,7 +155,7 @@ module.exports = {
             return BizResultCode.SAVE_TRANSFER_VALID_FAILED;
         });
     },
-    saveTradeRecord: (from, to, amount, memo, type) => {
+    saveTradeRecord: (from, to, amount, memo, type, transactionId, blockNum) => {
         var now = moment().format('YYYY-MM-DD HH:mm:ss');
         var tradeRecord = {
             from: from,
@@ -163,6 +163,8 @@ module.exports = {
             amount: amount,
             memo: memo,
             type: type,
+            transaction_id: transactionId,
+            block_num: blockNum,
             update_time: now,
             create_time: now
         }

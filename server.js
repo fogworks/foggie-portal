@@ -17,7 +17,14 @@ const FileController = require("./src/service/FileController");
 const AssetsController = require("./src/service/AssetsController");
 const PublishController = require("./src/service/PublishController");
 const OperController = require("./src/service/OperController");
+const OrderTimer = require("./src/service/OrderTimer");
 var jsonParser = bodyParser.json();
+
+var challengeConfig = config.get("challengeConfig");
+var payChallengeTimer = challengeConfig.get("payChallengeTimer");
+setInterval(function () {
+  OrderTimer.payChallengeTimer();
+}, payChallengeTimer);
 
 app.post("/order/outstanding_orders", jsonParser, (req, res) => {
   var email = req.body.email;
@@ -449,7 +456,7 @@ const socketIP = () => {
     socket.on("error", function (err) {
       cb && cb(err, host);
     });
-    socket.on("close", function (err) {});
+    socket.on("close", function (err) { });
     socket.connect(port1, host);
   };
   let hosts = [];
