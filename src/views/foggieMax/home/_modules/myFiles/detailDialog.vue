@@ -216,19 +216,22 @@ export default {
       let cid = item.cid;
       let key = item.key;
 
-      let ip = "218.2.96.99";
+      // let ip = "218.2.96.99";
       // let ip = "154.31.34.194";
-      let port = 8007;
-      let Id = orderId;
+      // let port = 8007;
+      let ip = deviceData.value.rpc.split(":")[0];
+      let port = deviceData.value.rpc.split(":")[1];
+      // let Id = orderId;
+      let Id = deviceData.value.foggie_id;
       let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
       let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
 
       var oA = document.createElement("a");
-      oA.download = item.name;
+      oA.download = item.name; 
       oA.href = downloadUrl;
       document.body.appendChild(oA);
       oA.click();
-      oA.remove();
+      oA.remove(); 
       proxy.$notify({
         type: "success",
         message: "Download succeeded",
@@ -237,11 +240,11 @@ export default {
     };
     function copySecret(key) {
       var input = document.createElement("textarea");
-      input.value = key;
-      document.body.appendChild(input);
-      input.select();
-      document.execCommand("Copy");
-      document.body.removeChild(input);
+      input.value = key; 
+      document.body.appendChild(input); 
+      input.select(); 
+      document.execCommand("Copy"); 
+      document.body.removeChild(input); 
       ElNotification({
         type: "success",
         message: "Copy succeeded",

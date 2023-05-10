@@ -80,15 +80,7 @@ import {
   computed,
   toRefs,
 } from "vue";
-import NextButton from "@/components/nextButton";
-import {
-  adminRegister,
-  adminLogin,
-  login,
-  get_foggie_dmc,
-  bind_foggie,
-  detected_net,
-} from "@/utils/api";
+import { login, bind_foggie } from "@/utils/api";
 import { useStore } from "vuex";
 import axios from "axios";
 const bcryptjs = require("bcryptjs");
@@ -269,7 +261,6 @@ const submit = () => {
                 },
               })
                 .then((res) => {
-                  //
                   if (!res.data.data.dmc_account) {
                     proxy.$notify({
                       type: "info",

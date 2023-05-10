@@ -98,11 +98,15 @@
         :noOrderShow="noOrderShow"
         @reload="reload"
       ></Withdraw>
-      <AssetsRecords v-model:visible="recordsVisible"></AssetsRecords>
-      <NftDialog
+
+      <AssetsRecords
+        v-if="recordsVisible"
+        v-model:visible="recordsVisible"
+      ></AssetsRecords>
+      <!-- <NftDialog
         v-model:visible="NftDialogVisible"
         :nft-link="nftLink"
-      ></NftDialog>
+      ></NftDialog> -->
     </div>
   </div>
 </template>
@@ -218,6 +222,7 @@ export default {
             0,
             res.data[0].balance.quantity.length - 4
           );
+          withDrawMoney.value = +balanceCount.value;
           balanceCount2.value = res.data[1].balance.quantity.slice(
             0,
             res.data[1].balance.quantity.length - 4
@@ -235,7 +240,7 @@ export default {
     const getDMC = () => {
       let owner_id = sessionStorage.getItem("walletUser")
         ? sessionStorage.getItem("walletUser")
-        : "foggiezzzzz2";
+        : "";
       getAssets(owner_id).then((r) => {
         // balanceCount.value = r.amount;
         nftCount.value = r.nft;
@@ -256,7 +261,7 @@ export default {
     const initYesterdayScore = async () => {
       let account = sessionStorage.getItem("walletUser")
         ? sessionStorage.getItem("walletUser")
-        : "foggiezzzzz2";
+        : "";
       let data = await ydaReward(account, "account");
       if (!data) {
         return;
@@ -291,7 +296,7 @@ export default {
       }
       let account = sessionStorage.getItem("walletUser")
         ? sessionStorage.getItem("walletUser")
-        : "foggiezzzzz2";
+        : "";
       let data = await OwnerBills(account);
       if (!data) {
         return;
@@ -430,7 +435,7 @@ export default {
     };
     watchEffect(() => {
       getUserInfo();
-      initAccountMoney();
+      // initAccountMoney();
       getUserAssets();
     });
     onMounted(() => {

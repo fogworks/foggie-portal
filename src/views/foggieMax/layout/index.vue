@@ -73,9 +73,9 @@ export default {
       deviceData.device_type == "foggie" ||
       deviceData.device_type == ""
     ) {
-      let orderId = readonly(deviceData.device_id);
+      let orderId = readonly(deviceData.foggie_id);
       // test
-      orderId = 100;
+      // orderId = 100;
       store.commit("upload/setOrderId", orderId);
       if (deviceData.device_type == "foggie_max") {
         store.commit("upload/setDeviceType", "2");
@@ -83,7 +83,7 @@ export default {
         store.commit("upload/setDeviceType", "1");
       }
     } else {
-      const orderId = readonly(deviceData.order_id);
+      const orderId = readonly(deviceData.foggie_id);
       store.commit("upload/setOrderId", orderId);
       store.commit("upload/setDeviceType", "3");
     }

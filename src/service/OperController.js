@@ -5,7 +5,7 @@ const publish_proto = require("./grpc/publish");
 const grpc = require("@grpc/grpc-js");
 const config = require("config");
 const { chunk } = require("lodash");
-// const FileType = require('file-type');
+const FileType = import('file-type');
 // const {fileTypeFromStream} = 'file-type';
 // const { da } = require("element-plus/es/locale");
 
@@ -55,7 +55,7 @@ class PublishController {
 
     // let successfulReports = [];
     // let totalLength = 0;
-    console.log("++++++++download", GetRequest);
+    console.log('++++++++download', GetRequest)
     // let failedReports = [];
     call.on("data", (employeeStream) => {
       console.log("++++++++++data", employeeStream);
@@ -67,10 +67,12 @@ class PublishController {
       //   totalLength += employeeStream.chunk.length
       //   successfulReports.push(employeeStream.chunk)
       // }
+
+
     });
-    call.on("end", () => {
-      console.log("++++++++++end");
-      res.end();
+    call.on('end', () => {
+      console.log('++++++++++end')
+      res.end()
       //  res.send(Buffer.concat(successfulReports, totalLength))
     });
   }
@@ -291,9 +293,9 @@ class PublishController {
     let successfulReports = [];
     let totalLength = 0;
     // let failedReports = [];
-    console.log("+++++++++++putObjectReq", putObjectReq);
-    call.on("data", async (employeeStream) => {
-      console.log("~~~~~~~~~~~~~~~employeeStream", employeeStream);
+    console.log('+++++++++++putObjectReq', putObjectReq)
+    call.on('data', async (employeeStream) => {
+      console.log('~~~~~~~~~~~~~~~employeeStream', employeeStream)
       // successfulReports.push(employeeStream);
       if (employeeStream?.chunk) {
         // console.log(FileType)
@@ -309,8 +311,9 @@ class PublishController {
       } else if (employeeStream.Option === "links") {
         res.send(employeeStream.links);
       }
+
     });
-    call.on("end", () => {
+    call.on('end', () => {
       // console.log('+++++++++', successfulReports)
       res.end();
       // res.send(successfulReports);

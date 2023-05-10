@@ -56,3 +56,27 @@ export function getPrivateKey(data) {
     data,
   });
 }
+export function transfer_valid(data) {
+  return request({
+    url: baseUrl + '/assets/transfer_valid',
+    method: 'POST',
+    data,
+  });
+}
+export function bind_valid(data) {
+  return request({
+    url: baseUrl + '/assets/bind_valid',
+    method: 'POST',
+    data,
+  });
+}
+export function check_account(data) {
+  return request({
+    url: baseUrl + '/user/check_account',
+    method: 'POST',
+    data,
+  });
+}
+
+
+

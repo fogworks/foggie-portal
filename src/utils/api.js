@@ -1,5 +1,7 @@
 import request from "@/utils/request";
 
+
+
 export const register = (data) => {
   return request({
     url: "/api/accounts/user",
@@ -30,6 +32,7 @@ export const user = () => {
     method: "GET",
   });
 };
+
 
 export const paynode = () => {
   return request({
@@ -69,7 +72,6 @@ export const transactions = (data) => {
   });
 };
 
-//refreshToken
 export const refreshToken = () => {
   return request({
     url: "/api/accounts/refresh_token",
@@ -154,7 +156,6 @@ export const oodTaskList = (ID, next_marker, prefix) => {
     method: "GET",
   });
 };
-//File STATUS
 export const oodFileStatus = (ID, type) => {
   let url = `/stats?st_type=${type}`;
   // let url = '/ping?t=1111';
@@ -185,7 +186,7 @@ export const file_delete = (item, peerId, Id) => {
   });
 };
 
-// FileSearch
+
 export const oodFileSearch = (key) => {
   // let url = `/o/${ID}/find?key=${key}`;
   let url = `/find?key=${key}`;
@@ -202,6 +203,7 @@ export const oodMonitor = (item) => {
     method: "GET",
   });
 };
+
 
 export const getActivationVood = (data, target) => {
   let url = `/v1/get_service_info`;
@@ -242,6 +244,7 @@ export const IPFSSync = (ood_id, data) => {
   });
 };
 
+
 export const voodInfoCheck = (vpsId) => {
   return request({
     url: `/v1/service/check_cyfs`,
@@ -276,11 +279,11 @@ export const dmcSwap = () => {
 };
 
 /**
- * @param {String} fileName
- * @param {String} upload_id
- * @param {String} cid
- * @param {object} data  parts:[{"part_number":1,"etag":"60f3efd9111f7a19c23d6045b15e8a2b"}]
- * @param {String} fileType this.file.fileType
+ * @param {String} fileName 
+ * @param {String} upload_id 
+ * @param {String} cid  
+ * @param {object} data  
+ * @param {String} fileType 
  *  */
 export const uploadMultipart = (params) => {
   const {
@@ -323,6 +326,7 @@ export const uploadMultipart = (params) => {
   return request(obj);
 };
 
+
 export const fileShare = (ood_id, data) => {
   let url = `o/${ood_id}/presignurl`;
   return request({
@@ -331,6 +335,7 @@ export const fileShare = (ood_id, data) => {
     data: data,
   });
 };
+
 
 export const awardTaskList = (ood_id) => {
   if (ood_id && ood_id !== null) {
@@ -341,7 +346,6 @@ export const awardTaskList = (ood_id) => {
   }
 };
 
-//003
 export const finishTask = (data) => {
   return request({
     url: "/x/reward_active",
@@ -427,6 +431,7 @@ export const getWithdrawList = (owner_id, page, limit) => {
     });
   }
 };
+
 
 export const lastweekReward = (account) => {
   if (account && account !== null) {

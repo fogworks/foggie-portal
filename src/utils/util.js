@@ -1,12 +1,14 @@
+//decrypt
 var CryptoJS = require("crypto-js");
 function decrypt(value) {
   var crypt_key = "047ADGJMQTW0369D";
   var crypt_iv = "131b0c8a7a6e072e";
-  let aes_key = CryptoJS.enc.Utf8.parse(crypt_key);
-  let aes_iv = CryptoJS.enc.Utf8.parse(crypt_iv);
-  let baseResult = CryptoJS.enc.Base64.parse(value);
-  let ciphertext = CryptoJS.enc.Base64.stringify(baseResult);
+  let aes_key = CryptoJS.enc.Utf8.parse(crypt_key); // Parsed key
+  let aes_iv = CryptoJS.enc.Utf8.parse(crypt_iv); // Resolved iv
+  let baseResult = CryptoJS.enc.Base64.parse(value); // 
+  let ciphertext = CryptoJS.enc.Base64.stringify(baseResult); // 
   let decryptResult = CryptoJS.AES.decrypt(ciphertext, aes_key, {
+    // AES
     iv: aes_iv,
     mode: CryptoJS.mode.CBC,
     padding: CryptoJS.pad.Pkcs7,
@@ -18,7 +20,7 @@ function decrypt(value) {
 function hmac() {
   // let key = "megaops@2022";
   // let data = "voodKey";
-  // var crypto = require("crypto");
+  // var crypto = require("crypto"); // Sign js using HmacSha512
   // var hmac = crypto.createHmac("sha1", key);
   // var signed = hmac.update(Buffer.from(data, "utf-8")).digest("base64");
   // signed = signed.replace("/", "_").replace("+", "-");
@@ -175,7 +177,6 @@ export {
   hmac,
   transferTime,
   handleTimeStamp,
-  handleTime,
   echartsHandleTimeStamp,
   decrypt,
   getQueryString,

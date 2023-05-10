@@ -45,12 +45,6 @@
             @click.stop="copyLink(item.device_id)"
           ></svg-icon>
         </div>
-        <template v-if="!item.device_type || item.device_type === 'space'">
-          <div>
-            Due
-            <span class="value-span">{{ handleTimeStamp(item.expire) }}</span>
-          </div>
-        </template>
         <div
           class="item"
           style="height: unset"
@@ -69,6 +63,17 @@
           >
           Space
         </div>
+        <template v-if="!item.device_type || item.device_type === 'space'">
+          <div>
+            Due
+            <el-progress
+              style="width: 150px; margin-left: 5px"
+              :percentage="handleProgress(item)"
+              :status="handleProgress(item) == 100 ? 'warning' : ''"
+            />
+            <!-- <span class="value-span">{{ handleTimeStamp(item.expire) }}</span> -->
+          </div>
+        </template>
 
         <!-- <el-dropdown
           popper-class="more-popper"
@@ -152,12 +157,12 @@ const toGuide = (item) => {
   }
 };
 const copyLink = (text) => {
-  var input = document.createElement("input");
-  input.value = text;
-  document.body.appendChild(input);
-  input.select();
-  document.execCommand("Copy");
-  document.body.removeChild(input);
+  var input = document.createElement("input"); 
+  input.value = text; 
+  document.body.appendChild(input); 
+  input.select(); 
+  document.execCommand("Copy"); 
+  document.body.removeChild(input); 
   // let str = `Copying  ${type} successful!`;
   // this.$message.success(str);
   proxy.$notify({
@@ -205,17 +210,31 @@ const showClick = () => {
   //   dropMenuRef.value.handleOpen();
   // }
 };
+const handleProgress = (item) => {
+  if (!item.device_type) {
+    let created = new Date(item.created_at).getTime() / 1000;
+    let now = new Date().getTime() / 1000 - created;
+    let end = +item.expire - created;
+    return +(now / end).toFixed(2) > 100 ? 100 : +(now / end).toFixed(2);
+  } else {
+    let created = +item.created_at;
+    let now = new Date().getTime() - created;
+    let end = +item.expire - created;
+    return +(now / end).toFixed(2) > 100 ? 100 : +(now / end).toFixed(2);
+  }
+};
+const currentTimeStamp = ref(Date.parse(new Date()));
 const email = computed(() => store.getters["token/currentUser"]);
 const search = () => {
   loading.value = true;
   search_foggie({ email: email.value })
     .then((res) => {
       let cur_data = res.data;
-      cur_data.forEach((r) => {
-        if (r.device_type === "space") {
-          r.expire = r.expire.slice(0, r.expire.length - 3);
-        }
-      });
+      // cur_data.forEach((r) => {
+      //   if (r.device_type === "space") {
+      //     r.expire = r.expire.slice(0, r.expire.length - 3);
+      //   }
+      // });
       deviceList.list = cur_data;
       store.dispatch("global/setDeviceList", cur_data);
       loading.value = false;
