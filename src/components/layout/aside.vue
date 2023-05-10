@@ -1,25 +1,37 @@
 <template>
   <div class="aside_menu">
-    <el-menu :default-active="store.getters.activeIndex" class="el-menu-vertical-demo" :collapse-transition="false" router
-      :collapse="isMobile">
+    <el-menu
+      :default-active="store.getters.activeIndex"
+      class="el-menu-vertical-demo"
+      :collapse-transition="false"
+      router
+      :collapse="isMobile"
+    >
       <div class="logoBox" v-if="!isMobile">
-        <svg-icon icon-class="FoggieV" style="font-size: 80px;"></svg-icon>
+        <svg-icon icon-class="FoggieV" style="font-size: 80px"></svg-icon>
         <span>FoggieV</span>
       </div>
-      <el-menu-item index="Home" :route="{ path: '/Alltemplate/Home' }" @click="menuItemClick('Home')">
+      <el-menu-item
+        index="Home"
+        :route="{ path: '/Alltemplate/Home' }"
+        @click="menuItemClick('Home')"
+      >
         <el-icon>
           <School />
         </el-icon>
         <template #title>Home</template>
       </el-menu-item>
 
-      <el-menu-item index="Orders" :route="{ path: '/Alltemplate/Orders' }" @click="menuItemClick('Orders')">
+      <el-menu-item
+        index="Orders"
+        :route="{ path: '/Alltemplate/Orders' }"
+        @click="menuItemClick('Orders')"
+      >
         <el-icon>
           <Memo />
         </el-icon>
         <template #title>Order</template>
       </el-menu-item>
-
 
       <div class="version" v-if="!isMobile" @click="menuItemClick('Storage')">
         <div class="version_vontent">
@@ -36,7 +48,6 @@
           </div>
         </div>
       </div>
-
     </el-menu>
   </div>
 </template>
@@ -46,8 +57,8 @@ import { getPrivateKey } from "@/api/common";
 import { useStore } from "vuex";
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-const store = useStore()
-const router = useRouter()
+const store = useStore();
+const router = useRouter();
 const props = defineProps({
   isMobile: {
     type: Boolean,
@@ -55,26 +66,22 @@ const props = defineProps({
   },
 });
 function menuItemClick(item) {
-  store.commit('global/setActiveIndex', item)
+  store.commit("global/setActiveIndex", item);
 
-  if (item == 'Storage') {
-    router.push({ path: '/Alltemplate/Storage' })
+  if (item == "Storage") {
+    router.push({ path: "/Alltemplate/Storage" });
   }
 }
 
-
-
 onMounted(() => {
   let headerRoute = localStorage.getItem("headerRoute") || "Home";
-  store.commit('global/setActiveIndex', headerRoute)
-
+  store.commit("global/setActiveIndex", headerRoute);
 });
 </script>
 
 <style lang="scss" scoped>
 // @import "../../static/style/variables.scss";
 @import "@/static/style/variables.scss";
-
 
 .logoBox {
   width: 200px;
@@ -83,7 +90,7 @@ onMounted(() => {
   justify-content: center;
   height: 140px;
 
-  &>span {
+  & > span {
     font-size: 16px;
     font-weight: bold;
     margin-left: -20px;
@@ -94,7 +101,8 @@ onMounted(() => {
 .version {
   background: linear-gradient(rgb(255, 255, 255) 0%, rgb(217, 223, 255) 100%);
   border: none;
-  box-shadow: rgb(255 255 255 / 20%) 0px 0px 0px 0.5px inset, rgb(23 0 102 / 20%) 0px 20px 40px, rgb(0 0 0 / 10%) 0px 1px 3px;
+  box-shadow: rgb(255 255 255 / 20%) 0px 0px 0px 0.5px inset,
+    rgb(23 0 102 / 20%) 0px 20px 40px, rgb(0 0 0 / 10%) 0px 1px 3px;
   border-radius: 20px;
   cursor: pointer;
   position: relative;
@@ -127,7 +135,11 @@ onMounted(() => {
       position: relative;
       width: 35px;
       height: 35px;
-      background: linear-gradient(200.44deg, rgb(67, 22, 219) 13.57%, rgb(144, 118, 231) 98.38%);
+      background: linear-gradient(
+        200.44deg,
+        rgb(67, 22, 219) 13.57%,
+        rgb(144, 118, 231) 98.38%
+      );
       box-shadow: rgb(182 153 255 / 30%) 0px 10px 20px;
       border-radius: 50%;
       padding: 8px;
@@ -144,7 +156,7 @@ onMounted(() => {
     margin: auto auto auto 16px;
     text-align: left;
 
-    &>p:first-child {
+    & > p:first-child {
       font-style: normal;
       font-size: 14px;
       line-height: 18px;
@@ -152,19 +164,23 @@ onMounted(() => {
       font-weight: 600;
       text-transform: uppercase;
       color: black !important;
-
     }
-
   }
 }
 
 .version:hover {
   transform: translate(-48%, -2px);
-  box-shadow: rgb(255 255 255 / 20%) 0px 0px 0px 0.5px inset, rgb(23 0 102 / 30%) 0px 40px 80px, rgb(0 0 0 / 30%) 0px 10px 30px;
+  box-shadow: rgb(255 255 255 / 20%) 0px 0px 0px 0.5px inset,
+    rgb(23 0 102 / 30%) 0px 40px 80px, rgb(0 0 0 / 30%) 0px 10px 30px;
 
   .wrapper {
-    background: linear-gradient(200.44deg, rgb(94, 23, 255) 13.57%, rgb(55, 180, 233) 98.38%);
-    box-shadow: rgb(182 153 255 / 30%) 0px 10px 20px, rgb(0 0 0 / 30%) 0px 0px 20px inset;
+    background: linear-gradient(
+      200.44deg,
+      rgb(94, 23, 255) 13.57%,
+      rgb(55, 180, 233) 98.38%
+    );
+    box-shadow: rgb(182 153 255 / 30%) 0px 10px 20px,
+      rgb(0 0 0 / 30%) 0px 0px 20px inset;
   }
 
   .SVG {

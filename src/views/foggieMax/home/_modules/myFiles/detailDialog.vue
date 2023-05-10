@@ -66,7 +66,15 @@
 </template>
 
 <script>
-import { reactive, onMounted, ref, computed, inject, toRefs ,getCurrentInstance} from "vue";
+import {
+  reactive,
+  onMounted,
+  ref,
+  computed,
+  inject,
+  toRefs,
+  getCurrentInstance,
+} from "vue";
 import ShareDialog from "./shareDialog";
 import { pIN, shareLink } from "@/utils/api.js";
 import { ElNotification } from "element-plus";
@@ -216,11 +224,11 @@ export default {
       let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
 
       var oA = document.createElement("a");
-      oA.download = item.name; 
+      oA.download = item.name;
       oA.href = downloadUrl;
       document.body.appendChild(oA);
       oA.click();
-      oA.remove(); 
+      oA.remove();
       proxy.$notify({
         type: "success",
         message: "Download succeeded",
@@ -229,11 +237,11 @@ export default {
     };
     function copySecret(key) {
       var input = document.createElement("textarea");
-      input.value = key; 
-      document.body.appendChild(input); 
-      input.select(); 
-      document.execCommand("Copy"); 
-      document.body.removeChild(input); 
+      input.value = key;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("Copy");
+      document.body.removeChild(input);
       ElNotification({
         type: "success",
         message: "Copy succeeded",

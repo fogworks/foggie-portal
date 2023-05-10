@@ -1,6 +1,10 @@
 <template>
   <div class="container" v-loading="loading">
-    <Access v-if="!accessible" v-model:accessible="accessible" @accessCallback="accessCallback"></Access>
+    <Access
+      v-if="!accessible"
+      v-model:accessible="accessible"
+      @accessCallback="accessCallback"
+    ></Access>
     <template v-else>
       <Welcome v-if="!hasReady" :haveNet="haveNet"></Welcome>
       <div v-else>
@@ -10,7 +14,11 @@
           </span>
           <svg-icon icon-class="setup" class="setup" @click="toSet"></svg-icon>
         </div>
-        <MaxHome v-if="!isInSetup" :haveNet="haveNet" :deviceData="deviceData"></MaxHome>
+        <MaxHome
+          v-if="!isInSetup"
+          :haveNet="haveNet"
+          :deviceData="deviceData"
+        ></MaxHome>
         <Setting v-else></Setting>
       </div>
     </template>
@@ -59,24 +67,25 @@ export default {
     provide("deviceData", deviceData);
     provide("requestTarget", requestTarget);
 
-
     const store = useStore();
-    if (deviceData.device_type == 'foggie_max' || deviceData.device_type == 'foggie' || deviceData.device_type == '') {
-      let orderId = readonly(deviceData.device_id)
-      // test 
+    if (
+      deviceData.device_type == "foggie_max" ||
+      deviceData.device_type == "foggie" ||
+      deviceData.device_type == ""
+    ) {
+      let orderId = readonly(deviceData.device_id);
+      // test
       orderId = 100;
-      store.commit('upload/setOrderId', orderId)
-      if (deviceData.device_type == 'foggie_max') {
-        store.commit("upload/setDeviceType", '2');
+      store.commit("upload/setOrderId", orderId);
+      if (deviceData.device_type == "foggie_max") {
+        store.commit("upload/setDeviceType", "2");
       } else {
-        store.commit("upload/setDeviceType", '1');
+        store.commit("upload/setDeviceType", "1");
       }
-
-
     } else {
-      const orderId = readonly(deviceData.order_id)
-      store.commit('upload/setOrderId', orderId)
-      store.commit("upload/setDeviceType", '3');
+      const orderId = readonly(deviceData.order_id);
+      store.commit("upload/setOrderId", orderId);
+      store.commit("upload/setDeviceType", "3");
     }
 
     const accessible = ref(false);
@@ -138,7 +147,7 @@ export default {
           }
           accessible.value = true;
         })
-        .catch(() => { })
+        .catch(() => {})
         .finally(() => {
           loading.value = false;
         });

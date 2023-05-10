@@ -1,14 +1,12 @@
-//decrypt
 var CryptoJS = require("crypto-js");
 function decrypt(value) {
   var crypt_key = "047ADGJMQTW0369D";
   var crypt_iv = "131b0c8a7a6e072e";
-  let aes_key = CryptoJS.enc.Utf8.parse(crypt_key); // Parsed key
-  let aes_iv = CryptoJS.enc.Utf8.parse(crypt_iv); // Resolved iv
-  let baseResult = CryptoJS.enc.Base64.parse(value); // 
-  let ciphertext = CryptoJS.enc.Base64.stringify(baseResult); // 
+  let aes_key = CryptoJS.enc.Utf8.parse(crypt_key);
+  let aes_iv = CryptoJS.enc.Utf8.parse(crypt_iv);
+  let baseResult = CryptoJS.enc.Base64.parse(value);
+  let ciphertext = CryptoJS.enc.Base64.stringify(baseResult);
   let decryptResult = CryptoJS.AES.decrypt(ciphertext, aes_key, {
-    // AES
     iv: aes_iv,
     mode: CryptoJS.mode.CBC,
     padding: CryptoJS.pad.Pkcs7,
@@ -20,7 +18,7 @@ function decrypt(value) {
 function hmac() {
   // let key = "megaops@2022";
   // let data = "voodKey";
-  // var crypto = require("crypto"); // Sign js using HmacSha512
+  // var crypto = require("crypto");
   // var hmac = crypto.createHmac("sha1", key);
   // var signed = hmac.update(Buffer.from(data, "utf-8")).digest("base64");
   // signed = signed.replace("/", "_").replace("+", "-");
@@ -69,7 +67,57 @@ function handleTimeStamp(timestamp) {
   let ss = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
   return YY + MM + DD + " " + hh + mm + ss;
 }
-
+function handleTime(time) {
+  if (time < 0) {
+    return;
+  }
+  var obj = {
+    text: "-",
+    day: 0,
+    isDanger: false,
+    s: 0,
+    h: 0,
+    m: 0,
+  };
+  if (time < 60) {
+    let s = parseInt(time);
+    obj.s = s;
+    obj.text = `${s}Seconds `;
+  } else if (time < 3600) {
+    let m = parseInt(time / 60);
+    let s = parseInt(time % 60);
+    obj.s = s;
+    obj.m = m;
+    obj.text = `${m}Minutes ${s}Seconds `;
+  } else if (time < 86400) {
+    let h = parseInt(time / 3600);
+    let min = time - h * 3600;
+    let m = parseInt(min / 60);
+    let ss = min - m * 60;
+    let s = parseInt(ss);
+    obj.s = s;
+    obj.h = h;
+    obj.m = m;
+    obj.text = `${h}Hours ${m}Minutes ${s}Seconds `;
+  } else if (time > 86400) {
+    let day = parseInt(time / 86400);
+    let hour = time - day * 86400;
+    let h = parseInt(hour / 3600);
+    let min = hour - h * 3600;
+    let m = parseInt(min / 60);
+    let ss = min - m * 60;
+    let s = parseInt(ss);
+    if (day > 7 || (day == 7 && h > 0)) {
+      obj.isDanger = false;
+    }
+    obj.s = s;
+    obj.h = h;
+    obj.m = m;
+    obj.day = day;
+    obj.text = `${day}Days ${h}Hours ${m}Minutes ${s}Seconds `;
+  }
+  return obj;
+}
 function echartsHandleTimeStamp(timestamp) {
   let date = new Date(parseInt(timestamp));
   let YY = date.getFullYear() + "-";

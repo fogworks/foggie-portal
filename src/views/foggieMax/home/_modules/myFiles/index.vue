@@ -371,9 +371,7 @@ const getFileList = function (scroll, prefix) {
     list_prefix = prefix.join("/");
   }
   tableLoading.value = true;
-  let orderId = deviceData.foggie_id;
-  let peer_id = deviceData.peer_id;
-  oodFileList(orderId, peer_id, list_prefix)
+  oodFileList(deviceData, list_prefix)
     .then((res) => {
       if (res && res.content) {
         initFileData(res);
@@ -783,7 +781,7 @@ const downloadItem = (item) => {
 const deleteItem = (item) => {
   tableLoading.value = true;
   let peerId = deviceData.peer_id;
-  let Id = deviceData.foggie_id
+  let Id = deviceData.foggie_id;
   file_delete(item, peerId, Id).then((res) => {
     if (res && res.data) {
       proxy.$notify({
@@ -823,7 +821,6 @@ const detailData = reactive({ data: {} });
 const toDetail = (item) => {
   localStorage.setItem("currentOODItem", JSON.stringify(currentOODItem.value));
   if (item.type === "application/x-directory") {
-    // 文件夹类型
     breadcrumbList.prefix = item.name.split("/");
     emits("currentPrefix", breadcrumbList.prefix);
   } else {

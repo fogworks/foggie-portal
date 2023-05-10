@@ -67,6 +67,7 @@ class BaseResultCode {
     static APPEND_FAILED = new BaseResultCode(20020, 'order append dmc failed');
     static CANCEL_FAILED = new BaseResultCode(20021, 'order cancel dmc failed');
     static ORDER_CHALLENGE_NOT_END = new BaseResultCode(20022, 'order challenge not end');
+    static CHALLENGE_NO_RESPONSE = new BaseResultCode(20023, 'miner no response challenge, no allow push merkle');
 
     // 文件的异常code 30000～39999
     static FILE_NOT_EXIST = new BaseResultCode(30000, 'file is not exist');

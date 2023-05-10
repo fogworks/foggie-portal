@@ -82,7 +82,7 @@ const router = useRouter();
 const registerFormRef = ref();
 let loading = ref(false);
 let isRegisterPassword = ref(false);
-let passwordIsExist = ref(true); 
+let passwordIsExist = ref(true);
 const props = defineProps(["userInfo"]);
 const loginForm = reactive({
   registerForm: {
@@ -219,7 +219,6 @@ function submit(FormRef) {
   });
 }
 
-
 async function SAVE_PASSWORD() {
   await store.dispatch("clientGlobal/setSavePassword", {
     password: loginForm.registerForm.password,
@@ -227,7 +226,6 @@ async function SAVE_PASSWORD() {
     username: props.userInfo.dmc,
   });
 }
-
 
 async function importPrivateKey() {
   ElMessageBox.prompt("Please enter the private key", "Tip", {

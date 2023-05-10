@@ -11,7 +11,7 @@ import router from "@/router";
 //   removeAccessToken,
 // } from "@/utils/auth";
 import { refreshToken } from "@/utils/api";
-import { getTokenMap } from '@/utils/tokenMap'
+import { getTokenMap } from "@/utils/tokenMap";
 import Qs from "qs";
 import { getToken } from "./auth";
 // import { hmac } from "./util.js";
@@ -96,9 +96,8 @@ service.interceptors.request.use(
         config.headers["Content-Md5"] = config.MD5;
       }
       if (config.url.indexOf("/v1") > -1) {
-        let token = getTokenMap(config.target?.device_id)
-        config.headers["Authorization"] = token || ''
-
+        let token = getTokenMap(config.target?.device_id);
+        config.headers["Authorization"] = token || "";
       }
     }
     return config;
@@ -147,7 +146,6 @@ service.interceptors.response.use(
         // });
         return;
       } else if (code === 420) {
-
         let res = await refreshToken();
 
         if (res && res.data && res.data.access_token) {

@@ -261,6 +261,7 @@ const submit = () => {
                 },
               })
                 .then((res) => {
+                  //
                   if (!res.data.data.dmc_account) {
                     proxy.$notify({
                       type: "info",
@@ -273,7 +274,6 @@ const submit = () => {
                     form.dmc_account = res.data.data.dmc_account;
                     loading.value = false;
                     showDMC.value = true;
-                    // 绑定
                   }
                 })
                 .catch((err) => {

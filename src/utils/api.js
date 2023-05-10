@@ -1,7 +1,5 @@
 import request from "@/utils/request";
 
-
-
 export const register = (data) => {
   return request({
     url: "/api/accounts/user",
@@ -32,7 +30,6 @@ export const user = () => {
     method: "GET",
   });
 };
-
 
 export const paynode = () => {
   return request({
@@ -79,7 +76,8 @@ export const refreshToken = () => {
   });
 };
 
-export const oodFileList = (orderId, peerId, prefix) => {
+//File LIST
+export const oodFileList = (deviceData, prefix) => {
   let url = "/list_files",
     // prefix = "",
     delimiter = "/",
@@ -96,8 +94,7 @@ export const oodFileList = (orderId, peerId, prefix) => {
     continuation_token,
     version_id_marker,
     key_marker,
-    Id: orderId,
-    peerId,
+    deviceData,
   };
 
   return request({
@@ -106,7 +103,6 @@ export const oodFileList = (orderId, peerId, prefix) => {
     data,
   });
 };
-
 
 export const find_objects = (orderId, peerId, fileId) => {
   let url = "/find_objects",
@@ -157,6 +153,7 @@ export const oodTaskList = (ID, next_marker, prefix) => {
     method: "GET",
   });
 };
+//File STATUS
 export const oodFileStatus = (ID, type) => {
   let url = `/stats?st_type=${type}`;
   // let url = '/ping?t=1111';
@@ -166,8 +163,7 @@ export const oodFileStatus = (ID, type) => {
   });
 };
 
-
-export const file_delete = (item,peerId, Id) => {
+export const file_delete = (item, peerId, Id) => {
   let objects = [
     { pubkey: item.pubkey ? item.pubkey : encodeURIComponent(item.key) },
   ];
@@ -188,7 +184,7 @@ export const file_delete = (item,peerId, Id) => {
   });
 };
 
-
+// FileSearch
 export const oodFileSearch = (key) => {
   // let url = `/o/${ID}/find?key=${key}`;
   let url = `/find?key=${key}`;
@@ -206,7 +202,6 @@ export const oodMonitor = (item) => {
   });
 };
 
-
 export const getActivationVood = (data, target) => {
   let url = `/v1/get_service_info`;
   return request({
@@ -215,7 +210,6 @@ export const getActivationVood = (data, target) => {
     target,
   });
 };
-
 
 //ipns publish list
 export const pIN = (data) => {
@@ -237,7 +231,6 @@ export const publishPin = (data) => {
   });
 };
 
-
 //ipns publish list
 export const IPFSSync = (ood_id, data) => {
   let url = `ipfsops/sync`;
@@ -247,7 +240,6 @@ export const IPFSSync = (ood_id, data) => {
     data: data,
   });
 };
-
 
 export const voodInfoCheck = (vpsId) => {
   return request({
@@ -263,7 +255,6 @@ export const voodActivate = (data) => {
     data: data,
   });
 };
-
 
 export const OwnerBills = (account) => {
   if (account && account !== null) {
@@ -283,13 +274,12 @@ export const dmcSwap = () => {
   });
 };
 
-
 /**
- * @param {String} fileName 
- * @param {String} upload_id 
- * @param {String} cid  
- * @param {object} data  
- * @param {String} fileType 
+ * @param {String} fileName
+ * @param {String} upload_id
+ * @param {String} cid
+ * @param {object} data  parts:[{"part_number":1,"etag":"60f3efd9111f7a19c23d6045b15e8a2b"}]
+ * @param {String} fileType this.file.fileType
  *  */
 export const uploadMultipart = (params) => {
   const {
@@ -331,7 +321,6 @@ export const uploadMultipart = (params) => {
   return request(obj);
 };
 
-
 export const fileShare = (ood_id, data) => {
   let url = `o/${ood_id}/presignurl`;
   return request({
@@ -340,7 +329,6 @@ export const fileShare = (ood_id, data) => {
     data: data,
   });
 };
-
 
 export const awardTaskList = (ood_id) => {
   if (ood_id && ood_id !== null) {
@@ -351,6 +339,7 @@ export const awardTaskList = (ood_id) => {
   }
 };
 
+//003
 export const finishTask = (data) => {
   return request({
     url: "/x/reward_active",
@@ -403,7 +392,6 @@ export const shareLink = (ID, key) => {
   }
 };
 
-
 export const withdrawDMC = (data) => {
   return request({
     url: "/x/withdraw",
@@ -437,7 +425,6 @@ export const getWithdrawList = (owner_id, page, limit) => {
     });
   }
 };
-
 
 export const lastweekReward = (account) => {
   if (account && account !== null) {
@@ -662,8 +649,6 @@ export const getNetStatus = (data) => {
   });
 };
 
-
-
 export const search_object = (data) => {
   let url = `/search_object`;
   return request({
@@ -672,5 +657,3 @@ export const search_object = (data) => {
     data,
   });
 };
-
-

@@ -102,8 +102,8 @@ export default {
       simultaneousUploads: 5,
 
       chunkSize: 1024 * 1024 * 5,
-      forceChunkSize: true, 
-      allowDuplicateUploads: true, 
+      forceChunkSize: true,
+      allowDuplicateUploads: true,
     });
     // const client = new APIClient('http://154.31.34.194:9007')
     const client = new APIClient("http://218.2.96.99:8007");

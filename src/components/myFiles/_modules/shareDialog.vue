@@ -63,7 +63,7 @@
 
 <script setup>
 import { defineProps, defineEmits, toRefs, getCurrentInstance } from "vue";
-import RippleInk from "@/components/rippleInk";
+// import RippleInk from "../../rippleInk";
 
 const { proxy } = getCurrentInstance();
 const props = defineProps({
@@ -106,81 +106,3 @@ const copyLink = (text) => {
   });
 };
 </script>
-
-<style lang="scss" scoped>
-.share-content {
-  margin-top: 20px;
-  color: #000;
-  font-size: 20px;
-  .title {
-    margin-bottom: 30px;
-    text-align: center;
-    font-weight: 700;
-    font-size: 26px;
-  }
-  .user-info {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    // height: 50px;
-    // line-height: 16px;
-    margin-bottom: 30px;
-    word-break: break-all;
-    // text-indent: 30px;
-    .ip {
-      display: inline-block;
-      max-width: 90%;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      font-weight: 700;
-      color: #134975;
-    }
-    a {
-      color: $light_blue;
-      word-break: break-all;
-      font-weight: 700;
-    }
-    .copy-icon {
-      margin-left: 10px;
-      vertical-align: middle;
-      color: $light_blue;
-      cursor: pointer;
-      transition: all 0.3s;
-      &:hover {
-        transform: scale(1.2);
-      }
-    }
-    .color-box {
-      width: 165px;
-      // .color-box();
-      @include color-box;
-
-      margin: 0 auto;
-      .ripple-ink {
-        border-radius: 45px;
-      }
-      .el-button {
-        position: relative;
-        font-size: 16px;
-        color: var(--text-color);
-        border: none;
-        border-radius: 45px;
-        box-shadow: 0px 2px 5px 0px rgb(0 0 0 / 20%);
-        background: var(--btn-gradient);
-      }
-    }
-  }
-  .share-str {
-    margin-bottom: 20px;
-    word-break: break-all;
-    text-indent: 30px;
-    color: #134975;
-  }
-}
-</style>
-<style lang="scss">
-.share-dialog {
-  // background-image: var(--dialog-gradient-bg) !important;
-}
-</style>

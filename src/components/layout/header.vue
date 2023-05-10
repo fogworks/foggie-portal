@@ -22,7 +22,7 @@
         </el-avatar>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item command="log_out"> Logout </el-dropdown-item>
+            <el-dropdown-item command="log_out">Logout </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>

@@ -209,7 +209,7 @@ function order() {
 
 // 用户提交merkle树
 function userPushMerkle() {
-    var tree = merkle('sha256').sync(['123', '456', '789','432','765']);
+    var tree = merkle('sha256').sync(['456', '789', '432', '765']);
     console.log('tree_root:', tree.root());
     dmc_client.transact({
         actions: [{
@@ -223,7 +223,7 @@ function userPushMerkle() {
             ],
             data: {
                 sender: "tbliuca12345",
-                order_id: 62,
+                order_id: 61,
                 merkle_root: tree.root(),
                 data_block_count: 3323
             }
@@ -365,7 +365,7 @@ function bill() {
 
 // 矿工提交merkle树
 function minerPushMerkle() {
-    var tree = merkle('sha256').sync(['000','123', '456', '789','432','765']);
+    var tree = merkle('sha256').sync(['000', '123', '456', '789', '432', '765']);
     console.log('tree_root:', tree.root());
     miner_dmc_client.transact({
         actions: [{
@@ -433,7 +433,7 @@ function ansChallenge() {
 }
 
 // 用户发起挑战
-reqChallenge();
+// reqChallenge();
 // 矿工响应挑战
 // ansChallenge();
 // 领取奖励
@@ -457,3 +457,104 @@ reqChallenge();
 // const BigNumber = require('bignumber.js');
 
 
+// var encryptor = crypto.createCipher('RSA-OAEP', privateKey);
+// let encrypted = encryptor.update("EncryptPKCS1v15" + ':' + orderId, 'utf8', 'base64');
+// encrypted += encryptor.final('base64');
+const crypto = require('crypto');
+
+function encrypt(privateKey) {
+    var encryptedData = crypto.privateEncrypt({
+        key: privateKey,
+        padding: crypto.constants.RSA_PKCS1_PADDING
+    }, Buffer.from('tbliuca12345:12434'));
+
+    console.log(encryptedData.toString('base64'));
+}
+
+
+
+function getKeyPair(passphrase) {
+    return crypto.generateKeyPairSync('rsa', {
+        modulusLength: 2048, // 模数的位数，即密钥的位数，2048 或以上一般是安全的
+        publicExponent: 0x10001, // 指数值，必须为奇数，默认值为 0x10001，即 65537
+        publicKeyEncoding: {
+            type: 'pkcs1',
+            format: 'pem'
+        },
+        privateKeyEncoding: {
+            type: 'pkcs1', // 用于存储私钥信息的标准语法标准
+            format: 'pem' // base64 编码的 DER 证书格式
+            // cipher: 'aes-256-cbc', // 加密算法和操作模式
+            // passphrase
+        }
+    });
+}
+
+var encryptCode = '5HsrwqjEJHsvqKgh4LDKwWQsfKK9UZygPYCspRaVfwM3recZCMn';
+// const crypto = require('crypto');
+function test() {
+
+    var sign = DMC.ecc.sign(Buffer.from('someData', 'utf8'), encryptCode)
+
+    console.log('sign:', sign);
+
+    // var encryptCode = getKeyPair(encryptCode);
+
+
+    // console.log("public_key:", encryptCode.publicKey);
+    // encrypt(Buffer.from(private_key,'utf-8'))
+    // var NodeRSA = require('node-rsa');
+    // var key = new NodeRSA();
+    // key.importKey(encryptCode, 'pkcs1')
+    // // key.setOptions({encryptionScheme: 'pkcs1'});
+    // let _data = key.encryptPrivate('tbliuca12345:12434', 'buffer');
+    // console.log(_data);
+
+
+
+    // // 生成RSA密钥对
+    // const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
+    //     modulusLength: 2048,
+    //     publicKeyEncoding: {
+    //         type: 'pkcs1',
+    //         format: 'pem'
+    //     },
+    //     privateKeyEncoding: {
+    //         type: 'pkcs1',
+    //         format: 'pem'
+    //     }
+    // });
+
+    // 要加密的数据
+    // const data = 'Hello, world!';
+
+    // // 使用私钥进行加密
+    // const encryptedData = crypto.privateEncrypt({
+    //     key: encryptCode.privateKey,
+    //     padding: crypto.constants.RSA_PKCS1_PADDING
+    // }, Buffer.from(data));
+
+    // console.log('加密后的数据：', encryptedData.toString('base64'));
+
+    // // 使用公钥进行解密
+    // const decryptedData = crypto.publicDecrypt({
+    //     key: encryptCode.publicKey,
+    //     padding: crypto.constants.RSA_PKCS1_PADDING
+    // }, encryptedData);
+
+    // console.log('解密后的数据：', decryptedData.toString());
+
+    console.log(DMC.ecc.privateToPublic('5HsrwqjEJHsvqKgh4LDKwWQsfKK9UZygPYCspRaVfwM3recZCMn'));
+
+    // console.log(privateToPublic('5HsrwqjEJHsvqKgh4LDKwWQsfKK9UZygPYCspRaVfwM3recZCMn'))
+    // var secp256k1 = require('secp256k1');
+    // var base58 = require('bs58');
+    // var ripemd160 = require('ripemd160');
+    // function privateToPublic(privateKey, publicKeyPrefix = 'EOS') {
+    //     const privateKeyBuffer = Buffer.from(privateKey,'hex');
+    //     const publicKeyBuffer = secp256k1.publicKeyCreate(privateKeyBuffer, false).slice(1);
+    //     const checksum = ripemd160(publicKeyBuffer).slice(0, 4);
+    //     return publicKeyPrefix + base58.encode(Buffer.concat([publicKeyBuffer, checksum]));
+    //   } 
+}
+test()

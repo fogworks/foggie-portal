@@ -23,26 +23,26 @@
       </el-link>
       <div style="font-size: 15px; color: rgba(255, 255, 255, 0.7)">
         <el-tag type="info" effect="dark" round v-if="item.state == '0'">
-          Order not agreed upon, waiting...</el-tag
+          Subscription not agreed, waiting...</el-tag
         >
         <el-tag effect="dark" round v-if="item.state == '1'"
-          >Order status delivery in progress</el-tag
+          >order status delivery</el-tag
         >
         <el-tag type="warning" effect="dark" round v-if="item.state == '2'">
-          Insufficient deposit, order is about to end
+          Insufficient deposit, the order is about to end
         </el-tag>
         <el-tag effect="dark" round v-if="item.state == '3'">
-          There is sufficient deposit and the order is still in delivery for the
-          next cycle
+          With sufficient deposit, the order is still in delivery in the next
+          cycle
         </el-tag>
         <el-tag type="success" effect="dark" round v-if="item.state == '4'">
-          The order has ended</el-tag
+          Order has ended</el-tag
         >
         <el-tag type="danger" effect="dark" round v-if="item.state == '5'">
-          Order cancelled</el-tag
+          Order has been canceled</el-tag
         >
         <el-tag type="warning" effect="dark" round v-if="item.state == '6'">
-          The order will be cancelled in the next cycle
+          The order will be canceled in the next cycle
         </el-tag>
       </div>
     </div>
@@ -170,11 +170,11 @@
             <span style="font-size: 24px; font-weight: 600">GB</span>
           </el-col>
           <el-col :span="9" class="bottom_col">
-            <svg-icon
+            <!-- <svg-icon
               icon-class="left"
               size="40"
               style="margin-right: 10px"
-            ></svg-icon>
+            ></svg-icon> -->
             <!-- <div>
               <div>Blocks</div>
               <div>12600</div>
@@ -355,7 +355,7 @@ function popoverClick(type, item) {
     // if (item.state == "1") {
     //   ElMessage({
     //     showClose: true,
-    //     message: "订单正在交付中，不能提交merKle,请等待。",
+    //     message: "The order is being delivered, merKle cannot be submitted, please wait.",
     //     type: "warning",
     //     grouping: true,
     //   });
@@ -373,7 +373,7 @@ function popoverClick(type, item) {
         item.popoverShow = false;
         ElMessage({
           showClose: true,
-          message: "MerKle tree uploaded successfully!",
+          message: "The merKle tree is uploaded successfully!",
           type: "success",
           grouping: true,
         });

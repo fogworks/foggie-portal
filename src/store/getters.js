@@ -1,4 +1,3 @@
-
 const getters = {
   uploadIsShow: state => state.upload.uploadIsShow,
   orderId: state => state.upload.orderId,

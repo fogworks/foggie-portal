@@ -173,12 +173,12 @@
                   >
                   <el-dropdown-item
                     :command="{ flag: 'ipfs', command: scope.row }"
-                    :disabled="scope.row.isDir"
+                    :disabled="scope.row.isDir && false"
                     >IPFS PIN</el-dropdown-item
                   >
                   <el-dropdown-item
                     :command="{ flag: 'cyfs', command: scope.row }"
-                    :disabled="scope.row.isDir"
+                    :disabled="scope.row.isDir && false"
                     >CYFS PIN</el-dropdown-item
                   >
                   <el-dropdown-item
@@ -350,14 +350,13 @@ function openUpload() {
 
 const loadFileList = async () => {
   let data = await oodFileList(
-    orderId.value,
-    deviceData.value.peer_id,
+    deviceData.value,
     breadcrumbList.prefix.join("/")
   );
   initFileData(data);
 };
 
-/* 下拉加载文件列表 */
+/* */
 const fileListsInfinite = _.debounce(() => {
   if (tableData.total > tableData.data.length) {
     tableData.pageNum += 1;
@@ -366,8 +365,6 @@ const fileListsInfinite = _.debounce(() => {
     return;
   }
 }, 300);
-
-/* 对文件发起挑战 */
 
 function challengeMiner(params) {
   InitiateChallenge(params).then((res) => {
@@ -647,12 +644,12 @@ const handleCommand = async (val) => {
     case "ipfs":
       ipfsDialogShow.value = true;
       pinData.item = item;
-      ipfsPin(item);
+      // ipfsPin(item);
       break;
     case "cyfs":
       cyfsDialogShow.value = true;
       pinData.item = item;
-      cyfsPin(item);
+      // cyfsPin(item);
       break;
     case "download":
       downloadItem(item);
@@ -774,11 +771,11 @@ const downloadItem = (item) => {
   let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
 
   var oA = document.createElement("a");
-  oA.download = item.name; // 设置下载的文件名，默认是'下载'
+  oA.download = item.name;
   oA.href = downloadUrl;
   document.body.appendChild(oA);
   oA.click();
-  oA.remove(); // 下载之后把创建的元素删除
+  oA.remove();
   proxy.$notify({
     type: "success",
     message: "Download succeeded",
@@ -787,12 +784,12 @@ const downloadItem = (item) => {
 };
 
 const copyLink = (text) => {
-  var input = document.createElement("input"); // 创建input对象
-  input.value = text; // 设置复制内容
-  document.body.appendChild(input); // 添加临时实例
-  input.select(); // 选择实例内容
-  document.execCommand("Copy"); // 执行复制
-  document.body.removeChild(input); // 删除临时实例
+  var input = document.createElement("input");
+  input.value = text;
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand("Copy");
+  document.body.removeChild(input);
   // let str = `Copying  ${type} successful!`;
   // this.$message.success(str);
   proxy.$notify({
@@ -806,7 +803,6 @@ const detailData = reactive({ data: {} });
 const toDetail = (item) => {
   localStorage.setItem("currentOODItem", JSON.stringify(currentOODItem.value));
   if (item.type === "application/x-directory") {
-    // 文件夹类型
     breadcrumbList.prefix = item.name.split("/");
     emits("currentPrefix", breadcrumbList.prefix);
   } else {
@@ -822,9 +818,7 @@ const getFileList = function (scroll, prefix) {
     list_prefix = prefix.join("/");
   }
   tableLoading.value = true;
-  let orderId = deviceData.foggie_id;
-  let peer_id = deviceData.peer_id;
-  oodFileList(orderId, peer_id, list_prefix)
+  oodFileList(deviceData.value, list_prefix)
     .then((res) => {
       if (res && res.content) {
         initFileData(res);

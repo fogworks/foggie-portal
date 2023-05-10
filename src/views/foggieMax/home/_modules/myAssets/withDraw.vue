@@ -11,8 +11,11 @@
       @close="close"
     >
       <div v-loading="dialogLoading">
+        <div class="no_auth_withdraw" v-if="no_auth_withdraw">
+          {{ no_auth_withdraw }}!
+        </div>
         <el-form
-          v-if="!dialogLoading"
+          v-if="!dialogLoading && !no_auth_withdraw"
           label-position="left"
           class="withdraw-form"
           ref="formRef"
@@ -20,17 +23,16 @@
           :rules="rules"
           label-width="220px"
         >
-          <!-- <el-form-item label="From DMC" v-if="!isWalletUser">
+          <el-form-item label="From DMC" v-if="!isWalletUser">
             <span>{{ walletUser }}</span>
-          </el-form-item> -->
+          </el-form-item>
           <el-form-item label="Balance">
             <span>{{ oldWalletMoney }} DMC</span>
           </el-form-item>
           <el-form-item label="To DMC" prop="receiver">
-            <!-- <span v-if="isWalletUser">{{ form.receiver }} (Owner)</span> -->
+            <span v-if="isWalletUser">{{ form.receiver }} (Owner)</span>
             <el-input
-              :disabled="loading"
-              style="width: 500px"
+              v-if="!isWalletUser"
               v-model.trim="form.receiver"
               placeholder="Please enter your username in the DMC wallet"
             ></el-input>
@@ -47,7 +49,6 @@
                 </template>
               </el-input> -->
               <el-input-number
-                :disabled="loading"
                 v-model="form.walletMoney"
                 :min="0.01"
                 :precision="4"
@@ -69,7 +70,7 @@
           </el-form-item>
         </el-form>
       </div>
-      <template v-if="!dialogLoading" #footer>
+      <template v-if="!dialogLoading && !no_auth_withdraw" #footer>
         <div class="color-box">
           <el-button :loading="loading" type="primary" @click="next">
             <RippleInk></RippleInk>
@@ -238,10 +239,15 @@
 </template>
 
 <script>
-import { ref, reactive, toRefs, watch, computed, inject, nextTick } from "vue";
-import { check_account, transfer_valid, bind_valid } from "@/api/common.js";
-import { useStore } from "vuex";
-import { assetsTransfer } from "@/api/order/orderList.js";
+import { ref, reactive, toRefs, watch, computed, inject } from "vue";
+import {
+  getGoogle,
+  getWithdrawGoogle,
+  withdrawGoogle,
+  checkAccount,
+  withdrawDMC,
+  verifyGoogle,
+} from "@/utils/api.js";
 import { Base64 } from "js-base64";
 import { ElNotification } from "element-plus";
 import VerificationCode from "./verificationCode";
@@ -269,13 +275,10 @@ export default {
     noOrderShow: {
       type: Boolean,
     },
-    withDrawMoney: {
-      type: [String, Number],
-      default: 0,
-    },
+    withDrawMoney: {},
   },
   setup(props, { emit }) {
-    const store = useStore();
+    const requestTarget = inject("requestTarget");
     const close = () => {
       emit("reload");
       emit("update:visible", false);
@@ -283,9 +286,10 @@ export default {
     const { visible, title, walletUser, walletType, withDrawMoney } =
       toRefs(props);
     const form = reactive({
-      balance: "0.00",
+      did: "hhvk3oti4qlr",
+      balance: "3.00",
       receiver: "",
-      walletMoney: 0,
+      walletMoney: "",
       gasfee: "0.0",
       total: "",
     });
@@ -295,8 +299,6 @@ export default {
     const authorForm = reactive({
       validateToken: "",
     });
-    const email = computed(() => store.getters["token/currentUser"]);
-    const chainId = computed(() => store.getters.ChainId);
     const formRef = ref(null);
     const withdrawFormRef = ref(null);
     const authorFormRef = ref(null);
@@ -325,19 +327,11 @@ export default {
         cb(new Error("Please enter the account address to withdraw"));
       } else {
         let postdata = {
-          username: form.receiver,
+          account_name: form.receiver,
         };
-        check_account(postdata).then(
+        checkAccount(postdata, requestTarget).then(
           (res) => {
-            if (res.code == 200) {
-              cb();
-            } else {
-              cb(
-                new Error(
-                  "The account does not exist. Please enter the correct account address"
-                )
-              );
-            }
+            cb();
           },
           (err) => {
             cb(
@@ -352,7 +346,7 @@ export default {
     const validateWalletMoney = (rule, value, cb) => {
       if (!value) {
         cb(new Error("Please enter the withdrawal amount"));
-      } else if (Number(value) > Number(actualMoeny.value)) {
+      } else if (value > Number(actualMoeny.value)) {
         cb(new Error("Exceeds the withdrawal amount"));
       } else if (Number(value) < 0.01) {
         cb(new Error("The minimum withdrawal amount is 0.01"));
@@ -381,10 +375,10 @@ export default {
       my_auth_input: [{ validator: validateAuthInput, trigger: "blur" }],
     };
     watch(
-      email,
+      walletUser,
       (data) => {
         if (visible.value) {
-          initGoogle();
+          initGoogle(data);
         }
       },
       {
@@ -396,7 +390,7 @@ export default {
       visible,
       (data) => {
         if (data) {
-          initGoogle();
+          initGoogle(walletUser.value);
         }
       },
       {
@@ -408,7 +402,7 @@ export default {
       walletType,
       (data) => {
         if (data === "wallet" && walletUser.value) {
-          form.receiver = "";
+          form.receiver = walletUser.value;
           isWalletUser.value = true;
         } else {
           form.receiver = "";
@@ -428,7 +422,7 @@ export default {
           actualMoeny.value = Number(
             Number(oldWalletMoney.value) / 1.01
           ).toFixed(4);
-          form.walletMoney = +actualMoeny.value;
+          form.walletMoney = actualMoeny.value;
         }
       },
       {
@@ -437,28 +431,29 @@ export default {
       }
     );
     function getAll() {
-      if (loading.value) return false;
-      form.walletMoney = +actualMoeny.value;
+      form.walletMoney = actualMoeny.value;
     }
-    const account = ref("");
     async function initGoogle() {
-      if (email.value) {
+      if (walletUser.value) {
         dialogLoading.value = true;
-        let res = await transfer_valid({ email: email.value });
-        if (res?.data?.imageUrl) {
-          // let data = {
-          //   account: walletUser.value,
-          // };
-          // let res = await getWithdrawGoogle(data);
-          scret_keyOld.value = res.data.secret;
-          scret_key.value = Base64.decode(res.data.secret);
-          // "data:image/jpg;base64," +
-          authQrcode.value = res.data.imageUrl;
-          account.value = res.data.account;
+        let res = await getGoogle(walletUser.value);
+        if (res && res.status === "Verification succeeded" && !res.OTP) {
+          let data = {
+            account: walletUser.value,
+          };
+          let res = await getWithdrawGoogle(data);
+          scret_keyOld.value = res.secret;
+          scret_key.value = Base64.decode(res.secret);
+          authQrcode.value = "data:image/jpg;base64," + res.qrcode;
           dialogLoading.value = false;
-        } else {
+        } else if (res && res.status === "Verification succeeded" && res.OTP) {
           withDrawBtn.value = true;
           dialogLoading.value = false;
+        } else {
+          showGoogleBtn.value = false;
+          dialogLoading.value = false;
+          withDrawBtn.value = false;
+          no_auth_withdraw.value = res.status;
         }
       }
     }
@@ -484,13 +479,12 @@ export default {
       if (!showErrorTips.value) {
         loading.value = true;
         let postData = {
-          email: email.value,
-          userToken: authorForm.validateToken,
+          token: authorForm.validateToken,
           // secret: Base64.encode(this.scret_key),
           secret: scret_keyOld.value,
         };
-        let data = await bind_valid(postData);
-        if (data.code !== 200 || data.error === "Invalid OTP token!") {
+        let data = await verifyGoogle(postData);
+        if (data.code === 400 || data.error === "Invalid OTP token!") {
           loading.value = false;
           ElNotification({
             type: "error",
@@ -500,7 +494,7 @@ export default {
           });
           return;
         } else {
-          // setGoogle();
+          setGoogle();
           authorForm.validateToken = "";
         }
       }
@@ -521,82 +515,46 @@ export default {
           loading.value = false;
         }
       }
-      // });
     }
-    // async function setGoogle() {
-    //   if (walletUser.value) {
-    //     let data = {
-    //       account: walletUser.value,
-    //       // secret: Base64.encode(this.scret_key),
-    //       secret: scret_keyOld.value,
-    //     };
-    //     let res = await withdrawGoogle(data);
-    //     if (res) {
-    //       showGoogleQrcode.value = false;
-    //       showGoogleBtn.value = true;
-    //       withDrawBtn.value = true;
-    //       loading.value = false;
-    //     }
-    //   }
-    // }
     function handelWithdraw() {
       let postdata = {
-        username: form.receiver,
+        account_name: form.receiver,
       };
       checkValidate(withdrawForm.my_auth_input);
       // withdrawFormRef.value.validate((valid) => {
       if (!showErrorTips.value) {
         loading.value = true;
-        check_account(postdata).then(
+        checkAccount(postdata, requestTarget).then(
           (res) => {
-            if (res.code !== 200) {
-              loading.value = false;
-              ElNotification({
-                title: "Withdrawal failed",
-                message:
-                  "The account does not exist. Please enter the correct account address",
-                position: "bottom-left",
-                type: "error",
-              });
-              return;
-            }
             let data = {
-              chainId: chainId.value,
-              email: email.value,
-              // account: walletUser.value,
-              amount: form.walletMoney.toFixed(4),
-              to: form.receiver,
-              userToken: withdrawForm.my_auth_input,
+              account: walletUser.value,
+              amount: Number(form.walletMoney),
+              receiver: form.receiver,
+              totp_secret: withdrawForm.my_auth_input,
             };
-            assetsTransfer(data)
-              .then((res) => {
-                loading.value = false;
-                if (res.code == 200) {
-                  // let str = "vood.withdrawSuccess";
-                  // this.$message.success(str);
-                  showGoogleBtn.value = false;
-                  withdrawForm.my_auth_input = "";
-                  close();
-                  ElNotification({
-                    title: "Withdrawal succeeded",
-                    message: "Withdrawal succeeded",
-                    position: "bottom-left",
-                    type: "success",
-                  });
-                } else {
-                  loading.value = false;
-
-                  ElNotification({
-                    title: "Withdrawal failed",
-                    message: res.error,
-                    position: "bottom-left",
-                    type: "error",
-                  });
-                }
-              })
-              .catch(() => {
-                loading.value = false;
-              });
+            withdrawDMC(data).then((res) => {
+              loading.value = false;
+              if (res.code !== 400) {
+                // let str = "vood.withdrawSuccess";
+                // this.$message.success(str);
+                showGoogleBtn.value = false;
+                withdrawForm.my_auth_input = "";
+                close();
+                ElNotification({
+                  title: "Withdrawal succeeded",
+                  message: "Withdrawal succeeded",
+                  position: "bottom-left",
+                  type: "success",
+                });
+              } else {
+                ElNotification({
+                  title: "Withdrawal failed",
+                  message: res.error,
+                  position: "bottom-left",
+                  type: "error",
+                });
+              }
+            });
           },
           (err) => {
             loading.value = false;

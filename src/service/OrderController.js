@@ -393,7 +393,6 @@ class OrderController {
             '            createdAt\n' +
             '        }\n' +
             '    }'
-        // let request = ;
         let order = JSON.parse(request('POST', transactionAddress + getOrders, {
             headers: {
                 'Content-Type': 'application/graphql'
@@ -416,6 +415,32 @@ class OrderController {
 
         if (!chainId || !orderId || !email) {
             res.send(BizResult.validateFailed());
+            return;
+        }
+
+        // valid file count 
+        var fileCount = await fileService.getFileCount(orderId, email, 1);
+        
+        if(fileCount instanceof BizResultCode){
+            res.send(BizResult.fail(fileCount));
+            return;
+        }
+
+        if (fileCount == 0) {
+            res.send(BizResult.fail(BizResultCode.FILE_NOT_EXIST));
+            return;
+        }
+
+        // valid challenge state
+        // get user challenge count miner not response challenge count
+        var challengeState = await orderService.getChallengeCountByState(orderId, [3]);
+        if (challengeState instanceof BizResultCode) {
+            res.send(BizResult.fail(challengeState));
+            return;
+        }
+
+        if (challengeState > 0) {
+            res.send(BizResult.fail(BizResultCode.CHALLENGE_NO_RESPONSE));
             return;
         }
 
@@ -552,6 +577,8 @@ class OrderController {
             response.send(BizResult.validateFailed());
             return;
         }
+
+        // todo valid order status and challenge status
 
         var privateKey = await userService.getPrivateKeyByEmail(email);
         if (privateKey instanceof BizResultCode) {

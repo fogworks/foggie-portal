@@ -59,6 +59,7 @@ $shrinkHeader: 56px;
   --dialog-gradient-bg: linear-gradient(180deg, #e5f3ff 0%, #93baee 100%);
 }
 
+/* light */
 :root.dark {
   --bg-color: #2f2e2e;
   --text-color: #fff;
@@ -74,4 +75,3 @@ $shrinkHeader: 56px;
   --text-color-444: #eee;
   --overlay-color: rgba(0, 0, 0, 0);
 }
-

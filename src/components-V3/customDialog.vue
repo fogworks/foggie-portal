@@ -76,8 +76,7 @@ export default {
       this.$emit("update:modelValue", this.isShow);
     },
   },
-  mounted() {
-  },
+  mounted() {},
 };
 </script>
 

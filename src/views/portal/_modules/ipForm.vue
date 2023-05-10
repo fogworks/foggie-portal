@@ -67,7 +67,7 @@ function ping(ip, timeout, success, callback) {
   img.src = /^(http|https)/.test(ip)
     ? ip + "?t=" + start
     : "http://" + ip + "?t=" + start;
-  var flag = false; 
+  var flag = false;
   img.onload = function () {
     flag = true;
     success();

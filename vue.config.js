@@ -11,7 +11,6 @@ module.exports = defineConfig({
     resolve: {
       alias: {},
       fallback: {
-        //If other options are not enabled, you can use keyname: false, for example: crypto: false,
         crypto: require.resolve("crypto-browserify"),
         stream: require.resolve("stream-browserify"),
       },
@@ -56,18 +55,18 @@ module.exports = defineConfig({
       },
       "/api/payments": {
         target: "http://154.31.0.29:8088",
-        changeOrigin: true, 
-        secure: false, 
+        changeOrigin: true,
+        secure: false,
       },
       "/api/checkpayment": {
         target: "http://154.31.0.29:8088",
-        changeOrigin: true, 
-        secure: false, 
+        changeOrigin: true,
+        secure: false,
       },
       "/api/completepayment": {
         target: "http://154.31.0.29:8088",
         changeOrigin: true,
-        secure: false, 
+        secure: false,
       },
       "/v2/payments": {
         // target: 'https://connect.squareupsandbox.com',//http://10.8.90.252:7000//http://10.8.90.145:8001，http://154.31.0.29:8001
@@ -111,7 +110,7 @@ module.exports = defineConfig({
         changeOrigin: true,
         secure: false,
         pathRewrite: {
-          "^/upload": "", 
+          "^/upload": "",
         },
       },
       "^/x": {
@@ -185,7 +184,7 @@ module.exports = defineConfig({
         changeOrigin: true,
         secure: false,
       },
-      
+
       "^/search_object": {
         // target: "http://154.31.41.36:880",
         // target: "http://218.2.96.99:9010",
@@ -193,7 +192,7 @@ module.exports = defineConfig({
         changeOrigin: true,
         secure: false,
       },
-      
+
       "^/file_download": {
         // target: "http://154.31.41.36:880",
         // target: "http://218.2.96.99:9010",
@@ -309,19 +308,18 @@ module.exports = defineConfig({
         changeOrigin: true,
         secure: false,
       },
-      '/client_api': {
+      "/client_api": {
         // target: 'http://192.168.1.104:3000',
 
-        target: 'http://127.0.0.1:3000',
-        changeOrigin: true, 
-        // ws: false, 
+        target: "http://127.0.0.1:3000",
+        changeOrigin: true,
+        // ws: false, //
         // logLevel: 'debug',
-        // onProxyReq: (proxyReq, req) => {   
-     
+        // onProxyReq: (proxyReq, req) => {
         //   console.log('[HPM] %s %s %s %s', req.method, req.originalUrl, '->', req.url);
         // },
         pathRewrite: {
-          '^/client_api': '',
+          "^/client_api": "",
         },
       },
     },
@@ -329,7 +327,7 @@ module.exports = defineConfig({
   },
 });
 
-// module.exports = { 
+// module.exports = {
 //   pages: {
 //     main: {
 //       entry: 'src/views/main/main.js',

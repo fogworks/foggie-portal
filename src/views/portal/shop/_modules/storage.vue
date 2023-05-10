@@ -35,13 +35,13 @@
           </div>
 
           <!-- <div>
-            <el-select v-model="formLine.priceSection" placeholder="請選擇理想價格區間" style="width: 360px">
-              <el-option :label="`基準價正負20%： 約 ${selectionOption['2'].min} -- ${selectionOption['2'].max} DMC`"
+            <el-select v-model="formLine.priceSection" placeholder="Please select the desired price range" style="width: 360px">
+              <el-option :label="`Base price plus or minus 20%： about ${selectionOption['2'].min} -- ${selectionOption['2'].max} DMC`"
                 value="2" />
-              <el-option :label="`基準價正負30%： 約 ${selectionOption['3'].min} -- ${selectionOption['3'].max} DMC`"
+              <el-option :label="`Base price plus or minus 30%： about ${selectionOption['3'].min} -- ${selectionOption['3'].max} DMC`"
                 value="3" />
 
-              <el-option label="不限價格" :value="0" />
+              <el-option label="unlimited price" :value="0" />
             </el-select>
           </div> -->
           <el-button
@@ -340,7 +340,6 @@ function loadCurReferenceRate() {
     }
   });
 }
-
 function purchasePST(item) {
   state.orderDetail.orderID = item.id;
   state.orderDetail.price = (item.price / 10000).toFixed(4);

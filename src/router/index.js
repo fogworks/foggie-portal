@@ -1,10 +1,14 @@
-import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
-import { defineAsyncComponent } from 'vue'
+import {
+  createRouter,
+  createWebHistory,
+  createWebHashHistory,
+} from "vue-router";
+import { defineAsyncComponent } from "vue";
 
 import store from "@/store";
 
 const router = createRouter({
-  history: createWebHashHistory(),  // hash 
+  history: createWebHashHistory(),
   routes: [
     {
       path: "/",
@@ -13,59 +17,66 @@ const router = createRouter({
       meta: {
         title: "portal",
       },
-      redirect: 'User',
+      redirect: "User",
       children: [
         {
-          path: 'user',
-          name: 'User',
-          component: defineAsyncComponent(() => import(`../views/portal/user/index`)),
+          path: "user",
+          name: "User",
+          component: defineAsyncComponent(() =>
+            import(`../views/portal/user/index`)
+          ),
           meta: {
-            title: 'user',
+            title: "user",
           },
         },
         {
-          path: 'device',
-          name: 'Device',
-          component: defineAsyncComponent(() => import(`../views/portal/_modules/device`)),
+          path: "device",
+          name: "Device",
+          component: defineAsyncComponent(() =>
+            import(`../views/portal/_modules/device`)
+          ),
           meta: {
-            title: 'device',
+            title: "device",
           },
         },
         {
-          path: 'discover',
-          name: 'Discover',
-          component: defineAsyncComponent(() => import(`../views/portal/_modules/discover`)),
+          path: "discover",
+          name: "Discover",
+          component: defineAsyncComponent(() =>
+            import(`../views/portal/_modules/discover`)
+          ),
           meta: {
-            title: 'discover',
+            title: "discover",
           },
         },
         {
-          path: 'assets',
-          name: 'Assets',
-          component: defineAsyncComponent(() => import(`../views/portal/assets`)),
+          path: "assets",
+          name: "Assets",
+          component: defineAsyncComponent(() =>
+            import(`../views/portal/assets`)
+          ),
           meta: {
-            title: 'assets',
+            title: "assets",
           },
         },
         {
-          path: 'shop',
-          name: 'Shop',
+          path: "shop",
+          name: "Shop",
           component: defineAsyncComponent(() => import(`../views/portal/shop`)),
           meta: {
-            title: 'shop',
+            title: "shop",
           },
         },
         {
-          path: 'appWindow',
-          name: 'AppWindow',
+          path: "appWindow",
+          name: "AppWindow",
           component: defineAsyncComponent(() => import(`../views/appWindow`)),
           meta: {
-            title: 'appWindow',
-            keepAlive: true
+            title: "appWindow",
+            keepAlive: true,
           },
         },
-
-      ]
+      ],
     },
     {
       path: "/detailFog",
@@ -76,58 +87,69 @@ const router = createRouter({
       },
     },
     {
-      path: '/Alltemplate',
-      name: 'Alltemplate',
-      redirect: '/Alltemplate/Home',
-      component: defineAsyncComponent(() => import(`../views/Alltemplate/Alltemplate.vue`)),
+      path: "/Alltemplate",
+      name: "Alltemplate",
+      redirect: "/Alltemplate/Home",
+      component: defineAsyncComponent(() =>
+        import(`../views/Alltemplate/Alltemplate.vue`)
+      ),
       children: [
         {
-          path: 'Home',
-          name: 'Home',
-          component: () => defineAsyncComponent(() => import(`@/views/Alltemplate/Home/Home.vue`)),
-          meta: { title: 'Home', headerRoute: 'Home' }
+          path: "Home",
+          name: "Home",
+          component: () =>
+            defineAsyncComponent(() =>
+              import(`@/views/Alltemplate/Home/Home.vue`)
+            ),
+          meta: { title: "Front Page", headerRoute: "Home" },
         },
         {
-          path: 'Orders',
-          name: 'Orders',
-          component: () => defineAsyncComponent(() => import(`@/views/Alltemplate/Orders/orders.vue`)),
-          meta: { title: 'Orders', headerRoute: 'Orders' }
+          path: "Orders",
+          name: "Orders",
+          component: () =>
+            defineAsyncComponent(() =>
+              import(`@/views/Alltemplate/Orders/orders.vue`)
+            ),
+          meta: { title: "Order", headerRoute: "Orders" },
         },
         {
-          path: 'MyFiles',
-          name: 'MyFiles',
-          component: () => defineAsyncComponent(() => import(`@/views/Alltemplate/MyFiles/myFiles.vue`)),
-          meta: { title: 'myFiles', headerRoute: 'Orders' }
+          path: "MyFiles",
+          name: "MyFiles",
+          component: () =>
+            defineAsyncComponent(() =>
+              import(`@/views/Alltemplate/MyFiles/myFiles.vue`)
+            ),
+          meta: { title: "MyFiles", headerRoute: "Orders" },
         },
 
         {
-          path: 'Storage',
-          name: 'Storage',
-          component: () => defineAsyncComponent(() => import(`@/views/Alltemplate/Storage/Storage.vue`)),
-          meta: { title: 'Storage', headerRoute: 'Storage' }
+          path: "Storage",
+          name: "Storage",
+          component: () =>
+            defineAsyncComponent(() =>
+              import(`@/views/Alltemplate/Storage/Storage.vue`)
+            ),
+          meta: { title: "Storage", headerRoute: "Storage" },
         },
-
-      ]
+      ],
     },
     {
       path: "/*",
       redirect: "/",
     },
-  ]
-})
+  ],
+});
 
 router.beforeEach((to, from, next) => {
-
   if (to.meta.title) {
     localStorage.setItem("headerRoute", to.meta.headerRoute);
 
     // store.commit('global/setActiveIndex', to.meta.headerRoute)
-    document.title = 'Foggie Portal';
+    document.title = "Foggie Portal";
   }
-  next()
-})
+  next();
+});
 
-router.afterEach((to, from) => {
-})
+router.afterEach((to, from) => { });
 
-export default router
+export default router;

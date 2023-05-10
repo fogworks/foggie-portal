@@ -6,7 +6,6 @@
 @import "./dark.scss";
 @import "./light.scss";
 
-
 body {
   height: 100%;
   -moz-osx-font-smoothing: grayscale;
@@ -52,7 +51,6 @@ html {
   height: 100%;
   box-sizing: border-box;
 }
-
 
 #app {
   height: 100%;
@@ -105,5 +103,3 @@ html.dark {
     color: #fff;
   }
 }
-
-
