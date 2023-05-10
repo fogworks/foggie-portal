@@ -2,11 +2,9 @@ import { savePassword } from "@/api/common";
 export default {
   namespaced: true,
   state: {
-    theme: window.localStorage.getItem("theme") || "",
+    theme: window.localStorage.getItem("theme") || "light",
     userInfo: {},
     detected_net: false,
-
-    theme: "",
     deviceList: [],
     currentOODItem:
       window.localStorage.currentOODItem &&

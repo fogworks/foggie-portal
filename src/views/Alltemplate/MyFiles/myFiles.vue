@@ -242,6 +242,12 @@ import {
   find_objects,
   publishPin,
 } from "@/utils/api.js";
+import {
+  oodFileList,
+  CidShare,
+  find_objects,
+  publishPin,
+} from "@/utils/api.js";
 
 import _ from "lodash";
 
@@ -350,7 +356,8 @@ function openUpload() {
 
 const loadFileList = async () => {
   let data = await oodFileList(
-    deviceData.value,
+    orderId.value,
+    deviceData.value.peer_id,
     breadcrumbList.prefix.join("/")
   );
   initFileData(data);
@@ -906,7 +913,7 @@ onMounted(() => {
   max-width: 1960px;
   border: var(--theme-border);
   min-height: calc(100vh - 200px);
-  background: #f2f6ff;
+  background: var(--bg-color);
 
   ::v-deep {
     .el-breadcrumb {

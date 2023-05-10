@@ -8,7 +8,7 @@ import { defineAsyncComponent } from "vue";
 import store from "@/store";
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHashHistory(),  // hash 
   routes: [
     {
       path: "/",
@@ -95,22 +95,16 @@ const router = createRouter({
       ),
       children: [
         {
-          path: "Home",
-          name: "Home",
-          component: () =>
-            defineAsyncComponent(() =>
-              import(`@/views/Alltemplate/Home/Home.vue`)
-            ),
-          meta: { title: "Front Page", headerRoute: "Home" },
+          path: 'Home',
+          name: 'Home',
+          component: () => defineAsyncComponent(() => import(`@/views/Alltemplate/Home/Home.vue`)),
+          meta: { title: 'Home', headerRoute: 'Home' }
         },
         {
-          path: "Orders",
-          name: "Orders",
-          component: () =>
-            defineAsyncComponent(() =>
-              import(`@/views/Alltemplate/Orders/orders.vue`)
-            ),
-          meta: { title: "Order", headerRoute: "Orders" },
+          path: 'Orders',
+          name: 'Orders',
+          component: () => defineAsyncComponent(() => import(`@/views/Alltemplate/Orders/orders.vue`)),
+          meta: { title: 'Orders', headerRoute: 'Orders' }
         },
         {
           path: "MyFiles",
@@ -123,13 +117,10 @@ const router = createRouter({
         },
 
         {
-          path: "Storage",
-          name: "Storage",
-          component: () =>
-            defineAsyncComponent(() =>
-              import(`@/views/Alltemplate/Storage/Storage.vue`)
-            ),
-          meta: { title: "Storage", headerRoute: "Storage" },
+          path: 'Storage',
+          name: 'Storage',
+          component: () => defineAsyncComponent(() => import(`@/views/Alltemplate/Storage/Storage.vue`)),
+          meta: { title: 'Storage', headerRoute: 'Storage' }
         },
       ],
     },

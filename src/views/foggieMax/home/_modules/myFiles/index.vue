@@ -155,17 +155,6 @@
           width="100"
           show-overflow-tooltip
         />
-        <!-- <el-table-column label="Share" width="100">
-          <template #default="{ row }">
-            <div>
-              <MyEcharts
-                style="width: 40px; height: 40px"
-                :options="row.share"
-              ></MyEcharts>
-            </div>
-          </template>
-        </el-table-column> -->
-        <!-- <el-table-column prop="status" label="Status" width="140" /> -->
         <el-table-column
           label="Actions"
           class-name="action-btn-column"
@@ -904,7 +893,7 @@ const upload = () => {
   margin: 24px 0 50px 0;
   // .card-box();
   color: #000;
-  background: var(--card-bg);
+  background: var(--bg-color);
   border: var(--theme-border);
   @include card-box;
 

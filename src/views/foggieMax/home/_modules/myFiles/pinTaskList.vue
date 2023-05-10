@@ -244,7 +244,6 @@ export default {
         this.initData(item);
       }
     },
-
     changeTabSon(item, index) {
       this.isNextMarket = "";
       this.currentPrefix = "";

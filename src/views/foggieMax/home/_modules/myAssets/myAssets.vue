@@ -98,15 +98,6 @@
       >
       </Rewards>
 
-      <Withdraw
-        v-if="WithdrawVisible"
-        v-model:visible="WithdrawVisible"
-        :walletUser="walletUser"
-        :walletType="walletType"
-        :withDrawMoney="withDrawMoney"
-        :noOrderShow="noOrderShow"
-        @reload="reload"
-      ></Withdraw>
       <AssetsRecords
         v-if="recordsVisible"
         v-model:visible="recordsVisible"
@@ -125,7 +116,6 @@
 import { ref, reactive, onMounted, watchEffect, toRefs, inject } from "vue";
 import NftDialog from "./nftDialog";
 import Rewards from "./rewards";
-import Withdraw from "./withDraw";
 import AssetsRecords from "@/components/orders/assetsRecords";
 import BigNumber from "bignumber.js";
 import MyEcharts from "@/components/echarts/myEcharts";
@@ -143,7 +133,6 @@ import RippleInk from "@/components/rippleInk";
 export default {
   components: {
     Rewards,
-    Withdraw,
     AssetsRecords,
     MyEcharts,
     RippleInk,
@@ -228,7 +217,7 @@ export default {
     const getDMC = () => {
       let owner_id = sessionStorage.getItem("walletUser")
         ? sessionStorage.getItem("walletUser")
-        : "foggiezzzzz2";
+        : "";
       getAssets(owner_id).then((r) => {
         balanceCount.value = r.amount;
         nftCount.value = r.nft;
@@ -249,7 +238,7 @@ export default {
     const initYesterdayScore = async () => {
       let account = sessionStorage.getItem("walletUser")
         ? sessionStorage.getItem("walletUser")
-        : "foggiezzzzz2";
+        : "";
       let data = await ydaReward(account, "account");
       if (!data) {
         return;
@@ -284,7 +273,7 @@ export default {
       }
       let account = sessionStorage.getItem("walletUser")
         ? sessionStorage.getItem("walletUser")
-        : "foggiezzzzz2";
+        : "";
       let data = await OwnerBills(account);
       if (!data) {
         return;

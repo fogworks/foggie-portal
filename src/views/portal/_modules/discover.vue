@@ -119,7 +119,6 @@ let currentItem = reactive({
 const toGuide = (item) => {
   currentItem.data = item;
   // if (userInfo.email) {
-  //
   // const url = `http://${item.ipaddress}:8080/#/welcome`;
   // window.location.href = url;
   // } else {
@@ -151,12 +150,12 @@ const skip = () => {
   // });
 };
 const copyLink = (text) => {
-  var input = document.createElement("input");
+  var input = document.createElement("input"); 
   input.value = text;
-  document.body.appendChild(input);
-  input.select();
-  document.execCommand("Copy");
-  document.body.removeChild(input);
+  document.body.appendChild(input); 
+  input.select(); 
+  document.execCommand("Copy"); 
+  document.body.removeChild(input); 
   // let str = `Copying  ${type} successful!`;
   // this.$message.success(str);
   proxy.$notify({

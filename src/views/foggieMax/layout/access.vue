@@ -138,7 +138,6 @@ const submit = () => {
         confirm_access_password: form.confirmPassword,
       };
       if (hasAccessPass.value) {
-        //
         access_pass_login(
           {
             access_password: form.password,
@@ -176,7 +175,6 @@ const submit = () => {
             btnLoading.value = false;
           });
       } else {
-        //
         access_pass(data, requestTarget)
           .then((res) => {
             proxy.$notify({
@@ -212,7 +210,7 @@ const submit = () => {
   justify-content: space-around;
   align-items: center;
   padding: 50px 0;
-  background-color: var(--bg-color);
+  background-color: #f2f6ff;
   border-radius: 20px;
   width: 900px;
   margin: 0 auto;

@@ -85,7 +85,7 @@
                   Purchase quantity：<span>{{ formLine.quantity }}GB</span>
                 </p>
                 <p>
-                  Buying cycle：<span>{{ formLine.week }}</span>
+                  Buying cycle：<span>{{ formLine.week }} Weeks</span>
                 </p>
                 <p>
                   Deposit multiple：<span>{{ item.deposit_ratio }}</span>
@@ -213,13 +213,13 @@ const ChainId = computed(() => store.getters.ChainId);
 // const username = computed(() => store.getters.userInfo?.dmc);
 const email = computed(() => store.getters.userInfo?.email);
 let loading = ref(false);
-let dialogIsShow = ref(false); //
-let curReferenceRate = ref(0); //
+let dialogIsShow = ref(false);
+let curReferenceRate = ref(0);
 
 const state = reactive({
   formLine: {
-    week: "", //
-    quantity: "", //
+    week: "",
+    quantity: "",
     priceSection: "3", //  2 3 0
     prestoreDMC: "", //
   },
@@ -233,16 +233,16 @@ const state = reactive({
       max: "",
     },
   },
-  filterOrderList: [], //
+  filterOrderList: [],
   orderDetail: {
     orderID: "",
-    price: "", //
-    total: "", //
-    deposit: "", //
-    aggregate: "", //
-    week: "", //
-    serverTime: "", //
-  }, //
+    price: "",
+    total: "",
+    deposit: "",
+    aggregate: "",
+    week: "",
+    serverTime: "",
+  },
 });
 const { formLine, selectionOption, filterOrderList, orderDetail } =
   toRefs(state);
@@ -253,17 +253,18 @@ watch(curReferenceRate, (newVal) => {
   state.selectionOption["3"].min = Math.round(newVal * 1000 * 0.7) / 1000;
   state.selectionOption["3"].max = Math.round(newVal * 1000 * 1.3) / 1000;
 });
+
 function filterOrder() {
   let params = {
-    email: email.value, //
+    email: email.value,
     chainId: ChainId.value,
     benchmarkPrice: curReferenceRate.value,
-    unmatchedAmount: state.formLine.quantity, //
-    period: state.formLine.week, //
+    unmatchedAmount: state.formLine.quantity,
+    period: state.formLine.week,
   };
   if (state.formLine.priceSection) {
-    params.minPrice = state.selectionOption[state.formLine.priceSection].min; //
-    params.maxPrice = state.selectionOption[state.formLine.priceSection].max; //
+    params.minPrice = state.selectionOption[state.formLine.priceSection].min;
+    params.maxPrice = state.selectionOption[state.formLine.priceSection].max;
   }
   loading.value = true;
   getOrderFilterList(params)
@@ -339,6 +340,7 @@ function loadCurReferenceRate() {
     }
   });
 }
+
 function purchasePST(item) {
   state.orderDetail.orderID = item.id;
   state.orderDetail.price = (item.price / 10000).toFixed(4);
@@ -365,12 +367,12 @@ async function submit() {
     let params = {
       chainId: ChainId.value, //chainId
       email: email.value,
-      billId: state.orderDetail.orderID, //
-      period: state.formLine.week, //>24
-      benchmarkPrice: curReferenceRate.value, //
-      priceRange: "3", // 30%
-      unmatchedAmount: state.formLine.quantity, //
-      totalPrice: state.orderDetail.aggregate, // DMC
+      billId: state.orderDetail.orderID,
+      period: state.formLine.week,
+      benchmarkPrice: curReferenceRate.value,
+      priceRange: "3",
+      unmatchedAmount: state.formLine.quantity,
+      totalPrice: state.orderDetail.aggregate,
     };
     // switch (state.formLine.priceSection) {
     //   case 0:
@@ -391,13 +393,14 @@ async function submit() {
           dialogIsShow.value = false;
           loading.value = false;
           ElMessage({
-            message: `Successful Purchase!`,
+            message: `Purchase successful!`,
             type: "success",
             grouping: true,
           });
+          filterOrder();
         } else {
           ElMessageBox.confirm(
-            "Whether to retry if the order fails!",
+            "Failed to pay the bill, do you want to try again!",
             "Warning",
             {
               confirmButtonText: "OK",
@@ -416,7 +419,14 @@ async function submit() {
       });
   }
 }
+const maxRetry = ref(0);
 const order_sync = async () => {
+  maxRetry.value++;
+  if (maxRetry.value > 5) {
+    maxRetry.value = 0;
+    loading.value = false;
+    return false;
+  }
   orderSync({
     email: email.value,
     billId: state.orderDetail.orderID,
@@ -427,7 +437,7 @@ const order_sync = async () => {
       loading.value = false;
 
       ElMessage({
-        message: `Successful Purchase!`,
+        message: `Purchase successful!`,
         type: "success",
         grouping: true,
       });
