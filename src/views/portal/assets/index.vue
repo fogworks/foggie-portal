@@ -71,10 +71,7 @@
           <div class="plus-num">{{ balanceCount2 }}</div>
           <div class="dmc">PST</div>
         </div>
-        <!-- <div class="flex PST" @click="NftDialogVisible = true">
-          <div class="plus-num">{{ nftCount }}</div>
-          <div class="dmc nft">NFT</div>
-        </div> -->
+
         <div class="flex today-right">
           <div class="color-box">
             <el-button @click="WithdrawVisible = true">
@@ -155,7 +152,6 @@ export default {
     const balanceCount = ref(0);
     const balanceCount2 = ref(0);
     const withDrawMoney = ref(0);
-    const nftCount = ref(0);
     // const visible = ref(false);
     const recordsVisible = ref(false);
     const rewardsVisible = ref(false);
@@ -241,11 +237,6 @@ export default {
       let owner_id = sessionStorage.getItem("walletUser")
         ? sessionStorage.getItem("walletUser")
         : "";
-      getAssets(owner_id).then((r) => {
-        // balanceCount.value = r.amount;
-        nftCount.value = r.nft;
-      });
-
       lastweekReward(owner_id).then((rr) => {
         lastWeekOptions.xAxis.data = rr?.map((el) => el.day);
         lastWeekOptions.series[0].data = rr?.map((el) => el.score);
@@ -452,7 +443,6 @@ export default {
       walletType,
       balanceCount,
       balanceCount2,
-      nftCount,
       // visible,
       recordsVisible,
       rewardsVisible,
