@@ -47,5 +47,9 @@
         "url":"http://154.31.41.36:8001",
         "syncOrder":"/api/accounts/bind_space_order",
         "getFoggieInfo":"/api/accounts/get_foggie_info"
+    },
+    "challengeConfig":{
+        "payChallengeTimeout": 300000,
+        "payChallengeTimer": 120000
     }
 }

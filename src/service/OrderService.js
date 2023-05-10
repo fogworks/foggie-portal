@@ -32,7 +32,7 @@ const orderDB = new NeDB({
 })
 
 module.exports = {
-    savePuskMerkleRecord: async (orderId, email, merkleRoot, blockNum, transactionId) => {
+    savePuskMerkleRecord: async (orderId, email, merkleRoot, blockNum, transactionId, blockNum) => {
         // save push merkle record into NeDB
         return new Promise((resolve, reject) => {
             var now = moment();
@@ -43,6 +43,7 @@ module.exports = {
                 merkle_root: merkleRoot,
                 block_num: blockNum,
                 transaction_id: transactionId,
+                block_num: blockNum,
                 update_time: currentTime,
                 create_time: currentTime
             }, function (err, doc) {
@@ -98,7 +99,7 @@ module.exports = {
             return BizResultCode.QUERY_PUSH_MERKLE_RECORD_FAILED;
         });
     },
-    saveChallengeRecord: async (orderId, email, cid, partId, dataHash, nonce, transactionId) => {
+    saveChallengeRecord: async (orderId, email, username, cid, partId, dataHash, nonce, transactionId, blockNum) => {
 
         // save chanllenge record into NeDB
         return new Promise((resolve, reject) => {
@@ -107,11 +108,14 @@ module.exports = {
             challengeRecordDB.insert({
                 order_id: orderId,
                 email: email,
+                username: username,
                 cid: cid,
                 part_id: partId,
                 data_hash: dataHash,
                 nonce: nonce,
+                state: 0,
                 transaction_id: transactionId,
+                block_num: blockNum,
                 update_time: currentTime,
                 create_time: currentTime
             }, function (err, doc) {
@@ -125,6 +129,111 @@ module.exports = {
         }).catch((err) => {
             logger.error('err:', err);
             return BizResultCode.SAVE_CHANLLLENGE_RECORD_FAILED;
+        });
+    },
+    getChallengeFromDB: async () => {
+
+        // save chanllenge record into NeDB
+        return new Promise((resolve, reject) => {
+            challengeRecordDB.find({
+                state: 0
+            }, function (err, doc) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.GET_CHANLLENGE_RECORD_FAILED);
+                    return;
+                }
+                resolve(doc);
+            });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
+        });
+    },
+    updateChallenge: async (id, state) => {
+
+        // save chanllenge record into NeDB
+        return new Promise((resolve, reject) => {
+            var now = moment();
+            var currentTime = now.format("YYYY-MM-DD HH:mm:ss");
+            challengeRecordDB.update({
+                _id: id
+            }, {
+                $set: {
+                    state: state,
+                    update_time: currentTime,
+                }
+            }, {}, function (err, num) {
+                if (err) {
+                    logger.error("err:" , err);
+                    resolve(BizResultCode.UPDATE_CHANLLENGE_RECORD_FAILED);
+                    return;
+                }
+                if (num.length == 0) {
+                    resolve(BizResultCode.UPDATE_CHANLLENGE_RECORD_FAILED);
+                    return;
+                }
+                resolve(num);
+            });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.UPDATE_CHANLLENGE_RECORD_FAILED;
+        });
+    },
+    payChallenge: async (chanllenge, dmc_client) => {
+
+        var username = chanllenge.username;
+        var orderId = chanllenge.order_id;
+
+        var challengeCount = await module.exports.getChallengeCountByState(orderId, [3]);
+        if (challengeCount instanceof BizResultCode) {
+            logger.info("get challenge count failed, orderId:{}", orderId);
+            return;
+        }
+        if(challengeCount == 0){
+            logger.info("not exist no response challenge, orderId:{}", orderId);
+            // update challenge record
+            await module.exports.updateChallenge(chanllenge._id, 1);
+            return;
+        }
+
+        return new Promise((resolve, reject) => {
+
+            dmc_client.transact({
+                actions: [{
+                    account: "dmc.token",
+                    name: 'paychallenge',
+                    authorization: [
+                        {
+                            actor: username,
+                            permission: 'active'
+                        }
+                    ],
+                    data: {
+                        sender: username,
+                        order_id: parseInt(orderId)
+                    }
+                }]
+            }, {
+                blocksBehind: 3,
+                expireSeconds: 30,
+            }).then(async (res) => {
+                logger.info("pay challenge is success, orderId:{}", orderId);
+                // update challenge record
+                var updateRes = await module.exports.updateChallenge(chanllenge._id, 2);
+                if (updateRes instanceof BizResultCode) {
+                    resolve(updateRes);
+                    return;
+                }
+                resolve(res.transaction_id);
+
+            }).catch((err) => {
+                logger.error('err:', err);
+                resolve(BizResultCode.PAY_CHALLENGE_FAILED);
+            })
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.PAY_CHALLENGE_FAILED;
         });
     },
     getChallengeRecord: (orderId, skip, limit) => {
@@ -203,10 +312,70 @@ module.exports = {
             return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
         }
     },
+    getOrderFromChain: (orderId) => {
+        var chainConfig = config.get('chainConfig')
+        var transactionAddress = chainConfig.get('transactionAddress')
+        var getOrders = chainConfig.get('getOrders')
+        try {
+            let body = '{\n' +
+                '        find_order(\n' +
+                '                where: {\n' +
+                '                    id: "' + orderId + '",\n' +
+                '                },\n' +
+                '                order: "-created_time,id",\n' +
+                '        ){\n' +
+                '            id\n' +
+                '            user {\n' +
+                '                id\n' +
+                '            }\n' +
+                '            miner {\n' +
+                '                id\n' +
+                '            }\n' +
+                '            bill {\n' +
+                '                id\n' +
+                '            }\n' +
+                '            created_time\n' +
+                '            epoch\n' +
+                '            user_pledge_amount\n' +
+                '            miner_lock_pst_amount\n' +
+                '            miner_lock_dmc_amount\n' +
+                '            price_amount\n' +
+                '            settlement_pledge_amount\n' +
+                '            lock_pledge_amount\n' +
+                '            state\n' +
+                '            deliver_start_date\n' +
+                '            latest_settlement_date\n' +
+                '            miner_lock_rsi_amount\n' +
+                '            miner_rsi_amount\n' +
+                '            user_rsi_amount\n' +
+                '            deposit_amount\n' +
+                '            deposit_valid\n' +
+                '            cancel_date\n' +
+                '            createdAt\n' +
+                '        }\n' +
+                '    }'
+            let order = JSON.parse(request('POST', transactionAddress + getOrders, {
+                headers: {
+                    'Content-Type': 'application/graphql'
+                },
+                body: body
+            }).getBody('utf-8')).data.find_order;
+
+            logger.info("order:{}", order);
+            if (order.length == 0) {
+                return BizResultCode.GET_ORDER_FROM_CHAIN_FAILED;
+            }
+            return order;
+        }
+        catch (err) {
+            logger.error('err:', err);
+            return BizResultCode.GET_ORDER_FROM_CHAIN_FAILED;
+        }
+    },
     getChallengeCountByState: (orderId, state) => {
         var schema = Joi.array().items(Joi.number());
         var result = schema.validate(state)
-        if(result.error){
+        if (result.error) {
             logger.error(result.error);
             return BizResultCode.VALIDATE_FAILED;
         }
@@ -242,7 +411,7 @@ module.exports = {
 
         var schema = Joi.array().items(Joi.number());
         var result = schema.validate(state)
-        if(result.error){
+        if (result.error) {
             logger.error(result.error);
             return BizResultCode.VALIDATE_FAILED;
         }
@@ -295,7 +464,7 @@ module.exports = {
             return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
         }
     },
-    saveOrder: async (email, orderId, miner, user, billId, pst, totalPrice, transactionId) => {
+    saveOrder: async (email, orderId, miner, user, billId, pst, totalPrice, transactionId, blockNum) => {
         // save buy order record into NeDB
         return new Promise((resolve, reject) => {
 
@@ -329,6 +498,7 @@ module.exports = {
                             foggie_id: '',
                             total_price: totalPrice,
                             transaction_id: transactionId,
+                            block_num: blockNum,
                             update_time: currentTime,
                         }
                     }, {}, function (err, num) {
@@ -355,6 +525,7 @@ module.exports = {
                         foggie_id: '',
                         total_price: totalPrice,
                         transaction_id: transactionId,
+                        block_num: blockNum,
                         update_time: currentTime,
                         create_time: currentTime
                     }, function (err, doc) {
@@ -415,6 +586,7 @@ module.exports = {
                         expire: '',
                         total_price: '',
                         transaction_id: '',
+                        block_num: '',
                         foggie_id: foggieId,
                         foggie_token: foggieToken,
                         update_time: currentTime,
@@ -520,6 +692,7 @@ module.exports = {
                     if (err) {
                         logger.error('err:', err);
                         resolve(BizResultCode.GET_FOGGIE_ID_FAILED);
+                        return;
                     }
                     logger.info("get foggie id success, foggieId:{}", data.fogId);
                     resolve(data.fogId);
@@ -965,5 +1138,32 @@ module.exports = {
             logger.error('err:', err);
             return BizResultCode.GET_FILE_IDX_FAILED;
         });
+    },
+    getChainId: () => {
+        try{
+            var chainConfig = config.get('chainConfig')
+            var httpEndpoint = chainConfig.get('httpEndpoint')
+            var getChainInfo = chainConfig.get('getChainInfo')
+    
+            return JSON.parse(request('POST', httpEndpoint + getChainInfo, {}).getBody('utf-8')).chain_id
+        }
+        catch(e){
+            logger.error('err:', e);
+            return BizResultCode.GET_CHAIN_ID_FAILED;
+        }
+    },
+    getBenchmarkPrice: () => {
+        try{
+            var chainConfig = config.get('chainConfig')
+            var httpEndpoint = chainConfig.get('httpEndpoint')
+            var getTableRows = chainConfig.get('getTableRows')
+            return JSON.parse(request('POST', httpEndpoint + getTableRows, {
+                json: { "json": true, "code": "dmc.token", "scope": "dmc.token", "table": "bcprice" }
+            }).getBody('utf-8')).rows[0].benchmark_price
+        }
+        catch(e){
+            logger.error('err:', e);
+            return BizResultCode.GET_BENCHMARK_PRICE_FAILED;
+        }
     }
 }

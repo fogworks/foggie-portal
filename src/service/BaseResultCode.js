@@ -68,6 +68,8 @@ class BaseResultCode {
     static CANCEL_FAILED = new BaseResultCode(20021, 'order cancel dmc failed');
     static ORDER_CHALLENGE_NOT_END = new BaseResultCode(20022, 'order challenge not end');
     static CHALLENGE_NO_RESPONSE = new BaseResultCode(20023, 'miner no response challenge, no allow push merkle');
+    static GET_ORDER_FROM_CHAIN_FAILED = new BaseResultCode(20024, 'get order from chain failed');
+    static UPDATE_CHANLLENGE_RECORD_FAILED = new BaseResultCode(20025, 'update challenge failed');
 
     // 文件的异常code 30000～39999
     static FILE_NOT_EXIST = new BaseResultCode(30000, 'file is not exist');
@@ -97,6 +99,9 @@ class BaseResultCode {
     static DELETE_CODEBOOK_OFFSET_FAILED = new BaseResultCode(30024, 'delete codebook offset failed');
     static GET_FOGGIE_ID_FAILED = new BaseResultCode(30025, 'get foggie id failed');
     static GET_FILE_IDX_FAILED = new BaseResultCode(30026, 'get file idx failed');
+    static PAY_CHALLENGE_FAILED = new BaseResultCode(30027, 'pay challenge failed');
+    static GET_CHAIN_ID_FAILED = new BaseResultCode(30028, 'get chain id failed');
+    static GET_BENCHMARK_PRICE_FAILED = new BaseResultCode(30029, 'get benchmark price failed');
 
     // 资产的异常code 40000～49999
     static TRANSFER_FAILED = new BaseResultCode(40000, 'transfer failed');

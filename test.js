@@ -53,6 +53,43 @@ function reqChallenge() {
     })
 }
 
+function paychallenge() {
+    dmc_client.transact({
+        actions: [{
+            account: "dmc.token",
+            name: 'paychallenge',
+            authorization: [
+                {
+                    actor: "tbliuca12345",
+                    permission: 'active'
+                }
+            ],
+            data: {
+                sender: "tbliuca12345",
+                order_id: 77
+            }
+        }]
+    }, {
+        blocksBehind: 3,
+        expireSeconds: 30,
+    }).then((res) => {
+        // res.send(BizResult.success());
+        console.log('res:', res);
+    }).catch((err) => {
+        console.log('err:', err);
+        // logger.error('err:', err);
+        // res.send(BizResult.fail(BizResultCode.PUSH_MERKLE_FAILED));
+    })
+    // var intervalId = setInterval(function() {
+    //     console.log("Hello World");
+    //   }, 1000);
+
+    //   setTimeout(() => {
+    //     console.log("timeout");
+    //     clearInterval(intervalId);
+    //   }, 10000);
+}
+
 
 // 领取交付奖励
 function claimorder() {
@@ -178,8 +215,8 @@ function order() {
             ],
             data: {
                 owner: "tbliuca12345",
-                bill_id: "211",
-                benchmark_price: "110",
+                bill_id: "84",
+                benchmark_price: "10000",
                 epoch: "24",
                 price_range: 3,
                 asset: {
@@ -187,7 +224,7 @@ function order() {
                     contract: "datamall"
                 },
                 reserve: {
-                    quantity: "0.0240 DMC",
+                    quantity: "25.0000 DMC",
                     contract: "datamall"
                 },
                 memo: ""
@@ -434,6 +471,8 @@ function ansChallenge() {
 
 // 用户发起挑战
 // reqChallenge();
+// 用户发起挑战超时
+// paychallenge()
 // 矿工响应挑战
 // ansChallenge();
 // 领取奖励
@@ -562,15 +601,15 @@ function test() {
     // var x = "2 RSI";
     // var y = "9 DMC";
     var changeRsi = 0;
-    var rsi = getAmount(x, y , "RSI");
-    var dmc = getAmount(x, y , "DMC");
+    var rsi = getAmount(x, y, "RSI");
+    var dmc = getAmount(x, y, "DMC");
 
     console.log(calcExpectReturns(dmc, rsi, changeRsi));
 
     // const result = str.substring(0, str.indexOf("DMC")).trim();
     // console.log("sss:"+result); // Output: 2.1903
 }
-test()
+// test()
 
 /**
  * 
@@ -583,11 +622,11 @@ function getAmount(x, y, unit) {
     var xIndex = x.indexOf(unit);
     var yIndex = y.indexOf(unit);
 
-    if(xIndex > -1){
+    if (xIndex > -1) {
         return x.substring(0, xIndex).trim();
     }
 
-    if(yIndex > -1){
+    if (yIndex > -1) {
         return y.substring(0, yIndex).trim();
     }
 
@@ -601,20 +640,20 @@ function getAmount(x, y, unit) {
  * @param {*} unit  DMC/RSI
  */
 function calcExpectReturns(dmc, rsi, changeRsi) {
-    
+
     var dmc = parseFloat(dmc);
     var rsi = parseFloat(rsi);
     var changeRsi = parseFloat(changeRsi);
-    
-    console.log("dmc:"+dmc);
-    console.log("rsi:"+rsi);
-    console.log("changeRsi:"+changeRsi);
-    console.log("dmc * rsi:"+dmc * rsi);
-    console.log("rsi+changeRsi:"+(rsi+changeRsi));
+
+    console.log("dmc:" + dmc);
+    console.log("rsi:" + rsi);
+    console.log("changeRsi:" + changeRsi);
+    console.log("dmc * rsi:" + dmc * rsi);
+    console.log("rsi+changeRsi:" + (rsi + changeRsi));
 
 
-    var tmp = (dmc * rsi)/ (rsi+changeRsi)
-    console.log("tmp:"+tmp);
+    var tmp = (dmc * rsi) / (rsi + changeRsi)
+    console.log("tmp:" + tmp);
     return (dmc - tmp).toFixed(4).padEnd(5, '0')
     // return (dmc - tmp)
 }
