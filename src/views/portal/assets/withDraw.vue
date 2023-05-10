@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- 体现第一步 -->
     <el-dialog
       class="withdraw-dialog"
       :model-value="visible"
@@ -12,11 +11,8 @@
       @close="close"
     >
       <div v-loading="dialogLoading">
-        <div class="no_auth_withdraw" v-if="no_auth_withdraw">
-          {{ no_auth_withdraw }}!
-        </div>
         <el-form
-          v-if="!dialogLoading && !no_auth_withdraw"
+          v-if="!dialogLoading"
           label-position="left"
           class="withdraw-form"
           ref="formRef"
@@ -24,16 +20,17 @@
           :rules="rules"
           label-width="220px"
         >
-          <el-form-item label="From DMC" v-if="!isWalletUser">
+          <!-- <el-form-item label="From DMC" v-if="!isWalletUser">
             <span>{{ walletUser }}</span>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item label="Balance">
             <span>{{ oldWalletMoney }} DMC</span>
           </el-form-item>
           <el-form-item label="To DMC" prop="receiver">
-            <span v-if="isWalletUser">{{ form.receiver }} (Owner)</span>
+            <!-- <span v-if="isWalletUser">{{ form.receiver }} (Owner)</span> -->
             <el-input
-              v-if="!isWalletUser"
+              :disabled="loading"
+              style="width: 500px"
               v-model.trim="form.receiver"
               placeholder="Please enter your username in the DMC wallet"
             ></el-input>
@@ -50,6 +47,7 @@
                 </template>
               </el-input> -->
               <el-input-number
+                :disabled="loading"
                 v-model="form.walletMoney"
                 :min="0.01"
                 :precision="4"
@@ -71,7 +69,7 @@
           </el-form-item>
         </el-form>
       </div>
-      <template v-if="!dialogLoading && !no_auth_withdraw" #footer>
+      <template v-if="!dialogLoading" #footer>
         <div class="color-box">
           <el-button :loading="loading" type="primary" @click="next">
             <RippleInk></RippleInk>
@@ -80,7 +78,6 @@
         </div>
       </template>
     </el-dialog>
-    <!-- 谷歌二维码 -->
     <el-dialog
       width="700px"
       class="withdraw-dialog"
@@ -141,7 +138,6 @@
           {{ googleErrorTip }}
         </div>
       </div>
-      <!-- //验证是否手机操作google -->
       <template #footer>
         <div class="color-box google">
           <!-- <el-button :loading="loading" type="primary" @click="next">
@@ -173,7 +169,6 @@
         > -->
       </template>
     </el-dialog>
-    <!-- 谷歌验证码提现框 -->
     <el-dialog
       top="25vh"
       width="700px"
@@ -241,15 +236,9 @@
 </template>
 
 <script>
-import { ref, reactive, toRefs, watch, computed, inject } from "vue";
-import {
-  getGoogle,
-  getWithdrawGoogle,
-  withdrawGoogle,
-  checkAccount,
-  withdrawDMC,
-  verifyGoogle,
-} from "@/utils/api.js";
+import { ref, reactive, toRefs, watch, computed, inject, nextTick } from "vue";
+import { check_account, transfer_valid, bind_valid } from "@/api/common.js";
+import { useStore } from "vuex";
 import { assetsTransfer } from "@/api/order/orderList.js";
 import { Base64 } from "js-base64";
 import { ElNotification } from "element-plus";
@@ -278,9 +267,13 @@ export default {
     noOrderShow: {
       type: Boolean,
     },
-    withDrawMoney: {},
+    withDrawMoney: {
+      type: [String, Number],
+      default: 0,
+    },
   },
   setup(props, { emit }) {
+    const store = useStore();
     const close = () => {
       emit("reload");
       emit("update:visible", false);
@@ -288,10 +281,9 @@ export default {
     const { visible, title, walletUser, walletType, withDrawMoney } =
       toRefs(props);
     const form = reactive({
-      did: "hhvk3oti4qlr",
-      balance: "3.00",
+      balance: "0.00",
       receiver: "",
-      walletMoney: "",
+      walletMoney: 0,
       gasfee: "0.0",
       total: "",
     });
@@ -301,9 +293,8 @@ export default {
     const authorForm = reactive({
       validateToken: "",
     });
-    const chainId = window.localStorage.getItem("FoggieV")
-      ? JSON.parse(window.localStorage.getItem("FoggieV"))?.global?.ChainId
-      : "";
+    const email = computed(() => store.getters["token/currentUser"]);
+    const chainId = computed(() => store.getters.ChainId);
     const formRef = ref(null);
     const withdrawFormRef = ref(null);
     const authorFormRef = ref(null);
@@ -332,11 +323,19 @@ export default {
         cb(new Error("Please enter the account address to withdraw"));
       } else {
         let postdata = {
-          account_name: form.receiver,
+          username: form.receiver,
         };
-        checkAccount(postdata).then(
+        check_account(postdata).then(
           (res) => {
-            cb();
+            if (res.code == 200) {
+              cb();
+            } else {
+              cb(
+                new Error(
+                  "The account does not exist. Please enter the correct account address"
+                )
+              );
+            }
           },
           (err) => {
             cb(
@@ -351,7 +350,7 @@ export default {
     const validateWalletMoney = (rule, value, cb) => {
       if (!value) {
         cb(new Error("Please enter the withdrawal amount"));
-      } else if (value > Number(actualMoeny.value)) {
+      } else if (Number(value) > Number(actualMoeny.value)) {
         cb(new Error("Exceeds the withdrawal amount"));
       } else if (Number(value) < 0.01) {
         cb(new Error("The minimum withdrawal amount is 0.01"));
@@ -380,10 +379,10 @@ export default {
       my_auth_input: [{ validator: validateAuthInput, trigger: "blur" }],
     };
     watch(
-      walletUser,
+      email,
       (data) => {
         if (visible.value) {
-          initGoogle(data);
+          initGoogle();
         }
       },
       {
@@ -395,7 +394,7 @@ export default {
       visible,
       (data) => {
         if (data) {
-          initGoogle(walletUser.value);
+          initGoogle();
         }
       },
       {
@@ -407,7 +406,7 @@ export default {
       walletType,
       (data) => {
         if (data === "wallet" && walletUser.value) {
-          form.receiver = walletUser.value;
+          form.receiver = "";
           isWalletUser.value = true;
         } else {
           form.receiver = "";
@@ -427,7 +426,7 @@ export default {
           actualMoeny.value = Number(
             Number(oldWalletMoney.value) / 1.01
           ).toFixed(4);
-          form.walletMoney = actualMoeny.value;
+          form.walletMoney = +actualMoeny.value;
         }
       },
       {
@@ -436,30 +435,28 @@ export default {
       }
     );
     function getAll() {
-      form.walletMoney = actualMoeny.value;
+      if (loading.value) return false;
+      form.walletMoney = +actualMoeny.value;
     }
-    //初始化google二维码
+    const account = ref("");
     async function initGoogle() {
-      if (walletUser.value) {
+      if (email.value) {
         dialogLoading.value = true;
-        let res = await getGoogle(walletUser.value);
-        if (res && res.status === "Verification succeeded" && !res.OTP) {
-          let data = {
-            account: walletUser.value,
-          };
-          let res = await getWithdrawGoogle(data);
-          scret_keyOld.value = res.secret;
-          scret_key.value = Base64.decode(res.secret);
-          authQrcode.value = "data:image/jpg;base64," + res.qrcode;
-          dialogLoading.value = false;
-        } else if (res && res.status === "Verification succeeded" && res.OTP) {
-          withDrawBtn.value = true;
+        let res = await transfer_valid({ email: email.value });
+        if (res?.data?.imageUrl) {
+          // let data = {
+          //   account: walletUser.value,
+          // };
+          // let res = await getWithdrawGoogle(data);
+          scret_keyOld.value = res.data.secret;
+          scret_key.value = Base64.decode(res.data.secret);
+          // "data:image/jpg;base64," +
+          authQrcode.value = res.data.imageUrl;
+          account.value = res.data.account;
           dialogLoading.value = false;
         } else {
-          showGoogleBtn.value = false;
+          withDrawBtn.value = true;
           dialogLoading.value = false;
-          withDrawBtn.value = false;
-          no_auth_withdraw.value = res.status;
         }
       }
     }
@@ -468,7 +465,6 @@ export default {
       formRef.value.validate((valid) => {
         if (valid) {
           if (withDrawBtn.value) {
-            // 可提现
             showGoogleBtn.value = true;
             withdrawForm.my_auth_input = "";
             showErrorTips.value = false;
@@ -485,14 +481,14 @@ export default {
       // authorFormRef.value.validate(async (valid) => {
       if (!showErrorTips.value) {
         loading.value = true;
-        //验证是否手机操作google并开启google验证
         let postData = {
-          token: authorForm.validateToken,
+          email: email.value,
+          userToken: authorForm.validateToken,
           // secret: Base64.encode(this.scret_key),
           secret: scret_keyOld.value,
         };
-        let data = await verifyGoogle(postData);
-        if (data.code === 400 || data.error === "Invalid OTP token!") {
+        let data = await bind_valid(postData);
+        if (data.code !== 200 || data.error === "Invalid OTP token!") {
           loading.value = false;
           ElNotification({
             type: "error",
@@ -502,71 +498,90 @@ export default {
           });
           return;
         } else {
-          setGoogle();
+          // setGoogle();
           authorForm.validateToken = "";
-        }
-      }
-      // });
-    }
-    //验证google
-    async function setGoogle() {
-      if (walletUser.value) {
-        let data = {
-          account: walletUser.value,
-          // secret: Base64.encode(this.scret_key),
-          secret: scret_keyOld.value,
-        };
-        let res = await withdrawGoogle(data);
-        if (res) {
           showGoogleQrcode.value = false;
           showGoogleBtn.value = true;
           withDrawBtn.value = true;
           loading.value = false;
         }
       }
+      // });
     }
-    const email = computed(() => store.getters["token/currentUser"]);
+    // async function setGoogle() {
+    //   if (walletUser.value) {
+    //     let data = {
+    //       account: walletUser.value,
+    //       // secret: Base64.encode(this.scret_key),
+    //       secret: scret_keyOld.value,
+    //     };
+    //     let res = await withdrawGoogle(data);
+    //     if (res) {
+    //       showGoogleQrcode.value = false;
+    //       showGoogleBtn.value = true;
+    //       withDrawBtn.value = true;
+    //       loading.value = false;
+    //     }
+    //   }
+    // }
     function handelWithdraw() {
       let postdata = {
-        account_name: form.receiver,
+        username: form.receiver,
       };
       checkValidate(withdrawForm.my_auth_input);
       // withdrawFormRef.value.validate((valid) => {
       if (!showErrorTips.value) {
         loading.value = true;
-        checkAccount(postdata).then(
+        check_account(postdata).then(
           (res) => {
+            if (res.code !== 200) {
+              loading.value = false;
+              ElNotification({
+                title: "Withdrawal failed",
+                message:
+                  "The account does not exist. Please enter the correct account address",
+                position: "bottom-left",
+                type: "error",
+              });
+              return;
+            }
             let data = {
-              chainId,
+              chainId: chainId.value,
               email: email.value,
               // account: walletUser.value,
-              amount: Number(form.walletMoney),
-              to: form.receiver, //没有设置OTP的，account和receiver 必须⼀致
-              totp_secret: withdrawForm.my_auth_input,
+              amount: form.walletMoney.toFixed(4),
+              to: form.receiver, 
+              userToken: withdrawForm.my_auth_input,
             };
-            assetsTransfer(data).then((res) => {
-              loading.value = false;
-              if (res.code !== 400) {
-                // let str = "vood.withdrawSuccess";
-                // this.$message.success(str);
-                showGoogleBtn.value = false;
-                withdrawForm.my_auth_input = "";
-                close();
-                ElNotification({
-                  title: "Withdrawal succeeded",
-                  message: "Withdrawal succeeded",
-                  position: "bottom-left",
-                  type: "success",
-                });
-              } else {
-                ElNotification({
-                  title: "Withdrawal failed",
-                  message: res.error,
-                  position: "bottom-left",
-                  type: "error",
-                });
-              }
-            });
+            assetsTransfer(data)
+              .then((res) => {
+                loading.value = false;
+                if (res.code == 200) {
+                  // let str = "vood.withdrawSuccess";
+                  // this.$message.success(str);
+                  showGoogleBtn.value = false;
+                  withdrawForm.my_auth_input = "";
+                  close();
+                  ElNotification({
+                    title: "Withdrawal succeeded",
+                    message: "Withdrawal succeeded",
+                    position: "bottom-left",
+                    type: "success",
+                  });
+                } else {
+                  loading.value = false;
+
+                  ElNotification({
+                    title: "Withdrawal failed",
+                    message: res.error,
+                    position: "bottom-left",
+                    type: "error",
+                  });
+                }
+              })
+              .catch(() => {
+                loading.value = false;
+              });
           },
           (err) => {
             loading.value = false;
@@ -584,12 +599,12 @@ export default {
       // });
     }
     function copySecret(key) {
-      var input = document.createElement("textarea"); // 创建input对象
-      input.value = key; // 设置复制内容
-      document.body.appendChild(input); // 添加临时实例
-      input.select(); // 选择实例内容
-      document.execCommand("Copy"); // 执行复制
-      document.body.removeChild(input); // 删除临时实例
+      var input = document.createElement("textarea"); 
+      input.value = key;
+      document.body.appendChild(input); 
+      input.select(); 
+      document.execCommand("Copy"); 
+      document.body.removeChild(input); 
       ElNotification({
         type: "success",
         message: "Copy succeeded",

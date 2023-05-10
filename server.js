@@ -1,136 +1,151 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const config = require('config');
+const express = require("express");
+const bodyParser = require("body-parser");
+const config = require("config");
 const app = express();
-const logger = require('./src/service/logger')('server.js');
-const multipart = require('connect-multiparty');
-var multipartMiddleware = multipart(); 
-var serverConf = config.get('serverConfig');
-var port = serverConf.get('port');
+const logger = require("./src/service/logger")("server.js");
+const multipart = require("connect-multiparty");
+var multipartMiddleware = multipart();
+var serverConf = config.get("serverConfig");
+var port = serverConf.get("port");
 app.listen(port, () => {
   logger.info(`Web server running at port:${port}/`);
 });
 
-const OrderController = require('./src/service/OrderController');
-const UserController = require('./src/service/UserController');
-const FileController = require('./src/service/FileController');
-const AssetsController = require('./src/service/AssetsController');
-const PublishController = require('./src/service/PublishController');
-const OperController = require('./src/service/OperController');
+const OrderController = require("./src/service/OrderController");
+const UserController = require("./src/service/UserController");
+const FileController = require("./src/service/FileController");
+const AssetsController = require("./src/service/AssetsController");
+const PublishController = require("./src/service/PublishController");
+const OperController = require("./src/service/OperController");
 var jsonParser = bodyParser.json();
 
-app.post('/order/outstanding_orders', jsonParser, (req, res) => {
+app.post("/order/outstanding_orders", jsonParser, (req, res) => {
   var email = req.body.email;
   var unmatchedAmount = req.body.unmatchedAmount;
   var period = req.body.period;
   var minPrice = req.body.minPrice;
   var maxPrice = req.body.maxPrice;
-  OrderController.outstandingOrders(email, unmatchedAmount, period, minPrice, maxPrice, res);
+  OrderController.outstandingOrders(
+    email,
+    unmatchedAmount,
+    period,
+    minPrice,
+    maxPrice,
+    res
+  );
 });
 
-app.post('/order/buy', jsonParser, (req, res) => {
+app.post("/order/buy", jsonParser, (req, res) => {
   OrderController.buy(req, res);
 });
 
-app.post('/order/sync', jsonParser, (req, res) => {
+app.post("/order/sync", jsonParser, (req, res) => {
   OrderController.syncOrder(req, res);
 });
 
-app.post('/order/list', jsonParser, (req, res) => {
+app.post("/order/list", jsonParser, (req, res) => {
   var email = req.body.email;
   var limit = req.body.limit;
   var pageNum = req.body.pageNum;
   OrderController.orderList(email, pageNum, limit, res);
 });
 
-app.post('/order/id', jsonParser, (req, res) => {
+app.post("/order/id", jsonParser, (req, res) => {
   OrderController.getOrderById(req, res);
 });
 
-app.get('/order/get_chain_id', (req, res) => {
+app.get("/order/get_chain_id", (req, res) => {
   res.json(OrderController.getChainId());
 });
 
-app.get('/order/get_table_rows', (req, res) => {
+app.get("/order/get_table_rows", (req, res) => {
   res.json(OrderController.getBenchmarkPrice());
 });
 
-app.post('/order/push_merkle', jsonParser, (req, res) => {
+app.post("/order/push_merkle", jsonParser, (req, res) => {
   OrderController.pushMerkle(req, res);
 });
 
-app.post('/order/push_merkle_record', jsonParser, (req, res) => {
+app.post("/order/push_merkle_record", jsonParser, (req, res) => {
   OrderController.getPushMerkleRecord(req, res);
 });
 
-app.post('/order/req_challenge', jsonParser, (req, res) => {
+app.post("/order/req_challenge", jsonParser, (req, res) => {
   OrderController.reqChallenge(req, res);
 });
 
-app.post('/order/challenge_list', jsonParser, (req, res) => {
+app.post("/order/challenge_list", jsonParser, (req, res) => {
   OrderController.getChallengeList(req, res);
 });
 
-app.post('/order/release', jsonParser, (req, res) => {
+app.post("/order/challenge_count", jsonParser, (req, res) => {
+  OrderController.getChallengeCount(req, res);
+});
+
+app.post("/order/release", jsonParser, (req, res) => {
   OrderController.release(req, res);
 });
 
-app.post('/order/append', jsonParser, (req, res) => {
+app.post("/order/append", jsonParser, (req, res) => {
   OrderController.append(req, res);
 });
 
-app.post('/order/cancel', jsonParser, (req, res) => {
+app.post("/order/cancel", jsonParser, (req, res) => {
   OrderController.cancel(req, res);
 });
 
-app.post('/order/sync_device', jsonParser, (req, res) => {
+app.post("/order/sync_device", jsonParser, (req, res) => {
   OrderController.syncDevice(req, res);
 });
 
-app.post('/user/encode_user_order', jsonParser, (req, res) => {
+app.post("/user/encode_user_order", jsonParser, (req, res) => {
   UserController.getToken4UploadFile(req, res);
 });
 
-app.post('/user/validate_user_login', jsonParser, (req, res) => {
+app.post("/user/validate_user_login", jsonParser, (req, res) => {
   UserController.validateUserLogin(req, res);
 });
 
-app.post('/user/save_password', jsonParser, (req, res) => {
+app.post("/user/check_account", jsonParser, (req, res) => {
+  UserController.checkAccount(req, res);
+});
+
+app.post("/user/save_password", jsonParser, (req, res) => {
   var email = req.body.email;
   var username = req.body.username;
   var password = req.body.password;
   UserController.saveUserPassword(email, password, username, res);
 });
 
-app.post('/user/validate_password', jsonParser, (req, res) => {
+app.post("/user/validate_password", jsonParser, (req, res) => {
   UserController.validateUserPassword(req, res);
 });
 
-app.post('/user/reset_password', jsonParser, (req, res) => {
+app.post("/user/reset_password", jsonParser, (req, res) => {
   UserController.resetUserPassword(req, res);
 });
 
-app.post('/user/import_private_key', jsonParser, (req, res) => {
+app.post("/user/import_private_key", jsonParser, (req, res) => {
   UserController.saveUserPrivateKey(req, res);
 });
 
-app.post('/user/get_private_key', jsonParser, (req, res) => {
+app.post("/user/get_private_key", jsonParser, (req, res) => {
   UserController.getUserPrivateKey(req, res);
 });
 
-app.post('/user/dividend_list', jsonParser, (req, res) => {
+app.post("/user/dividend_list", jsonParser, (req, res) => {
   UserController.dividendList(req, res);
 });
 
-app.post('/user/claim_order', jsonParser, (req, res) => {
+app.post("/user/claim_order", jsonParser, (req, res) => {
   UserController.claimOrder(req, res);
 });
 
-app.post('/file/save', jsonParser, (req, res) => {
+app.post("/file/save", jsonParser, (req, res) => {
   FileController.saveFileProp(req, res);
 });
 
-app.post('/file/list', jsonParser, (req, res) => {
+app.post("/file/list", jsonParser, (req, res) => {
   var orderId = req.body.orderId;
   var email = req.body.email;
   var pageSize = req.body.pageSize;
@@ -139,23 +154,23 @@ app.post('/file/list', jsonParser, (req, res) => {
   FileController.list(orderId, email, deviceType, pageSize, pageNo, res);
 });
 
-app.post('/file/remove', jsonParser, (req, res) => {
+app.post("/file/remove", jsonParser, (req, res) => {
   FileController.removeFileProp(req, res);
 });
 
-app.post('/file/get_codebook', jsonParser, (req, res) => {
+app.post("/file/get_codebook", jsonParser, (req, res) => {
   FileController.getCodebook(req, res);
 });
 
-app.post('/file/remove_file_codebook_offset', jsonParser, (req, res) => {
+app.post("/file/remove_file_codebook_offset", jsonParser, (req, res) => {
   FileController.deleteFileCodebookOffset(req, res);
 });
 
-app.post('/file/upload', multipartMiddleware, (req, res) => {
+app.post("/file/upload", multipartMiddleware, (req, res) => {
   FileController.upload(req, res);
 });
 
-app.post('/file/create', jsonParser, (req, res) => {
+app.post("/file/create", jsonParser, (req, res) => {
   var fileName = req.body.fileName;
   var md5 = req.body.md5;
   var fileType = req.body.fileType;
@@ -163,37 +178,49 @@ app.post('/file/create', jsonParser, (req, res) => {
   var orderId = req.body.orderId;
   var email = req.body.email;
   var deviceType = req.body.deviceType;
-  FileController.create(email, fileName, md5, fileType, fileSize, orderId, deviceType, res);
+  FileController.create(
+    email,
+    fileName,
+    md5,
+    fileType,
+    fileSize,
+    orderId,
+    deviceType,
+    res
+  );
 });
 
-app.post('/file/complete', jsonParser, (req, res) => {
+app.post("/file/complete", jsonParser, (req, res) => {
   FileController.complete(req, res);
 });
 
-app.post('/assets/transfer', jsonParser, (req, res) => {
+app.post("/assets/transfer", jsonParser, (req, res) => {
   AssetsController.transfer(req, res);
 });
 
-app.post('/assets/transfer_valid', jsonParser, (req, res) => {
+app.post("/assets/transfer_valid", jsonParser, (req, res) => {
   AssetsController.transferValid(req, res);
 });
 
-app.post('/assets/list_in_order', jsonParser, (req, res) => {
+app.post("/assets/bind_valid", jsonParser, (req, res) => {
+  AssetsController.bindValid(req, res);
+});
+
+app.post("/assets/list_in_order", jsonParser, (req, res) => {
   AssetsController.getAssetsOfOrder(req, res);
 });
 
-app.post('/assets/income_in_order', jsonParser, (req, res) => {
+app.post("/assets/income_in_order", jsonParser, (req, res) => {
   AssetsController.getIncomeOfOrder(req, res);
 });
 
-app.post('/assets/list_in_user', jsonParser, (req, res) => {
+app.post("/assets/list_in_user", jsonParser, (req, res) => {
   AssetsController.getAssetsOfUser(req, res);
 });
 
-app.post('/assets/user', jsonParser, (req, res) => {
+app.post("/assets/user", jsonParser, (req, res) => {
   AssetsController.userOverview(req, res);
 });
-
 
 const os = require("os").networkInterfaces();
 
@@ -215,7 +242,6 @@ function getIP() {
 }
 require("events").EventEmitter.defaultMaxListeners = 0;
 
-
 app.post("/get_net_status", (req, res) => {
   // let ip = req.body.ip;
   // const querystring = require("querystring");
@@ -233,7 +259,6 @@ app.post("/get_net_status", (req, res) => {
   //     job: "webdev",
   //   })
   // );
-
   // curlTest.on("end", function (statusCode, data, headers) {
   //   console.info("Status code " + statusCode);
   //   console.info("***");
@@ -242,7 +267,6 @@ app.post("/get_net_status", (req, res) => {
   //   console.info("Length: " + data.length);
   //   console.info("***");
   //   // console.info("Total time taken: " + this.getInfo("TOTAL_TIME"));
-
   //   this.close();
   //   res.send({
   //     statusCode,
@@ -298,7 +322,6 @@ app.post("/socket_ip", async (req, res) => {
   let port1 = 9094;
   let hosts = [];
   for (let i = 1; i <= 255; i++) {
-
     let request = require("request");
     request(
       `http://${ip}.${i}:9094/v1/get_max_info`,
@@ -384,7 +407,6 @@ const client = async (ip, port) => {
 const socketIP1 = () => {
   let net = require("net");
   let Socket = net.Socket;
-  //待扫描的开始网段，可换成192.168.0
   let ip = "154.37.16";
   let port1 = 9094;
   let hosts = [];
@@ -407,10 +429,9 @@ const socketIP1 = () => {
 };
 
 const socketIP = () => {
-  console.log('socketIPsocketIPsocketIP')
+  console.log("socketIPsocketIPsocketIP");
   let net = require("net");
   let Socket = net.Socket;
-  //待扫描的开始网段，可换成192.168.0
   let ip = "192.168.1";
   let port1 = 80;
   let scan = function (host, cb) {
@@ -444,46 +465,45 @@ const socketIP = () => {
   return hosts;
 };
 
-
-
 // ipfs pin
-app.post("/s_ipfsops/pin",jsonParser, (req, res) => {
+app.post("/s_ipfsops/pin", jsonParser, (req, res) => {
   let request = require("request");
-  request(`http://${req.body.ip_address}:${req.body.port}/ipfsops/pin`, function (err, response, body) {
-    if (!err && response.statusCode == 200) {
-      let rr = JSON.parse(body);
-      res.send(rr);
-    } else {
-      res.send({});
+  request(
+    `http://${req.body.ip_address}:${req.body.port}/ipfsops/pin`,
+    function (err, response, body) {
+      if (!err && response.statusCode == 200) {
+        let rr = JSON.parse(body);
+        res.send(rr);
+      } else {
+        res.send({});
+      }
     }
-  });
+  );
 });
 
-
 // ipfs pin
-app.post('/publish', jsonParser, (req, res) => {
+app.post("/publish", jsonParser, (req, res) => {
   PublishController.doPublish(req, res);
 });
 
 // app.get('/file_download', jsonParser, (req, res) => {
 //   OperController.doDownload(req, res);
 // });
-app.get('/file_download', (req, res) => {
+app.get("/file_download", (req, res) => {
   let params = req.query;
   OperController.doDownload(params, res);
 });
 
-app.delete('/file_delete', jsonParser, (req, res) => {
+app.delete("/file_delete", jsonParser, (req, res) => {
   OperController.doDelete(req, res);
 });
 
-app.post('/list_files', jsonParser, (req, res) => {
+app.post("/list_files", jsonParser, (req, res) => {
   OperController.listFiles(req, res);
 });
-app.post('/search_object', jsonParser, (req, res) => {
+app.post("/search_object", jsonParser, (req, res) => {
   OperController.SearchObject(req, res);
 });
-app.post('/find_objects', jsonParser, (req, res) => {
+app.post("/find_objects", jsonParser, (req, res) => {
   OperController.findObjects(req, res);
 });
-

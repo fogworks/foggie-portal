@@ -74,7 +74,7 @@ module.exports = {
                     })
                 } else {
                     logger.error('transfer failed, userToken is invalid');
-                    resolve(BizResultCode.TRANSFER_FAILED);
+                    resolve(BizResultCode.TRANSFER_VALID_FAILED);
                 }
             });
         }).catch((err) => {
@@ -96,11 +96,6 @@ module.exports = {
                     const secret = speakeasy.generateSecret({ length: 10, name: 'Foggie(' + email + ')' });
                     // Save the secret key in your database
                     logger.log('secret:', secret);
-                    // Generate a TOTP password
-                    // const token = speakeasy.totp({
-                    //     secret: secret.base32,
-                    //     encoding: 'base32'
-                    // });
 
                     // Generate a QR code for the secret key
                     QRCode.toDataURL(secret.otpauth_url, function (err, imageUrl) {
@@ -111,16 +106,11 @@ module.exports = {
                         } else {
                             // Display the QR code to the user
                             logger.info("imageUrl:", imageUrl);
-                            // save to db
-                            var now = moment().format('YYYY-MM-DD HH:mm:ss');
-                            tradeValidDb.insert({ email: email, secret: secret.base32, update_time: now, create_time: now }, function (err, newDoc) {
-                                if (err) {
-                                    logger.error('save transfer valid err:', err);
-                                    resolve(BizResultCode.SAVE_TRANSFER_VALID_FAILED);
-                                    return;
-                                }
-                                resolve(imageUrl);
-                            });
+                            var validState = {};
+                            validState['imageUrl'] = imageUrl;
+                            validState['secret'] = secret.base32;
+                            validState['account'] = 'Foggie(' + email + ')';
+                            resolve(validState);
                         }
                     });
                 }
@@ -129,11 +119,41 @@ module.exports = {
                 }
             });
         })
+            .catch((err) => {
+                logger.error('err:', err);
+                return BizResultCode.GET_TRANSFER_VALID_FAILED;
+            });
+
+    },
+    bindValid: async (email, secret, userToken) => {
+
+        return new Promise((resolve, reject) => {
+            // Verify the TOTP password
+            const verified = speakeasy.totp.verify({
+                secret: secret,
+                encoding: 'base32',
+                token: userToken
+            });
+            if (verified) {
+                // save to db
+                var now = moment().format('YYYY-MM-DD HH:mm:ss');
+                tradeValidDb.insert({ email: email, secret: secret, update_time: now, create_time: now }, function (err, newDoc) {
+                    if (err) {
+                        logger.error('save transfer valid err:', err);
+                        resolve(BizResultCode.SAVE_TRANSFER_VALID_FAILED);
+                        return;
+                    }
+                    resolve(newDoc._id);
+                });
+            }
+            else {
+                resolve(BizResultCode.TRANSFER_VALID_FAILED);
+            }
+        })
         .catch((err) => {
             logger.error('err:', err);
-            return BizResultCode.GET_TRANSFER_VALID_FAILED;
+            return BizResultCode.SAVE_TRANSFER_VALID_FAILED;
         });
-
     },
     saveTradeRecord: (from, to, amount, memo, type) => {
         var now = moment().format('YYYY-MM-DD HH:mm:ss');

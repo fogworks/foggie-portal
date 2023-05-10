@@ -58,6 +58,7 @@ import upload from "@/components/upload";
 import { ref, computed } from "vue";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
+import { getChain_id } from "@/api/common.js";
 const store = useStore();
 
 let uploadIsShow = computed(() => store.getters.uploadIsShow);
@@ -69,6 +70,14 @@ const userName = computed(() => store.getters["token/currentUser"] || "Login");
 const changeCollapse = () => {
   isCollapse.value = !isCollapse.value;
 };
+const getChainId = () => {
+  getChain_id().then((res) => {
+    if (res.code == 200) {
+      store.commit("clientGlobal/SAVE_ChainId", res.data);
+    }
+  });
+};
+getChainId();
 </script>
 
 <style lang="scss" scoped>
@@ -116,7 +125,7 @@ const changeCollapse = () => {
     .el-menu {
       // width: 250px;
       height: 100%;
-      background-color: #f2f6ff;
+      background-color: var(--bg-color);
 
       .el-menu-item {
         display: flex;

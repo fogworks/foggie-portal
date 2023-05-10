@@ -301,7 +301,6 @@ const gotoDeploy = async (item, type) => {
 };
 
 const calcIndex = (uniqueStr) => {
-  // 示例用了cyfs sdk依赖的node-forge库进行计算
   const md5 = cyfs.forge.md.md5.create();
   md5.update(uniqueStr, "utf8");
   let result = cyfs.forge.util.binary.hex.encode(md5.digest());
@@ -320,7 +319,6 @@ function hashCode(strValue) {
 }
 const count = ref(0);
 const getInstallStatus = (type) => {
-  // 获取安装状态
   return new Promise((resolve, reject) => {
     const getStatus = () => {
       get_service_info(requestTarget)

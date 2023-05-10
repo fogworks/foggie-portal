@@ -26,7 +26,6 @@ export default {
       type: String,
       required: true,
     },
-    //图标的font-size，单位是px
     size: {
       type: String,
       default: "",

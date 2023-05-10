@@ -41,6 +41,8 @@ class BaseResultCode {
     static GET_USERINFO_FAILED = new BaseResultCode(10013, 'get userinfo failed');
     static GET_DIVIDEND_LIST_FAILED = new BaseResultCode(10014, 'get dividend list failed');
     static GET_DIVIDEND_COUNT_FAILED = new BaseResultCode(10015, 'get dividend count failed');
+    static ACCOUNT_NOT_EXIST = new BaseResultCode(10016, 'account is not exist');
+    static CHECK_ACCOUNT_FAILED = new BaseResultCode(10017, 'check account failed');
 
     // 订单的异常code 20000～29999
     static ORDER_BUY_FAILED = new BaseResultCode(20000, 'buy failed');
@@ -64,7 +66,9 @@ class BaseResultCode {
     static RELEASE_FAILED = new BaseResultCode(20019, 'order release dmc failed');
     static APPEND_FAILED = new BaseResultCode(20020, 'order append dmc failed');
     static CANCEL_FAILED = new BaseResultCode(20021, 'order cancel dmc failed');
-    
+    static ORDER_CHALLENGE_NOT_END = new BaseResultCode(20022, 'order challenge not end');
+    static CHALLENGE_NO_RESPONSE = new BaseResultCode(20023, 'miner no response challenge, no allow push merkle');
+
     // 文件的异常code 30000～39999
     static FILE_NOT_EXIST = new BaseResultCode(30000, 'file is not exist');
     static SAVE_FILE_FAILED = new BaseResultCode(30001, 'save file failed');
@@ -92,12 +96,14 @@ class BaseResultCode {
     static REMOVE_FILE_FAILED = new BaseResultCode(30023, 'remove file failed');
     static DELETE_CODEBOOK_OFFSET_FAILED = new BaseResultCode(30024, 'delete codebook offset failed');
     static GET_FOGGIE_ID_FAILED = new BaseResultCode(30025, 'get foggie id failed');
+    static GET_FILE_IDX_FAILED = new BaseResultCode(30026, 'get file idx failed');
 
     // 资产的异常code 40000～49999
     static TRANSFER_FAILED = new BaseResultCode(40000, 'transfer failed');
     static GET_TRANSFER_VALID_FAILED = new BaseResultCode(40001, 'get transfer valid failed');
     static GENERATE_QR_CODE_FAILED = new BaseResultCode(40002, 'generating QR code failed');
     static SAVE_TRANSFER_VALID_FAILED = new BaseResultCode(40003, 'save transfer valid failed');
+    static TRANSFER_VALID_FAILED = new BaseResultCode(40004, 'transfer valid failed');
 }
 
 module.exports = BaseResultCode

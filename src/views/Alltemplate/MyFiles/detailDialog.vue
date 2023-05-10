@@ -131,13 +131,15 @@ export default {
     const copyContent = ref("");
 
     const ipfsPin = (item) => {
+      let ip_address = deviceData.rpc.split(":")[0];
+      let port = deviceData.rpc.split(":")[1];
       let data = {
-        ip_address: "218.2.96.99",
-        port: 8007,
+        ip_address,
+        port,
         token: "11111",
-        // peerId: deviceData.peer_id,
-        peerId: "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA",
-        Id: orderId.value,
+        peerId: deviceData.peer_id,
+        // peerId: "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA",
+        Id: deviceData.foggie_id,
         exp: 3 * 24 * 3600,
         stype: "ipfs",
         pin: true,
@@ -218,19 +220,25 @@ export default {
       let cid = item.cid;
       let key = item.key;
 
-      let ip = "218.2.96.99";
-      // let ip = "154.31.34.194";
-      let port = 8007;
-      let Id = orderId;
-      let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+      // let ip = "218.2.96.99";
+      // // let ip = "154.31.34.194";
+      // let port = 8007;
+
+      // let Id = orderId;
+      // let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+
+      let ip = deviceData.rpc.split(":")[0];
+      let port = deviceData.rpc.split(":")[1];
+      let Id = deviceData.foggie_id;
+      let peerId = deviceData.peer_id;
       let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
 
       var oA = document.createElement("a");
-      oA.download = item.name; // 设置下载的文件名，默认是'下载'
+      oA.download = item.name;
       oA.href = downloadUrl;
       document.body.appendChild(oA);
       oA.click();
-      oA.remove(); // 下载之后把创建的元素删除
+      oA.remove();
       proxy.$notify({
         type: "success",
         message: "Download succeeded",
@@ -238,12 +246,12 @@ export default {
       });
     };
     function copySecret(key) {
-      var input = document.createElement("textarea"); // 创建input对象
-      input.value = key; // 设置复制内容
-      document.body.appendChild(input); // 添加临时实例
-      input.select(); // 选择实例内容
-      document.execCommand("Copy"); // 执行复制
-      document.body.removeChild(input); // 删除临时实例
+      var input = document.createElement("textarea");
+      input.value = key;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("Copy");
+      document.body.removeChild(input);
       ElNotification({
         type: "success",
         message: "Copy succeeded",

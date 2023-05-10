@@ -47,8 +47,6 @@ initFoggieDate();
   height: 4px;
 }
 ::-webkit-scrollbar-thumb {
-  /*滚动条里面小方块*/
-
   border-radius: 5px;
 
   background: rgba(0, 0, 0, 0.2);

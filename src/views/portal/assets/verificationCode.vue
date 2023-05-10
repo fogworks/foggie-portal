@@ -77,8 +77,8 @@ export default {
   },
   data() {
     return {
-      aCheckCodeInput: ["", "", "", "", "", ""], // 存储输入验证码内容
-      aCheckCodePasteResult: [], // 粘贴的验证码
+      aCheckCodeInput: ["", "", "", "", "", ""], 
+      aCheckCodePasteResult: [],
     };
   },
   watch: {
@@ -90,7 +90,6 @@ export default {
     },
   },
   computed: {
-    // 验证码计算属性
     aCheckCodeInputComputed() {
       if (this.aCheckCodePasteResult.length === 6) {
         return this.aCheckCodePasteResult;
@@ -108,14 +107,11 @@ export default {
     },
   },
   methods: {
-    // 输入验证码，更新验证码数据
     fnCheckCodeKeyup(e) {
       let index = e.target.dataset.index * 1;
       let el = e.target;
-      // 解决输入e的问题
       el.value = el.value.replace(/Digit|Numpad/i, "").slice(0, 1);
       if (/Digit|Numpad/i.test(e.code)) {
-        // 必须在这里赋值，否则输入框会是空值
         this.aCheckCodeInput.splice(
           index,
           1,
@@ -128,7 +124,6 @@ export default {
         }
       }
     },
-    // 输入验证码，检测位置变化
     fnCheckCodeKeydown(e) {
       let index = e.target.dataset.index * 1;
       let el = e.target;
@@ -161,14 +156,12 @@ export default {
         if (el.nextElementSibling) el.nextElementSibling.focus();
       }
     },
-    // 输入验证码，解决一个输入框输入多个字符的问题
     fnCheckCodeInputEvent(e) {
       let index = e.target.dataset.index * 1;
       let el = e.target;
       el.value = el.value.replace(/Digit|Numpad/i, "").slice(0, 1);
       this.aCheckCodeInput[index] = el.value;
     },
-    // 验证码粘贴
     fnCheckCodeKeyPaste(e) {
       e.clipboardData.items[0].getAsString((str) => {
         if (str.toString().length === 6) {
@@ -177,7 +170,6 @@ export default {
           this.aCheckCodeInput = this.aCheckCodeInputComputed;
           this.aCheckCodePasteResult = [];
         } else {
-          // 如果粘贴内容不合规，清除所有内容
           this.aCheckCodeInput = ["", "", "", "", "", ""];
         }
       });

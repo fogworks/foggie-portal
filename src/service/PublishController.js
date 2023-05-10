@@ -3,15 +3,15 @@ const BizResultCode = require("./BaseResultCode");
 const logger = require("./logger")("FileController.js");
 const publish_proto = require("./grpc/publish");
 const grpc = require("@grpc/grpc-js");
-const config = require('config')
+const config = require("config");
 
 class PublishController {
   /**
-   * 发布ipfs
+   * publish ipfs
    * @param {*} cid          pubkey
    * @param {*} is_pin       is_pin
    * @param {*} new_path     file key
-   * @param {*} res          HTTP的response
+   * @param {*} res          HTTP response
    * @returns
    */
   static async doPublish(req, res) {
@@ -66,7 +66,7 @@ class PublishController {
   static getNetGrpcClient(ip_address, port) {
     // ip_address = "154.31.34.194";
     // ip_address  = "192.168.1.115";
-    let grpcConfig = config.get('grpcConfig');
+    let grpcConfig = config.get("grpcConfig");
     ip_address = grpcConfig.get("ip");
     port = 8007;
     return new publish_proto.API(

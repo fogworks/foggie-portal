@@ -30,7 +30,7 @@
           </div>
         </div>
       </div>
-      <button>Buy now</button>
+      <button @click="handleActive('foggie')">Buy now</button>
     </div>
 
     <div class="card">
@@ -80,7 +80,7 @@
         <div>
           <svg-icon icon-class="storage"></svg-icon>
         </div>
-        <div class="price">$648</div>
+        <!-- <div class="price">$</div> -->
         <div class="description">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at
           posuere eros. Interdum et malesuada fames ac ante ipsum primis in
@@ -117,11 +117,14 @@
     <svg-icon icon-class="back"></svg-icon>
   </div>
   <Storage v-if="!isShop && active === 'storage'"></Storage>
+  <Foggie v-if="!isShop && active === 'foggie'"></Foggie>
+
 </template>
 
 <script setup>
 import { ref } from "vue";
 import Storage from "./_modules/storage";
+import Foggie from "./_modules/foggie"
 // import Storage from "@/views/Alltemplate/Storage/Storage";
 const isShop = ref(true);
 const active = ref("");
@@ -145,7 +148,7 @@ const handleActive = (val = "") => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-between;
   width: 300px;
   height: 415px;
   min-width: 300px;
@@ -162,7 +165,8 @@ const handleActive = (val = "") => {
   cursor: default;
   &:hover {
     transform: scale(1.1);
-    svg {
+    svg,
+    img {
       transform: scale(0.9);
     }
   }
@@ -196,6 +200,9 @@ const handleActive = (val = "") => {
     // color: rgba(255, 255, 255, 0.64);
     color: #fff;
     opacity: 0.64;
+    transition: all 0.3s;
+  }
+  img {
     transition: all 0.3s;
   }
 }

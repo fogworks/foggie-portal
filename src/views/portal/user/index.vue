@@ -33,6 +33,20 @@
           <!-- <el-button type="danger" @click="unbindVisible = true"
             >Unbind</el-button
           > -->
+          <div
+            class="theme"
+            @click="
+              handleThemeChange(currentTheme === 'light' ? 'dark' : 'light')
+            "
+          >
+            <el-icon
+              class="light"
+              color="#000"
+              v-if="currentTheme === 'light' || ''"
+              ><Sunny
+            /></el-icon>
+            <el-icon class="dark" color="#fff" v-else><Moon /></el-icon>
+          </div>
           <el-button type="primary" @click="logout"
             ><svg-icon icon-class="switch"></svg-icon> Switch
             Accounts</el-button
@@ -74,24 +88,15 @@
 </template>
 
 <script setup>
-import {
-  ref,
-  reactive,
-  defineEmits,
-  defineProps,
-  getCurrentInstance,
-  computed,
-  toRefs,
-  inject,
-} from "vue";
+import { ref, reactive, getCurrentInstance, computed, inject } from "vue";
 import Web3Link from "./_modules/web3Link";
-import { login, get_foggie_dmc, user, unbind_foggie } from "@/utils/api";
+import { login, user, unbind_foggie } from "@/utils/api";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 const bcryptjs = require("bcryptjs");
 const store = useStore();
 const router = useRouter();
-const isNew = ref(false); //是否是新用户
+const isNew = ref(false); //
 // const form = reactive(props.form);
 const { proxy } = getCurrentInstance();
 const requestTarget = inject("requestTarget");
@@ -102,6 +107,24 @@ const form = reactive({
 const formRef = ref(null);
 const unbindVisible = ref(false);
 const needLogin = ref(true);
+const currentTheme = computed(() => store.getters.theme);
+const handleThemeChange = (val) => {
+  document.documentElement.setAttribute("class", val);
+  // window.localStorage.setItem("theme", val);
+  store.dispatch("global/setTheme", val);
+};
+
+const getTimeState = () => {
+  let timeNow = new Date();
+
+  let hours = timeNow.getHours();
+
+  if (hours >= 0 && hours <= 18) {
+    handleThemeChange(currentTheme.value || "light");
+  } else if (hours > 18 && hours <= 24) {
+    handleThemeChange(currentTheme.value || "dark");
+  }
+};
 const userInfo = computed(() => store.getters["global/userInfo"]);
 const validatePass = (rule, value, callback) => {
   if (value === "") {
@@ -264,9 +287,27 @@ const unbind = () => {
     }
   }
 }
+.theme {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 25px;
+  height: 25px;
+  margin-right: 25px;
+  background-color: var(--theme-box-bg);
+  border-radius: 50%;
+  cursor: pointer;
+  .light {
+    color: #fff;
+  }
+  .dark {
+    color: #000;
+  }
+}
 .foot-btn {
   display: flex;
   justify-content: center;
+  align-items: center;
   :deep {
     .el-button {
       min-width: 100px;

@@ -22,7 +22,7 @@
       <div>
         <el-table class="table-box" :data="tableData" style="width: 100%">
           <el-table-column prop="action" label="Type" width="240" />
-          <el-table-column label="Created At" width="320">
+          <el-table-column label="Time" width="320">
             <template #default="scope">
               {{ transferTime(scope.row.created_at) }}
             </template>

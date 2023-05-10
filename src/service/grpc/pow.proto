@@ -63,9 +63,19 @@ message GetIDResponse {
  string id = 1;
  string fogId = 2;
 }
+message MerkleIDRequest{
+ string id = 1;
+ string cid =2;
+ int64 idx = 3;
+}
+message NormalMerkleBlocks {
+ string id = 1;
+ int64 idx=2;
+}
 service PowService {
  rpc GetMerkleRoot(CliGetMerkleRequest)returns(CliGetMerkleReply){}
  rpc GetMerkleProof(CliGetMerkleRequest)returns(GetMerkleProofResp){}
  rpc BuildMerkelLeaf(stream PutObjectMKOpt)returns(PutObjectMKResp){}
  rpc GetID(GetIDRequest)returns(GetIDResponse){}
+ rpc GetMerkleID(MerkleIDRequest)returns(NormalMerkleBlocks){}
 }

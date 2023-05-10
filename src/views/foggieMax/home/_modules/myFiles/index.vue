@@ -155,17 +155,6 @@
           width="100"
           show-overflow-tooltip
         />
-        <!-- <el-table-column label="Share" width="100">
-          <template #default="{ row }">
-            <div>
-              <MyEcharts
-                style="width: 40px; height: 40px"
-                :options="row.share"
-              ></MyEcharts>
-            </div>
-          </template>
-        </el-table-column> -->
-        <!-- <el-table-column prop="status" label="Status" width="140" /> -->
         <el-table-column
           label="Actions"
           class-name="action-btn-column"
@@ -260,7 +249,9 @@
   <DetailDialog
     v-if="detailShow"
     v-model:visible="detailShow"
+    :orderId="orderId"
     :detailData="detailData"
+    :deviceData="deviceData"
   ></DetailDialog>
 </template>
 
@@ -380,9 +371,7 @@ const getFileList = function (scroll, prefix) {
     list_prefix = prefix.join("/");
   }
   tableLoading.value = true;
-  let orderId = deviceData.foggie_id;
-  let peer_id = deviceData.peer_id;
-  oodFileList(orderId, peer_id, list_prefix)
+  oodFileList(deviceData, list_prefix)
     .then((res) => {
       if (res && res.content) {
         initFileData(res);
@@ -437,9 +426,9 @@ const initFileData = async (data) => {
       data.content[j].cid,
       data.content[j].key,
       isDir,
-      deviceData.rpc.split(':')[0],
-      deviceData.rpc.split(':')[1],
-      deviceData.peer_id,
+      deviceData.rpc.split(":")[0],
+      deviceData.rpc.split(":")[1],
+      deviceData.peer_id
     );
     let { imgHttpLink: url_large } = handleImg(
       type,
@@ -447,19 +436,18 @@ const initFileData = async (data) => {
       data.content[j].cid,
       data.content[j].key,
       isDir,
-      deviceData.rpc.split(':')[0],
-      deviceData.rpc.split(':')[1],
-      deviceData.peer_id,
+      deviceData.rpc.split(":")[0],
+      deviceData.rpc.split(":")[1],
+      deviceData.peer_id
     );
     // let _url = require(`@/svg-icons/logo-dog-black.svg`);
-    let cid =data.content[j].cid;
+    let cid = data.content[j].cid;
     let file_id = data.content[j].file_id;
 
     let name = decodeURIComponent(data.content[j].key);
     if (data.prefix) {
       name = name.split(data.prefix)[1];
     }
-
 
     let item = {
       isDir: isDir,
@@ -571,7 +559,7 @@ const initMyOption = (xdata, ydata, cid) => {
   }
 };
 const theme = computed(() => store.getters.theme);
-const handleImg = (type, ID, cid, key,isDir, ip ,port,peerId) => {
+const handleImg = (type, ID, cid, key, isDir, ip, port, peerId) => {
   let imgHttpLink = "";
   type = type.toLowerCase();
   let isSystemImg = false;
@@ -722,12 +710,15 @@ const doShare = async (item) => {
 };
 const ipfsPin = (checked) => {
   const item = pinData.item;
+  let ip_address = deviceData.rpc.split(":")[0];
+  let port = deviceData.rpc.split(":")[1];
+  let peerId = deviceData.peer_id;
   let data = {
-    ip_address: "218.2.96.99",
-    port: 8007,
+    ip_address,
+    port,
     token: "11111",
     // peerId: deviceData.value.peer_id,
-    peerId: deviceData.peer_id,
+    peerId,
     Id: deviceData.foggie_id,
     exp: 3 * 24 * 3600,
     stype: "ipfs",
@@ -743,11 +734,12 @@ const ipfsPin = (checked) => {
 };
 const cyfsPin = () => {
   const item = pinData.item;
+  let ip_address = deviceData.rpc.split(":")[0];
+  let port = deviceData.rpc.split(":")[1];
   let data = {
-    ip_address: "218.2.96.99",
-    port: 8007,
+    ip_address,
+    port,
     token: "11111",
-    // peerId: deviceData.value.peer_id,
     peerId: deviceData.peer_id,
     Id: deviceData.foggie_id,
     exp: 3 * 24 * 3600,
@@ -770,20 +762,20 @@ const downloadItem = (item) => {
   let cid = item.cid;
   let key = item.key;
 
-  let ip = deviceData.rpc.split(':')[0];
+  let ip = deviceData.rpc.split(":")[0];
   // let ip = "154.31.34.194";
-  let port = deviceData.rpc.split(':')[1];
+  let port = deviceData.rpc.split(":")[1];
   // let Id = item.id;
   let Id = deviceData.foggie_id;
   let peerId = deviceData.peer_id;
   let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
 
   var oA = document.createElement("a");
-  oA.download = item.name; // 设置下载的文件名，默认是'下载'
+  oA.download = item.name;
   oA.href = downloadUrl;
   document.body.appendChild(oA);
   oA.click();
-  oA.remove(); // 下载之后把创建的元素删除
+  oA.remove();
   proxy.$notify({
     type: "success",
     message: "Download succeeded",
@@ -792,15 +784,19 @@ const downloadItem = (item) => {
 };
 const deleteItem = (item) => {
   tableLoading.value = true;
-  file_delete(item).then((res) => {
+  let peerId = deviceData.peer_id;
+  let Id = deviceData.foggie_id;
+  file_delete(item, peerId, Id).then((res) => {
     if (res && res.data) {
       proxy.$notify({
         type: "success",
         message: "Delete succeeded",
         position: "bottom-left",
       });
+      tableLoading.value = false;
       doSearch();
     } else {
+      tableLoading.value = false;
       proxy.$notify({
         type: "error",
         message: "Delete Error",
@@ -811,12 +807,12 @@ const deleteItem = (item) => {
 };
 
 const copyLink = (text) => {
-  var input = document.createElement("input"); // 创建input对象
-  input.value = text; // 设置复制内容
-  document.body.appendChild(input); // 添加临时实例
-  input.select(); // 选择实例内容
-  document.execCommand("Copy"); // 执行复制
-  document.body.removeChild(input); // 删除临时实例
+  var input = document.createElement("input");
+  input.value = text;
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand("Copy");
+  document.body.removeChild(input);
   // let str = `Copying  ${type} successful!`;
   // this.$message.success(str);
   proxy.$notify({
@@ -829,7 +825,6 @@ const detailData = reactive({ data: {} });
 const toDetail = (item) => {
   localStorage.setItem("currentOODItem", JSON.stringify(currentOODItem.value));
   if (item.type === "application/x-directory") {
-    // 文件夹类型
     breadcrumbList.prefix = item.name.split("/");
     emits("currentPrefix", breadcrumbList.prefix);
   } else {
@@ -848,7 +843,7 @@ const doSearch = async () => {
     tableLoading.value = true;
     let orderId = deviceData.foggie_id;
     let peer_id = deviceData.peer_id;
-    breadcrumbList.prefix = []
+    breadcrumbList.prefix = [];
     let data = await find_objects(orderId, peer_id, keyWord.value);
     tableData.data = [];
     initFileData(data);
@@ -902,7 +897,7 @@ const upload = () => {
   margin: 24px 0 50px 0;
   // .card-box();
   color: #000;
-  background: var(--card-bg);
+  background: var(--bg-color);
   border: var(--theme-border);
   @include card-box;
 

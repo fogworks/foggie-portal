@@ -3,19 +3,19 @@ const BizResultCode = require("./BaseResultCode");
 const logger = require("./logger")("FileController.js");
 const publish_proto = require("./grpc/publish");
 const grpc = require("@grpc/grpc-js");
-const config = require('config');
+const config = require("config");
 const { chunk } = require("lodash");
-const FileType = require('file-type');
+const FileType = import('file-type');
 // const {fileTypeFromStream} = 'file-type';
 // const { da } = require("element-plus/es/locale");
 
 class PublishController {
   /**
-   * 发布ipfs
+   * publish ipfs
    * @param {*} cid          pubkey
    * @param {*} is_pin       is_pin
    * @param {*} new_path     file key
-   * @param {*} res          HTTP的response
+   * @param {*} res          HTTP response
    * @returns
    */
   static async doDownload(req, res) {
@@ -46,34 +46,32 @@ class PublishController {
       header,
       cid,
       key,
-      range
+      range,
     };
 
     var client = PublishController.getNetGrpcClient(ip_address, port);
 
     let call = client.GetObject(GetRequest);
 
-    let successfulReports = [];
-    let totalLength = 0;
-    console.log('++++++++download',GetRequest )
+    // let successfulReports = [];
+    // let totalLength = 0;
     // let failedReports = [];
-    call.on('data', (employeeStream) => {
-      console.log('++++++++++', employeeStream)
+    call.on("data", (employeeStream) => {
       if (employeeStream?.chunk) {
-        res.write(employeeStream.chunk)
+        res.write(employeeStream.chunk);
       }
-      
+
       // if (employeeStream?.chunk) {
       //   totalLength += employeeStream.chunk.length
       //   successfulReports.push(employeeStream.chunk)
       // }
-      
+
 
     });
-    call.on('end',()=>{      
+    call.on('end', () => {
       res.end()
       //  res.send(Buffer.concat(successfulReports, totalLength))
-    })
+    });
   }
 
   static async doDelete(req, res) {
@@ -92,12 +90,14 @@ class PublishController {
     let token = req.body.token;
     let peerId = req.body.peerId;
 
-    let Id = "4321";
+    let Id = req.body.Id;
+
+    // let Id = "4321";
     // test
-    Id = "100";
+    // Id = "100";
 
     token = "11111";
-    peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+    // peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
 
     if (!object_type || !objects || !cids) {
       res.send(BizResult.validateFailed());
@@ -121,7 +121,6 @@ class PublishController {
       request: request,
     };
 
-
     client.DeleteObject(putObjectReq, (err, data) => {
       if (err) {
         res.send({});
@@ -132,14 +131,14 @@ class PublishController {
   }
 
   static async listFiles(req, res) {
-    let ip_address = req.body.ip_address;
-    let port = req.body.port;
+    let ip_address = req.body.deviceData.rpc.split(":")[0];
+    let port = req.body.deviceData.rpc.split(":")[1];
     let token = req.body.token;
-    let peerId = req.body.peerId;
-    let Id = req.body.Id;
+    let peerId = req.body.deviceData.peer_id;
+    let Id = req.body.deviceData.foggie_id;
 
     // test
-    peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+    // peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
     // Id = "34";
     token = "11111";
 
@@ -182,9 +181,7 @@ class PublishController {
     };
 
     var client = PublishController.getNetGrpcClient(ip_address, port);
-
     client.ListObjects(putObjectReq, (err, data) => {
-      console.log('list+++++++', data)
       if (err) {
         res.send();
         return;
@@ -193,7 +190,6 @@ class PublishController {
     });
   }
 
-  
   static async findObjects(req, res) {
     let ip_address = req.body.ip_address;
     let port = req.body.port;
@@ -247,7 +243,6 @@ class PublishController {
     var client = PublishController.getNetGrpcClient(ip_address, port);
 
     client.ListObjects(putObjectReq, (err, data) => {
-      console.log('list+++++++', data)
       if (err) {
         res.send();
         return;
@@ -255,7 +250,6 @@ class PublishController {
       res.send(data);
     });
   }
-
 
   static async SearchObject(req, res) {
     let ip_address = req.body.ip;
@@ -295,36 +289,30 @@ class PublishController {
     let successfulReports = [];
     let totalLength = 0;
     // let failedReports = [];
-    console.log('+++++++++++putObjectReq', putObjectReq)
-    call.on('data',async (employeeStream)=>{
-      console.log('~~~~~~~~~~~~~~~employeeStream', employeeStream)
+    call.on('data', async (employeeStream) => {
       // successfulReports.push(employeeStream);
       if (employeeStream?.chunk) {
-        console.log(FileType)
-        console.log('+++++++type',await FileType.fromBuffer(employeeStream.chunk));
-        // console.log(await fileTypeFromStream(employeeStream.chunk))
         // let type = await FileType.fromBuffer(employeeStream.chunk);
         // if (type) {
         //   res.write({type, employeeStream: employeeStream.chunk})
         // } else {
         //   res.write({type: "", employeeStream: employeeStream.chunk})
         // }
-        res.write(employeeStream.chunk)
-      } else if (employeeStream.Option === 'links') {
-        res.send(employeeStream.links)
+        res.write(employeeStream.chunk);
+      } else if (employeeStream.Option === "links") {
+        res.send(employeeStream.links);
       }
-      
+
     });
-    call.on('end',()=>{      
-      // console.log('+++++++++', successfulReports)
+    call.on('end', () => {
       res.end();
       // res.send(successfulReports);
       //  res.send(Buffer.concat(successfulReports, totalLength))
-    })
+    });
   }
 
   static getNetGrpcClient(ip_address, port) {
-    let grpcConfig = config.get('grpcConfig');
+    let grpcConfig = config.get("grpcConfig");
     ip_address = grpcConfig.get("ip");
     port = 8007;
     return new publish_proto.API(

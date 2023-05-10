@@ -22,7 +22,7 @@
         </el-avatar>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item command="log_out"> 退出 </el-dropdown-item>
+            <el-dropdown-item command="log_out">Log out </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -51,11 +51,8 @@ let theme = ref(true);
 const emit = defineEmits(["setlanguage_key"]);
 
 const isDark = useDark({
-  // 存储到localStorage/sessionStorage中的Key 根据自己的需求更改
   storageKey: "useDarkKEY",
-  // 暗黑class名字
   valueDark: "dark",
-  // 高亮class名字
   valueLight: "light",
 });
 const toggle = useToggle(isDark);
@@ -74,12 +71,10 @@ watch(theme, (newVal) => {
 
 // });
 
-/* 关闭 或打开 aside */
 function closeOpenAside() {
   // emit('closeOpenAside')
 }
 
-/* 下拉菜单 */
 function handleChange(item) {
   if (item == "log_out") {
   }

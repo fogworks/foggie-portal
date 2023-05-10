@@ -1,14 +1,14 @@
-//解密
+//decrypt
 var CryptoJS = require("crypto-js");
 function decrypt(value) {
   var crypt_key = "047ADGJMQTW0369D";
   var crypt_iv = "131b0c8a7a6e072e";
-  let aes_key = CryptoJS.enc.Utf8.parse(crypt_key); // 解析后的key
-  let aes_iv = CryptoJS.enc.Utf8.parse(crypt_iv); // 解析后的iv
-  let baseResult = CryptoJS.enc.Base64.parse(value); // Base64解密
-  let ciphertext = CryptoJS.enc.Base64.stringify(baseResult); // Base64解密
+  let aes_key = CryptoJS.enc.Utf8.parse(crypt_key); // Parsed key
+  let aes_iv = CryptoJS.enc.Utf8.parse(crypt_iv); // Resolved iv
+  let baseResult = CryptoJS.enc.Base64.parse(value); // 
+  let ciphertext = CryptoJS.enc.Base64.stringify(baseResult); // 
   let decryptResult = CryptoJS.AES.decrypt(ciphertext, aes_key, {
-    // AES解密
+    // AES
     iv: aes_iv,
     mode: CryptoJS.mode.CBC,
     padding: CryptoJS.pad.Pkcs7,
@@ -18,10 +18,9 @@ function decrypt(value) {
 }
 
 function hmac() {
-  // 声明签名秘钥和签名体
   // let key = "megaops@2022";
   // let data = "voodKey";
-  // var crypto = require("crypto"); // 使用HmacSha512签名 js
+  // var crypto = require("crypto"); // Sign js using HmacSha512
   // var hmac = crypto.createHmac("sha1", key);
   // var signed = hmac.update(Buffer.from(data, "utf-8")).digest("base64");
   // signed = signed.replace("/", "_").replace("+", "-");
@@ -32,17 +31,13 @@ function hmac() {
   // return tokens;
 }
 function transferTime(utc_datetime) {
-  // 转为正常的时间格式 年-月-日 时:分:秒
   let new_datetime =
     utc_datetime.split("T")[0] + " " + utc_datetime.split("T")[1].split(".")[0];
 
-  // 处理成为时间戳
   let timestamp = new Date(new_datetime.replace(/-/g, "/")).getTime();
   timestamp = timestamp / 1000;
-  // 增加8个小时，北京时间比utc时间多八个时区
   // timestamp = timestamp + 8 * 60 * 60;
 
-  // 时间戳转为时间
   let date = new Date(parseInt(timestamp) * 1000);
   let YY = date.getFullYear() + "-";
   let MM =
@@ -89,13 +84,13 @@ function handleTime(time) {
   if (time < 60) {
     let s = parseInt(time);
     obj.s = s;
-    obj.text = `${s}秒`;
+    obj.text = `${s}Seconds `;
   } else if (time < 3600) {
     let m = parseInt(time / 60);
     let s = parseInt(time % 60);
     obj.s = s;
     obj.m = m;
-    obj.text = `${m}分${s}秒`;
+    obj.text = `${m}Minutes ${s}Seconds `;
   } else if (time < 86400) {
     let h = parseInt(time / 3600);
     let min = time - h * 3600;
@@ -105,7 +100,7 @@ function handleTime(time) {
     obj.s = s;
     obj.h = h;
     obj.m = m;
-    obj.text = `${h}小时${m}分${s}秒`;
+    obj.text = `${h}Hours ${m}Minutes ${s}Seconds `;
   } else if (time > 86400) {
     let day = parseInt(time / 86400);
     let hour = time - day * 86400;
@@ -121,7 +116,7 @@ function handleTime(time) {
     obj.h = h;
     obj.m = m;
     obj.day = day;
-    obj.text = `${day}天${h}小时${m}分${s}秒`;
+    obj.text = `${day}Days ${h}Hours ${m}Minutes ${s}Seconds `;
   }
   return obj;
 }
@@ -150,7 +145,6 @@ function getQueryString(name) {
 }
 
 function getfilesize(size, type) {
-  //把字节转换成正常文件大小
   if (!size && size !== 0) return "";
   var num = 1024.0; //byte
   size = Number(size).toFixed(2);
@@ -171,7 +165,6 @@ function getfilesize(size, type) {
   }
 }
 
-//base64，js原生方法btoa()实现
 function b64EncodeUnicode(str) {
   return btoa(
     encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
@@ -184,7 +177,6 @@ export {
   hmac,
   transferTime,
   handleTimeStamp,
-  handleTime,
   echartsHandleTimeStamp,
   decrypt,
   getQueryString,

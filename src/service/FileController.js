@@ -148,6 +148,18 @@ class FileController {
             return;
         }
 
+        // 上传文件时，校验挑战状态, 挑战未走到终态，不允许上传文件
+        // var challengeCount = orderService.getChallengeCountByState(orderId, [3]);
+        // if (challengeCount instanceof BizResultCode) {
+        //     res.send(BizResult.fail(challengeCount));
+        //     return;
+        // }
+        // if (challengeCount > 0) {
+        //     logger.info("challenge is not end, orderId:{}, count:{}", orderId, challengeCount);
+        //     res.send(BizResult.fail(BizResultCode.ORDER_CHALLENGE_NOT_END));
+        //     return;
+        // }
+
         // 校验相同的文件是否已经上传过
         var resultData = await fileService.getFileByMd5(orderId, email, fileName, wholeMd5, deviceType)
 
@@ -170,8 +182,6 @@ class FileController {
         // 获取peerId
         var orderInfo = await orderService.getOrderById(email, orderId);
         
-        // test
-        orderInfo.peer_id = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
         if(orderInfo instanceof BizResultCode){
             res.send(BizResult.fail(orderInfo));
             return;

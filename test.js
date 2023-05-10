@@ -4,9 +4,9 @@ const merkle = require('merkle');
 
 ////////////////////////////////////////////user///////////
 var dmc_client = DMC({
-    chainId: "4d1fb981dd562d2827447dafa89645622bdcd4e29185d60eeb45539f25d2d85d",
-    keyProvider: "5J2J27QSRhX4yXaxDrbA2w1RoWciFV4J9gdQNz1fUGxN1BhJ93z",
-    httpEndpoint: "http://154.22.123.188:8870",
+    chainId: "bb6e31180359e169335481bad672aadf57cfb5787379bedb6a5dce916fcb0ac5",
+    keyProvider: "5HsrwqjEJHsvqKgh4LDKwWQsfKK9UZygPYCspRaVfwM3recZCMn",
+    httpEndpoint: "http://156.242.10.10:5802",
     logger: {
         log: null,
         error: null
@@ -15,7 +15,7 @@ var dmc_client = DMC({
 
 // 发起挑战
 function reqChallenge() {
-    let data = "123";
+    let data = "12345";
     let nonce = "QmdigZtSztwgxMFs6QqEUgfLu4YyPsGPquVDhTNqqmw3U8";
     let pre_data_hash = DMC.ecc.sha256(data + nonce);
     let data_hash = Buffer.from(pre_data_hash).toString('hex');
@@ -28,14 +28,14 @@ function reqChallenge() {
             name: 'reqchallenge',
             authorization: [
                 {
-                    actor: "tianbao12345",
+                    actor: "tbliuca12345",
                     permission: 'active'
                 }
             ],
             data: {
-                sender: "tianbao12345",
-                order_id: 153,
-                data_id: 1,
+                sender: "tbliuca12345",
+                order_id: 62,
+                data_id: 2,
                 hash_data: data_hash,
                 nonce: nonce
             }
@@ -62,12 +62,12 @@ function claimorder() {
             name: 'claimorder',
             authorization: [
                 {
-                    actor: "tianbao12345",
+                    actor: "tbliuca12345",
                     permission: 'active'
                 }
             ],
             data: {
-                payer: "tianbao12345",
+                payer: "tbliuca12345",
                 order_id: 150
             }
         }]
@@ -139,15 +139,14 @@ function transfer() {
             name: 'transfer',
             authorization: [
                 {
-                    actor: "tianbao12345",
+                    actor: "tbliuca12345",
                     permission: 'active'
                 }
             ],
             data: {
-                from: "tianbao12345",
-                to: "miner1222222",
-                quantity: "100.0000 DMC",
-                memo: "share test DMC"
+                from: "tbliuca12345",
+                to: "ljktest12345",
+                quantity: "100.0000 DMC"
             }
         }]
     }, {
@@ -173,12 +172,12 @@ function order() {
             name: 'order',
             authorization: [
                 {
-                    actor: "tianbao12345",
+                    actor: "tbliuca12345",
                     permission: 'active'
                 }
             ],
             data: {
-                owner: "tianbao12345",
+                owner: "tbliuca12345",
                 bill_id: "211",
                 benchmark_price: "110",
                 epoch: "24",
@@ -210,22 +209,23 @@ function order() {
 
 // 用户提交merkle树
 function userPushMerkle() {
-    var tree = merkle('sha256').sync(['123', '456', '789']);
+    var tree = merkle('sha256').sync(['456', '789', '432', '765']);
+    console.log('tree_root:', tree.root());
     dmc_client.transact({
         actions: [{
             account: "dmc.token",
             name: 'addmerkle',
             authorization: [
                 {
-                    actor: "tianbao12345",
+                    actor: "tbliuca12345",
                     permission: 'active'
                 }
             ],
             data: {
-                sender: "tianbao12345",
-                order_id: 156,
+                sender: "tbliuca12345",
+                order_id: 61,
                 merkle_root: tree.root(),
-                data_block_count: 12
+                data_block_count: 3323
             }
         }]
     }, {
@@ -245,9 +245,9 @@ function userPushMerkle() {
 
 ////////////////////////////////////////////miner///////////
 var miner_dmc_client = DMC({
-    chainId: "4d1fb981dd562d2827447dafa89645622bdcd4e29185d60eeb45539f25d2d85d",
-    keyProvider: "5KV7aKDajbmgG54RPvpyyfAtRBCs69XqXXRvEetSrjtJ7medN5h",
-    httpEndpoint: "http://154.22.123.188:8870",
+    chainId: "bb6e31180359e169335481bad672aadf57cfb5787379bedb6a5dce916fcb0ac5",
+    keyProvider: "5K7KeVcqhLKAHCun34Ziz3pw9FUrmM67FaU8eEnuBCxoJt2Ctew",
+    httpEndpoint: "http://156.242.10.10:5802",
     logger: {
         log: null,
         error: null
@@ -262,13 +262,13 @@ function increase() {
             name: 'increase',
             authorization: [
                 {
-                    actor: "miner1222222",
+                    actor: "ljktest12345",
                     permission: 'active'
                 }
             ],
             data: {
-                owner: "miner1222222",
-                miner: "miner1222222",
+                owner: "ljktest12345",
+                miner: "ljktest12345",
                 asset: {
                     quantity: "4.0000 DMC",
                     contract: "datamall"
@@ -297,12 +297,12 @@ function mint() {
             name: 'mint',
             authorization: [
                 {
-                    actor: "miner1222222",
+                    actor: "ljktest12345",
                     permission: 'active'
                 }
             ],
             data: {
-                owner: "miner1222222",
+                owner: "ljktest12345",
                 asset: {
                     quantity: "40 PST",
                     contract: "datamall"
@@ -332,12 +332,12 @@ function bill() {
             name: 'bill',
             authorization: [
                 {
-                    actor: "miner1222222",
+                    actor: "ljktest12345",
                     permission: 'active'
                 }
             ],
             data: {
-                owner: "miner1222222",
+                owner: "ljktest12345",
                 asset: {
                     quantity: "10 PST",
                     contract: "datamall"
@@ -365,22 +365,23 @@ function bill() {
 
 // 矿工提交merkle树
 function minerPushMerkle() {
-    var tree = merkle('sha256').sync(['123', '456', '789']);
+    var tree = merkle('sha256').sync(['000', '123', '456', '789', '432', '765']);
+    console.log('tree_root:', tree.root());
     miner_dmc_client.transact({
         actions: [{
             account: "dmc.token",
             name: 'addmerkle',
             authorization: [
                 {
-                    actor: "miner1222222",
+                    actor: "ljktest12345",
                     permission: 'active'
                 }
             ],
             data: {
-                sender: "miner1222222",
-                order_id: 156,
+                sender: "ljktest12345",
+                order_id: 62,
                 merkle_root: tree.root(),
-                data_block_count: 12
+                data_block_count: 256
             }
         }]
     }, {
@@ -396,128 +397,45 @@ function minerPushMerkle() {
     })
 }
 
+function ansChallenge() {
+    let data = "123";
+    let nonce = "QmdigZtSztwgxMFs6QqEUgfLu4YyPsGPquVDhTNqqmw3U8";
+    var dataHash = DMC.ecc.sha256(data + nonce);
+    var reply_hash = Buffer.from(dataHash).toString('hex');
 
-
-//////////////////////////DB test /////////////////////////
-const NeDB = require('nedb');
-const config = require('config');
-const process = require('node:process');
-const path = require('path');
-const dbConfig = config.get('dbConfig');
-
-
-// var data = Buffer.from('1234567890');
-// db.insert({
-//     primary_key: 'binary',
-//     data: data,
-// }, function (err, doc) {
-//     if (err) {
-//         console.log('err:', err);
-//         // resolve(BizResultCode.SAVE_PASSWORD_FAILED);
-//         return;
-//     }
-//     console.log('doc:', doc);
-// });
-
-// db.find({
-//     primary_key: 'binary'
-// }, function (err, docs) {
-//     if (err) {
-//         console.log('err:', err);
-//         return;
-//     }
-//     var data = Buffer.from(docs[0].data).toString('utf8');
-//     console.log('data:', data);
-// });
-
-
-
-/**
- * 计算密码本的偏移量
- * 文件大小小于分块大小，返回 [0]
- * 完整的分块数量 小于等于3，则随机取一个分块的偏移量
- * 完整的分块数量 大于3，则先随机从前3个中取一个分块的偏移量，
- * 然后根据增长因子，计算出后续的分块，每次增长一次offset = offset + blockSize * growthFactor
- * 增长的次数N 越大，存入偏移量数组的概率越小
- * 
- * @param {*} fileSize  文件大小
- * @param {*} blockSize     分块大小
- * @param {*} growthFactor  增长因子
- * @returns 偏移量的数组
- */
-function calcCodebookOffset(fileSize, blockSize, growthFactor) {
-    var offsetArr = [];
-    var offset = 0;
-    // 如果文件大小小于分块大小，则直接返回
-    if (fileSize < blockSize) {
-        return offsetArr;
-    }
-    // 计算完整的分块数量
-    var blockNum = Math.floor(fileSize / blockSize);
-
-    // 如果 完整的分块数量 小于等于3，则随机取一个分块
-    if (blockNum <= 3) {
-        var rand = Math.floor(Math.random() * blockNum);
-        offsetArr.push(rand * blockSize);
-        return offsetArr;
-    }
-
-    // 如果 完整的分块数量 大于3，则先随机从前3个 中 取一个分块
-    var rand = Math.floor(Math.random() * 3);
-    offset = rand * blockSize;
-    offsetArr.push(offset);
-
-    var i = 1;
-    // 然后根据增长因子，计算出后续的分块，每次增长一次offset = offset + blockSize * growthFactor
-    while (true) {
-        blockSize *= growthFactor;
-        offset += blockSize;
-        if (offset > fileSize) {
-            break;
-        }
-        // 增长的次数N 越大，存入偏移量数组的概率越小
-        if (Math.random() < 1 / i) {
-            offsetArr.push(offset);
-        }
-        i++;
-    }
-    return offsetArr;
+    miner_dmc_client.transact({
+        actions: [{
+            account: "dmc.token",
+            name: 'anschallenge',
+            authorization: [
+                {
+                    actor: "ljktest12345",
+                    permission: 'active'
+                }
+            ],
+            data: {
+                sender: "ljktest12345",
+                order_id: 62,
+                reply_hash: reply_hash,
+            }
+        }]
+    }, {
+        blocksBehind: 3,
+        expireSeconds: 30,
+    }).then((res) => {
+        // res.send(BizResult.success());
+        console.log('res:', res);
+    }).catch((err) => {
+        console.log('err:', err);
+        // logger.error('err:', err);
+        // res.send(BizResult.fail(BizResultCode.PUSH_MERKLE_FAILED));
+    })
 }
 
-// for (var i = 0; i < 5; i++) {
-//     calcCodebookOffset(5622, 4096, 2).forEach((arr) => {
-//         console.log("arr:", arr);
-//     });
-// }
-
-// const array = [1, 2];
-
-// function getRandomElement(arr) {
-//   const randomIndex = Math.floor(Math.random() * arr.length);
-//   return arr[randomIndex];
-// }
-
-// console.log(getRandomElement(array));
-
-// function testNull() {
-//     return new Promise((resolve, reject) => {
-//         resolve(null);
-//     });
-// }
-
-// async function test(){
-//     var res = await testNull().catch((err) => {
-//         console.log('err:', err);
-//     });
-//     if(!res){
-//         console.log('res:', res);
-//     }
-// } 
-
-// test();
-
-// 发起挑战
+// 用户发起挑战
 // reqChallenge();
+// 矿工响应挑战
+// ansChallenge();
 // 领取奖励
 // claimorder();
 // 查询挑战记录
@@ -539,81 +457,164 @@ function calcCodebookOffset(fileSize, blockSize, growthFactor) {
 // const BigNumber = require('bignumber.js');
 
 
-// function walletNameToNumber(str) {
-//     const len = str.length
+// var encryptor = crypto.createCipher('RSA-OAEP', privateKey);
+// let encrypted = encryptor.update("EncryptPKCS1v15" + ':' + orderId, 'utf8', 'base64');
+// encrypted += encryptor.final('base64');
+const crypto = require('crypto');
 
-//     let value = new BigNumber(0)
+function encrypt(privateKey) {
+    var encryptedData = crypto.privateEncrypt({
+        key: privateKey,
+        padding: crypto.constants.RSA_PKCS1_PADDING
+    }, Buffer.from('tbliuca12345:12434'));
 
-//     for (let i = 0; i <= 12; ++i) {
-//         let c = 0
-//         if (i < len && i <= 12) {
-//             c = char_to_symbol(str.charCodeAt(i))
-//         }
-
-//         if (i < 12) {
-//             c &= 0x1f
-//             let b_c = new BigNumber(c)
-//             const two = new BigNumber(2)
-//             b_c = b_c.times(two.pow(64 - 5 * (i + 1)))
-//             value = value.plus(b_c)
-//         } else {
-//             c &= 0x0f
-//             value = value.plus(c)
-//         }
-//     }
-
-//     function char_to_symbol(c) {
-//         if (c >= 97 && c <= 122) return (c - 97) + 6
-//         if (c >= 49 && c <= 53) return (c - 49) + 1
-//         return 0
-//     }
-
-//     return value.toFixed()
-// }
-
-// const name = "tbliuca12345";
-// console.log(walletNameToNumber(name)); // 用stringToName(name)去查询  函数是这个
-
-
-const speakeasy = require('speakeasy');
-const QRCode = require('qrcode');
-
-// Generate a secret key
-const secret = speakeasy.generateSecret({ length: 10, name: 'Foggie(tbliuca12345)' });
-
-// Save the secret key in your database
-
-console.log('secret:', secret);
-
-// Generate a TOTP password
-const token = speakeasy.totp({
-    secret: secret.base32,
-    encoding: 'base32'
-});
-
-console.log('token:', token);
-// Generate a QR code for the secret key
-QRCode.toDataURL(secret.otpauth_url, function (err, imageUrl) {
-    if (err) {
-        console.log("Error generating QR code");
-    } else {
-        // Display the QR code to the user
-        console.log("imageUrl:" + imageUrl);
-    }
-});
-
-// Verify the TOTP password
-const verified = speakeasy.totp.verify({
-    secret: 'NVAXIMZIHFPH2XJ4',
-    encoding: 'base32',
-    token: '869234'
-});
-
-if (verified) {
-    console.log('success');
-} else {
-    // Display an error message to the user
-    console.log('failed');
+    console.log(encryptedData.toString('base64'));
 }
 
 
+
+function getKeyPair(passphrase) {
+    return crypto.generateKeyPairSync('rsa', {
+        modulusLength: 2048, // 模数的位数，即密钥的位数，2048 或以上一般是安全的
+        publicExponent: 0x10001, // 指数值，必须为奇数，默认值为 0x10001，即 65537
+        publicKeyEncoding: {
+            type: 'pkcs1',
+            format: 'pem'
+        },
+        privateKeyEncoding: {
+            type: 'pkcs1', // 用于存储私钥信息的标准语法标准
+            format: 'pem' // base64 编码的 DER 证书格式
+            // cipher: 'aes-256-cbc', // 加密算法和操作模式
+            // passphrase
+        }
+    });
+}
+
+var encryptCode = '5HsrwqjEJHsvqKgh4LDKwWQsfKK9UZygPYCspRaVfwM3recZCMn';
+// const crypto = require('crypto');
+function test() {
+
+    // var sign = DMC.ecc.sign(Buffer.from('someData', 'utf8'), encryptCode)
+
+    // console.log('sign:', sign);
+
+    // var encryptCode = getKeyPair(encryptCode);
+
+
+    // console.log("public_key:", encryptCode.publicKey);
+    // encrypt(Buffer.from(private_key,'utf-8'))
+    // var NodeRSA = require('node-rsa');
+    // var key = new NodeRSA();
+    // key.importKey(encryptCode, 'pkcs1')
+    // // key.setOptions({encryptionScheme: 'pkcs1'});
+    // let _data = key.encryptPrivate('tbliuca12345:12434', 'buffer');
+    // console.log(_data);
+
+
+
+    // // 生成RSA密钥对
+    // const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
+    //     modulusLength: 2048,
+    //     publicKeyEncoding: {
+    //         type: 'pkcs1',
+    //         format: 'pem'
+    //     },
+    //     privateKeyEncoding: {
+    //         type: 'pkcs1',
+    //         format: 'pem'
+    //     }
+    // });
+
+    // 要加密的数据
+    // const data = 'Hello, world!';
+
+    // // 使用私钥进行加密
+    // const encryptedData = crypto.privateEncrypt({
+    //     key: encryptCode.privateKey,
+    //     padding: crypto.constants.RSA_PKCS1_PADDING
+    // }, Buffer.from(data));
+
+    // console.log('加密后的数据：', encryptedData.toString('base64'));
+
+    // // 使用公钥进行解密
+    // const decryptedData = crypto.publicDecrypt({
+    //     key: encryptCode.publicKey,
+    //     padding: crypto.constants.RSA_PKCS1_PADDING
+    // }, encryptedData);
+
+    // console.log('解密后的数据：', decryptedData.toString());
+
+    // console.log(DMC.ecc.privateToPublic('5HsrwqjEJHsvqKgh4LDKwWQsfKK9UZygPYCspRaVfwM3recZCMn'));
+
+    // console.log(privateToPublic('5HsrwqjEJHsvqKgh4LDKwWQsfKK9UZygPYCspRaVfwM3recZCMn'))
+    // var secp256k1 = require('secp256k1');
+    // var base58 = require('bs58');
+    // var ripemd160 = require('ripemd160');
+    // function privateToPublic(privateKey, publicKeyPrefix = 'EOS') {
+    //     const privateKeyBuffer = Buffer.from(privateKey,'hex');
+    //     const publicKeyBuffer = secp256k1.publicKeyCreate(privateKeyBuffer, false).slice(1);
+    //     const checksum = ripemd160(publicKeyBuffer).slice(0, 4);
+    //     return publicKeyPrefix + base58.encode(Buffer.concat([publicKeyBuffer, checksum]));
+    //   } 
+
+    var x = "2.1903 RSI";
+    var y = "455988.8667 DMC";
+    // var x = "2 RSI";
+    // var y = "9 DMC";
+    var changeRsi = 0;
+    var rsi = getAmount(x, y , "RSI");
+    var dmc = getAmount(x, y , "DMC");
+
+    console.log(calcExpectReturns(dmc, rsi, changeRsi));
+
+    // const result = str.substring(0, str.indexOf("DMC")).trim();
+    // console.log("sss:"+result); // Output: 2.1903
+}
+test()
+
+/**
+ * 
+ * @param {*} x  2.1903 RSI
+ * @param {*} y  455988.8667 DMC
+ * @param {*} unit  DMC/RSI
+ */
+function getAmount(x, y, unit) {
+
+    var xIndex = x.indexOf(unit);
+    var yIndex = y.indexOf(unit);
+
+    if(xIndex > -1){
+        return x.substring(0, xIndex).trim();
+    }
+
+    if(yIndex > -1){
+        return y.substring(0, yIndex).trim();
+    }
+
+    return 0;
+}
+
+/**
+ * 
+ * @param {*} dmc  2.1903 RSI
+ * @param {*} rsi  455988.8667 DMC
+ * @param {*} unit  DMC/RSI
+ */
+function calcExpectReturns(dmc, rsi, changeRsi) {
+    
+    var dmc = parseFloat(dmc);
+    var rsi = parseFloat(rsi);
+    var changeRsi = parseFloat(changeRsi);
+    
+    console.log("dmc:"+dmc);
+    console.log("rsi:"+rsi);
+    console.log("changeRsi:"+changeRsi);
+    console.log("dmc * rsi:"+dmc * rsi);
+    console.log("rsi+changeRsi:"+(rsi+changeRsi));
+
+
+    var tmp = (dmc * rsi)/ (rsi+changeRsi)
+    console.log("tmp:"+tmp);
+    return (dmc - tmp).toFixed(4).padEnd(5, '0')
+    // return (dmc - tmp)
+}

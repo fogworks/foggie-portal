@@ -1,12 +1,13 @@
 import { setToken, getToken, removeToken } from "@/utils/auth";
-import { setTokenMap, getTokenMap } from '@/utils/tokenMap'
+import { setTokenMap, getTokenMap } from "@/utils/tokenMap";
 export default {
-  // 开启命名空间
   namespaced: true,
   state: {
-    token: getToken() || '',
-    currentUser: window.localStorage.getItem('currentUser') || '',
-    tokenMap: window.localStorage.getItem("tokenMap") ? JSON.parse(window.localStorage.getItem("tokenMap")) : {}
+    token: getToken() || "",
+    currentUser: window.localStorage.getItem("currentUser") || "",
+    tokenMap: window.localStorage.getItem("tokenMap")
+      ? JSON.parse(window.localStorage.getItem("tokenMap"))
+      : {},
   },
   getters: {
     token: (state) => state.token,
@@ -20,13 +21,13 @@ export default {
     SET_CURRENTUSER: (state, currentUser) => {
       state.currentUser = currentUser;
     },
-    REMOVE_TOKEN: (state,) => {
-      state.token = '';
-      state.currentUser = '';
+    REMOVE_TOKEN: (state) => {
+      state.token = "";
+      state.currentUser = "";
     },
     SET_tokenMap: (state, data) => {
-      state.tokenMap[data.id] = data.token
-    }
+      state.tokenMap[data.id] = data.token;
+    },
   },
   actions: {
     login({ commit }, userInfo) {
@@ -38,13 +39,13 @@ export default {
       window.localStorage.setItem("currentUser", username);
     },
     logout({ commit }) {
-      removeToken()
+      removeToken();
       commit("REMOVE_TOKEN");
       window.localStorage.removeItem("currentUser");
     },
     setTokenMap({ commit }, data) {
       commit("SET_tokenMap", data);
-      setTokenMap(data.id, data.token)
-    }
+      setTokenMap(data.id, data.token);
+    },
   },
 };

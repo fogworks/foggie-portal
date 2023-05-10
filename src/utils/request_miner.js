@@ -4,9 +4,9 @@ import store from "@/store";
 import router from "@/router";
 // import { b64EncodeUnicode } from "./util.js";
 
-import { ElMessage, ElLoading } from 'element-plus';
-import _ from 'lodash';
-import { getToken, removeToken } from '@/utils/auth';
+import { ElMessage, ElLoading } from "element-plus";
+import _ from "lodash";
+import { getToken, removeToken } from "@/utils/auth";
 
 // import {
 //   setToken,
@@ -23,7 +23,6 @@ const service = axios.create({
   // timeout: 3000, // request timeout
 });
 // request interceptor
-
 
 service.interceptors.request.use(
   (config) => {
@@ -68,8 +67,11 @@ service.interceptors.request.use(
       };
       config.headers = header;
     } else {
-      if (!blackList.some(item => config.url.indexOf(item) > -1)) {
-        loadingInstance = ElLoading.service({ fullscreen: true, background: 'rgba(0, 0, 0, 0.4)' });
+      if (!blackList.some((item) => config.url.indexOf(item) > -1)) {
+        loadingInstance = ElLoading.service({
+          fullscreen: true,
+          background: "rgba(0, 0, 0, 0.4)",
+        });
         // config.headers.Authorization = getToken() || '';
       }
       if (
@@ -104,7 +106,7 @@ service.interceptors.request.use(
         config.headers["Content-Md5"] = config.MD5;
       }
     }
-   
+
     return config;
   },
   (error) => {
@@ -114,10 +116,10 @@ service.interceptors.request.use(
 
 // response interceptor
 let loadingInstance = null
-const blackList = ['/file/upload', '/file/save','/file/create']  // 加载黑名单
+const blackList = ['/file/upload', '/file/save','/file/create']  
 service.interceptors.response.use(
   async (response) => {
-     loadingInstance ? loadingInstance.close() : ''
+    loadingInstance ? loadingInstance.close() : "";
     const res = response.data;
     if (
       response.config.url.indexOf("/api/paynode") > -1 ||
@@ -154,7 +156,6 @@ service.interceptors.response.use(
         // });
         return;
       } else if (code === 420) {
-
         let res = await refreshToken();
 
         if (res && res.data && res.data.access_token) {
@@ -209,34 +210,38 @@ service.interceptors.response.use(
       return res;
     }
 
-    const _response = _.has(response, 'data') && _.isObject(response.data) && _.has(response.data, 'code') ? response.data : { code: 10001, errmsg: '网络出错' };
+    const _response =
+      _.has(response, "data") &&
+      _.isObject(response.data) &&
+      _.has(response.data, "code")
+        ? response.data
+        : { code: 10001, errmsg: "Network Error" };
 
     if (response.config.url.indexOf('validate_user_login') > -1) {
-      /* 校验用户的登录状态  code 10001 密码不存在 10002 密码存在*/
+      /* Verify the user's login status code 10001 Password does not exist 10002 Password exists*/
     } else {
       if (_response.code !== 200) {
         ElMessage({
           message: _response.msg,
           grouping: true,
-          type: 'error',
-        })
+          type: "error",
+        });
       }
     }
-   
+
     return _response;
   },
   (error) => {
     if (!error.config.url.indexOf("ping")) {
     }
-    loadingInstance ? loadingInstance.close() : ''
+    loadingInstance ? loadingInstance.close() : "";
 
     ElMessage.error(error.response.data.msg || error.msg);
-    return Promise.reject(error)
-
+    return Promise.reject(error);
   }
 );
 
-//base64，js原生方法btoa()实现
+
 function b64EncodeUnicode(str) {
   return btoa(
     encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
@@ -246,5 +251,3 @@ function b64EncodeUnicode(str) {
 }
 
 export default service;
-
-

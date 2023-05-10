@@ -47,7 +47,6 @@
   background-color: rgb(22, 27, 36) !important;
 }
 
-/* 弹窗 */
 // .el-overlay-message-box {
 //   width: 100%;
 //   -webkit-backdrop-filter: blur(20px) saturate(100%);
@@ -128,12 +127,11 @@
       box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.2);
       font-size: 14px;
     }
-    .el-button--primary{
+    .el-button--primary {
       background: var(--btn-gradient);
     }
   }
 }
-/* 表单 */
 // .homeBoxHeader-left,
 // .formBox {
 //   .el-input {
@@ -212,7 +210,6 @@
 // }
 
 
-/* 自定义下拉菜单 */
 .el-popper.custom_dropdown {
   border-radius: 16px !important;
 
@@ -334,7 +331,7 @@
   background: rgba(255, 255, 255, 0.6);
 
   header,
-  >div,
+  > div,
   footer {
     padding: 0;
   }

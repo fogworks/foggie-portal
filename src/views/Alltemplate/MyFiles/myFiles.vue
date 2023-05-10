@@ -71,7 +71,7 @@
     <div style="height: 100%">
       <el-table
         class="table-box"
-        :data="data"
+        :data="tableData.data"
         :header-cell-style="setNameCell"
         style="width: 100%; margin-top: 10px; height: 1000px"
         ref="fileTable"
@@ -173,12 +173,12 @@
                   >
                   <el-dropdown-item
                     :command="{ flag: 'ipfs', command: scope.row }"
-                    :disabled="scope.row.isDir"
+                    :disabled="scope.row.isDir && false"
                     >IPFS PIN</el-dropdown-item
                   >
                   <el-dropdown-item
                     :command="{ flag: 'cyfs', command: scope.row }"
-                    :disabled="scope.row.isDir"
+                    :disabled="scope.row.isDir && false"
                     >CYFS PIN</el-dropdown-item
                   >
                   <el-dropdown-item
@@ -236,7 +236,12 @@ import {
 } from "vue";
 import DetailDialog from "./detailDialog";
 import { GetFileList, InitiateChallenge } from "@/api/myFiles/myfiles";
-import { oodFileList, CidShare, find_objects, publishPin } from "@/utils/api.js";
+import {
+  oodFileList,
+  CidShare,
+  find_objects,
+  publishPin,
+} from "@/utils/api.js";
 
 import _ from "lodash";
 
@@ -344,11 +349,14 @@ function openUpload() {
 }
 
 const loadFileList = async () => {
-  let data = await oodFileList(orderId.value, deviceData.value.peer_id, breadcrumbList.prefix.join('/'));
+  let data = await oodFileList(
+    deviceData.value,
+    breadcrumbList.prefix.join("/")
+  );
   initFileData(data);
 };
 
-/* 下拉加载文件列表 */
+/* */
 const fileListsInfinite = _.debounce(() => {
   if (tableData.total > tableData.data.length) {
     tableData.pageNum += 1;
@@ -357,8 +365,6 @@ const fileListsInfinite = _.debounce(() => {
     return;
   }
 }, 300);
-
-/* 对文件发起挑战 */
 
 function challengeMiner(params) {
   InitiateChallenge(params).then((res) => {
@@ -386,6 +392,9 @@ const refresh = () => {
 };
 
 const initFileData = async (data) => {
+  if (!data) {
+    return;
+  }
   let params = {
     email: email.value,
     orderId: orderId.value,
@@ -438,18 +447,12 @@ const initFileData = async (data) => {
     let { imgHttpLink: url, isSystemImg } = handleImg(
       data.content[j],
       type,
-      "",
-      data.content[j].cid,
-      isDir,
-      
+      isDir
     );
     let { imgHttpLink: url_large } = handleImg(
       data.content[j],
       type,
-      "",
-      data.content[j].cid,
       isDir,
-      400
     );
     // let _url = require(`@/svg-icons/logo-dog-black.svg`);
     let cid = data.content[j].cid;
@@ -582,9 +585,9 @@ const initMyOption = (xdata, ydata, cid) => {
   }
 };
 
-const handleImg = (item, type, ID, pubkey, isDir, size ) => {
-  size = size || 20;
-  let location = window.location.origin;
+const handleImg = (item, type, isDir) => {
+  // size = size || 20;
+  // let location = window.location.origin;
   let imgHttpLink = "";
   type = type.toLowerCase();
   let isSystemImg = false;
@@ -603,11 +606,15 @@ const handleImg = (item, type, ID, pubkey, isDir, size ) => {
     let cid = item.cid;
     let key = item.key;
 
-    let ip = "218.2.96.99";
-    // let ip = "154.31.34.194";
-    let port = 8007;
-    let Id = orderId.value;
-    let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+    let ip = deviceData.value.rpc.split(":")[0];
+    let port = deviceData.value.rpc.split(":")[1];
+    let Id = deviceData.value.foggie_id;
+    let peerId = deviceData.value.peer_id;
+
+    // ip = "218.2.96.99";
+    // port = 8007;
+    // let Id = orderId.value;
+    // let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
     imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
   } else {
     isSystemImg = true;
@@ -636,12 +643,12 @@ const handleCommand = async (val) => {
     case "ipfs":
       ipfsDialogShow.value = true;
       pinData.item = item;
-      ipfsPin(item);
+      // ipfsPin(item);
       break;
     case "cyfs":
       cyfsDialogShow.value = true;
       pinData.item = item;
-      cyfsPin(item);
+      // cyfsPin(item);
       break;
     case "download":
       downloadItem(item);
@@ -706,13 +713,16 @@ const doShare = async (item) => {
 };
 const ipfsPin = () => {
   const item = pinData.item;
+  let ip_address = deviceData.value.rpc.split(":")[0];
+  let port = deviceData.value.rpc.split(":")[1];
+  let peerId = deviceData.value.peer_id;
+  let Id = deviceData.value.foggie_id;
   let data = {
-    ip_address: "218.2.96.99",
-    port: 8007,
+    ip_address,
+    port,
     token: "11111",
-    // peerId: deviceData.value.peer_id,
-    peerId: deviceData.value.peer_id,
-    Id: orderId.value,
+    peerId,
+    Id,
     exp: 3 * 24 * 3600,
     stype: "ipfs",
     pin: true,
@@ -727,13 +737,16 @@ const ipfsPin = () => {
 };
 const cyfsPin = () => {
   const item = pinData.item;
+  let ip_address = deviceData.value.rpc.split(":")[0];
+  let port = deviceData.value.rpc.split(":")[1];
+  let peerId = deviceData.value.peer_id;
+  let Id = deviceData.value.foggie_id;
   let data = {
-    ip_address: "218.2.96.99",
-    port: 8007,
+    ip_address,
+    port,
     token: "11111",
-    // peerId: deviceData.value.peer_id,
-    peerId: deviceData.value.peer_id,
-    Id: orderId.value,
+    peerId,
+    Id,
     exp: 3 * 24 * 3600,
     stype: "cyfs",
     pin: true,
@@ -755,19 +768,22 @@ const downloadItem = (item) => {
   let cid = item.cid;
   let key = item.key;
 
-  let ip = "218.2.96.99";
+  // let ip = "218.2.96.99";
+  let ip = deviceData.value.rpc.split(":")[0];
   // let ip = "154.31.34.194";
-  let port = 8007;
-  let Id = orderId.value;
-  let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+  // let port = 8007;
+  let port = deviceData.value.rpc.split(":")[1];
+  // let Id = orderId.value;
+  let Id = deviceData.value.foggie_id;
+  let peerId = deviceData.value.peer_id;
   let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
 
   var oA = document.createElement("a");
-  oA.download = item.name; // 设置下载的文件名，默认是'下载'
+  oA.download = item.name;
   oA.href = downloadUrl;
   document.body.appendChild(oA);
   oA.click();
-  oA.remove(); // 下载之后把创建的元素删除
+  oA.remove();
   proxy.$notify({
     type: "success",
     message: "Download succeeded",
@@ -776,12 +792,12 @@ const downloadItem = (item) => {
 };
 
 const copyLink = (text) => {
-  var input = document.createElement("input"); // 创建input对象
-  input.value = text; // 设置复制内容
-  document.body.appendChild(input); // 添加临时实例
-  input.select(); // 选择实例内容
-  document.execCommand("Copy"); // 执行复制
-  document.body.removeChild(input); // 删除临时实例
+  var input = document.createElement("input");
+  input.value = text;
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand("Copy");
+  document.body.removeChild(input);
   // let str = `Copying  ${type} successful!`;
   // this.$message.success(str);
   proxy.$notify({
@@ -795,7 +811,6 @@ const detailData = reactive({ data: {} });
 const toDetail = (item) => {
   localStorage.setItem("currentOODItem", JSON.stringify(currentOODItem.value));
   if (item.type === "application/x-directory") {
-    // 文件夹类型
     breadcrumbList.prefix = item.name.split("/");
     emits("currentPrefix", breadcrumbList.prefix);
   } else {
@@ -811,9 +826,7 @@ const getFileList = function (scroll, prefix) {
     list_prefix = prefix.join("/");
   }
   tableLoading.value = true;
-  let orderId = deviceData.foggie_id;
-  let peer_id = deviceData.peer_id;
-  oodFileList(orderId, peer_id, list_prefix)
+  oodFileList(deviceData.value, list_prefix)
     .then((res) => {
       if (res && res.content) {
         initFileData(res);
@@ -828,7 +841,7 @@ const doSearch = async () => {
     tableLoading.value = true;
     // let orderId = deviceData.value.space_order_id;
     let peer_id = deviceData.value.peer_id;
-    breadcrumbList.prefix = []
+    breadcrumbList.prefix = [];
     let data = await find_objects(orderId.value, peer_id, keyWord.value);
     tableData.data = [];
     initFileData(data);
@@ -901,7 +914,7 @@ onMounted(() => {
   max-width: 1960px;
   border: var(--theme-border);
   min-height: calc(100vh - 200px);
-  background: #f2f6ff;
+  background: var(--bg-color);
 
   ::v-deep {
     .el-breadcrumb {

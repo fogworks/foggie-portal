@@ -5,14 +5,15 @@ const Encrypt = require('./Encrypt');
 const userService = require('./UserService');
 const DMC = require('dmc.js');
 const config = require('config');
+const OrderService = require('./OrderService');
 
 class UserController {
 
     /**
      * validate user login
-     * @param {*} req   HTTP请求
-     * @param {*} res   HTTP响应
-     * @returns 10001 密码不存在 10002 密码存在
+     * @param {*} req   HTTP request
+     * @param {*} res   HTTP response
+     * @returns 10001 password is not exists 10002 password is exists
      */
     static async validateUserLogin(req, res) {
         var email = req.body.email;
@@ -43,11 +44,30 @@ class UserController {
     }
 
     /**
+     * check account
+     * @param {*} req   HTTP request
+     * @param {*} res   HTTP response
+     */
+    static checkAccount(req, res) {
+        var username = req.body.username;
+        if (!username) {
+            res.send(BizResult.validateFailed());
+            return;
+        }
+        var result = userService.checkAccount(username);
+        if (result !== username) {
+            res.send(BizResult.fail(BizResultCode.ACCOUNT_NOT_EXIST));
+            return;
+        }
+        res.send(BizResult.success(result));
+    }
+
+    /**
      * save user password
-     * @param {*} email     foggie的邮箱
-     * @param {*} password  用户的密码
-     * @param {*} username  用户名
-     * @param {*} res       HTTP响应
+     * @param {*} email     foggie email
+     * @param {*} password  password
+     * @param {*} username  username
+     * @param {*} res       HTTP response
      * @returns
      */
     static async saveUserPassword(email, password, username, res) {
@@ -66,8 +86,8 @@ class UserController {
     /**
      * reset user password
      * 
-     * @param {*} req   HTTP请求
-     * @param {*} res       HTTP响应
+     * @param {*} req    HTTP request
+     * @param {*} res    HTTP response
      * @returns
      */
     static async resetUserPassword(req, res) {
@@ -88,9 +108,8 @@ class UserController {
 
     /**
      * validate user password
-     * @param {*} req    HTTP请求
-     * @param {*} res       HTTP响应
-     * @returns 10003 密码错误 10004 密码正确
+     * @param {*} req    HTTP request
+     * @param {*} res    HTTP response
      */
     static async validateUserPassword(req, res) {
 
@@ -100,9 +119,9 @@ class UserController {
             res.send(BizResult.validateFailed());
             return;
         }
-        
+
         var userInfo = await userService.getUserInfo(email);
-        
+
         if (userInfo instanceof BizResultCode) {
             res.send(BizResult.fail(BizResultCode.PASSWORD_VALID_FAILED));
             return;
@@ -121,10 +140,9 @@ class UserController {
     }
 
     /**
-     * 获取用户的私钥
-     * @param {*} req       HTTP请求
-     * @param {*} res       HTTP响应
-     * @returns 用户的私钥
+     * get user private key
+     * @param {*} req       HTTP request
+     * @param {*} res       HTTP response
      */
     static async getUserPrivateKey(req, res) {
         var email = req.body.email;
@@ -144,8 +162,8 @@ class UserController {
 
     /** 
      * save user keystore
-     * @param {*} req    HTTP请求
-     * @param {*} res       HTTP响应
+     * @param {*} req    HTTP request
+     * @param {*} res    HTTP response
      * @returns
      */
     static async saveUserPrivateKey(req, res) {
@@ -170,22 +188,22 @@ class UserController {
     }
 
     /**
-     * 加密 用户的订单信息
-     * 源数据格式 用户私钥:用户名:订单id
-     * @param {*} req       HTTP请求
-     * @param {*} res       HTTP响应
-     * @returns 加密后的字符串
+     * encrypt order info,
+     * source data contains user private key,username,order id
+     * @param {*} req       HTTP request
+     * @param {*} res       HTTP response
+     * @returns encrypted character
      */
     static async getToken4UploadFile(req, res) {
         var orderId = req.body.orderId;
-        var email = req.body.email;
-        if (!orderId || !email) {
+        if (!orderId) {
             res.send(BizResult.validateFailed(orderId));
             return;
         }
 
+        var email = await OrderService.getEmailByOrderId(orderId);
         var token = await userService.getToken4UploadFile(email, orderId);
-        if(token instanceof BizResultCode) {
+        if (token instanceof BizResultCode) {
             res.send(BizResult.fail(token));
             return;
         }
@@ -193,9 +211,9 @@ class UserController {
     }
 
     /**
-     * 用户领取奖励
-     * @param {*} req   HTTP请求
-     * @param {*} res   HTTP响应
+     * user claim order
+     * @param {*} req   HTTP request
+     * @param {*} res   HTTP response
      * @returns 
      */
     static async claimOrder(req, res) {
@@ -259,12 +277,6 @@ class UserController {
         })
     }
 
-    /**
-     * 用户的分红列表
-     * @param {*} req   HTTP请求
-     * @param {*} res   HTTP响应
-     * @returns 
-     */
     static async dividendList(req, res) {
         var email = req.body.email;
 
