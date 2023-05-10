@@ -45,8 +45,8 @@ export function ChinaTime3(date) {
 }
 
 /**
- * @param {Number} n 
- * @param {String} type 'YYYY-MM-DD HH-MM-SS' //  'YYYY-MM-DD' // 'HH-MM-SS'
+ * @param {Number} n
+ * @param {String} type  'YYYY-MM-DD HH-MM-SS' //  'YYYY-MM-DD' // 'HH-MM-SS'
  *  */
 export function ChinaTime4(n, type) {
   let nowDate = new Date();
@@ -62,14 +62,12 @@ export function ChinaTime4(n, type) {
   return nowDate;
 }
 
-export function transferTime(utc_datetime, tyep = 'YYYY-MM-DD hh-mm-ss') {
+export function transferTime(utc_datetime, tyep = "YYYY-MM-DD hh-mm-ss") {
   let new_datetime =
     utc_datetime.split("T")[0] + " " + utc_datetime.split("T")[1].split(".")[0];
   let timestamp = new Date(new_datetime.replace(/-/g, "/")).getTime();
   timestamp = timestamp / 1000;
-  // Add 8 hours, Beijing time is eight more time zones than UTC time
   // timestamp = timestamp + 8 * 60 * 60;
-
 
   let date = new Date(parseInt(timestamp) * 1000);
   let YY = date.getFullYear() + "-";
@@ -89,18 +87,13 @@ export function transferTime(utc_datetime, tyep = 'YYYY-MM-DD hh-mm-ss') {
     return YY + MM + DD + " " + hh + mm + ss;
 }
 
-
-
-
-
-/* Obtain the current percentage of remaining time and remaining days in hours at the current time */
 /**
- * @param {String} date 
- * @param {String} createdTime 
+ * @param {String} date
+ * @param {String} createdTime
  *  */
-const ONEDAY = 60 * 60 * 24 * 1000 
-const ONEHOURS = 60 * 60 * 1 * 1000
-const ONEMINUTE = 60 * 1 * 1000
+const ONEDAY = 60 * 60 * 24 * 1000; //
+const ONEHOURS = 60 * 60 * 1 * 1000;
+const ONEMINUTE = 60 * 1 * 1000;
 
 export function getResidueTime(date, createdTime) {
   if (date) {
@@ -116,9 +109,9 @@ export function getResidueTime(date, createdTime) {
     const CT = new Date(createdTime);
     const Time = +new Date();
 
-    let allTime = T.getTime() - CT.getTime()  
-    let consumeTime = Time - CT.getTime() 
-    let residueTime = allTime - consumeTime 
+    let allTime = T.getTime() - CT.getTime()
+    let consumeTime = Time - CT.getTime()
+    let residueTime = allTime - consumeTime
 
     TimeObj.percentage = ((residueTime / allTime) * 100).toFixed(4) * 1;
 

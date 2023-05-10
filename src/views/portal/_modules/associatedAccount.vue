@@ -96,7 +96,7 @@ const store = useStore();
 const isNew = ref(false);
 const tipTitle = computed(() => {
   if (isNew.value) {
-    return "Already have an account? Disassociation";
+    return "Do you already have an account? Start Association";
   } else {
     return "No account? Go to register";
   }
@@ -191,7 +191,7 @@ const submit = () => {
           .then((res) => {
             proxy.$notify({
               type: "success",
-              message: "Successfully associated",
+              message: "Successfully Associated",
               position: "bottom-left",
             });
             login(postData).then((res) => {
@@ -261,6 +261,7 @@ const submit = () => {
                 },
               })
                 .then((res) => {
+                  //
                   if (!res.data.data.dmc_account) {
                     proxy.$notify({
                       type: "info",

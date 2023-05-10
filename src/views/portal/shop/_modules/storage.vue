@@ -340,7 +340,6 @@ function loadCurReferenceRate() {
     }
   });
 }
-
 function purchasePST(item) {
   state.orderDetail.orderID = item.id;
   state.orderDetail.price = (item.price / 10000).toFixed(4);

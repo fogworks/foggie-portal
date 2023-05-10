@@ -47,7 +47,6 @@ import { ref, reactive, defineEmits, getCurrentInstance, inject } from "vue";
 import { access_pass, access_pass_login, check_access_pass } from "@/utils/api";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-import { setTokenMap } from "@/utils/tokenMap";
 const bcryptjs = require("bcryptjs");
 const emit = defineEmits(["accessCallback", "update:accessible"]);
 const props = defineProps({});
@@ -138,6 +137,7 @@ const submit = () => {
         confirm_access_password: form.confirmPassword,
       };
       if (hasAccessPass.value) {
+        //
         access_pass_login(
           {
             access_password: form.password,
@@ -175,6 +175,7 @@ const submit = () => {
             btnLoading.value = false;
           });
       } else {
+        //
         access_pass(data, requestTarget)
           .then((res) => {
             proxy.$notify({

@@ -77,6 +77,22 @@ export function check_account(data) {
     data,
   });
 }
+export function dividend_list(data) {
+  return request({
+    url: baseUrl + '/user/dividend_list',
+    method: 'POST',
+    data,
+  });
+}
+export function claim_order(data) {
+  return request({
+    url: baseUrl + '/user/claim_order',
+    method: 'POST',
+    data,
+  });
+}
+
+
 
 
 

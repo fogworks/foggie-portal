@@ -115,8 +115,8 @@ service.interceptors.request.use(
 );
 
 // response interceptor
-let loadingInstance = null
-const blackList = ['/file/upload', '/file/save','/file/create']  
+let loadingInstance = null;
+const blackList = ["/file/upload", "/file/save", "/file/create"];
 service.interceptors.response.use(
   async (response) => {
     loadingInstance ? loadingInstance.close() : "";
@@ -212,13 +212,13 @@ service.interceptors.response.use(
 
     const _response =
       _.has(response, "data") &&
-      _.isObject(response.data) &&
-      _.has(response.data, "code")
+        _.isObject(response.data) &&
+        _.has(response.data, "code")
         ? response.data
         : { code: 10001, errmsg: "Network Error" };
 
-    if (response.config.url.indexOf('validate_user_login') > -1) {
-      /* Verify the user's login status code 10001 Password does not exist 10002 Password exists*/
+    if (response.config.url.indexOf("validate_user_login") > -1) {
+      /*   code 10001:no pwd , 10002 have pwd*/
     } else {
       if (_response.code !== 200) {
         ElMessage({
@@ -240,7 +240,6 @@ service.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 
 function b64EncodeUnicode(str) {
   return btoa(

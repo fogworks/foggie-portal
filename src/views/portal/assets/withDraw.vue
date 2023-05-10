@@ -138,6 +138,7 @@
           {{ googleErrorTip }}
         </div>
       </div>
+      <!-- /google -->
       <template #footer>
         <div class="color-box google">
           <!-- <el-button :loading="loading" type="primary" @click="next">
@@ -169,6 +170,8 @@
         > -->
       </template>
     </el-dialog>
+    <!-- -->
+
     <el-dialog
       top="25vh"
       width="700px"
@@ -367,9 +370,11 @@ export default {
     const validateAuthInput = (rule, value, cb) => {
       let numReg = /^\d{6}$/;
       if (!value) {
-        cb(new Error("Please enter Google Author"));
+        cb(new Error("Please enter Google verification code"));
       } else if (!numReg.test(value)) {
-        cb(new Error("Please enter Google Authenticator in 6-digit format"));
+        cb(
+          new Error("Please enter Google verification code in 6-digit format")
+        );
       } else {
         cb();
       }
@@ -493,7 +498,7 @@ export default {
           ElNotification({
             type: "error",
             title: "Verification code error",
-            message: "Please enter Google Authenticator in 6-digit format",
+            message: "Please enter Google verification code in 6-digit format",
             position: "bottom-left",
           });
           return;
@@ -550,7 +555,7 @@ export default {
               email: email.value,
               // account: walletUser.value,
               amount: form.walletMoney.toFixed(4),
-              to: form.receiver, 
+              to: form.receiver,
               userToken: withdrawForm.my_auth_input,
             };
             assetsTransfer(data)
@@ -599,12 +604,12 @@ export default {
       // });
     }
     function copySecret(key) {
-      var input = document.createElement("textarea"); 
+      var input = document.createElement("textarea");
       input.value = key;
-      document.body.appendChild(input); 
-      input.select(); 
-      document.execCommand("Copy"); 
-      document.body.removeChild(input); 
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("Copy");
+      document.body.removeChild(input);
       ElNotification({
         type: "success",
         message: "Copy succeeded",
@@ -621,7 +626,7 @@ export default {
       } else if (!numReg.test(value)) {
         showErrorTips.value = true;
         googleErrorTip.value =
-          "Please enter Google Authenticator in 6-digit format";
+          "Please enter Google verification code in 6-digit format";
         return;
       } else {
         showErrorTips.value = false;

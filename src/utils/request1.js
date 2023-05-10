@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ElMessage, ElLoading } from "element-plus";
+import { ElMessage, ElLoading, ElNotification } from "element-plus";
 import _ from "lodash";
 import { getToken, removeToken } from "@/utils/auth";
 import router from "@/router";
@@ -12,7 +12,12 @@ const service = axios.create({
 
 let loadingInstance = null;
 
-const blackList = ['/file/upload', '/file/save','/file/create','/file/complete']  
+const blackList = [
+  "/file/upload",
+  "/file/save",
+  "/file/create",
+  "/file/complete",
+];
 
 service.interceptors.request.use(
   (config) => {
@@ -31,32 +36,29 @@ service.interceptors.request.use(
   }
 );
 
+//
 service.interceptors.response.use(
   async (response) => {
     const _response =
       _.has(response, "data") &&
-      _.isObject(response.data) &&
-      _.has(response.data, "code")
+        _.isObject(response.data) &&
+        _.has(response.data, "code")
         ? response.data.data
         : { code: 10001, errmsg: "Network Error" };
 
-    if (response.config.url.indexOf('validate_user_login') > -1) {
-      /* Verify the user's login status code 10001 Password does not exist 10002 Password exists*/
-
-
+    if (response.config.url.indexOf("validate_user_login") > -1) {
     } else {
       if (_response.code !== 200) {
-        ElMessage({
+        ElNotification({
+          type: 'error',
           message: _response.msg,
-          grouping: true,
-          type: "error",
+          // grouping: true,
+          // type: "error",
+          position: 'bottom-left'
         });
       }
     }
 
-
-
-    // // Token 
     // if (_response.code === 10001) {
     //   removeToken();
     //   router.push({ path: '/loginBox', query: { redirect: router.currentRoute.path } });
@@ -69,8 +71,14 @@ service.interceptors.response.use(
   },
   (error) => {
     loadingInstance ? loadingInstance.close() : "";
-
-    ElMessage.error(error.response.data.msg || error.msg);
+    ElNotification({
+      type: 'error',
+      message: error.response.data.msg || error.msg,
+      // grouping: true,
+      // type: "error",
+      position: 'bottom-left'
+    });
+    // ElMessage.error(error.response.data.msg || error.msg);
     return Promise.reject(error);
   }
 );

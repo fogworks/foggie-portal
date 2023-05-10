@@ -33,7 +33,6 @@ export const user = () => {
   });
 };
 
-
 export const paynode = () => {
   return request({
     url: "/api/paynode",
@@ -186,7 +185,6 @@ export const file_delete = (item, peerId, Id) => {
   });
 };
 
-
 export const oodFileSearch = (key) => {
   // let url = `/o/${ID}/find?key=${key}`;
   let url = `/find?key=${key}`;
@@ -203,7 +201,6 @@ export const oodMonitor = (item) => {
     method: "GET",
   });
 };
-
 
 export const getActivationVood = (data, target) => {
   let url = `/v1/get_service_info`;
@@ -243,7 +240,6 @@ export const IPFSSync = (ood_id, data) => {
     data: data,
   });
 };
-
 
 export const voodInfoCheck = (vpsId) => {
   return request({
@@ -309,9 +305,8 @@ export const uploadMultipart = (params) => {
   //   }&content_type=${fileType}`;
   // }
 
-  url = `/mp/${encodeURIComponent(fileName)}?upload_id=${
-    upload_id ?? ""
-  }&content_type=${fileType}`;
+  url = `/mp/${encodeURIComponent(fileName)}?upload_id=${upload_id ?? ""
+    }&content_type=${fileType}`;
 
   let obj = {
     url: url,
@@ -326,7 +321,6 @@ export const uploadMultipart = (params) => {
   return request(obj);
 };
 
-
 export const fileShare = (ood_id, data) => {
   let url = `o/${ood_id}/presignurl`;
   return request({
@@ -335,7 +329,6 @@ export const fileShare = (ood_id, data) => {
     data: data,
   });
 };
-
 
 export const awardTaskList = (ood_id) => {
   if (ood_id && ood_id !== null) {
@@ -346,6 +339,7 @@ export const awardTaskList = (ood_id) => {
   }
 };
 
+//003
 export const finishTask = (data) => {
   return request({
     url: "/x/reward_active",
@@ -431,7 +425,6 @@ export const getWithdrawList = (owner_id, page, limit) => {
     });
   }
 };
-
 
 export const lastweekReward = (account) => {
   if (account && account !== null) {

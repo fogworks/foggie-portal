@@ -109,7 +109,7 @@
         target="_blank"
         href="https://opensea.io/collection/foggie-genesis"
       >
-        <button style="width: 100%">MINTING NOW</button>
+        <button style="width: 100%">BUY NOW</button>
       </a>
     </div>
   </div>
@@ -118,13 +118,12 @@
   </div>
   <Storage v-if="!isShop && active === 'storage'"></Storage>
   <Foggie v-if="!isShop && active === 'foggie'"></Foggie>
-
 </template>
 
 <script setup>
 import { ref } from "vue";
 import Storage from "./_modules/storage";
-import Foggie from "./_modules/foggie"
+import Foggie from "./_modules/foggie";
 // import Storage from "@/views/Alltemplate/Storage/Storage";
 const isShop = ref(true);
 const active = ref("");

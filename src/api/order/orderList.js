@@ -26,7 +26,6 @@ export function pushMerkle(data) {
     data,
   });
 }
-
 export function orderAssetsList(data) {
   return request({
     url: baseUrl + "/assets/list_in_order",
@@ -34,7 +33,6 @@ export function orderAssetsList(data) {
     data,
   });
 }
-
 export function userAssetsList(data) {
   return request({
     url: baseUrl + "/assets/list_in_user",
@@ -42,7 +40,6 @@ export function userAssetsList(data) {
     data,
   });
 }
-
 export function userAssets(data) {
   return request({
     url: baseUrl + "/assets/user",
@@ -50,7 +47,6 @@ export function userAssets(data) {
     data,
   });
 }
-
 export function assetsTransfer(data) {
   return request({
     url: baseUrl + "/assets/transfer",

@@ -171,12 +171,25 @@ const cancelItem = (data) => {
       (el.space_order_id && el.space_order_id === data.space_order_id)
   );
   if (target) {
-    uploadFileList.value[target.order_id || target.space_order_id]?.forEach(
-      (el) => {
-        console.log(el, "elllllllllll");
+    let cantCancel = uploadFileList.value[
+      target.space_order_id || target.order_id
+    ]?.some((el) => {
+      if (el.paused) {
+        return true;
       }
-    );
-
+      if (!el.completed && !el.error && !el.paused) {
+        return true;
+      }
+    });
+    if (cantCancel) {
+      proxy.$notify({
+        type: "warning",
+        message:
+          "There are files being uploaded. Please wait for the upload to complete before proceeding with the operation",
+        position: "bottom-left",
+      });
+      return false;
+    }
     totalActiveDevice.data = totalActiveDevice.data.filter(
       (el) =>
         (el.device_id && el.device_id !== data.device_id) ||

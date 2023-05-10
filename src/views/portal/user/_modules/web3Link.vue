@@ -45,11 +45,11 @@ const download = () => {
     // test Qmay112YzDqKkRWZKh8dChv32Fifcz4L7kWmTXZ2GAixLo
     let downloadUrl = `https://w3s.link/ipfs/${keyWord.value}`;
     var oA = document.createElement("a");
-    oA.download = name; 
+    oA.download = name;
     oA.href = downloadUrl;
     document.body.appendChild(oA);
     oA.click();
-    oA.remove(); 
+    oA.remove();
   } else {
     proxy.$notify({
       type: "warning",
@@ -119,11 +119,11 @@ const downloadItem = () => {
         document.body.removeChild(link);
 
         // var oA = document.createElement("a");
-        // oA.download = ''; 
+        // oA.download = '';
         // oA.href = r;
         // document.body.appendChild(oA);
         // oA.click();
-        // oA.remove(); 
+        // oA.remove();
         proxy.$notify({
           type: "success",
           message: "Download succeeded",

@@ -3,11 +3,11 @@
   -moz-border-radius: $radius;
   border-radius: $radius;
 }
-
-// button {
-//   @include border-radius(10px);
-// }
-
+/* 
+button {
+  @include border-radius(10px);
+}
+*/
 @mixin card-box() {
   padding: 20px 40px;
   box-sizing: border-box;
