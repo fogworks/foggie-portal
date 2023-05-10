@@ -106,9 +106,9 @@ export default {
       allowDuplicateUploads: true, 
     });
     // const client = new APIClient('http://154.31.34.194:9007')
-    const client = new APIClient("http://218.2.96.99:8007");
+    // const client = new APIClient("http://218.2.96.99:8007");
     // window.client = client
-    provide("client", readonly(client));
+    // provide("client", readonly(client));
 
     const alertTitle = ref("");
     const fileStatusText = ref({

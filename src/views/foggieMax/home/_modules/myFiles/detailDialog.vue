@@ -216,10 +216,13 @@ export default {
       let cid = item.cid;
       let key = item.key;
 
-      let ip = "218.2.96.99";
+      // let ip = "218.2.96.99";
       // let ip = "154.31.34.194";
-      let port = 8007;
-      let Id = orderId;
+      // let port = 8007;
+      let ip = deviceData.value.rpc.split(":")[0];
+      let port = deviceData.value.rpc.split(":")[1];
+      // let Id = orderId;
+      let Id = deviceData.value.foggie_id;
       let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
       let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
 

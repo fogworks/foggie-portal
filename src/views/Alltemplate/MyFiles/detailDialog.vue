@@ -131,13 +131,15 @@ export default {
     const copyContent = ref("");
 
     const ipfsPin = (item) => {
+      let ip_address = deviceData.rpc.split(":")[0];
+      let port = deviceData.rpc.split(":")[1];
       let data = {
-        ip_address: "218.2.96.99",
-        port: 8007,
+        ip_address,
+        port,
         token: "11111",
-        // peerId: deviceData.peer_id,
-        peerId: "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA",
-        Id: orderId.value,
+        peerId: deviceData.peer_id,
+        // peerId: "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA",
+        Id: deviceData.foggie_id,
         exp: 3 * 24 * 3600,
         stype: "ipfs",
         pin: true,
@@ -218,11 +220,17 @@ export default {
       let cid = item.cid;
       let key = item.key;
 
-      let ip = "218.2.96.99";
-      // let ip = "154.31.34.194";
-      let port = 8007;
-      let Id = orderId;
-      let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+      // let ip = "218.2.96.99";
+      // // let ip = "154.31.34.194";
+      // let port = 8007;
+
+      // let Id = orderId;
+      // let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+
+      let ip = deviceData.rpc.split(":")[0];
+      let port = deviceData.rpc.split(":")[1];
+      let Id = deviceData.foggie_id;
+      let peerId = deviceData.peer_id;
       let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
 
       var oA = document.createElement("a");

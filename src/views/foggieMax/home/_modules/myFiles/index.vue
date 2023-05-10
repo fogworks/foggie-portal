@@ -710,12 +710,15 @@ const doShare = async (item) => {
 };
 const ipfsPin = (checked) => {
   const item = pinData.item;
+  let ip_address = deviceData.rpc.split(":")[0];
+  let port = deviceData.rpc.split(":")[1];
+  let peerId = deviceData.peer_id;
   let data = {
-    ip_address: "218.2.96.99",
-    port: 8007,
+    ip_address,
+    port,
     token: "11111",
     // peerId: deviceData.value.peer_id,
-    peerId: deviceData.peer_id,
+    peerId,
     Id: deviceData.foggie_id,
     exp: 3 * 24 * 3600,
     stype: "ipfs",
@@ -731,11 +734,12 @@ const ipfsPin = (checked) => {
 };
 const cyfsPin = () => {
   const item = pinData.item;
+  let ip_address = deviceData.rpc.split(":")[0];
+  let port = deviceData.rpc.split(":")[1];
   let data = {
-    ip_address: "218.2.96.99",
-    port: 8007,
+    ip_address,
+    port,
     token: "11111",
-    // peerId: deviceData.value.peer_id,
     peerId: deviceData.peer_id,
     Id: deviceData.foggie_id,
     exp: 3 * 24 * 3600,

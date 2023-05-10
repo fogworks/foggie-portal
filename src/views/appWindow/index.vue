@@ -153,7 +153,9 @@ const syncDevice = async (data) => {
   await sync_device(d)
     .then(() => {})
     .catch(() => {
-      // syncDevice(data);
+      setTimeout(() => {
+        syncDevice(data);
+      }, 4000);
     });
 };
 const uploadFileList = computed(() => store.getters.uploadFileList);

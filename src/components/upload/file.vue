@@ -199,11 +199,6 @@ export default {
     const aborted = ref(false);
     const fileMd5 = ref(null);
 
-    const header = new Header();
-    header.setId(file.value.orderId);
-    header.setPeerid(peerId);
-    header.setToken(token);
-
     const header = new Header()
     header.setId(file.value.orderId)
     header.setPeerid(peerId)

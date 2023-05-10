@@ -71,7 +71,7 @@
     <div style="height: 100%">
       <el-table
         class="table-box"
-        :data="data"
+        :data="tableData.data"
         :header-cell-style="setNameCell"
         style="width: 100%; margin-top: 10px; height: 1000px"
         ref="fileTable"
@@ -236,12 +236,6 @@ import {
 } from "vue";
 import DetailDialog from "./detailDialog";
 import { GetFileList, InitiateChallenge } from "@/api/myFiles/myfiles";
-import {
-  oodFileList,
-  CidShare,
-  find_objects,
-  publishPin,
-} from "@/utils/api.js";
 import {
   oodFileList,
   CidShare,
@@ -454,17 +448,12 @@ const initFileData = async (data) => {
     let { imgHttpLink: url, isSystemImg } = handleImg(
       data.content[j],
       type,
-      "",
-      data.content[j].cid,
       isDir
     );
     let { imgHttpLink: url_large } = handleImg(
       data.content[j],
       type,
-      "",
-      data.content[j].cid,
       isDir,
-      400
     );
     // let _url = require(`@/svg-icons/logo-dog-black.svg`);
     let cid = data.content[j].cid;
@@ -597,9 +586,9 @@ const initMyOption = (xdata, ydata, cid) => {
   }
 };
 
-const handleImg = (item, type, ID, pubkey, isDir, size) => {
-  size = size || 20;
-  let location = window.location.origin;
+const handleImg = (item, type, isDir) => {
+  // size = size || 20;
+  // let location = window.location.origin;
   let imgHttpLink = "";
   type = type.toLowerCase();
   let isSystemImg = false;
@@ -618,11 +607,15 @@ const handleImg = (item, type, ID, pubkey, isDir, size) => {
     let cid = item.cid;
     let key = item.key;
 
-    let ip = "218.2.96.99";
-    // let ip = "154.31.34.194";
-    let port = 8007;
-    let Id = orderId.value;
-    let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+    let ip = deviceData.value.rpc.split(":")[0];
+    let port = deviceData.value.rpc.split(":")[1];
+    let Id = deviceData.value.foggie_id;
+    let peerId = deviceData.value.peer_id;
+
+    // ip = "218.2.96.99";
+    // port = 8007;
+    // let Id = orderId.value;
+    // let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
     imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
   } else {
     isSystemImg = true;
@@ -721,13 +714,16 @@ const doShare = async (item) => {
 };
 const ipfsPin = () => {
   const item = pinData.item;
+  let ip_address = deviceData.value.rpc.split(":")[0];
+  let port = deviceData.value.rpc.split(":")[1];
+  let peerId = deviceData.value.peer_id;
+  let Id = deviceData.value.foggie_id;
   let data = {
-    ip_address: "218.2.96.99",
-    port: 8007,
+    ip_address,
+    port,
     token: "11111",
-    // peerId: deviceData.value.peer_id,
-    peerId: deviceData.value.peer_id,
-    Id: orderId.value,
+    peerId,
+    Id,
     exp: 3 * 24 * 3600,
     stype: "ipfs",
     pin: true,
@@ -742,13 +738,16 @@ const ipfsPin = () => {
 };
 const cyfsPin = () => {
   const item = pinData.item;
+  let ip_address = deviceData.value.rpc.split(":")[0];
+  let port = deviceData.value.rpc.split(":")[1];
+  let peerId = deviceData.value.peer_id;
+  let Id = deviceData.value.foggie_id;
   let data = {
-    ip_address: "218.2.96.99",
-    port: 8007,
+    ip_address,
+    port,
     token: "11111",
-    // peerId: deviceData.value.peer_id,
-    peerId: deviceData.value.peer_id,
-    Id: orderId.value,
+    peerId,
+    Id,
     exp: 3 * 24 * 3600,
     stype: "cyfs",
     pin: true,
@@ -770,10 +769,13 @@ const downloadItem = (item) => {
   let cid = item.cid;
   let key = item.key;
 
-  let ip = "218.2.96.99";
+  // let ip = "218.2.96.99";
+  let ip = deviceData.value.rpc.split(":")[0];
   // let ip = "154.31.34.194";
-  let port = 8007;
-  let Id = orderId.value;
+  // let port = 8007;
+  let port = deviceData.value.rpc.split(":")[1];
+  // let Id = orderId.value;
+  let Id = deviceData.value.foggie_id;
   let peerId = deviceData.value.peer_id;
   let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
 
