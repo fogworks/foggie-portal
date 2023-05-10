@@ -393,7 +393,7 @@ class OrderController {
 
         // valid challenge state
         // get user challenge count miner not response challenge count
-        var challengeState = await orderService.getChallengeCountByState(orderId, [3]);
+        var challengeState = orderService.getChallengeCountByState(orderId, [3]);
         if (challengeState instanceof BizResultCode) {
             res.send(BizResult.fail(challengeState));
             return;
@@ -537,7 +537,18 @@ class OrderController {
             return;
         }
 
-        // todo valid order status and challenge status
+        // valid order status and challenge status
+        var challengeCount = orderService.getChallengeCountByState(orderId, [0]);
+        if (challengeCount instanceof BizResultCode) {
+            logger.info("get challenge count failed, orderId:{}", orderId);
+            response.send(BizResult.fail(challengeCount));
+            return;
+        }
+        if(challengeCount > 0){
+            logger.info("merkle inconsistent, orderId:{}", orderId);
+            response.send(BizResult.fail(BizResultCode.MERKLE_INCONSISTENT));
+            return;
+        }
 
         var privateKey = await userService.getPrivateKeyByEmail(email);
         if (privateKey instanceof BizResultCode) {

@@ -143,22 +143,42 @@ class FileController {
         var wholeMd5 = req.body.wholeMd5;
         var wholeFileSize = req.body.wholeFileSize;
 
-        if (!fileCategory || !fileName || !md5 || !fileSize || !orderId ||!email || !wholeMd5 || !deviceType) {
+        if (!fileCategory || !fileName || !md5 || !fileSize || !orderId || !email || !wholeMd5 || !deviceType) {
             res.send(BizResult.validateFailed());
             return;
         }
 
-        // 上传文件时，校验挑战状态, 挑战未走到终态，不允许上传文件
-        // var challengeCount = orderService.getChallengeCountByState(orderId, [3]);
-        // if (challengeCount instanceof BizResultCode) {
-        //     res.send(BizResult.fail(challengeCount));
-        //     return;
-        // }
-        // if (challengeCount > 0) {
-        //     logger.info("challenge is not end, orderId:{}, count:{}", orderId, challengeCount);
-        //     res.send(BizResult.fail(BizResultCode.ORDER_CHALLENGE_NOT_END));
-        //     return;
-        // }
+        // upload file valid challenge is end
+        var challengeList = orderService.getChallengeByState(orderId, [0, 1, 3, 7]);
+        if (challengeList instanceof BizResultCode) {
+            res.send(BizResult.fail(challengeList));
+            return;
+        }
+        if (challengeList.length > 0) {
+
+            for (const chanllenge of challengeList) {
+                if (chanllenge.state === 3) {
+                    logger.info("challenge is not end, orderId:{}", orderId);
+                    res.send(BizResult.fail(BizResultCode.ORDER_CHALLENGE_NOT_END));
+                    return;
+                }
+                if (chanllenge.state === 7) {
+                    logger.info("order is end, orderId:{}", orderId);
+                    res.send(BizResult.fail(BizResultCode.ORDER_STATE_END));
+                    return;
+                }
+                if (chanllenge.state === 0 && chanllenge.pre_merkle_root != chanllenge.merkle_root) {
+                    logger.info("merkle is inconsistent, orderId:{}", orderId);
+                    res.send(BizResult.fail(BizResultCode.MERKLE_INCONSISTENT));
+                    return;
+                }
+                if (chanllenge.state === 1 && parseInt(chanllenge.pre_merkle_root) != 0) {
+                    logger.info("merkle is inconsistent, orderId:{}", orderId);
+                    res.send(BizResult.fail(BizResultCode.MERKLE_INCONSISTENT));
+                    return;
+                }
+            }
+        }
 
         // 校验相同的文件是否已经上传过
         var resultData = await fileService.getFileByMd5(orderId, email, fileName, wholeMd5, deviceType)
@@ -174,15 +194,15 @@ class FileController {
 
         // 获取token
         var token = await userService.getToken4UploadFile(email, orderId);
-        if(token instanceof BizResultCode) {
+        if (token instanceof BizResultCode) {
             res.send(BizResult.fail(token));
             return;
         }
 
         // 获取peerId
         var orderInfo = await orderService.getOrderById(email, orderId);
-        
-        if(orderInfo instanceof BizResultCode){
+
+        if (orderInfo instanceof BizResultCode) {
             res.send(BizResult.fail(orderInfo));
             return;
         }
@@ -329,7 +349,7 @@ class FileController {
      * @returns 
      */
     static async create(email, fileName, md5, fileType, fileSize, orderId, deviceType, res) {
-        
+
         if (!fileName || !fileType || !fileSize || !orderId || !md5 || !email || !deviceType) {
             res.send(BizResult.validateFailed());
             return;
@@ -337,21 +357,21 @@ class FileController {
 
         // 获取token
         var token = await userService.getToken4UploadFile(email, orderId);
-        if(token instanceof BizResultCode) {
+        if (token instanceof BizResultCode) {
             res.send(BizResult.fail(token));
             return;
         }
 
         // 获取peerId
         var orderInfo = await orderService.getOrderById(email, orderId);
-        if(orderInfo instanceof BizResultCode){
+        if (orderInfo instanceof BizResultCode) {
             res.send(BizResult.fail(orderInfo));
             return;
         }
         var peerId = orderInfo.peer_id;
         var rpc = orderInfo.rpc;
         var foggieId = orderInfo.foggie_id;
-        
+
         // 校验相同的文件是否已经上传过
         var resultData = await fileService.getFileByMd5(orderId, email, fileName, md5, deviceType)
 
@@ -416,7 +436,7 @@ class FileController {
      * @param {*} res 
      * @returns 
      */
-    static async getCodebook(req, res){
+    static async getCodebook(req, res) {
         var orderId = req.body.orderId;
         var email = req.body.email;
         var md5 = req.body.md5;
@@ -456,14 +476,14 @@ class FileController {
 
         // 获取token
         var token = await userService.getToken4UploadFile(email, orderId);
-        if(token instanceof BizResultCode) {
+        if (token instanceof BizResultCode) {
             res.send(BizResult.fail(token));
             return;
         }
 
         // 获取peerId
         var orderInfo = await orderService.getOrderById(email, orderId);
-        if(orderInfo instanceof BizResultCode){
+        if (orderInfo instanceof BizResultCode) {
             res.send(BizResult.fail(orderInfo));
             return;
         }

@@ -595,65 +595,20 @@ function test() {
     //     const checksum = ripemd160(publicKeyBuffer).slice(0, 4);
     //     return publicKeyPrefix + base58.encode(Buffer.concat([publicKeyBuffer, checksum]));
     //   } 
+    const list = [
+        { id: 1, state: 0, pre_merkle_root: "0000000000000000000000000000000000000000000000000000000000000000", merkle_root: "0000000000000000000000000000000000000000000000000000000000000000" },
+        { id: 2, state: 0, pre_merkle_root: "930c55135daa73c89c6b639e7cd254e36722dbc7d7b53f1ddfced32a1e5be833", merkle_root: "0000000000000000000000000000000000000000000000000000000000000000" },
+        { id: 3, state: 1, pre_merkle_root: "0000000000000000000000000000000000000000000000000000000000000000", merkle_root: "930c55135daa73c89c6b639e7cd254e36722dbc7d7b53f1ddfced32a1e5be833" },
+        { id: 4, state: 1, pre_merkle_root: "0401b51fb7a3eada18eadacaa3cff7226e60222695caa796e65485f3ebb9989b", merkle_root: "930c55135daa73c89c6b639e7cd254e36722dbc7d7b53f1ddfced32a1e5be833" },
+    ];
 
-    var x = "2.1903 RSI";
-    var y = "455988.8667 DMC";
-    // var x = "2 RSI";
-    // var y = "9 DMC";
-    var changeRsi = 0;
-    var rsi = getAmount(x, y, "RSI");
-    var dmc = getAmount(x, y, "DMC");
-
-    console.log(calcExpectReturns(dmc, rsi, changeRsi));
-
-    // const result = str.substring(0, str.indexOf("DMC")).trim();
-    // console.log("sss:"+result); // Output: 2.1903
-}
-// test()
-
-/**
- * 
- * @param {*} x  2.1903 RSI
- * @param {*} y  455988.8667 DMC
- * @param {*} unit  DMC/RSI
- */
-function getAmount(x, y, unit) {
-
-    var xIndex = x.indexOf(unit);
-    var yIndex = y.indexOf(unit);
-
-    if (xIndex > -1) {
-        return x.substring(0, xIndex).trim();
+    for(const item of list){
+        if(item.state === 1 && parseInt(item.pre_merkle_root) != 0){
+            console.log("id:{}", item.id);
+            return;
+        }
     }
 
-    if (yIndex > -1) {
-        return y.substring(0, yIndex).trim();
-    }
-
-    return 0;
+    console.log(hasStateThree);
 }
-
-/**
- * 
- * @param {*} dmc  2.1903 RSI
- * @param {*} rsi  455988.8667 DMC
- * @param {*} unit  DMC/RSI
- */
-function calcExpectReturns(dmc, rsi, changeRsi) {
-
-    var dmc = parseFloat(dmc);
-    var rsi = parseFloat(rsi);
-    var changeRsi = parseFloat(changeRsi);
-
-    console.log("dmc:" + dmc);
-    console.log("rsi:" + rsi);
-    console.log("changeRsi:" + changeRsi);
-    console.log("dmc * rsi:" + dmc * rsi);
-    console.log("rsi+changeRsi:" + (rsi + changeRsi));
-
-
-    var tmp = (dmc * rsi) / (rsi + changeRsi)
-    console.log("tmp:" + tmp);
-    return (dmc - tmp).toFixed(4).padEnd(5, '0')
-    // return (dmc - tmp)
-}
+test()

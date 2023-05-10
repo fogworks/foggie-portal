@@ -415,7 +415,6 @@ module.exports = {
             return BizResultCode.VALIDATE_FAILED;
         }
 
-        // todo
         var stateCondition = state.join(',');
         try {
             var chainConfig = config.get('chainConfig');
@@ -425,6 +424,7 @@ module.exports = {
             let body = '{\n' +
                 '        find_challenge(\n' +
                 '                where: {\n' +
+                '                    order_id: ' + orderId + ',\n' +
                 '                    state: [' + stateCondition + '],\n' +
                 '                },\n' +
                 '                order: "-id",\n' +
