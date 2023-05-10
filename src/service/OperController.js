@@ -55,10 +55,8 @@ class PublishController {
 
     // let successfulReports = [];
     // let totalLength = 0;
-    console.log('++++++++download', GetRequest)
     // let failedReports = [];
     call.on("data", (employeeStream) => {
-      console.log("++++++++++data", employeeStream);
       if (employeeStream?.chunk) {
         res.write(employeeStream.chunk);
       }
@@ -71,7 +69,6 @@ class PublishController {
 
     });
     call.on('end', () => {
-      console.log('++++++++++end')
       res.end()
       //  res.send(Buffer.concat(successfulReports, totalLength))
     });
@@ -184,7 +181,6 @@ class PublishController {
     };
 
     var client = PublishController.getNetGrpcClient(ip_address, port);
-    console.log("putObjectReq", putObjectReq);
     client.ListObjects(putObjectReq, (err, data) => {
       if (err) {
         res.send();
@@ -293,14 +289,9 @@ class PublishController {
     let successfulReports = [];
     let totalLength = 0;
     // let failedReports = [];
-    console.log('+++++++++++putObjectReq', putObjectReq)
     call.on('data', async (employeeStream) => {
-      console.log('~~~~~~~~~~~~~~~employeeStream', employeeStream)
       // successfulReports.push(employeeStream);
       if (employeeStream?.chunk) {
-        // console.log(FileType)
-        // console.log('+++++++type',await FileType.fromBuffer(employeeStream.chunk));
-        // console.log(await fileTypeFromStream(employeeStream.chunk))
         // let type = await FileType.fromBuffer(employeeStream.chunk);
         // if (type) {
         //   res.write({type, employeeStream: employeeStream.chunk})
@@ -314,7 +305,6 @@ class PublishController {
 
     });
     call.on('end', () => {
-      // console.log('+++++++++', successfulReports)
       res.end();
       // res.send(successfulReports);
       //  res.send(Buffer.concat(successfulReports, totalLength))
