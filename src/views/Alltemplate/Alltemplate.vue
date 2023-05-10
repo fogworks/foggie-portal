@@ -9,6 +9,7 @@
     ></login>
     <template v-else>
       <orderList :orderId="orderId"></orderList>
+      <TimeLine :orderId="orderId"></TimeLine>
       <myFiles :orderId="orderId" :deviceData="deviceData"></myFiles>
     </template>
   </div>
@@ -26,6 +27,7 @@ import {
 } from "vue";
 import orderList from "@/components/orders/orderList.vue";
 import myFiles from "@/views/Alltemplate/MyFiles/myFiles";
+import TimeLine from "./MyFiles/timeLine";
 // import customDialog from "@/components-V3/customDialog";
 import login from "@/components/login";
 import { useStore } from "vuex";
