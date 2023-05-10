@@ -12,7 +12,12 @@ const service = axios.create({
 
 let loadingInstance = null;
 
-const blackList = ['/file/upload', '/file/save', '/file/create', '/file/complete']
+const blackList = [
+  "/file/upload",
+  "/file/save",
+  "/file/create",
+  "/file/complete",
+];
 
 service.interceptors.request.use(
   (config) => {
@@ -31,6 +36,7 @@ service.interceptors.request.use(
   }
 );
 
+//
 service.interceptors.response.use(
   async (response) => {
     const _response =
@@ -40,10 +46,7 @@ service.interceptors.response.use(
         ? response.data.data
         : { code: 10001, errmsg: "Network Error" };
 
-    if (response.config.url.indexOf('validate_user_login') > -1) {
-      /* Verify the user's login status code 10001 Password does not exist 10002 Password exists*/
-
-
+    if (response.config.url.indexOf("validate_user_login") > -1) {
     } else {
       if (_response.code !== 200) {
         ElNotification({
@@ -56,9 +59,6 @@ service.interceptors.response.use(
       }
     }
 
-
-
-    // // Token 
     // if (_response.code === 10001) {
     //   removeToken();
     //   router.push({ path: '/loginBox', query: { redirect: router.currentRoute.path } });

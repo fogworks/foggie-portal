@@ -164,12 +164,12 @@ const keyWord = ref("");
 const deviceList = computed(() => store.getters["global/deviceList"]);
 
 const copyLink = (text) => {
-  var input = document.createElement("input"); 
-  input.value = text; 
-  document.body.appendChild(input); 
-  input.select(); 
-  document.execCommand("Copy"); 
-  document.body.removeChild(input); 
+  var input = document.createElement("input");
+  input.value = text;
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand("Copy");
+  document.body.removeChild(input);
   // let str = `Copying  ${type} successful!`;
   // this.$message.success(str);
   proxy.$notify({

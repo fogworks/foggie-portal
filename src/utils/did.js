@@ -1,5 +1,5 @@
 // import * as cyfs from "cyfs-sdk";
-// Create a DID and activate the VOD process, taking 'API/VPS/OOD'_ The 'active' interface returns the data.ip and data.access of the object_ token
+// ip":["154.64.63.133:1320"],"access_token":"ZKtO7dWHmh5U"
 import { voodInfoCheck, voodActivate } from "./api";
 export async function createDID(vpsId) {
   const g_oodName = "";
@@ -161,11 +161,11 @@ export async function activeVOOD(bindInfoObj, vpsId) {
 }
 
 function calcIndex(uniqueStr) {
-	const md5 = cyfs.forge.md.md5.create();
-	md5.update(uniqueStr, "utf8");
-	let result = cyfs.forge.util.binary.hex.encode(md5.digest());
-	let index = hashCode(result);
-	return index;
+  const md5 = cyfs.forge.md.md5.create();
+  md5.update(uniqueStr, "utf8");
+  let result = cyfs.forge.util.binary.hex.encode(md5.digest());
+  let index = hashCode(result);
+  return index;
 }
 
 function hashCode(strValue) {

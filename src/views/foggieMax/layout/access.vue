@@ -137,6 +137,7 @@ const submit = () => {
         confirm_access_password: form.confirmPassword,
       };
       if (hasAccessPass.value) {
+        //
         access_pass_login(
           {
             access_password: form.password,
@@ -174,6 +175,7 @@ const submit = () => {
             btnLoading.value = false;
           });
       } else {
+        //
         access_pass(data, requestTarget)
           .then((res) => {
             proxy.$notify({

@@ -261,6 +261,7 @@ const submit = () => {
                 },
               })
                 .then((res) => {
+                  //
                   if (!res.data.data.dmc_account) {
                     proxy.$notify({
                       type: "info",

@@ -138,6 +138,7 @@
           {{ googleErrorTip }}
         </div>
       </div>
+      <!-- /google -->
       <template #footer>
         <div class="color-box google">
           <!-- <el-button :loading="loading" type="primary" @click="next">
@@ -169,6 +170,8 @@
         > -->
       </template>
     </el-dialog>
+    <!-- -->
+
     <el-dialog
       top="25vh"
       width="700px"
