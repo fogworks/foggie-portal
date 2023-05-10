@@ -494,9 +494,9 @@ var encryptCode = '5HsrwqjEJHsvqKgh4LDKwWQsfKK9UZygPYCspRaVfwM3recZCMn';
 // const crypto = require('crypto');
 function test() {
 
-    var sign = DMC.ecc.sign(Buffer.from('someData', 'utf8'), encryptCode)
+    // var sign = DMC.ecc.sign(Buffer.from('someData', 'utf8'), encryptCode)
 
-    console.log('sign:', sign);
+    // console.log('sign:', sign);
 
     // var encryptCode = getKeyPair(encryptCode);
 
@@ -544,7 +544,7 @@ function test() {
 
     // console.log('解密后的数据：', decryptedData.toString());
 
-    console.log(DMC.ecc.privateToPublic('5HsrwqjEJHsvqKgh4LDKwWQsfKK9UZygPYCspRaVfwM3recZCMn'));
+    // console.log(DMC.ecc.privateToPublic('5HsrwqjEJHsvqKgh4LDKwWQsfKK9UZygPYCspRaVfwM3recZCMn'));
 
     // console.log(privateToPublic('5HsrwqjEJHsvqKgh4LDKwWQsfKK9UZygPYCspRaVfwM3recZCMn'))
     // var secp256k1 = require('secp256k1');
@@ -556,5 +556,65 @@ function test() {
     //     const checksum = ripemd160(publicKeyBuffer).slice(0, 4);
     //     return publicKeyPrefix + base58.encode(Buffer.concat([publicKeyBuffer, checksum]));
     //   } 
+
+    var x = "2.1903 RSI";
+    var y = "455988.8667 DMC";
+    // var x = "2 RSI";
+    // var y = "9 DMC";
+    var changeRsi = 0;
+    var rsi = getAmount(x, y , "RSI");
+    var dmc = getAmount(x, y , "DMC");
+
+    console.log(calcExpectReturns(dmc, rsi, changeRsi));
+
+    // const result = str.substring(0, str.indexOf("DMC")).trim();
+    // console.log("sss:"+result); // Output: 2.1903
 }
 test()
+
+/**
+ * 
+ * @param {*} x  2.1903 RSI
+ * @param {*} y  455988.8667 DMC
+ * @param {*} unit  DMC/RSI
+ */
+function getAmount(x, y, unit) {
+
+    var xIndex = x.indexOf(unit);
+    var yIndex = y.indexOf(unit);
+
+    if(xIndex > -1){
+        return x.substring(0, xIndex).trim();
+    }
+
+    if(yIndex > -1){
+        return y.substring(0, yIndex).trim();
+    }
+
+    return 0;
+}
+
+/**
+ * 
+ * @param {*} dmc  2.1903 RSI
+ * @param {*} rsi  455988.8667 DMC
+ * @param {*} unit  DMC/RSI
+ */
+function calcExpectReturns(dmc, rsi, changeRsi) {
+    
+    var dmc = parseFloat(dmc);
+    var rsi = parseFloat(rsi);
+    var changeRsi = parseFloat(changeRsi);
+    
+    console.log("dmc:"+dmc);
+    console.log("rsi:"+rsi);
+    console.log("changeRsi:"+changeRsi);
+    console.log("dmc * rsi:"+dmc * rsi);
+    console.log("rsi+changeRsi:"+(rsi+changeRsi));
+
+
+    var tmp = (dmc * rsi)/ (rsi+changeRsi)
+    console.log("tmp:"+tmp);
+    return (dmc - tmp).toFixed(4).padEnd(5, '0')
+    // return (dmc - tmp)
+}

@@ -287,12 +287,37 @@ module.exports = {
                 '            }\n' +
                 '        }\n' +
                 '    }'
-            return JSON.parse(request('POST', transactionAddress + getDividend, {
+            var dividendList = JSON.parse(request('POST', transactionAddress + getDividend, {
                 headers: {
                     'Content-Type': 'application/graphql'
                 },
                 body: body
             }).getBody('utf-8')).data.find_order
+
+            // return dividendList;
+
+            var chainConfig = config.get('chainConfig')
+            var httpEndpoint = chainConfig.get('httpEndpoint')
+            var getTableRows = chainConfig.get('getTableRows')
+            var innermarker = JSON.parse(request('POST', httpEndpoint + getTableRows, {
+                json: { "json": true, "code": "dmc.token", "scope": "dmc.token", "table": "innermarker" }
+            }).getBody('utf-8')).rows[0]
+
+            var x = innermarker.tokenx.quantity;
+            var y = innermarker.tokeny.quantity;
+
+            var rsi = getAmount(x, y, 'RSI');
+            var dmc = getAmount(x, y, 'DMC');
+
+            var resultList = [];
+            for(dividend of dividendList){
+                var userRsi = dividend.user_rsi_amount;
+                var expect = calcExpectReturns(dmc, rsi, userRsi);
+                dividend['expect_returns'] = expect;
+                resultList.push(dividend);
+            }
+
+            return resultList;
         }
         catch (e) {
             logger.error('err:', e);
@@ -322,4 +347,42 @@ module.exports = {
             return BizResultCode.GET_DIVIDEND_COUNT_FAILED;
         }
     }
+}
+
+/**
+ * 
+ * @param {*} x  2.1903 RSI
+ * @param {*} y  455988.8667 DMC
+ * @param {*} unit  DMC/RSI
+ */
+function getAmount(x, y, unit) {
+
+    var xIndex = x.indexOf(unit);
+    var yIndex = y.indexOf(unit);
+
+    if(xIndex > -1){
+        return x.substring(0, xIndex).trim();
+    }
+
+    if(yIndex > -1){
+        return y.substring(0, yIndex).trim();
+    }
+
+    return 0;
+}
+
+/**
+ * 
+ * @param {*} dmc  2.1903 RSI
+ * @param {*} rsi  455988.8667 DMC
+ * @param {*} unit  DMC/RSI
+ */
+function calcExpectReturns(dmc, rsi, changeRsi) {
+    
+    var dmc = parseFloat(dmc);
+    var rsi = parseFloat(rsi);
+    var changeRsi = parseFloat(changeRsi);
+    
+    var tmp = (dmc * rsi)/ (rsi+changeRsi)
+    return (dmc - tmp).toFixed(4).padEnd(5, '0')
 }
