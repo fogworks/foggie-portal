@@ -378,7 +378,6 @@ module.exports = {
      * @returns 偏移量的数组
      */
     getCodebookOffset: async (fileCategory, orderId, email, fileName, md5, fileSize, blockSize, growthFactor) => {
-
         return new Promise((resolve, reject) => {
             codeBookOffsetDB.find({
                 order_id: orderId,
@@ -395,7 +394,8 @@ module.exports = {
                     var offset = 0;
                     // 如果文件大小小于分块大小，则直接返回[]
                     if (fileSize < blockSize) {
-                        return offsetArr;
+                        resolve(offsetArr);
+                        return;
                     }
                     // 计算完整的分块数量
                     var blockNum = Math.floor(fileSize / blockSize);
@@ -404,7 +404,8 @@ module.exports = {
                     if (blockNum <= 3) {
                         var rand = Math.floor(Math.random() * blockNum);
                         offsetArr.push(rand * blockSize);
-                        return offsetArr;
+                        resolve(offsetArr);
+                        return;
                     }
 
                     // 如果 完整的分块数量 大于3，则先随机从前3个 中 取一个分块
@@ -589,24 +590,23 @@ module.exports = {
         return new pow_proto.PowService(ip + ':' + port, grpc.credentials.createInsecure());
     },
     getProxGrpcClient: async (rpc, header) => {
-        // var rpc = '192.168.1.127:6007'
         var proxClient = new prox_proto.Service(rpc, grpc.credentials.createInsecure());
         var proxPingRequest = {
             header: header
         }
         return new Promise((resolve, reject) => {
             proxClient.Ping(proxPingRequest, function (err, data) {
-                // if (err) {
-                //     logger.error('err:', err);
+                if (err) {
+                    logger.error('err:', err);
                     var grpcConfig = config.get('grpcConfig');
                     var ip = grpcConfig.get("ip");
                     var port = grpcConfig.get("port");
                     logger.info('grpc address:', ip + ':' + port);
                     resolve(new net_proto.API(ip + ':' + port, grpc.credentials.createInsecure()));
                     return;
-                // }
-                // logger.info('grpc address:', rpc);
-                // resolve(proxClient);
+                }
+                logger.info('grpc address:', rpc);
+                resolve(proxClient);
             });
         });
     }

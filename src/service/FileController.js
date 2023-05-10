@@ -41,6 +41,19 @@ class FileController {
             return;
         }
 
+        // check file is exist
+        var resultData = await fileService.getFileByMd5(orderId, email, filePath, md5, deviceType)
+
+        if (resultData instanceof BizResultCode) {
+            res.send(BizResult.fail(resultData));
+            return;
+        }
+        if (resultData > 0) {
+            logger.info("file is exist, orderId:{}, md5:{}", orderId, md5);
+            res.send(BizResult.success());
+            return;
+        }
+
         orderService.updateOrderUsedSpace(email, orderId, fileSize);
 
         var codebooks = await fileService.getFileCodeBookByMd5(orderId, email, md5);
@@ -49,11 +62,15 @@ class FileController {
             return;
         }
 
+        if(codebooks.length == 0){
+            res.send(BizResult.fail(BizResultCode.GET_FILE_CODEBOOK_FAILED));
+            return;
+        }
+
         var codebook = codebooks[0];
 
-        await fileService.saveFileProp(orderId, email, filePath, fileSize, md5, codebook.cid, deviceType);
+        fileService.saveFileProp(orderId, email, filePath, fileSize, md5, codebook.cid, deviceType);
 
-        // 根据文件的上传记录，重读一次文件，生成merkle树后 提交
         var fileUploadRecordRes = await fileService.getFileUploadRecord(orderId, email, md5);
 
         if (fileUploadRecordRes instanceof BizResultCode) {
@@ -61,10 +78,14 @@ class FileController {
             return;
         }
 
-        for (const file of fileUploadRecordRes) {
-            const filename = file.file_path;
-            fs.unlinkSync(filename);
-            logger.info("delete file, file path:{}", filename);
+        try {
+            for (const file of fileUploadRecordRes) {
+                const filename = file.file_path;
+                fs.unlinkSync(filename);
+                logger.info("delete file, file path:{}", filename);
+            }
+        } catch (error) {
+            logger.error("delete file error:{}", error);
         }
 
         res.send(BizResult.success());
@@ -180,7 +201,7 @@ class FileController {
             }
         }
 
-        // 校验相同的文件是否已经上传过
+        // check file is exist
         var resultData = await fileService.getFileByMd5(orderId, email, fileName, wholeMd5, deviceType)
 
         if (resultData instanceof BizResultCode) {
@@ -605,17 +626,14 @@ async function smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, r
             res.send(BizResult.fail(BizResultCode.UPLOAD_FILE_FAILED));
             return;
         }
-
         // 上传成功后，保存文件上传记录 小文件不存在分片，所以partNum为0
         fileService.saveFileUploadRecord(orderId, email, file.path, md5, 0)
-
         // 根据文件的大小，merkle树的块大小 计算密码本的偏移量数组
         var offsetArray = await fileService.getCodebookOffset(fileCategory, orderId, email, fileName, md5, fileSize, merkleBufferSize, 2);
         if (offsetArray instanceof BizResultCode) {
             res.send(BizResult.fail(offsetArray));
             return;
         }
-
         var powClient = fileService.getPowGrpcClient();
         let merkleStream = powClient.BuildMerkelLeaf(function (err, data2) {
             if (err) {
@@ -641,13 +659,14 @@ async function smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, r
         merkleStream.write({ req: putObjectMKReq });
 
         var fd = fs.openSync(file.path, 'r');
-        offsetArray.forEach(async (offset) => {
+
+        for (const offset of offsetArray) {
             fs.readSync(fd, merkleBuffer, 0, merkleBufferSize, offset);
             var hashVaule = crypto.createHash('md5').update(merkleBuffer).digest('hex');
             var compressedData = zlib.gzipSync(merkleBuffer);
             var base64data = Buffer.from(compressedData).toString('base64');
-            await fileService.saveFileCodeBook(orderId, email, md5, fileSize, data.cid, offset / merkleBufferSize, base64data, hashVaule);
-        });
+            fileService.saveFileCodeBook(orderId, email, md5, fileSize, data.cid, offset / merkleBufferSize, base64data, hashVaule);
+        }
         fs.closeSync(fd);
         merkleStream.write({ chunk: fs.readFileSync(file.path) });
         merkleStream.end();
