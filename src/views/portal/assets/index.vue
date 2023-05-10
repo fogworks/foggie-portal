@@ -58,7 +58,7 @@
           <!-- <div class="dmc">DMC</div> -->
         </div>
         <div class="flex today-right">
-          <!-- <div @click="rewardsVisible = true">Earn More &nbsp;></div> -->
+          <div @click="rewardsVisible = true">Earn More &nbsp;></div>
         </div>
       </div>
       <div class="sub-title">Balance</div>
@@ -84,10 +84,7 @@
           </div>
         </div>
       </div>
-      <Rewards
-        :currentOODItem="currentOODItem"
-        v-model:visible="rewardsVisible"
-      >
+      <Rewards v-if="rewardsVisible" v-model:visible="rewardsVisible">
       </Rewards>
       <Withdraw
         v-if="WithdrawVisible"
@@ -241,10 +238,10 @@ export default {
       let owner_id = sessionStorage.getItem("walletUser")
         ? sessionStorage.getItem("walletUser")
         : "";
-      getAssets(owner_id).then((r) => {
-        // balanceCount.value = r.amount;
-        nftCount.value = r.nft;
-      });
+      // getAssets(owner_id).then((r) => {
+      //   // balanceCount.value = r.amount;
+      //   nftCount.value = r.nft;
+      // });
 
       lastweekReward(owner_id).then((rr) => {
         lastWeekOptions.xAxis.data = rr?.map((el) => el.day);

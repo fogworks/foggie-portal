@@ -41,11 +41,11 @@
           >
             <el-icon
               class="light"
-              color="#000"
+              color="#fff"
               v-if="currentTheme === 'light' || ''"
               ><Sunny
             /></el-icon>
-            <el-icon class="dark" color="#fff" v-else><Moon /></el-icon>
+            <el-icon class="dark" color="#000" v-else><Moon /></el-icon>
           </div>
           <el-button type="primary" @click="logout"
             ><svg-icon icon-class="switch"></svg-icon> Switch

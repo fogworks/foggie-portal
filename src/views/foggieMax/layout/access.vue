@@ -47,7 +47,6 @@ import { ref, reactive, defineEmits, getCurrentInstance, inject } from "vue";
 import { access_pass, access_pass_login, check_access_pass } from "@/utils/api";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-import { setTokenMap } from "@/utils/tokenMap";
 const bcryptjs = require("bcryptjs");
 const emit = defineEmits(["accessCallback", "update:accessible"]);
 const props = defineProps({});

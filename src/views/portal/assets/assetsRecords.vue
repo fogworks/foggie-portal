@@ -27,7 +27,7 @@
               {{ transferTime(scope.row.created_at) }}
             </template>
           </el-table-column>
-          <el-table-column prop="time" label="Time" width="200">
+          <el-table-column prop="amount" label="Amount" width="200">
             <template #default="scope">
               {{ scope.row.quantity }}{{ scope.row.token }}
             </template>
@@ -516,6 +516,9 @@ export default {
     margin-bottom: 40px;
     background: transparent;
     --el-table-tr-bg-color: transparent;
+    .el-table__body {
+      font-size: 18px;
+    }
     tr {
       background: transparent;
     }

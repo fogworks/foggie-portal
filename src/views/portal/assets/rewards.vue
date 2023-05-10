@@ -4,290 +4,212 @@
       class="withdraw-dialog"
       :model-value="visible"
       :title="title"
-      width="910px"
+      width="1000px"
       @close="close"
     >
-      <div>
-        <div class="sub-title">
-          Complete the following quest to get more rewards.
-        </div>
-        <div class="row" v-for="item in rowList.value">
-          <div class="row-item1">
-            {{ item.title }}
-          </div>
-          <div class="row-item2">
-            {{ item.num ? "+" + item.num + " DMC" : "" }}
-          </div>
-          <div class="row-item3">
-            <div class="color-box">
-              <el-button type="primary" @click="gotoReward(item)">
-                <RippleInk></RippleInk>
-                {{ item.status }}</el-button
+      <div class="card-box">
+        <el-table class="table-box" :data="rowList" style="width: 100%">
+          <el-table-column width="200" label="Time">
+            <template #default="{ row }">
+              {{ transferTime(row.created_time) }}
+            </template>
+          </el-table-column>
+          <el-table-column width="150" prop="id" label="Order ID">
+          </el-table-column>
+          <el-table-column width="200" label="Account" show-overflow-tooltip>
+            <template #default="{ row }">
+              {{ row.user.id }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            width="200"
+            prop="estimated"
+            label="Estimated Income(DMC)"
+          >
+          </el-table-column>
+          <el-table-column width="180" label="Action">
+            <template #default="{ row }">
+              <el-button
+                style="width: unset; height: unset; border-radius: 99px"
+                type="primary"
+                @click="collect(row)"
+                >Collect</el-button
               >
-            </div>
-            <!-- <el-button v-else disabled type="primary">Finished</el-button> -->
-          </div>
-        </div>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          v-model:current-page="pageNo"
+          :background="false"
+          :page-size="10"
+          layout="prev, pager, next, jumper"
+          :total="total"
+          @current-change="dividendList"
+        />
       </div>
     </el-dialog>
   </div>
 </template>
 
-<script>
-import { ref, reactive, toRefs, watch } from "vue";
+<script setup>
 import {
-  awardTaskList,
-  oodFileStatus,
-  rewardReceive,
-  finishTask,
-} from "@/utils/api.js";
+  ref,
+  reactive,
+  toRefs,
+  watch,
+  computed,
+  getCurrentInstance,
+} from "vue";
+import { transferTime } from "@/utils/util";
+import { useStore } from "vuex";
+import { dividend_list, claim_order } from "@/api/common.js";
 import RippleInk from "@/components/rippleInk";
-export default {
-  components: { RippleInk },
-  props: {
-    visible: {
-      type: Boolean,
-      default: false,
-    },
-    title: {
-      type: String,
-      default: "Rewards",
-    },
-    currentOODItem: {
-      type: Object,
-      default: false,
-    },
+const emits = defineEmits(["update:visible"]);
+const store = useStore();
+
+const props = defineProps({
+  title: {
+    type: String,
+    default: "Rewards",
   },
-  setup(props, { emit }) {
-    const close = () => {
-      emit("update:visible", false);
-    };
-    const { visible, title, currentOODItem } = toRefs(props);
-    let rowList = reactive([]);
-    const fileCount = ref(0);
-    const currentFirstVoodSIZE = ref(0);
-
-    const initTaskList = async () => {
-      // let oodId = "Dr663EDOga1WYd60kUtu8rSMf9FdhV6rn3drU2T1t8zN";
-      let oodId = currentOODItem.value.device_id;
-      let res = await awardTaskList(oodId);
-      let TaskGroupList = [];
-      if (res && res.TaskGroup !== null) {
-        let TaskGroup = res.TaskGroup;
-        let NftReward = {};
-        for (let item in TaskGroup) {
-          if (TaskGroup[item].length === 2) {
-            let list = TaskGroup[item][1];
-            list.groupId = item;
-            TaskGroupList.push(list);
-            NftReward = TaskGroup[item][0];
-            NftReward.groupId = item;
-          } else if (TaskGroup[item].length === 1) {
-            let list = TaskGroup[item][0];
-            list.groupId = item;
-            TaskGroupList.push(list);
-          }
-        }
-        let taskList = JSON.parse(JSON.stringify(TaskGroupList));
-        if (NftReward && NftReward.id) {
-          taskList.unshift(NftReward);
-        }
-        let rr = await oodFileStatus(oodId, "sum");
-        currentFirstVoodSIZE.value = rr && rr[0].used_size;
-        fileCount.value = rr && rr[0].file_count;
-
-        let arr = [];
-        for (let i = 0; i < taskList.length; i++) {
-          let item = taskList[i];
-          let o = {
-            title: "",
-            num: "",
-            status: "",
-          };
-          if (item.targe_type === 1) {
-            o.title = "NFT Reward";
-            o.num = "1";
-          } else if (item.targe_type === 2) {
-            o.title = "Adopt Foggie";
-            o.num = "5";
-          } else if (item.targe_type === 3) {
-            o.title = "First upload reward";
-            o.num = "2.5";
-          } else if (item.targe_type === 4) {
-            o.title = "Upload files to big 4G rewards";
-            o.num = "5";
-          }
-
-          if (item.targe_type === 1 || item.targe_type === 2) {
-            if (item.label === "Adopted") {
-              o.status = "Available";
-            } else if (item.label === "" && item.complete_state === -1) {
-              o.status = "Task not completed";
-            } else if (item.label === "" && item.complete_state === 1) {
-              o.status = "Received";
-            }
-          } else if (item.targe_type === 3) {
-            if (item.complete_state === -1 && fileCount.value > 0) {
-              o.status = "Available";
-            } else if (item.complete_state === 1) {
-              o.status = "Received";
-            } else if (fileCount.value === 0) {
-              o.status = "Task not completed";
-            }
-          } else if (item.targe_type === 4) {
-            if (
-              item.complete_state === -1 &&
-              currentFirstVoodSIZE.value / 1024 / 1024 / 1024 > 4
-            ) {
-              o.status = "Available";
-            } else if (item.complete_state === 1) {
-              o.status = "Received";
-            } else if (currentFirstVoodSIZE.value / 1024 / 1024 / 1024 < 4) {
-              o.status = "Task not completed";
-            }
-          }
-          o.label = item.label;
-          o.targe_type = item.targe_type;
-          o.complete_state = item.complete_state;
-          o.id = item.id;
-          o.groupId = item.groupId;
-          if (item.targe_type < 5) {
-            arr.push(o);
-          }
-        }
-        rowList.value = arr;
-      }
-    };
-    const gotoReward = async (item) => {
-      let ood_id = currentOODItem.value.device_id;
-      if (!ood_id) {
-        return;
-      }
-      if (
-        item.targe_type === 3 &&
-        item.complete_state === -1 &&
-        fileCount.value > 0
-      ) {
-        let data = {
-          // ood_id: "Dr663EDOga1WYd60kUtu8rSMf9FdhV6rn3drU2T1t8zN",
-          ood_id: currentOODItem.value.device_id,
-          tid: item.id,
-        };
-        await finishTask(data);
-        let rewardData = {
-          // ood_id: "Dr663EDOga1WYd60kUtu8rSMf9FdhV6rn3drU2T1t8zN",
-          ood_id,
-          gid: item.groupId,
-        };
-        await rewardReceive(rewardData);
-        window.location.reload();
-      } else if (
-        item.targe_type === 4 &&
-        item.complete_state === -1 &&
-        currentFirstVoodSIZE.value / 1024 / 1024 / 1024 > 4
-      ) {
-        let data = {
-          // ood_id: "Dr663EDOga1WYd60kUtu8rSMf9FdhV6rn3drU2T1t8zN",
-          ood_id,
-          tid: item.id,
-        };
-        await finishTask(data);
-        let rewardData = {
-          // ood_id: "Dr663EDOga1WYd60kUtu8rSMf9FdhV6rn3drU2T1t8zN",
-          ood_id: currentOODItem.value.device_id,
-          gid: item.groupId,
-        };
-        await rewardReceive(rewardData);
-        window.location.reload();
-      } else if (item.targe_type === 1 && item.label === "Adopted") {
-        let data = {
-          // ood_id: "Dr663EDOga1WYd60kUtu8rSMf9FdhV6rn3drU2T1t8zN",
-          ood_id,
-          tid: item.id,
-        };
-        await finishTask(data);
-        window.location.reload();
-      } else if (item.targe_type === 2 && item.label === "Adopted") {
-        let data = {
-          // ood_id: "Dr663EDOga1WYd60kUtu8rSMf9FdhV6rn3drU2T1t8zN",
-          ood_id,
-          tid: item.id,
-        };
-        await finishTask(data);
-        let rewardData = {
-          // ood_id: "Dr663EDOga1WYd60kUtu8rSMf9FdhV6rn3drU2T1t8zN",
-          ood_id,
-          gid: item.groupId,
-        };
-        await rewardReceive(rewardData);
-        window.location.reload();
-      }
-    };
-    watch(
-      currentOODItem,
-      (data) => {
-        initTaskList();
-      },
-      {
-        immediate: true,
-        deep: true,
-      }
-    );
-    // onMounted(initTaskList);
-    return { visible, title, rowList, close, initTaskList, gotoReward };
+  visible: {
+    type: Boolean,
+    default: false,
   },
+});
+const { proxy } = getCurrentInstance();
+const close = () => {
+  emits("update:visible", false);
 };
+const { visible, title } = toRefs(props);
+let rowList = ref([]);
+const email = computed(() => store.getters["token/currentUser"]);
+const chainId = computed(() => store.getters.ChainId);
+const total = ref(0);
+const pageNo = ref(1);
+const dividendList = () => {
+  dividend_list({
+    email: email.value,
+    pageNo: pageNo.value,
+    pageSize: 10,
+  }).then((res) => {
+    rowList.value = res.data.list;
+    total.value = res.data.count;
+    console.log(res, "res");
+  });
+};
+const collect = (row) => {
+  claim_order({
+    email: email.value,
+    chainId: chainId.value,
+    orderId: row.id,
+  }).then((res) => {
+    if (res.code == 200) {
+      proxy.$notify({
+        type: "success",
+        message: "Collect successfully",
+        position: "bottom-left",
+      });
+      dividendList();
+    }
+  });
+};
+watch(
+  email,
+  (data) => {
+    // initTaskList();
+    dividendList();
+  },
+  {
+    immediate: true,
+    deep: true,
+  }
+);
+// onMounted(initTaskList);
 </script>
 
 <style lang="scss" scoped>
-.sub-title {
-  margin-top: 40px;
-  color: #000;
-  font-size: 24px;
-  font-weight: 700;
-}
-.row {
+.flex {
   display: flex;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.items-center {
   align-items: center;
-  margin-top: 20px;
-  .row-item1 {
-    width: 420px;
-    font-size: 20px;
+}
+.card-box {
+  width: 100%;
+  @include card-box;
+
+  margin: 24px 0 100px 0;
+  padding: 0;
+  color: #000;
+  box-shadow: none;
+  border: none;
+
+  .title {
     color: #000;
-  }
-  .row-item2 {
-    width: 160px;
-    font-size: 20px;
+    font-size: 30px;
     font-weight: 700;
-    color: #000;
   }
-  .row-item3 {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    .color-box {
-      // .color-box();
-      @include color-box;
 
-      .ripple-ink {
-        border-radius: 16px;
+  .title-img {
+    width: 32px;
+    margin-right: 12px;
+    object-fit: contain;
+  }
+  .status-box {
+    margin: 36px 0 64px 0;
+  }
+  .status {
+    font-size: 24px;
+    margin-right: 40px;
+  }
+  :deep {
+    .el-pagination {
+      float: right;
+      button {
+        background-color: transparent;
       }
-    }
-
-    :deep(.el-button) {
-      position: relative;
-      // width: 120px;
-      height: 48px;
-      border-radius: 50px;
-      font-size: 16px;
+      .el-pager {
+        li {
+          background-color: transparent;
+        }
+      }
     }
   }
 }
 </style>
-<style lang="scss">
+<!-- <style lang="scss">
 .withdraw-dialog {
   position: relative;
   backdrop-filter: blur(40px);
   background: rgba(255, 255, 255, 0.6);
+  .table-box {
+    min-height: 430px;
+    margin-bottom: 40px;
+    background: transparent;
+    --el-table-tr-bg-color: transparent;
+    tr {
+      background: transparent;
+    }
+
+    .el-table__cell {
+      background: transparent !important;
+      border-bottom: 1px solid #e4e4e4 !important;
+    }
+    .el-table__inner-wrapper::before {
+      z-index: 1;
+      background-color: #e4e4e4;
+    }
+  }
+  .link_txt {
+    text-decoration: underline;
+    cursor: pointer;
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
 }
-</style>
+</style> -->

@@ -799,7 +799,7 @@ const deleteItem = (item) => {
       tableLoading.value = false;
       proxy.$notify({
         type: "error",
-        message: "Delete Error",
+        message: "Delete Failed",
         position: "bottom-left",
       });
     }
