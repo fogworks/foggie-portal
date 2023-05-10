@@ -312,8 +312,8 @@ module.exports = {
             var resultList = [];
             for(dividend of dividendList){
                 var userRsi = dividend.user_rsi_amount;
-                var expect = calcExpectReturns(dmc, rsi, userRsi);
-                dividend['expect_returns'] = expect;
+                var estimated = calcEstimated(dmc, rsi, userRsi);
+                dividend['estimated'] = estimated;
                 resultList.push(dividend);
             }
 
@@ -377,7 +377,7 @@ function getAmount(x, y, unit) {
  * @param {*} rsi  455988.8667 DMC
  * @param {*} unit  DMC/RSI
  */
-function calcExpectReturns(dmc, rsi, changeRsi) {
+function calcEstimated(dmc, rsi, changeRsi) {
     
     var dmc = parseFloat(dmc);
     var rsi = parseFloat(rsi);
