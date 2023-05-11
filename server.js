@@ -22,9 +22,9 @@ var jsonParser = bodyParser.json();
 
 var challengeConfig = config.get("challengeConfig");
 var payChallengeTimer = challengeConfig.get("payChallengeTimer");
-setInterval(function () {
-  OrderTimer.payChallengeTimer();
-}, payChallengeTimer);
+// setInterval(function () {
+//   OrderTimer.payChallengeTimer();
+// }, payChallengeTimer);
 
 app.post("/order/outstanding_orders", jsonParser, (req, res) => {
   var email = req.body.email;

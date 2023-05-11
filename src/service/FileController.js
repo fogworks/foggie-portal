@@ -235,10 +235,6 @@ class FileController {
 
         //small file upload
         if (parseInt(fileCategory) == 1) {
-            if (!fileType) {
-                res.send(BizResult.validateFailed());
-                return;
-            }
             await smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, res, fileCategory, orderId, email, peerId, file, foggieId);
         }
         // big file upload
