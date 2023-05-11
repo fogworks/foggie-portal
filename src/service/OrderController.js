@@ -16,28 +16,27 @@ const merkleBufferSize = fileConfig.get('merkleBufferSize');
 class OrderController {
 
     /**
-     * 买单
-     * @param {*} req    HTTP的请求
-     * @param {*} response      HTTP的响应
+     * buy order
+     * @param {*} req    HTTP request
+     * @param {*} response   HTTP response
      * @returns 
      */
     static async buy(req, response) {
 
-        // chainId
         var chainId = req.body.chainId;
-        // 挂单的id
         var billId = req.body.billId;
-        // 购买周期，单位周
+        // buy period, unit week
         var period = req.body.period;
-        // 基准价格，单位 DMC
+        // benchmark price,unit DMC
         var benchmarkPrice = req.body.benchmarkPrice;
-        // 价格区间 1 基准价格正负浮动20%；2 基准价格正负浮动30%
+        // 1 fluctuates by 20% plus or minus ,
+        // 2 fluctuates by 30% plus or minus
+        // 3 no limit
         var priceRange = req.body.priceRange;
-        // 购买PST的数量
+        // PST number
         var unmatchedAmount = req.body.unmatchedAmount;
-        // 订单总价，单位 DMC
+        // total price, unit DMC
         var totalPrice = req.body.totalPrice;
-        // foggie的邮箱
         var email = req.body.email;
 
         var chainConfig = config.get('chainConfig')
@@ -59,9 +58,8 @@ class OrderController {
             res.send(BizResult.fail(userInfo));
             return;
         }
-        // 用户名
         var username = userInfo.username;
-        // 基准价格*10000
+        // benchmarkPrice*10000
         var benchmark = (benchmarkPrice * 10000).toString()
         var dmc_client = DMC({
             chainId: chainId,
@@ -104,19 +102,20 @@ class OrderController {
             blocksBehind: 3,
             expireSeconds: 30,
         }).then(async (res) => {
-            // 根据买单的返回数据获取订单的基本信息，包含订单的id、矿工、用户
+            // Obtain basic information about the order based on the returned data
+            // of the purchase order, including the order ID, miner, and user
             var orderBasic = await orderService.getOrderBasicByBuyRes(res);
             if (orderBasic instanceof BizResultCode) {
                 response.send(BizResult.fail(orderBasic));
                 return;
             }
-            // 保存订单到neDB
+            // save order into neDB
             var saveRes = await orderService.saveOrder(email, orderBasic.orderId, orderBasic.miner, orderBasic.user, billId, unmatchedAmount, totalPrice, res.transaction_id, res.processed.block_num);
             if (saveRes instanceof BizResultCode) {
                 response.send(BizResult.fail(saveRes));
                 return;
             }
-            // 同步订单到注册中心
+            // sync order to register center
             var syncOrderRes = await orderService.syncOrder2RegisterCenter(email, orderBasic.orderId,
                 billId, unmatchedAmount * 1024 * 1024 * 1024, 0, res.transaction_id);
             if (syncOrderRes instanceof BizResultCode) {
@@ -131,7 +130,7 @@ class OrderController {
     }
 
     /**
-     * 同步订单信息到注册中心
+     * sync order to register center
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -144,7 +143,7 @@ class OrderController {
             res.send(BizResult.fail(BizResultCode.SYNC_ORDER_2_REGISTER_CENTER_FAILED));
             return;
         }
-        // 同步订单到注册中心
+        // sync order to register center
         var syncOrderRes = await orderService.syncOrder2RegisterCenter(email, order.order_id,
             order.bill_id, order.pst * 1024 * 1024 * 1024, 0, order.transaction_id);
         if (syncOrderRes instanceof BizResultCode) {
@@ -155,15 +154,15 @@ class OrderController {
     }
 
     /**
-     * 获取筛选的订单列表
-     * 筛选条件的价格范围是 左闭右闭
-     * @param {*} email     foggie的邮箱
-     * @param {*} unmatchedAmount 购买PST的数量
-     * @param {*} period    购买周期，单位 周
-     * @param {*} minPrice  最低价，单位 DMC
-     * @param {*} maxPrice  最高价，单位 DMC
-     * @param {*} res       HTTP的响应
-     * @returns 订单列表
+     * Obtain filtered order list
+     * The price range of the filtering criteria is left closed and right closed
+     * @param {*} email     
+     * @param {*} unmatchedAmount pst nuumber
+     * @param {*} period    buy period, unit week
+     * @param {*} minPrice  minimum price, unit DMC
+     * @param {*} maxPrice  maximum price, unit DMC
+     * @param {*} res       HTTP response
+     * @returns order list
      */
     static async outstandingOrders(email, unmatchedAmount, period, minPrice, maxPrice, res) {
 
@@ -323,7 +322,7 @@ class OrderController {
             },
             body: body
         }).getBody('utf-8')).data.find_order
-        // 获取用户订单总数
+        // get count
         let num = '{count_order(\n' +
             '            where:{and:[{user_id:"' + username + '" }]}\n' +
             '        )\n' +

@@ -6,7 +6,7 @@ class BaseResultCode {
      */
     code;
     /**
-     * 说明
+     * desc
      */
     desc;
 
@@ -17,14 +17,14 @@ class BaseResultCode {
 
     /************************************/
 
-    // 通用的异常code 1～9999
+    // common exception code 1～9999
     static SUCCESS = new BaseResultCode(200, 'success');
     static FAILED = new BaseResultCode(500, 'failed');
     static VALIDATE_FAILED = new BaseResultCode(300, 'parameter valid failed');
     static API_NOT_FOUNT = new BaseResultCode(400, 'api not found');
     static API_BUSY = new BaseResultCode(600, 'operate frequently, try again later')
 
-    // 用户的异常code 10000～19999
+    // user exception code 10000～19999
     static USER_NOT_EXIST = new BaseResultCode(10000, 'user is not exist');
     static PASSWORD_NOT_EXIST = new BaseResultCode(10001, 'password is not exist');
     static PASSWORD_EXIST = new BaseResultCode(10002, 'password is exist');
@@ -44,7 +44,7 @@ class BaseResultCode {
     static ACCOUNT_NOT_EXIST = new BaseResultCode(10016, 'account is not exist');
     static CHECK_ACCOUNT_FAILED = new BaseResultCode(10017, 'check account failed');
 
-    // 订单的异常code 20000～29999
+    // order exceptin code 20000～29999
     static ORDER_BUY_FAILED = new BaseResultCode(20000, 'buy failed');
     static SAVE_PUSH_MERKLE_RECORD_FAILED = new BaseResultCode(20001, 'save push merkle record failed');
     static QUERY_PUSH_MERKLE_RECORD_FAILED = new BaseResultCode(20002, 'query push merkle record failed');
@@ -73,7 +73,7 @@ class BaseResultCode {
     static MERKLE_INCONSISTENT = new BaseResultCode(20026, 'merkle inconsistent');
     static ORDER_STATE_END = new BaseResultCode(20027, 'order state is end');
 
-    // 文件的异常code 30000～39999
+    // file exception code 30000～39999
     static FILE_NOT_EXIST = new BaseResultCode(30000, 'file is not exist');
     static SAVE_FILE_FAILED = new BaseResultCode(30001, 'save file failed');
     static QUERY_FILE_FAILED = new BaseResultCode(30002, 'query file failed');
@@ -105,7 +105,7 @@ class BaseResultCode {
     static GET_CHAIN_ID_FAILED = new BaseResultCode(30028, 'get chain id failed');
     static GET_BENCHMARK_PRICE_FAILED = new BaseResultCode(30029, 'get benchmark price failed');
 
-    // 资产的异常code 40000～49999
+    // asset exception code 40000～49999
     static TRANSFER_FAILED = new BaseResultCode(40000, 'transfer failed');
     static GET_TRANSFER_VALID_FAILED = new BaseResultCode(40001, 'get transfer valid failed');
     static GENERATE_QR_CODE_FAILED = new BaseResultCode(40002, 'generating QR code failed');

@@ -16,24 +16,20 @@ const crypto = require('crypto');
 class FileController {
 
     /**
-     * 存储文件属性，包含 订单id，文件路径，foggie邮箱地址，文件大小，文件md5
-     * @param {*} req       HTTP的request
-     * @param {*} res       HTTP的response
+     * save file info, contains order_id,file_path,email,file_size,md5,device_type
+     * @param {*} req       HTTP request
+     * @param {*} res       HTTP response
      * @returns 
      */
     static async saveFileProp(req, res) {
 
         var orderId = req.body.orderId;
-        // foggie的邮箱地址
         var email = req.body.email;
-        // 文件的路径
         var filePath = req.body.filePath;
-        // 文件大小，单位：字节
         var fileSize = req.body.fileSize;
-        // 文件内容的md5
         var md5 = req.body.md5;
 
-        // 设备类型 1 foggie 2 foggieMax 3 用户客户端
+        //  1 foggie 2 foggieMax 3 client
         var deviceType = req.body.deviceType;
 
         if (!orderId || !email || !filePath || !fileSize || !md5 || !deviceType) {
@@ -92,13 +88,13 @@ class FileController {
     }
 
     /**
-     * 查询，包含 订单id，文件路径，用户名
-     * @param {*} orderId       订单id
-     * @param {*} email         foggie的邮箱地址
-     * @param {*} deviceType    设备类型 1 foggie 2 foggieMax 3 用户客户端
-     * @param {*} pageSize      每页条数
-     * @param {*} pageNo        页数
-     * @param {*} res HTTP的response
+     * file list
+     * @param {*} orderId       
+     * @param {*} email         
+     * @param {*} deviceType    1 foggie 2 foggieMax 3 client
+     * @param {*} pageSize      
+     * @param {*} pageNo        
+     * @param {*} res HTTP response
      * @returns 
      */
     static async list(orderId, email, deviceType, pageSize, pageNo, res) {
@@ -137,18 +133,17 @@ class FileController {
     }
 
     /**
-     * 上传文件
-     * 大于10M的文件，使用流的方式
+     * upload file
      * 
-     * @param {*} req HTTP的request
-     * @param {*} res HTTP的response
+     * @param {*} req HTTP request
+     * @param {*} res HTTP response
      * @returns
      */
     static async upload(req, res) {
 
-        // 上传文件的类别 1：小文件 2：大文件
+        // 1 small 2 big
         var fileCategory = req.body.fileCategory;
-        // 设备类型 1 foggie 2 foggieMax 3 用户客户端
+        // deviceType 1 foggie 2 foggieMax 3 client
         var deviceType = req.body.deviceType;
         var fileName = req.body.fileName;
         var md5 = req.body.md5;
@@ -156,7 +151,7 @@ class FileController {
         var fileSize = req.body.fileSize;
         var orderId = req.body.orderId;
         var email = req.body.email;
-        // 大文件新增的入参
+        // the following are big file parameter
         var partId = req.body.partId;
         var uploadId = req.body.uploadId;
         var minOffset = req.body.minOffset;
@@ -213,14 +208,14 @@ class FileController {
             return;
         }
 
-        // 获取token
+        // token
         var token = await userService.getToken4UploadFile(email, orderId);
         if (token instanceof BizResultCode) {
             res.send(BizResult.fail(token));
             return;
         }
 
-        // 获取peerId
+        // peerId
         var orderInfo = await orderService.getOrderById(email, orderId);
 
         if (orderInfo instanceof BizResultCode) {
@@ -236,10 +231,9 @@ class FileController {
             token: token
         };
         var file = req.files.file;
-        // 测试文件服务器端联通性
         var rpc = orderInfo.rpc;
 
-        // 小文件上传
+        //small file upload
         if (parseInt(fileCategory) == 1) {
             if (!fileType) {
                 res.send(BizResult.validateFailed());
@@ -247,7 +241,7 @@ class FileController {
             }
             await smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, res, fileCategory, orderId, email, peerId, file, foggieId);
         }
-        // 大文件上传
+        // big file upload
         else if (parseInt(fileCategory) == 2) {
             if (!partId || !uploadId || !minOffset || !maxOffset || !wholeFileSize) {
                 res.send(BizResult.validateFailed());
@@ -274,14 +268,19 @@ class FileController {
                     return;
                 }
 
-                // 分片文件上传文件后，需要记录分片文件的临时路径以及整个大文件的md5，用于提交接口中生成merkle树
+                // After uploading the sharded file, 
+                // it is necessary to record the temporary path of the sharded file 
+                // and the MD5 of the entire large file, 
+                //which is used to generate a merkle tree in the commit interface
                 var saveFileUploadRecordRes = await fileService.saveFileUploadRecord(orderId, email, file.path, wholeMd5, partId)
                 if (saveFileUploadRecordRes instanceof BizResultCode) {
                     res.send(BizResult.fail(saveFileUploadRecordRes));
                     return;
                 }
 
-                // 根据文件的大小，merkle树的块大小 计算密码本的偏移量数组
+                // Calculate the offset array of the password book 
+                // based on the size of the file and the block size of 
+                // the merkle tree
                 var offsetArray = await fileService.getCodebookOffset(fileCategory, orderId, email, fileName, wholeMd5, wholeFileSize, merkleBufferSize, 2)
                 if (offsetArray instanceof BizResultCode) {
                     res.send(BizResult.fail(offsetArray));
@@ -291,14 +290,17 @@ class FileController {
                 logger.info('big file codebookOffset,md5:{},offsetArray:{}', wholeMd5, offsetArray);
                 var fd = fs.openSync(file.path, 'r');
                 offsetArray.forEach(async (offset) => {
-                    // 判断当前的分片文件offset范围是否需要记录密码本
+                    // Determine whether the offset range of the current shard file 
+                    // needs to be recorded in a password book
                     if (offset >= minOffset && offset < maxOffset) {
                         fs.readSync(fd, merkleBuffer, 0, merkleBufferSize, offset);
                         var hashVaule = crypto.createHash('md5').update(merkleBuffer).digest('hex');
                         logger.info('saveFileCodeBook, file_path:{}, partNum:{}, md5:{}, offset:{}, minOffset:{}, maxOffset:{}', file.path, partId, hashVaule, offset, minOffset, maxOffset);
                         var compressedData = zlib.gzipSync(merkleBuffer);
                         var base64data = Buffer.from(compressedData).toString('base64');
-                        // 大文件的cid在上传成功后，还没有生成，先记录一个空字符串，后续提交接口中会更新
+                        //After successfully uploading the big file's cid, 
+                        //it has not yet been generated. 
+                        //First, an empty string will be recorded and updated in the subsequent submission interface
                         await fileService.saveFileCodeBook(orderId, email, wholeMd5, wholeFileSize, '', offset / merkleBufferSize, base64data, hashVaule);
                     }
                 });
@@ -332,7 +334,7 @@ class FileController {
     }
 
     /**
-     * 删除生成的密码本偏移数组
+     * Delete the generated password book offset array
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -357,16 +359,16 @@ class FileController {
     }
 
     /**
-     * 创建文件
-     * @param {*} email    foggie邮箱地址
-     * @param {*} fileName 文件名
-     * @param {*} md5      文件md5
-     * @param {*} fileType 文件类型
-     * @param {*} fileSize 文件大小，单位 Bytes
-     * @param {*} orderId  订单id
-     * @param {*} token    文件token 
-     * @param {*} peerId   peerId
-     * @param {*} res      HTTP的response
+     * create file
+     * @param {*} email    
+     * @param {*} fileName 
+     * @param {*} md5      
+     * @param {*} fileType 
+     * @param {*} fileSize 
+     * @param {*} orderId  
+     * @param {*} token     
+     * @param {*} peerId   
+     * @param {*} res     
      * @returns 
      */
     static async create(email, fileName, md5, fileType, fileSize, orderId, deviceType, res) {
@@ -376,14 +378,14 @@ class FileController {
             return;
         }
 
-        // 获取token
+        // token
         var token = await userService.getToken4UploadFile(email, orderId);
         if (token instanceof BizResultCode) {
             res.send(BizResult.fail(token));
             return;
         }
 
-        // 获取peerId
+        // peerId
         var orderInfo = await orderService.getOrderById(email, orderId);
         if (orderInfo instanceof BizResultCode) {
             res.send(BizResult.fail(orderInfo));
@@ -393,7 +395,7 @@ class FileController {
         var rpc = orderInfo.rpc;
         var foggieId = orderInfo.foggie_id;
 
-        // 校验相同的文件是否已经上传过
+        // valid the same as file
         var resultData = await fileService.getFileByMd5(orderId, email, fileName, md5, deviceType)
 
         if (resultData instanceof BizResultCode) {
@@ -436,7 +438,6 @@ class FileController {
         });
     }
 
-    // 删除文件
     static async removeFileProp(req, res) {
         var orderId = req.body.orderId;
         var email = req.body.email;
@@ -452,7 +453,7 @@ class FileController {
     }
 
     /**
-     * 获取密码本
+     * get code book
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -474,10 +475,10 @@ class FileController {
     }
 
     /**
-     * 完成文件传输后的提交
+     * complete upload file
      * 
-     * @param {*} req HTTP的request
-     * @param {*} res HTTP的response
+     * @param {*} req HTTP request
+     * @param {*} res HTTP response
      * @returns
      */
     static async complete(req, res) {
@@ -495,14 +496,14 @@ class FileController {
             return;
         }
 
-        // 获取token
+        // token
         var token = await userService.getToken4UploadFile(email, orderId);
         if (token instanceof BizResultCode) {
             res.send(BizResult.fail(token));
             return;
         }
 
-        // 获取peerId
+        // peerId
         var orderInfo = await orderService.getOrderById(email, orderId);
         if (orderInfo instanceof BizResultCode) {
             res.send(BizResult.fail(orderInfo));
@@ -512,7 +513,7 @@ class FileController {
         var rpc = orderInfo.rpc;
         var foggieId = orderInfo.foggie_id;
 
-        // 根据文件的上传记录，重读一次文件，生成merkle树后 提交
+        // According to the upload record of the file, reread the file once
         var fileUploadRecordRes = await fileService.getFileUploadRecord(orderId, email, md5);
 
         if (fileUploadRecordRes instanceof BizResultCode) {
@@ -528,7 +529,7 @@ class FileController {
                 return;
             }
             logger.info('generate merkle success, orderId{}, data:', data);
-            // 生成merkle树后 更新cid
+            // Update cid after generating merkle tree
             var updateCodebookRes = await fileService.updateFileCodeBook(orderId, email, md5, data.cid)
 
             if (updateCodebookRes instanceof BizResultCode) {
@@ -536,7 +537,7 @@ class FileController {
                 return;
             }
 
-            // 生成merkle树后 提交
+            // Generate Merkle Tree and Submit
             const header = {
                 peerId: peerId,
                 Id: foggieId,
@@ -590,7 +591,6 @@ class FileController {
                 for (const file of fileUploadRecordRes) {
                     const filename = file.file_path;
                     const readStream = fs.createReadStream(filename, { highWaterMark: uploadFileBufferSize });
-                    // 将文件内容写入流
                     for await (const chunk of readStream) {
                         merkleStream.write({ chunk: chunk });
                     }
@@ -626,9 +626,9 @@ async function smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, r
             res.send(BizResult.fail(BizResultCode.UPLOAD_FILE_FAILED));
             return;
         }
-        // 上传成功后，保存文件上传记录 小文件不存在分片，所以partNum为0
+        // After successful upload, save the file upload record. 
+        // The small file does not have shards, so partNum is 0
         fileService.saveFileUploadRecord(orderId, email, file.path, md5, 0)
-        // 根据文件的大小，merkle树的块大小 计算密码本的偏移量数组
         var offsetArray = await fileService.getCodebookOffset(fileCategory, orderId, email, fileName, md5, fileSize, merkleBufferSize, 2);
         if (offsetArray instanceof BizResultCode) {
             res.send(BizResult.fail(offsetArray));
