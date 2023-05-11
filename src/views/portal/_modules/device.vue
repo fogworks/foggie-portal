@@ -120,7 +120,7 @@ import WifiSearching from "@/components/wifiSearching";
 import { useRouter } from "vue-router";
 import IPFrom from "./ipForm";
 import { search_foggie } from "@/utils/api";
-import { handleTimeStamp, getfilesize } from "@/utils/util";
+import { handleTimeStamp, transferUTCTime, getfilesize } from "@/utils/util";
 import { useStore } from "vuex";
 const store = useStore();
 const router = useRouter();
@@ -219,11 +219,10 @@ const handleProgress = (item) => {
   } else {
     let created = +item.created_at;
     let now = new Date().getTime() - created;
-    let end = +item.expire - created;
+    let end = new Date(item.expire).getTime() - created;
     return +(now / end).toFixed(2) > 100 ? 100 : +(now / end).toFixed(2);
   }
 };
-const currentTimeStamp = ref(Date.parse(new Date()));
 const email = computed(() => store.getters["token/currentUser"]);
 const search = () => {
   loading.value = true;

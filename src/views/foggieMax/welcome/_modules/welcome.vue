@@ -5,7 +5,7 @@
     <p>
       <HoverButton @next="next"></HoverButton>
     </p>
-    <p class="sub-title">Set up your Foggie Max now</p>
+    <p class="sub-title">Set your Foggie Max now</p>
   </div>
 </template>
 

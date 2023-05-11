@@ -205,7 +205,7 @@ const handleProgress = (item) => {
   } else {
     let created = +item.created_at;
     let now = new Date().getTime() - created;
-    let end = +item.expire - created;
+    let end = new Date(item.expire).getTime() - created;
     return +(now / end).toFixed(2) > 100 ? 100 : +(now / end).toFixed(2);
   }
 };
