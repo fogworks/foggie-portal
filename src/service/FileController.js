@@ -41,6 +41,19 @@ class FileController {
             return;
         }
 
+        // check file is exist
+        var resultData = await fileService.getFileByMd5(orderId, email, filePath, md5, deviceType)
+
+        if (resultData instanceof BizResultCode) {
+            res.send(BizResult.fail(resultData));
+            return;
+        }
+        if (resultData > 0) {
+            logger.info("file is exist, orderId:{}, md5:{}", orderId, md5);
+            res.send(BizResult.success());
+            return;
+        }
+
         orderService.updateOrderUsedSpace(email, orderId, fileSize);
 
         var codebooks = await fileService.getFileCodeBookByMd5(orderId, email, md5);
@@ -49,11 +62,15 @@ class FileController {
             return;
         }
 
+        if(codebooks.length == 0){
+            res.send(BizResult.fail(BizResultCode.GET_FILE_CODEBOOK_FAILED));
+            return;
+        }
+
         var codebook = codebooks[0];
 
-        await fileService.saveFileProp(orderId, email, filePath, fileSize, md5, codebook.cid, deviceType);
+        fileService.saveFileProp(orderId, email, filePath, fileSize, md5, codebook.cid, deviceType);
 
-        // 根据文件的上传记录，重读一次文件，生成merkle树后 提交
         var fileUploadRecordRes = await fileService.getFileUploadRecord(orderId, email, md5);
 
         if (fileUploadRecordRes instanceof BizResultCode) {
@@ -61,10 +78,14 @@ class FileController {
             return;
         }
 
-        for (const file of fileUploadRecordRes) {
-            const filename = file.file_path;
-            fs.unlinkSync(filename);
-            logger.info("delete file, file path:{}", filename);
+        try {
+            for (const file of fileUploadRecordRes) {
+                const filename = file.file_path;
+                fs.unlinkSync(filename);
+                logger.info("delete file, file path:{}", filename);
+            }
+        } catch (error) {
+            logger.error("delete file error:{}", error);
         }
 
         res.send(BizResult.success());
@@ -143,24 +164,44 @@ class FileController {
         var wholeMd5 = req.body.wholeMd5;
         var wholeFileSize = req.body.wholeFileSize;
 
-        if (!fileCategory || !fileName || !md5 || !fileSize || !orderId ||!email || !wholeMd5 || !deviceType) {
+        if (!fileCategory || !fileName || !md5 || !fileSize || !orderId || !email || !wholeMd5 || !deviceType) {
             res.send(BizResult.validateFailed());
             return;
         }
 
-        // 上传文件时，校验挑战状态, 挑战未走到终态，不允许上传文件
-        // var challengeCount = orderService.getChallengeCountByState(orderId, [3]);
-        // if (challengeCount instanceof BizResultCode) {
-        //     res.send(BizResult.fail(challengeCount));
-        //     return;
-        // }
-        // if (challengeCount > 0) {
-        //     logger.info("challenge is not end, orderId:{}, count:{}", orderId, challengeCount);
-        //     res.send(BizResult.fail(BizResultCode.ORDER_CHALLENGE_NOT_END));
-        //     return;
-        // }
+        // upload file valid challenge is end
+        var challengeList = orderService.getChallengeByState(orderId, [0, 1, 3, 7]);
+        if (challengeList instanceof BizResultCode) {
+            res.send(BizResult.fail(challengeList));
+            return;
+        }
+        if (challengeList.length > 0) {
 
-        // 校验相同的文件是否已经上传过
+            for (const chanllenge of challengeList) {
+                if (chanllenge.state === 3) {
+                    logger.info("challenge is not end, orderId:{}", orderId);
+                    res.send(BizResult.fail(BizResultCode.ORDER_CHALLENGE_NOT_END));
+                    return;
+                }
+                if (chanllenge.state === 7) {
+                    logger.info("order is end, orderId:{}", orderId);
+                    res.send(BizResult.fail(BizResultCode.ORDER_STATE_END));
+                    return;
+                }
+                if (chanllenge.state === 0 && chanllenge.pre_merkle_root != chanllenge.merkle_root) {
+                    logger.info("merkle is inconsistent, orderId:{}", orderId);
+                    res.send(BizResult.fail(BizResultCode.MERKLE_INCONSISTENT));
+                    return;
+                }
+                if (chanllenge.state === 1 && parseInt(chanllenge.pre_merkle_root) != 0) {
+                    logger.info("merkle is inconsistent, orderId:{}", orderId);
+                    res.send(BizResult.fail(BizResultCode.MERKLE_INCONSISTENT));
+                    return;
+                }
+            }
+        }
+
+        // check file is exist
         var resultData = await fileService.getFileByMd5(orderId, email, fileName, wholeMd5, deviceType)
 
         if (resultData instanceof BizResultCode) {
@@ -174,15 +215,15 @@ class FileController {
 
         // 获取token
         var token = await userService.getToken4UploadFile(email, orderId);
-        if(token instanceof BizResultCode) {
+        if (token instanceof BizResultCode) {
             res.send(BizResult.fail(token));
             return;
         }
 
         // 获取peerId
         var orderInfo = await orderService.getOrderById(email, orderId);
-        
-        if(orderInfo instanceof BizResultCode){
+
+        if (orderInfo instanceof BizResultCode) {
             res.send(BizResult.fail(orderInfo));
             return;
         }
@@ -329,7 +370,7 @@ class FileController {
      * @returns 
      */
     static async create(email, fileName, md5, fileType, fileSize, orderId, deviceType, res) {
-        
+
         if (!fileName || !fileType || !fileSize || !orderId || !md5 || !email || !deviceType) {
             res.send(BizResult.validateFailed());
             return;
@@ -337,21 +378,21 @@ class FileController {
 
         // 获取token
         var token = await userService.getToken4UploadFile(email, orderId);
-        if(token instanceof BizResultCode) {
+        if (token instanceof BizResultCode) {
             res.send(BizResult.fail(token));
             return;
         }
 
         // 获取peerId
         var orderInfo = await orderService.getOrderById(email, orderId);
-        if(orderInfo instanceof BizResultCode){
+        if (orderInfo instanceof BizResultCode) {
             res.send(BizResult.fail(orderInfo));
             return;
         }
         var peerId = orderInfo.peer_id;
         var rpc = orderInfo.rpc;
         var foggieId = orderInfo.foggie_id;
-        
+
         // 校验相同的文件是否已经上传过
         var resultData = await fileService.getFileByMd5(orderId, email, fileName, md5, deviceType)
 
@@ -416,7 +457,7 @@ class FileController {
      * @param {*} res 
      * @returns 
      */
-    static async getCodebook(req, res){
+    static async getCodebook(req, res) {
         var orderId = req.body.orderId;
         var email = req.body.email;
         var md5 = req.body.md5;
@@ -456,14 +497,14 @@ class FileController {
 
         // 获取token
         var token = await userService.getToken4UploadFile(email, orderId);
-        if(token instanceof BizResultCode) {
+        if (token instanceof BizResultCode) {
             res.send(BizResult.fail(token));
             return;
         }
 
         // 获取peerId
         var orderInfo = await orderService.getOrderById(email, orderId);
-        if(orderInfo instanceof BizResultCode){
+        if (orderInfo instanceof BizResultCode) {
             res.send(BizResult.fail(orderInfo));
             return;
         }
@@ -585,17 +626,14 @@ async function smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, r
             res.send(BizResult.fail(BizResultCode.UPLOAD_FILE_FAILED));
             return;
         }
-
         // 上传成功后，保存文件上传记录 小文件不存在分片，所以partNum为0
         fileService.saveFileUploadRecord(orderId, email, file.path, md5, 0)
-
         // 根据文件的大小，merkle树的块大小 计算密码本的偏移量数组
         var offsetArray = await fileService.getCodebookOffset(fileCategory, orderId, email, fileName, md5, fileSize, merkleBufferSize, 2);
         if (offsetArray instanceof BizResultCode) {
             res.send(BizResult.fail(offsetArray));
             return;
         }
-
         var powClient = fileService.getPowGrpcClient();
         let merkleStream = powClient.BuildMerkelLeaf(function (err, data2) {
             if (err) {
@@ -621,13 +659,14 @@ async function smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, r
         merkleStream.write({ req: putObjectMKReq });
 
         var fd = fs.openSync(file.path, 'r');
-        offsetArray.forEach(async (offset) => {
+
+        for (const offset of offsetArray) {
             fs.readSync(fd, merkleBuffer, 0, merkleBufferSize, offset);
             var hashVaule = crypto.createHash('md5').update(merkleBuffer).digest('hex');
             var compressedData = zlib.gzipSync(merkleBuffer);
             var base64data = Buffer.from(compressedData).toString('base64');
-            await fileService.saveFileCodeBook(orderId, email, md5, fileSize, data.cid, offset / merkleBufferSize, base64data, hashVaule);
-        });
+            fileService.saveFileCodeBook(orderId, email, md5, fileSize, data.cid, offset / merkleBufferSize, base64data, hashVaule);
+        }
         fs.closeSync(fd);
         merkleStream.write({ chunk: fs.readFileSync(file.path) });
         merkleStream.end();

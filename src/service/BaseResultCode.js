@@ -70,6 +70,8 @@ class BaseResultCode {
     static CHALLENGE_NO_RESPONSE = new BaseResultCode(20023, 'miner no response challenge, no allow push merkle');
     static GET_ORDER_FROM_CHAIN_FAILED = new BaseResultCode(20024, 'get order from chain failed');
     static UPDATE_CHANLLENGE_RECORD_FAILED = new BaseResultCode(20025, 'update challenge failed');
+    static MERKLE_INCONSISTENT = new BaseResultCode(20026, 'merkle inconsistent');
+    static ORDER_STATE_END = new BaseResultCode(20027, 'order state is end');
 
     // 文件的异常code 30000～39999
     static FILE_NOT_EXIST = new BaseResultCode(30000, 'file is not exist');
