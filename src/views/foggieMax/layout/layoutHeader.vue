@@ -31,7 +31,7 @@
         </div>
         <template #dropdown>
           <el-dropdown-menu class="logout-dropdown">
-            <el-dropdown-item command="setting">Set Up</el-dropdown-item>
+            <el-dropdown-item command="setting">Set</el-dropdown-item>
             <!-- <el-dropdown-item command="logout">Logout</el-dropdown-item> -->
           </el-dropdown-menu>
         </template>

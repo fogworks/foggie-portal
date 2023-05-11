@@ -3,7 +3,7 @@
     <div class="reset">
       <svg-icon @click="resetMethod" icon-class="reset2"></svg-icon>
       <div>
-        <p>Service one click reset</p>
+        <p>Click to reset</p>
         <p>After resetting, the device needs to be reinitialized</p>
       </div>
     </div>

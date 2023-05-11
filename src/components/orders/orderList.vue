@@ -155,6 +155,11 @@
                   <span>15days 0 hours 30min</span>
                 </template>
               </el-progress>
+              <svg-icon
+                class="over"
+                @click="overShow = true"
+                icon-class="overTime"
+              ></svg-icon>
             </div>
           </el-col>
         </el-row>
@@ -278,6 +283,23 @@
     v-model:visible="recordsShow"
     :orderId="orderId"
   ></AssetsRecords>
+  <el-dialog
+    class="account-dialog"
+    title="Overtime compensation"
+    width="500px"
+    v-model="overShow"
+  >
+    <span class="dialog-span">
+      The miners have not recovered for 20 hours. Do you want to make overtime
+      compensation?
+    </span>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="overShow = false">calcel</el-button>
+        <el-button type="primary" @click="handlerOver"> YES </el-button>
+      </span>
+    </template>
+  </el-dialog>
 
   <!-- </div>s -->
 </template>
@@ -305,6 +327,7 @@ const props = defineProps({
     default: "",
   },
 });
+const overShow = ref(false);
 const ChainId = computed(() => $state.getters.ChainId);
 const deviceType = computed(() => $state.getters.deviceType);
 
@@ -349,7 +372,9 @@ function openMyFiles(item) {
   $state.commit("upload/setOrderId", item.id);
   // router.push({ path: "/Alltemplate/MyFiles", query: { orderState: item.state } });
 }
-
+function handlerOver() {
+  console.log(111);
+}
 function popoverClick(type, item) {
   if (type == "submitMerkle") {
     // if (item.state == "1") {
@@ -687,6 +712,29 @@ onMounted(() => {
         color: #ff9b3d;
         font-style: italic;
       }
+    }
+  }
+}
+.over {
+  color: #ff9b3d;
+  cursor: pointer;
+  &:hover {
+    color: #ff9b3d !important;
+    transform: scale(1.05);
+  }
+}
+.account-dialog {
+  .dialog-span {
+    display: inline-block;
+    padding: 20px 0 !important;
+    color: #000;
+  }
+
+  .dialog-footer {
+    .el-button {
+      width: unset;
+      height: unset;
+      border-radius: 50px;
     }
   }
 }
