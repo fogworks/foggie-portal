@@ -755,7 +755,7 @@ module.exports = {
             var registerCenterConfig = config.get('registerCenterConfig');
             var registerCenterUrl = registerCenterConfig.get('url');
             var syncOrder = registerCenterConfig.get('syncOrder');
-            var expire = new Date(expire).getTime();
+            var expire = new Date(expire).toISOString();
             var orderInfo = await module.exports.getOrderById(email, orderId);
             if (orderInfo instanceof BizResultCode) {
                 logger.error('orderInfo is null, orderId:{}', orderId);
