@@ -11,9 +11,9 @@ const common = require('./common');
 class AssetsController {
 
     /**
-     * 转账
-     * @param {*} req HTTP请求 
-     * @param {*} res HTTP响应
+     * transfer
+     * @param {*} req HTTP request 
+     * @param {*} res HTTP response
      * @returns 
      */
     static async transfer(req, res) {
@@ -68,7 +68,7 @@ class AssetsController {
     }
 
     /**
-     * 转账校验
+     * transfer valid
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -90,7 +90,7 @@ class AssetsController {
     }
 
     /**
-     * 绑定google的校验
+     * bind google valid
      * @param {*} req 
      * @param {*} res 
      * @returns 
@@ -114,7 +114,7 @@ class AssetsController {
     }
 
     /**
-     * 获取订单中的资产记录
+     * get assets in order
      * @param {*} req 
      * @param {*} res 
      */
@@ -169,7 +169,7 @@ class AssetsController {
             body: body
         }).getBody('utf-8')
         let assetsList = JSON.parse(assetsReq).data.find_order_asset_record
-        // 获取订单资产记录总数
+        // get count
         let num = '{count_order_asset_record(\n' +
             '            where:{order_id:"' + orderId + '",acc_type:1,rec_type:{ne:5},change_amount:{ne:0.0000}}\n' +
             '        )\n' +
@@ -188,7 +188,7 @@ class AssetsController {
     }
 
     /**
-     * 获取订单的收益列表
+     * get income list in order
      * @param {*} req 
      * @param {*} res 
      */
@@ -243,7 +243,7 @@ class AssetsController {
             body: body
         }).getBody('utf-8')
         let assetsList = JSON.parse(assetsReq).data.find_order_asset_record
-        // 获取订单收益记录总数
+        // get count
         let num = '{count_order_asset_record(\n' +
             '            where:{order_id:"' + orderId + '",acc_type:1,rec_type:{in: [4,5]},change_amount:{ne:0.0000}}\n' +
             '        )\n' +
@@ -262,7 +262,7 @@ class AssetsController {
     }
 
     /**
-     * 获取用户资产记录
+     * get assets list of user
      * @param {*} req 
      * @param {*} res 
      */
@@ -385,7 +385,7 @@ class AssetsController {
             body: body
         }).getBody('utf-8')
         let assetsList = JSON.parse(assetsReq).data.find_tokens_action
-        // 获取用户订单总数
+        // get total
         let num = '{\n' +
             'count_tokens_action(\n' +
             '    where:{or:[{and:[{or:[{account_from_id:"' + username + '"},{account_to_id:"' + username + '"}]},{contract_action:{in:["dmc.token/transfer","dmc.token/extransfer","dmc.token/exchange","dmc.token/addreserves","dmc.token/withdraw","dmc.token/outreceipt","dmc.token/orderchange","dmc.token/incentiverec","dmc.token/incentiverec1","dmc.token/mint","dmc.token/exlocktrans","dmc.token/exunlock","dmc.token/exretire","dmc.token/orderclarec","dmc.token/redeemrec","dmc.token/traderecord","dmc/undelegatebw","dmc.token/liqrec","dmc.token/subordasset","dmc.token/addordasset","dmc.token/assetcharec","dmc.token/assetrec"]}}]},{and:[{or:[{account_from_id:"' + username + '"}]},{contract_action:{in:["dmc.token/increase","dmc.token/orderrec1"]}}]}]}\n' +
@@ -405,9 +405,9 @@ class AssetsController {
     }
 
     /**
-     * 用户资产概览
-     * @param {*} req   HTTP请求
-     * @param {*} res   HTTP响应
+     * user assets overview
+     * @param {*} req   HTTP request
+     * @param {*} res   HTTP response
      */
     static async userOverview(req, res) {
         var email = req.body.email

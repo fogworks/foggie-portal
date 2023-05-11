@@ -361,21 +361,22 @@ module.exports = {
         });
     },
     /**
-     * 计算密码本的偏移量
-     * 文件大小小于分块大小，返回 []
-     * 完整的分块数量 小于等于3，则随机取一个分块的偏移量
-     * 完整的分块数量 大于3，则先随机从前3个中取一个分块的偏移量，
-     * 然后根据增长因子，计算出后续的分块，每次增长一次offset = offset + blockSize * growthFactor
-     * 增长的次数N 越大，存入偏移量数组的概率越小
+     * Calculate the offset of the password book
+     * The file size is smaller than the block size, returning []
+     * If the number of complete blocks is less than or equal to 3, the offset of one block is randomly taken
+     * If the number of complete blocks is greater than 3, randomly select the offset of one block from the first 3,
+     * Then, based on the growth factor, calculate the subsequent blocks, 
+     * with each increase offset=offset+blockSize * growthFactor
+     * The greater the number of increases N, the lower the probability of storing in the offset array
      * 
-     * @param {*} fileCategory  文件类型 1:小文件 2:大文件
-     * @param {*} orderId   订单号
-     * @param {*} email     foggie邮箱
-     * @param {*} fileName  文件名
-     * @param {*} fileSize  文件大小
-     * @param {*} blockSize     分块大小
-     * @param {*} growthFactor  增长因子
-     * @returns 偏移量的数组
+     * @param {*} fileCategory    1 small file 2 big file
+     * @param {*} orderId   
+     * @param {*} email         
+     * @param {*} fileName  
+     * @param {*} fileSize      
+     * @param {*} blockSize         
+     * @param {*} growthFactor      
+     * @returns array
      */
     getCodebookOffset: async (fileCategory, orderId, email, fileName, md5, fileSize, blockSize, growthFactor) => {
         return new Promise((resolve, reject) => {
@@ -392,15 +393,15 @@ module.exports = {
                 if (docs.length === 0) {
                     var offsetArr = [];
                     var offset = 0;
-                    // 如果文件大小小于分块大小，则直接返回[]
+                    // The file size is smaller than the block size, returning []
                     if (fileSize < blockSize) {
                         resolve(offsetArr);
                         return;
                     }
-                    // 计算完整的分块数量
+                    // Calculate the complete number of blocks
                     var blockNum = Math.floor(fileSize / blockSize);
 
-                    // 如果 完整的分块数量 小于等于3，则随机取一个分块
+                    // If the number of complete blocks is less than or equal to 3, the offset of one block is randomly taken
                     if (blockNum <= 3) {
                         var rand = Math.floor(Math.random() * blockNum);
                         offsetArr.push(rand * blockSize);
@@ -408,27 +409,28 @@ module.exports = {
                         return;
                     }
 
-                    // 如果 完整的分块数量 大于3，则先随机从前3个 中 取一个分块
+                    //If the number of complete blocks is greater than 3, randomly select the offset of one block from the first 3,
                     var rand = Math.floor(Math.random() * 3);
                     offset = rand * blockSize;
                     offsetArr.push(offset);
 
                     var i = 1;
-                    // 然后根据增长因子，计算出后续的分块，每次增长一次offset = offset + blockSize * growthFactor
+                    // Then, based on the growth factor, calculate the subsequent blocks,
+                    // with each increase offset= offset + blockSize * growthFactor
                     while (true) {
                         blockSize *= growthFactor;
                         offset += blockSize;
                         if (offset > fileSize) {
                             break;
                         }
-                        // 增长的次数N 越大，存入偏移量数组的概率越小
+                        // The greater the number of increases N, the lower the probability of storing in the offset array
                         if (Math.random() < 1 / i) {
                             offsetArr.push(offset);
                         }
                         i++;
 
                     }
-                    // 小文件不插入数据库，直接返回
+                    // small file not insert DB
                     if (fileCategory === 1) {
                         resolve(offsetArr);
                         return;
@@ -503,7 +505,6 @@ module.exports = {
                     resolve(BizResultCode.SAVE_FILE_UPLOAD_RECORD_FAILED);
                     return;
                 }
-                // 如果已经存在，则更新数据
                 if (doc) {
                     fileUploadRecordDB.update
                         ({

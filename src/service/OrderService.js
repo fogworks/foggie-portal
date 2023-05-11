@@ -677,7 +677,7 @@ module.exports = {
         return new pow_proto.PowService(ip + ':' + port, grpc.credentials.createInsecure());
     },
     syncOrder2RegisterCenter: async (email, orderId, billId, totalSpace, usedSpace, transactionId) => {
-        // 获取foggieID
+        // foggieID
         async function getFoggieId(orderId) {
             const getIDRequest = {
                 id: orderId,
