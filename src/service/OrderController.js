@@ -358,17 +358,67 @@ class OrderController {
             return;
         }
 
+
         var orderInfo = await orderService.getOrderById(email, orderId);
         order[0]['used_space'] = orderInfo.used_space;
         order[0]['total_space'] = orderInfo.total_space;
         var fileCount = await fileService.getFileCount(orderId, email, deviceType);
         order[0]['file_count'] = fileCount;
 
+        var challengePeriod = await orderService.getChallengeExpire(orderId, email);
+        if (challengePeriod > 0) {
+            order[0]['challenge_period'] = challengePeriod;
+        }
         res.send(BizResult.success(order));
     }
 
-    static async pushMerkle(req, res) {
+    static async payChallenge(req, res) {
 
+        var orderId = req.body.orderId;
+        var email = req.body.email;
+        var chainId = req.body.chainId;
+
+        if (!orderId || !email || !chainId) {
+            res.send(BizResult.validateFailed());
+            return;
+        }
+
+        var challengeList = await orderService.getChallengeFromDB(3, orderId, email);
+        if (challengeList instanceof BizResultCode) {
+            res.send(BizResult.fail(challengeList));
+            return;
+        }
+
+        var chanllenge = challengeList[0];
+
+        var privateKey = await userService.getPrivateKeyByEmail(email);
+        if (privateKey instanceof BizResultCode) {
+            logger.error("get privateKey is error, email:{}", email);
+            res.send(BizResult.fail(privateKey));
+            return;
+        }
+        var chainConfig = config.get('chainConfig');
+        var httpEndpoint = chainConfig.get("httpEndpoint");
+        var dmc_client = DMC({
+            chainId: chainId,
+            keyProvider: privateKey,
+            httpEndpoint: httpEndpoint,
+            logger: {
+                log: null,
+                error: null
+            }
+        });
+
+        var result = await orderService.payChallenge(chanllenge, dmc_client);
+        if (result instanceof BizResultCode) {
+            logger.info('payChallenge is error, orderId:{}', orderId);
+            res.send(BizResult.fail(result));
+            return;
+        }
+        res.send(BizResult.success(result));
+    }
+
+    static async pushMerkle(req, res) {
         var chainId = req.body.chainId;
         var orderId = req.body.orderId;
         var email = req.body.email;
@@ -543,7 +593,7 @@ class OrderController {
             response.send(BizResult.fail(challengeCount));
             return;
         }
-        if(challengeCount > 0){
+        if (challengeCount > 0) {
             logger.info("merkle inconsistent, orderId:{}", orderId);
             response.send(BizResult.fail(BizResultCode.MERKLE_INCONSISTENT));
             return;
@@ -826,7 +876,7 @@ class OrderController {
 
     static getChainId() {
         var chainId = orderService.getChainId();
-        if(chainId instanceof BizResultCode){
+        if (chainId instanceof BizResultCode) {
             return BizResult.fail(chainId);
         }
         return BizResult.success(chainId);
@@ -834,7 +884,7 @@ class OrderController {
 
     static getBenchmarkPrice() {
         var benchmarkPrice = orderService.getBenchmarkPrice();
-        if(benchmarkPrice instanceof BizResultCode){
+        if (benchmarkPrice instanceof BizResultCode) {
             return BizResult.fail(benchmarkPrice);
         }
         return BizResult.success(benchmarkPrice);

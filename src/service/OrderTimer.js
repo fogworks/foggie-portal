@@ -8,7 +8,7 @@ const config = require('config');
 class OrderTimer {
     static async payChallengeTimer() {
         logger.info('payChallengeTimer start')
-        var challengeList = await orderService.getChallengeFromDB();
+        var challengeList = await orderService.getChallengeFromDB(3);
         if (challengeList instanceof BizResultCode) {
             logger.info('payChallengeTimer challengeList is null')
             return;
@@ -54,7 +54,7 @@ class OrderTimer {
                 }
             });
 
-            var result = await orderService.payChallenge(chanllenge, dmc_client);
+            var result = await orderService.payChallenge4Timer(chanllenge, dmc_client);
             if (result instanceof BizResultCode) {
                 logger.info('payChallengeTimer payChallenge is error, orderId:{}', chanllenge.order_id);
                 continue;

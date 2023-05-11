@@ -61,6 +61,10 @@ app.post("/order/id", jsonParser, (req, res) => {
   OrderController.getOrderById(req, res);
 });
 
+app.post("/order/pay_challenge", jsonParser, (req, res) => {
+  OrderController.payChallenge(req, res);
+});
+
 app.get("/order/get_chain_id", (req, res) => {
   res.json(OrderController.getChainId());
 });

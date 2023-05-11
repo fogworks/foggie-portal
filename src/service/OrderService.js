@@ -113,7 +113,7 @@ module.exports = {
                 part_id: partId,
                 data_hash: dataHash,
                 nonce: nonce,
-                state: 0,
+                state: 3,
                 transaction_id: transactionId,
                 block_num: blockNum,
                 update_time: currentTime,
@@ -131,15 +131,22 @@ module.exports = {
             return BizResultCode.SAVE_CHANLLLENGE_RECORD_FAILED;
         });
     },
-    getChallengeFromDB: async () => {
+    getChallengeFromDB: async (state, orderId, email) => {
 
         // save chanllenge record into NeDB
         return new Promise((resolve, reject) => {
             challengeRecordDB.find({
-                state: 0
-            }, function (err, doc) {
+                state: state,
+                order_id: orderId,
+                email: email
+            }).sort({create_time: -1}).exec(function (err, doc) {
                 if (err) {
                     logger.error('err:', err);
+                    resolve(BizResultCode.GET_CHANLLENGE_RECORD_FAILED);
+                    return;
+                }
+                if(doc == null || doc.length == 0){
+                    logger.error("getChallengeFromDB doc is null, state:{}, orderId:{}, email:{}", state, orderId, email);
                     resolve(BizResultCode.GET_CHANLLENGE_RECORD_FAILED);
                     return;
                 }
@@ -149,6 +156,42 @@ module.exports = {
             logger.error('err:', err);
             return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
         });
+    },
+    getChallengeExpire: async (orderId, email) => {
+        var challengeListFromChain = module.exports.getChallengeByState(orderId, [3,4,5,6,7]);
+        if(challengeListFromChain instanceof BizResultCode){
+            logger.info("getChallengeByState failed, orderId:{}", orderId);
+            return 0;
+        }
+        if(challengeListFromChain.length == 0){
+            logger.info("getChallengeByState challengeList is null, orderId:{}", orderId);
+            return 0;
+        }
+
+        var challengeList = await module.exports.getChallengeFromDB(3, orderId, email);
+        if (challengeList instanceof BizResultCode) {
+            logger.info("get challenge from db failed, orderId:{}", orderId);
+            return 0;
+        }
+
+        var challenge = challengeList[0];
+        // db and chain both have challenge, update challenge state by chain data
+        var challengeStateChain = challengeListFromChain[0].state;
+        if(challengeStateChain !=3){
+            module.exports.updateChallenge(challenge._id, challengeListFromChain[0].state);
+            return 0;
+        }
+        else{
+            var challengeTime = challenge.create_time;
+            var period = new Date().getTime() - new Date(challengeTime).getTime();
+            var challengeConfig = config.get("challengeConfig");
+            var payChallengeTimeout = challengeConfig.get("payChallengeTimeout");
+            if (period < payChallengeTimeout) {
+                logger.info("challenge is not timeout, orderId:{}", orderId);
+                return 0;
+            }
+            return period;
+        }
     },
     updateChallenge: async (id, state) => {
 
@@ -180,7 +223,7 @@ module.exports = {
             return BizResultCode.UPDATE_CHANLLENGE_RECORD_FAILED;
         });
     },
-    payChallenge: async (chanllenge, dmc_client) => {
+    payChallenge4Timer: async (chanllenge, dmc_client) => {
 
         var username = chanllenge.username;
         var orderId = chanllenge.order_id;
@@ -192,8 +235,8 @@ module.exports = {
         }
         if(challengeCount == 0){
             logger.info("not exist no response challenge, orderId:{}", orderId);
-            // update challenge record
-            await module.exports.updateChallenge(chanllenge._id, 1);
+            // update challenge record state 
+            await module.exports.updateChallenge(chanllenge._id, 8);
             return;
         }
 
@@ -220,7 +263,51 @@ module.exports = {
             }).then(async (res) => {
                 logger.info("pay challenge is success, orderId:{}", orderId);
                 // update challenge record
-                var updateRes = await module.exports.updateChallenge(chanllenge._id, 2);
+                var updateRes = await module.exports.updateChallenge(chanllenge._id, 7);
+                if (updateRes instanceof BizResultCode) {
+                    resolve(updateRes);
+                    return;
+                }
+                resolve(res.transaction_id);
+
+            }).catch((err) => {
+                logger.error('err:', err);
+                resolve(BizResultCode.PAY_CHALLENGE_FAILED);
+            })
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.PAY_CHALLENGE_FAILED;
+        });
+    },
+    payChallenge: async (chanllenge, dmc_client) => {
+
+        var username = chanllenge.username;
+        var orderId = chanllenge.order_id;
+
+        return new Promise((resolve, reject) => {
+
+            dmc_client.transact({
+                actions: [{
+                    account: "dmc.token",
+                    name: 'paychallenge',
+                    authorization: [
+                        {
+                            actor: username,
+                            permission: 'active'
+                        }
+                    ],
+                    data: {
+                        sender: username,
+                        order_id: parseInt(orderId)
+                    }
+                }]
+            }, {
+                blocksBehind: 3,
+                expireSeconds: 30,
+            }).then(async (res) => {
+                logger.info("pay challenge is success, orderId:{}", orderId);
+                // update challenge record
+                var updateRes = await module.exports.updateChallenge(chanllenge._id, 7);
                 if (updateRes instanceof BizResultCode) {
                     resolve(updateRes);
                     return;
@@ -1130,6 +1217,7 @@ module.exports = {
                 if (err) {
                     logger.error('err:', err);
                     resolve(BizResultCode.GET_FILE_IDX_FAILED);
+                    return;
                 }
                 logger.info("get idx in order space success, idx:{}", data.idx);
                 resolve(data.idx);
