@@ -30,8 +30,11 @@
           <el-table-column width="180" label="Action">
             <template #default="{ row }">
               <el-button
+                class="collect-btn"
+                :disabled="checkDisabled(row)"
                 style="width: unset; height: unset; border-radius: 99px"
                 type="primary"
+                link
                 @click="collect(row)"
                 >Collect</el-button
               >
@@ -114,6 +117,19 @@ const collect = (row) => {
     }
   });
 };
+const checkDisabled = (row) => {
+  //false is extractable
+  if (row.state == 1 && row.challenge.state == 1) {
+    return false;
+  }
+  if (row.state == 1 && row.challenge.state == 6) {
+    return false;
+  }
+  if (row.state == 4 && row.challenge.state == 7) {
+    return false;
+  }
+  return true;
+};
 watch(
   email,
   (data) => {
@@ -137,6 +153,13 @@ watch(
 }
 .items-center {
   align-items: center;
+}
+.collect-btn {
+  font-size: 18px;
+  font-weight: 400;
+  &.is-disabled {
+    color: #d8d8d8;
+  }
 }
 .card-box {
   width: 100%;

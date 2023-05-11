@@ -84,7 +84,7 @@ getChainId();
 .portal-main {
   display: flex;
   height: 100%;
-  background: url("~@/assets/cool-background.png") no-repeat;
+  background: var(--main-background-image);
   background-size: cover;
 
   .left-box {

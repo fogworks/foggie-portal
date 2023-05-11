@@ -355,13 +355,7 @@ export default {
             }
             if ("assetrec" === a) {
               var O = t.action.rawData.act.data,
-                g = O.changed
-                  .map(function (e) {
-                    return e.quantity.split(" ")[0];
-                  })
-                  .reduce(function (e, t) {
-                    return "";
-                  }, 0);
+                g = O.changed[0].quantity.split(" ")[0];
               return {
                 token: O.changed[0].quantity.split(" ")[1],
                 quantity: ""

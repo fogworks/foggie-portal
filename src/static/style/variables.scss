@@ -57,6 +57,7 @@ $shrinkHeader: 56px;
   --text-color-444: #444;
   --overlay-color: rgba(0, 0, 0, 0.4);
   --dialog-gradient-bg: linear-gradient(180deg, #e5f3ff 0%, #93baee 100%);
+    --main-background-image: url("~@/assets/cool-background.png") no-repeat;
 }
 
 /* light */
@@ -74,4 +75,5 @@ $shrinkHeader: 56px;
   --text-color-777: #b4b4b4;
   --text-color-444: #eee;
   --overlay-color: rgba(0, 0, 0, 0);
+    --main-background-image: url("~@/assets/cool-background.png") no-repeat;
 }
