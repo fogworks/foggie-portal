@@ -1,4 +1,5 @@
 var CryptoJS = require("crypto-js");
+import moment from "moment";
 function decrypt(value) {
   var crypt_key = "047ADGJMQTW0369D";
   var crypt_iv = "131b0c8a7a6e072e";
@@ -51,6 +52,9 @@ function transferTime(utc_datetime) {
   let ss = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
   return YY + MM + DD + " " + hh + mm + ss;
 }
+const transferUTCTime = (time) => {
+  return moment.utc(time).local().format("YYYY-MM-DD HH:mm:ss");
+};
 function handleTimeStamp(timestamp) {
   let date = new Date(parseInt(timestamp) * 1000);
   let YY = date.getFullYear() + "-";
@@ -174,6 +178,7 @@ function b64EncodeUnicode(str) {
 export {
   hmac,
   transferTime,
+  transferUTCTime,
   handleTimeStamp,
   echartsHandleTimeStamp,
   decrypt,

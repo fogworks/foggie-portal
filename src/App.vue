@@ -28,6 +28,7 @@ initFoggieDate();
 * {
   margin: 0;
   padding: 0;
+  // color: var(--text-color);
 }
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

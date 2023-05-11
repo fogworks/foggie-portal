@@ -24,7 +24,7 @@
           <el-table-column prop="action" label="Type" width="240" />
           <el-table-column label="Time" width="320">
             <template #default="scope">
-              {{ transferTime(scope.row.created_at) }}
+              {{ transferUTCTime(scope.row.created_at) }}
             </template>
           </el-table-column>
           <el-table-column prop="amount" label="Amount" width="200">
@@ -50,7 +50,7 @@
 import { reactive, ref, onMounted, computed, watch, toRefs, inject } from "vue";
 import { historyReward, getWithdrawList } from "@/utils/api.js";
 import { userAssetsList } from "@/api/order/orderList.js";
-import { transferTime } from "@/utils/util.js";
+import { transferUTCTime } from "@/utils/util.js";
 import { useStore } from "vuex";
 export default {
   props: {
@@ -435,7 +435,7 @@ export default {
       close,
       initRecords,
       toDmcLink,
-      transferTime,
+      transferUTCTime,
     };
   },
 };

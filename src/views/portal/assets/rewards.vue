@@ -11,7 +11,7 @@
         <el-table class="table-box" :data="rowList" style="width: 100%">
           <el-table-column width="200" label="Time">
             <template #default="{ row }">
-              {{ transferTime(row.created_time) }}
+              {{ transferUTCTime(row.latest_settlement_date) }}
             </template>
           </el-table-column>
           <el-table-column width="150" prop="id" label="Order ID">
@@ -24,12 +24,14 @@
           <el-table-column
             width="200"
             prop="estimated"
-            label="Estimated Income(DMC)"
+            label="Estimated Income"
           >
+            <template #default="{ row }"> {{ row.estimated }} DMC </template>
           </el-table-column>
           <el-table-column width="180" label="Action">
             <template #default="{ row }">
               <el-button
+                :loading="btnLoading"
                 class="collect-btn"
                 :disabled="checkDisabled(row)"
                 style="width: unset; height: unset; border-radius: 99px"
@@ -63,13 +65,13 @@ import {
   computed,
   getCurrentInstance,
 } from "vue";
-import { transferTime } from "@/utils/util";
+import { transferUTCTime } from "@/utils/util";
 import { useStore } from "vuex";
 import { dividend_list, claim_order } from "@/api/common.js";
 import RippleInk from "@/components/rippleInk";
-const emits = defineEmits(["update:visible"]);
+const emits = defineEmits(["update:visible", "reload"]);
 const store = useStore();
-
+const btnLoading = ref(false);
 const props = defineProps({
   title: {
     type: String,
@@ -80,6 +82,7 @@ const props = defineProps({
     default: false,
   },
 });
+
 const { proxy } = getCurrentInstance();
 const close = () => {
   emits("update:visible", false);
@@ -97,35 +100,49 @@ const dividendList = () => {
     pageSize: 10,
   }).then((res) => {
     rowList.value = res.data.list;
+    btnLoading.value = false;
     total.value = res.data.count;
     console.log(res, "res");
   });
 };
 const collect = (row) => {
+  btnLoading.value = true;
   claim_order({
     email: email.value,
     chainId: chainId.value,
     orderId: row.id,
-  }).then((res) => {
-    if (res.code == 200) {
-      proxy.$notify({
-        type: "success",
-        message: "Collect successfully",
-        position: "bottom-left",
-      });
-      dividendList();
-    }
-  });
+  })
+    .then((res) => {
+      if (res.code == 200) {
+        proxy.$notify({
+          type: "success",
+          message: "Collect successfully",
+          position: "bottom-left",
+        });
+        emits("reload");
+        emits("update:visible", false);
+
+        // setTimeout(() => {
+        //   dividendList();
+        // }, 1000);
+      } else {
+        btnLoading.value = false;
+      }
+    })
+    .catch(() => {
+      btnLoading.value = false;
+    });
 };
 const checkDisabled = (row) => {
   //false is extractable
-  if (row.state == 1 && row.challenge.state == 1) {
+  if (row.state == 1 && row.challenge[0].state == 1) {
     return false;
   }
-  if (row.state == 1 && row.challenge.state == 6) {
+  if (row.state == 1 && row.challenge[0].state == 6) {
     return false;
   }
-  if (row.state == 4 && row.challenge.state == 7) {
+  if (row.state == 4 && row.challenge[0].state == 7) {
+    console.log(row);
     return false;
   }
   return true;
