@@ -81,7 +81,11 @@
           </div>
         </div>
       </div>
-      <Rewards v-if="rewardsVisible" v-model:visible="rewardsVisible">
+      <Rewards
+        v-if="rewardsVisible"
+        @reload="reload"
+        v-model:visible="rewardsVisible"
+      >
       </Rewards>
       <Withdraw
         v-if="WithdrawVisible"

@@ -155,18 +155,16 @@ const handleActive = (val = "") => {
   margin: 10px 20px;
   text-align: center;
   position: relative;
-  box-shadow: 0 10px 15px -3px rgba(33, 150, 243, 0.4),
-    0 4px 6px -4px rgba(33, 150, 243, 0.4);
   border-radius: 10px;
   background-color: #6b6ecc;
   background: linear-gradient(45deg, #04051dea 0%, #2b566e 100%);
   transition: all 0.3s;
   cursor: default;
   &:hover {
-    transform: scale(1.1);
+    transform: scale(1.05);
     svg,
     img {
-      transform: scale(0.9);
+      transform: scale(0.95);
     }
   }
   &:nth-child(2) {

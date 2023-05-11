@@ -62,16 +62,25 @@
           <div
             class="theme"
             @click="
-              handleThemeChange(currentTheme === 'light' ? 'dark' : 'light')
+              handleThemeChange(
+                currentTheme === 'light' || currentTheme == ''
+                  ? 'dark'
+                  : 'light'
+              )
             "
           >
-            <el-icon
+            <!-- <el-icon
               class="light"
               color="#fff"
               v-if="currentTheme === 'light' || ''"
               ><Sunny
-            /></el-icon>
-            <el-icon class="dark" color="#000" v-else><Moon /></el-icon>
+            /></el-icon> -->
+            <svg-icon
+              icon-class="sun"
+              v-if="currentTheme === 'light' || ''"
+            ></svg-icon>
+            <svg-icon icon-class="moon" v-else></svg-icon>
+            <!-- <el-icon class="dark" color="#000" v-else><Moon /></el-icon> -->
           </div>
           <el-button type="primary" @click="logout"
             ><svg-icon icon-class="switch"></svg-icon> Switch
@@ -126,6 +135,7 @@ const getTimeState = () => {
     handleThemeChange(currentTheme.value || "dark");
   }
 };
+getTimeState();
 const userInfo = computed(() => store.getters["global/userInfo"]);
 const validatePass = (rule, value, callback) => {
   if (value === "") {
@@ -336,12 +346,6 @@ const unbind = () => {
   background-color: var(--theme-box-bg);
   border-radius: 50%;
   cursor: pointer;
-  .light {
-    color: #fff;
-  }
-  .dark {
-    color: #000;
-  }
 }
 .foot-btn {
   display: flex;
