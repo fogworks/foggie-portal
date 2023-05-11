@@ -73,7 +73,7 @@ service.interceptors.response.use(
     loadingInstance ? loadingInstance.close() : "";
     ElNotification({
       type: 'error',
-      message: error.response.data.msg || error.msg,
+      message: error.response.data.msg || error.msg || 'network error',
       // grouping: true,
       // type: "error",
       position: 'bottom-left'

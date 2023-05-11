@@ -9,6 +9,12 @@
         ref="formRef"
         :rules="rules"
       >
+        <p class="top-title">
+          <span v-if="isLogin" @click="isLogin = !isLogin"
+            >No account, go register!</span
+          >
+          <span v-else @click="isLogin = !isLogin">Go log in</span>
+        </p>
         <el-form-item label="Foggie Email" prop="email">
           <el-input v-model="form.email"></el-input>
         </el-form-item>
@@ -19,12 +25,32 @@
             show-password
           ></el-input>
         </el-form-item>
+        <el-form-item
+          v-if="!isLogin"
+          label="Confirm Password"
+          prop="confirmPassword"
+        >
+          <el-input
+            type="password"
+            v-model="form.confirmPassword"
+            show-password
+          ></el-input>
+        </el-form-item>
         <div class="foot-btn">
-          <el-button :loading="loading" type="primary" @click="submit">
+          <el-button
+            v-if="isLogin"
+            :loading="loading"
+            type="primary"
+            @click="submit"
+          >
             {{ "Login" }}
+          </el-button>
+          <el-button v-else :loading="loading" @click="handleRegister">
+            {{ "Register" }}
           </el-button>
         </div>
       </el-form>
+      <!-- <LoginBox></LoginBox> -->
     </div>
 
     <div class="info-box" v-else>
@@ -53,45 +79,18 @@
           >
         </div>
       </div>
-      <!-- <el-descriptions :column="3" size="large" border>
-        <template #extra>
-          <el-button type="default" @click="unbindVisible = true"
-            >Unbind</el-button
-          >
-          <el-button type="primary" @click="logout">Logout</el-button>
-        </template>
-        <el-descriptions-item label="Email">
-          {{ userInfo.email }}
-        </el-descriptions-item>
-        <el-descriptions-item label="DMC">
-          {{ userInfo.dmc }}
-        </el-descriptions-item>
-      </el-descriptions> -->
-      <Web3Link></Web3Link>
-      <!-- <Assets></Assets> -->
-    </div>
 
-    <!-- <el-button @click="emit('next')">Next</el-button> -->
+      <Web3Link></Web3Link>
+    </div>
   </div>
-  <el-dialog
-    class="unbind-dialog"
-    title="Unbinding"
-    v-model="unbindVisible"
-    width="400px"
-  >
-    <span> Are you sure you want to unbind the account </span>
-    <template #footer>
-      <el-button @click="unbindVisible = false">NO</el-button>
-      <el-button type="primary" @click="unbind">YES</el-button>
-    </template>
-  </el-dialog>
 </template>
 
 <script setup>
 import { ref, reactive, getCurrentInstance, computed, inject } from "vue";
 import Web3Link from "./_modules/web3Link";
-import { login, user, unbind_foggie } from "@/utils/api";
+import { login, register, user, unbind_foggie } from "@/utils/api";
 import { useStore } from "vuex";
+import LoginBox from "./_modules/loginBox";
 import { useRouter } from "vue-router";
 const bcryptjs = require("bcryptjs");
 const store = useStore();
@@ -103,7 +102,9 @@ const requestTarget = inject("requestTarget");
 const form = reactive({
   password: "",
   email: "",
+  confirmPassword: "",
 });
+const isLogin = ref(true);
 const formRef = ref(null);
 const unbindVisible = ref(false);
 const needLogin = ref(true);
@@ -133,6 +134,15 @@ const validatePass = (rule, value, callback) => {
     callback();
   }
 };
+const validatePass2 = (rule, value, callback) => {
+  if (value === "") {
+    callback(new Error("Please input the password again"));
+  } else if (value !== form.password) {
+    callback(new Error("Two inputs don't match!"));
+  } else {
+    callback();
+  }
+};
 const rules = {
   email: {
     required: true,
@@ -147,6 +157,11 @@ const rules = {
       trigger: "blur",
     },
   ],
+  confirmPassword: {
+    required: true,
+    validator: validatePass2,
+    trigger: "blur",
+  },
 };
 const loading = ref(false);
 const getUserInfo = () => {
@@ -209,6 +224,23 @@ const submit = () => {
     }
   });
 };
+const handleRegister = () => {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      let postData = {
+        email: form.email,
+        register_type: "email",
+      };
+      register(postData).then((res) => {
+        proxy.$notify({
+          type: "success",
+          message: "Successfully register",
+          position: "bottom-left",
+        });
+      });
+    }
+  });
+};
 const logout = () => {
   store.dispatch("token/logout");
   store.dispatch("global/setUserInfo", {});
@@ -250,6 +282,13 @@ const unbind = () => {
   img {
     width: 300px;
     margin: 0 50px;
+  }
+  .top-title {
+    cursor: pointer;
+    margin-bottom: 10px;
+    span:hover {
+      color: $light_blue;
+    }
   }
 }
 .account-form {
