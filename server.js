@@ -77,7 +77,7 @@ app.post("/order/push_merkle", jsonParser, (req, res) => {
   OrderController.pushMerkle(req, res);
 });
 
-app.post("/order/push_merkle_record", jsonParser, (req, res) => {
+app.post("/order/merkle_list", jsonParser, (req, res) => {
   OrderController.getPushMerkleRecord(req, res);
 });
 

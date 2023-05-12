@@ -553,7 +553,7 @@ class OrderController {
                 blocksBehind: 3,
                 expireSeconds: 30,
             }).then(async (result) => {
-                var savePushMerkleRecordRes = await orderService.savePuskMerkleRecord(orderId, username, merkleRoot, dataBlockCount, result.transaction_id, result.processed.block_num);
+                var savePushMerkleRecordRes = await orderService.savePuskMerkleRecord(orderId, email, merkleRoot, dataBlockCount, result.transaction_id, result.processed.block_num);
                 if (savePushMerkleRecordRes instanceof BizResultCode) {
                     res.send(BizResult.fail(savePushMerkleRecordRes));
                     return;

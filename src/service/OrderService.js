@@ -182,14 +182,6 @@ module.exports = {
             return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
         });
     },
-    getLastChallengeFromDB: async (orderId, email) => {
-        var challengeList = await module.exports.getChallengeAllFromDB(orderId, email);
-        if (challengeList instanceof BizResultCode) {
-            logger.info("get challenge from db failed, orderId:{}", orderId);
-            return 0;
-        }
-        return challengeList;
-    },
     getChallengeExpire: async (orderId, email) => {
         var challengeListFromChain = module.exports.getChallengeByState(orderId, [3,4,5,6,7]);
         if(challengeListFromChain instanceof BizResultCode){
