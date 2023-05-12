@@ -75,7 +75,7 @@ import {
   toRefs,
   getCurrentInstance,
 } from "vue";
-import ShareDialog from "./shareDialog";
+import ShareDialog from "@/views/foggieMax/home/_modules/myFiles/shareDialog";
 import { publishPin } from "@/utils/api.js";
 import { ElNotification } from "element-plus";
 import { useStore } from "vuex";
@@ -177,8 +177,6 @@ export default {
           : "";
         let ipfsStr = item.cid ? `ipfs://${item.cid}` : "";
 
-        // this.shareTitle = this.$t("vood.uploadShareTitle");
-        // this.shareContent = this.$t("vood.uploadShareContent");
         shareCopyContent = `${user} publish ${key} to Web3` + "\n";
         shareRefContent.user = `${user} publish ${key} to Web3`;
         let myQrcode = window.sessionStorage.getItem("myQrcode");
@@ -188,17 +186,18 @@ export default {
         shareCopyContent = shareCopyContent + httpStr + " \n";
         shareCopyContent = shareCopyContent + " " + " \n ";
         shareRefContent.httpStr = httpStr;
-        shareCopyContent = shareCopyContent + ipfsStr + " \n";
-        shareCopyContent = shareCopyContent + " " + " \n ";
-        shareRefContent.ipfsStr = ipfsStr;
-        shareRefContent.httpStr =
-          shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
 
-        shareCopyContent = shareCopyContent + cyfsStr + " \n";
-        shareCopyContent = shareCopyContent + " " + " \n ";
-        shareRefContent.cyfsStr = cyfsStr;
-        shareRefContent.httpStr =
-          shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
+        // shareCopyContent = shareCopyContent + ipfsStr + " \n";
+        // shareCopyContent = shareCopyContent + " " + " \n ";
+        // shareRefContent.ipfsStr = ipfsStr;
+        // shareRefContent.httpStr =
+        //   shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
+
+        // shareCopyContent = shareCopyContent + cyfsStr + " \n";
+        // shareCopyContent = shareCopyContent + " " + " \n ";
+        // shareRefContent.cyfsStr = cyfsStr;
+        // shareRefContent.httpStr =
+        //   shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
 
         shareCopyContent = shareCopyContent + shareStr + " \n";
         shareRefContent.shareStr = shareStr;

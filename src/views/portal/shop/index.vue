@@ -30,7 +30,8 @@
           </div>
         </div>
       </div>
-      <button @click="handleActive('foggie')">Buy now</button>
+      <!-- <button @click="handleActive('foggie')">Buy now</button> -->
+      <button disabled>Coming Soon</button>
     </div>
 
     <div class="card">
@@ -65,13 +66,14 @@
           </div>
         </div>
       </div>
-      <a
+      <!-- <a
         style="width: 90%"
         target="_blank"
         href="https://www.indiegogo.com/projects/foggie-max-the-world-s-first-personal-web3-server#/"
       >
         <button style="width: 100%">Buy now</button>
-      </a>
+      </a> -->
+      <button disabled>Coming Soon</button>
     </div>
 
     <div class="card">

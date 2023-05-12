@@ -4,7 +4,6 @@
       <h3 style="display: flex; align-items: center">
         <div class="card-title">
           <span v-if="activeName == 'Challenge'">Challenge List</span>
-          <span v-else-if="activeName == 'Arbitration'">Arbitration List</span>
           <span v-else>Merkle List</span>
           <span class="font-size-sm">
             <span>{{ data[activeName].total }} Record</span>
@@ -39,10 +38,6 @@
                 :command="{ flag: 'Challenge', command: 'Challenge' }"
                 >Challenge</el-dropdown-item
               >
-              <el-dropdown-item
-                :command="{ flag: 'Arbitration', command: 'Arbitration' }"
-                >Arbitration</el-dropdown-item
-              >
               <el-dropdown-item :command="{ flag: 'Merkle', command: 'Merkle' }"
                 >Merkle</el-dropdown-item
               >
@@ -51,237 +46,6 @@
         </el-dropdown>
       </div>
     </div>
-
-    <!-- <template v-if="activeName == 'Challenge'">
-      <div class="card-body">
-        <div class="timeline">
-          <div
-            class="timeline-item"
-            v-for="item in data.Challenge.dataList"
-            :key="item.id"
-          >
-            <div class="timeline-label">{{ item.createdAt }}</div>
-
-            <div class="timeline-badge text-warning"></div>
-
-            <div class="timeline-content text-muted fs16">
-              {{ item.sender }}
-              <span class="text-warning1 font-weight-bolder fs12">Waiting</span>
-              <div style="padding: 10px">
-                <span class="mr-20"> Merkle Root</span>
-                <span>{{ item.Merkle_root }}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-label font-weight-bolder">
-              2023-04-26 08:42
-            </div>
-
-            <div class="timeline-badge text-success"></div>
-
-            <div class="timeline-content">
-              <span class="font-weight-bolder">OrderID: 20</span>
-              <span class="text-success1 font-weight-bolder fs12">Success</span>
-              <div style="padding: 10px" class="font-weight-bolder">
-                <span>提交人：张三</span>
-                <p class="text-muted">
-                  张三仲裁成功，由于你作恶，现扣除你押金
-                  <span class="text-danger1 fs12">-50DMC</span>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-label font-weight-bolder">
-              2023-04-26 08:42
-            </div>
-
-            <div class="timeline-badge text-danger"></div>
-
-            <div class="timeline-content">
-              <span class="font-weight-bolder">OrderID: 20 </span>
-              <span class="text-danger1 font-weight-bolder fs13">Fail</span>
-              <div style="padding: 10px" class="font-weight-bolder">
-                <span>提交人：李四</span>
-
-                <p class="text-muted">
-                  李四仲裁失败，由于你挑战成功，现奖励你
-                  <span class="text-success1 fs12">+500DMC</span>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-label font-weight-bolder">16:50</div>
-
-            <div class="timeline-badge text-primary"></div>
-
-            <div class="timeline-content text-muted">
-              Indulging in poorly driving and keep structure keep great
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-label font-weight-bolder">21:03</div>
-
-            <div class="timeline-badge text-danger"></div>
-
-            <div class="timeline-content font-weight-bolder">
-              New order placed <a href="#" class="text-primary1">#XF-2356</a>.
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-label font-weight-bolder">23:07</div>
-
-            <div class="timeline-badge text-info"></div>
-
-            <div class="timeline-content font-weight-mormal">
-              Outlines keep and you honest. Indulging in poorly driving
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-label font-weight-bolder">16:50</div>
-
-            <div class="timeline-badge text-primary"></div>
-
-            <div class="timeline-content text-muted">
-              Indulging in poorly driving and keep structure keep great
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-label font-weight-bolder">21:03</div>
-
-            <div class="timeline-badge text-danger"></div>
-
-            <div class="timeline-content font-weight-bolder">
-              New order placed <a href="#" class="text-primary1">#XF-2356</a>.
-            </div>
-          </div>
-        </div>
-      </div>
-    </template>
-    <template v-else-if="activeName == 'Arbitration'">
-      <div class="card-body">
-        <div class="timeline">
-          <div
-            class="timeline-item"
-            v-for="item in data.Arbitration.dataList"
-            :key="item.id"
-          >
-            <div class="timeline-label">{{ item.createdAt }}</div>
-
-            <div class="timeline-badge text-warning"></div>
-
-            <div class="timeline-content text-muted fs16">
-              {{ item.sender }}
-              <span class="text-warning1 font-weight-bolder fs12">Waiting</span>
-              <div style="padding: 10px">
-                <span class="mr-20"> Merkle Root</span>
-                <span>{{ item.Merkle_root }}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-label font-weight-bolder">
-              2023-04-26 08:42
-            </div>
-
-            <div class="timeline-badge text-success"></div>
-
-            <div class="timeline-content">
-              <span class="font-weight-bolder">OrderID: 20</span>
-              <span class="text-success1 font-weight-bolder fs12">Success</span>
-              <div style="padding: 10px" class="font-weight-bolder">
-                <span>提交人：张三</span>
-                <p class="text-muted">
-                  张三仲裁成功，由于你作恶，现扣除你押金
-                  <span class="text-danger1 fs12">-50DMC</span>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-label font-weight-bolder">
-              2023-04-26 08:42
-            </div>
-
-            <div class="timeline-badge text-danger"></div>
-
-            <div class="timeline-content">
-              <span class="font-weight-bolder">OrderID: 20 </span>
-              <span class="text-danger1 font-weight-bolder fs13">Fail</span>
-              <div style="padding: 10px" class="font-weight-bolder">
-                <span>提交人：李四</span>
-
-                <p class="text-muted">
-                  李四仲裁失败，由于你挑战成功，现奖励你
-                  <span class="text-success1 fs12">+500DMC</span>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-label font-weight-bolder">16:50</div>
-
-            <div class="timeline-badge text-primary"></div>
-
-            <div class="timeline-content text-muted">
-              Indulging in poorly driving and keep structure keep great
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-label font-weight-bolder">21:03</div>
-
-            <div class="timeline-badge text-danger"></div>
-
-            <div class="timeline-content font-weight-bolder">
-              New order placed <a href="#" class="text-primary1">#XF-2356</a>.
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-label font-weight-bolder">23:07</div>
-
-            <div class="timeline-badge text-info"></div>
-
-            <div class="timeline-content font-weight-mormal">
-              Outlines keep and you honest. Indulging in poorly driving
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-label font-weight-bolder">16:50</div>
-
-            <div class="timeline-badge text-primary"></div>
-
-            <div class="timeline-content text-muted">
-              Indulging in poorly driving and keep structure keep great
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <div class="timeline-label font-weight-bolder">21:03</div>
-
-            <div class="timeline-badge text-danger"></div>
-
-            <div class="timeline-content font-weight-bolder">
-              New order placed <a href="#" class="text-primary1">#XF-2356</a>.
-            </div>
-          </div>
-        </div>
-      </div>
-    </template> -->
 
     <div
       class="card-body"
@@ -293,7 +57,7 @@
         <div
           class="timeline-item"
           v-for="item in data[activeName].dataList"
-          :key="item.data_id"
+          :key="item.data_id || item.order_id"
         >
           <div class="timeline-label font-weight-bolder">
             {{ item.createdAt }}
@@ -301,23 +65,41 @@
 
           <div
             class="timeline-badge"
-            :class="item.state == 'success' ? 'text-success' : 'text-danger'"
+            :class="
+              item.state == 'success'
+                ? 'text-success'
+                : item.state == 'error'
+                ? 'text-danger'
+                : 'normal'
+            "
           ></div>
 
           <div class="timeline-content" style="text-align: left">
-            <span class="font-weight-bolder">{{ item.challenger.id }}</span>
+            <span
+              class="font-weight-bolder"
+              v-if="item.challenger && item.challenger.id"
+              >{{ item.challenger.id }}</span
+            >
             <span
               class="font-weight-bolder fs12 ml-8"
               :class="
-                item.state == 'success' ? 'text-success1' : 'text-danger1'
+                item.state == 'success'
+                  ? 'text-success1'
+                  : item.state == 'error'
+                  ? 'text-danger1'
+                  : 'normal'
               "
-              >{{ item.state == "success" ? "Success" : "Fail" }}</span
+              >{{ item.stateTitle || "" }}</span
             >
             <div style="padding: 10px" class="font-weight-bolder">
               <span
                 class="mr-20"
                 :class="
-                  item.state == 'success' ? 'text-primary1' : 'text-danger1'
+                  item.state == 'success'
+                    ? 'text-primary1'
+                    : item.state == 'error'
+                    ? 'text-danger1'
+                    : 'normal'
                 "
                 >{{
                   activeName == "Merkle" ? "Merkle Root #" : "Reply Hash #"
@@ -326,7 +108,11 @@
               <span
                 class="fs12"
                 :class="
-                  item.state == 'success' ? 'text-success1' : 'text-muted'
+                  item.state == 'success'
+                    ? 'text-success1'
+                    : item.state == 'error'
+                    ? 'text-muted'
+                    : 'normal'
                 "
                 >{{ item.merkle_root || item.hash_data }}</span
               >
@@ -344,6 +130,7 @@ import {
   ChinaTime1,
   transferISOTime,
 } from "@/utils/ChinaStandardTime.js";
+import { transferUTCTime } from "@/utils/util";
 import {
   ref,
   reactive,
@@ -355,11 +142,7 @@ import {
 } from "vue";
 
 import { useStore } from "vuex";
-import {
-  getMerkleList,
-  getChallengeList,
-  getArbitrationList,
-} from "@/api/order/orderList.js";
+import { getMerkleList, getChallengeList } from "@/api/order/orderList.js";
 
 const store = useStore();
 const email = computed(() => store.getters["token/currentUser"]);
@@ -379,12 +162,12 @@ const data = reactive({
     pageNum: 1,
     dataList: [],
   },
-  Arbitration: {
-    total: 0,
-    pageSizes: 10,
-    pageNum: 1,
-    dataList: [],
-  },
+  // Arbitration: {
+  //   total: 0,
+  //   pageSizes: 10,
+  //   pageNum: 1,
+  //   dataList: [],
+  // },
   Merkle: {
     total: 0,
     pageSizes: 10,
@@ -392,11 +175,11 @@ const data = reactive({
     dataList: [],
   },
 });
-const IsOpenHider = ref(false);
+const IsOpenHider = ref(true);
 
-/* 挑战 */
 function loadChallengeList() {
   let params = {
+    email: email.value,
     orderId: orderId.value,
     pageSize: data.Challenge.pageSizes,
     pageNo: data.Challenge.pageNum,
@@ -406,7 +189,23 @@ function loadChallengeList() {
       if (res.code == 200) {
         data.Challenge.total = res.data.count;
         for (const item of res.data.list) {
-          item.createdAt = ChinaTime1(item.created_time);
+          item.createdAt = transferUTCTime(item.created_time);
+          if (item.state == 3) {
+            item.state = "";
+            item.stateTitle = "Challenging";
+          } else if (item.state == 4) {
+            item.state = "";
+            item.stateTitle = "Miner has responded";
+          } else if (item.state == 5) {
+            item.state = "success";
+            item.stateTitle = "Success";
+          } else if (item.state == 6) {
+            item.state = "error";
+            item.stateTitle = "Fail";
+          } else if (item.state == 7) {
+            item.state = "error";
+            item.stateTitle = "Challenge timeout";
+          }
         }
         data.Challenge.dataList = data.Challenge.dataList.concat(res.data.list);
       }
@@ -415,7 +214,6 @@ function loadChallengeList() {
       console.log(error);
     });
 }
-/* markle 记录 */
 function loadMerkleList() {
   let params = {
     email: email.value,
@@ -426,11 +224,12 @@ function loadMerkleList() {
   getMerkleList(params)
     .then((res) => {
       if (res.code == 200) {
-        data.Merkle.total = res.result.total;
-        for (const item of res.result.data) {
-          item.createdAt = ChinaTime1(item.createdAt);
+        data.Merkle.total = res.data.count;
+        for (const item of res.data.list) {
+          item.createdAt = transferUTCTime(item.createdAt);
+          item.state = "success";
         }
-        data.Merkle.dataList = data.Merkle.dataList.concat(res.result.data);
+        data.Merkle.dataList = data.Merkle.dataList.concat(res.data.list);
         console.log(data.Merkle.dataList);
       }
     })
@@ -438,28 +237,7 @@ function loadMerkleList() {
       console.log(error);
     });
 }
-/* 仲裁 记录 */
-function loadArbitration() {
-  let params = {
-    email: email.value,
-    orderId: orderId.value,
-    pageSize: data.Arbitration.pageSizes,
-    pageNo: data.Arbitration.pageNum,
-  };
-  getArbitrationList(params)
-    .then((res) => {
-      if (res.code == 200) {
-        data.Challenge.total = res.result.total;
-        for (const item of res.data) {
-        }
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-}
 
-/* 下拉加载 */
 function dataListInfinite() {
   console.log(789);
   if (data[activeName.value].total > data[activeName.value].dataList.length) {
@@ -467,10 +245,6 @@ function dataListInfinite() {
     switch (activeName.value) {
       case "Challenge":
         loadChallengeList();
-        break;
-
-      case "Arbitration":
-        loadArbitration();
         break;
       case "Merkle":
         loadMerkleList();
@@ -488,8 +262,6 @@ watch(
     data[newVal].dataList = [];
     if (newVal == "Challenge") {
       loadChallengeList();
-    } else if (newVal == "Arbitration") {
-      loadArbitration();
     } else if (newVal == "Merkle") {
       loadMerkleList();
     }

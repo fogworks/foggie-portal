@@ -64,7 +64,7 @@ export function sync_device(data) {
 }
 export function getMerkleList(data) {
   return request({
-    url: baseUrl + "/order/push_merkle_record",
+    url: baseUrl + "/order/merkle_list",
     method: "post",
     data,
   });
@@ -72,13 +72,6 @@ export function getMerkleList(data) {
 export function getChallengeList(data) {
   return request({
     url: baseUrl + "/order/challenge_list",
-    method: "post",
-    data,
-  });
-}
-export function getArbitrationList(data) {
-  return request({
-    url: baseUrl + "/order/push_merkle_record",
     method: "post",
     data,
   });

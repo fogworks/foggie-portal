@@ -172,33 +172,33 @@ export default {
         shareCopyContent = shareCopyContent + " " + " \n ";
         shareRefContent.httpStr = httpStr;
 
-        if (
-          (currentOODItem.value.data.cbs_state === "finish" ||
-            currentOODItem.value.data.cbs_state === "upgrade_finish" ||
-            currentOODItem.value.data.ipfs_state === "finish") &&
-          currentOODItem.value.data.ipfs_service_state === "start" &&
-          meta.cid
-        ) {
-          shareCopyContent = shareCopyContent + ipfsStr + " \n";
-          shareCopyContent = shareCopyContent + " " + " \n ";
-          shareRefContent.ipfsStr = ipfsStr;
-          shareRefContent.httpStr =
-            shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
-        }
+        // if (
+        //   (currentOODItem.value.data.cbs_state === "finish" ||
+        //     currentOODItem.value.data.cbs_state === "upgrade_finish" ||
+        //     currentOODItem.value.data.ipfs_state === "finish") &&
+        //   currentOODItem.value.data.ipfs_service_state === "start" &&
+        //   meta.cid
+        // ) {
+        //   shareCopyContent = shareCopyContent + ipfsStr + " \n";
+        //   shareCopyContent = shareCopyContent + " " + " \n ";
+        //   shareRefContent.ipfsStr = ipfsStr;
+        //   shareRefContent.httpStr =
+        //     shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
+        // }
 
-        if (
-          (currentOODItem.value.data.cbs_state === "finish" ||
-            currentOODItem.value.data.cbs_state === "upgrade_finish" ||
-            currentOODItem.value.data.cyfs_state === "finish") &&
-          currentOODItem.value.data.cyfs_service_state === "start" &&
-          meta.file_id
-        ) {
-          shareCopyContent = shareCopyContent + cyfsStr + " \n";
-          shareCopyContent = shareCopyContent + " " + " \n ";
-          shareRefContent.cyfsStr = cyfsStr;
-          shareRefContent.httpStr =
-            shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
-        }
+        // if (
+        //   (currentOODItem.value.data.cbs_state === "finish" ||
+        //     currentOODItem.value.data.cbs_state === "upgrade_finish" ||
+        //     currentOODItem.value.data.cyfs_state === "finish") &&
+        //   currentOODItem.value.data.cyfs_service_state === "start" &&
+        //   meta.file_id
+        // ) {
+        //   shareCopyContent = shareCopyContent + cyfsStr + " \n";
+        //   shareCopyContent = shareCopyContent + " " + " \n ";
+        //   shareRefContent.cyfsStr = cyfsStr;
+        //   shareRefContent.httpStr =
+        //     shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
+        // }
 
         shareCopyContent = shareCopyContent + shareStr + " \n";
         shareRefContent.shareStr = shareStr;

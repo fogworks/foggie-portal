@@ -673,31 +673,31 @@ const doShare = async (item) => {
     shareCopyContent = shareCopyContent + httpStr + " \n";
     shareCopyContent = shareCopyContent + " " + " \n ";
     shareRefContent.httpStr = httpStr;
-    if (
-      (currentOODItem.value.cbs_state === "finish" ||
-        currentOODItem.value.cbs_state === "upgrade_finish" ||
-        currentOODItem.value.ipfs_state === "finish") &&
-      currentOODItem.value.ipfs_service_state === "start" &&
-      meta.cid
-    ) {
-      shareCopyContent = shareCopyContent + ipfsStr + " \n";
-      shareCopyContent = shareCopyContent + " " + " \n ";
-      shareRefContent.ipfsStr = ipfsStr;
-      shareRefContent.httpStr = shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
-    }
+    // if (
+    //   (currentOODItem.value.cbs_state === "finish" ||
+    //     currentOODItem.value.cbs_state === "upgrade_finish" ||
+    //     currentOODItem.value.ipfs_state === "finish") &&
+    //   currentOODItem.value.ipfs_service_state === "start" &&
+    //   meta.cid
+    // ) {
+    //   shareCopyContent = shareCopyContent + ipfsStr + " \n";
+    //   shareCopyContent = shareCopyContent + " " + " \n ";
+    //   shareRefContent.ipfsStr = ipfsStr;
+    //   shareRefContent.httpStr = shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
+    // }
 
-    if (
-      (currentOODItem.value.cbs_state === "finish" ||
-        currentOODItem.value.cbs_state === "upgrade_finish" ||
-        currentOODItem.value.cyfs_state === "finish") &&
-      currentOODItem.value.cyfs_service_state === "start" &&
-      meta.file_id
-    ) {
-      shareCopyContent = shareCopyContent + cyfsStr + " \n";
-      shareCopyContent = shareCopyContent + " " + " \n ";
-      shareRefContent.cyfsStr = cyfsStr;
-      shareRefContent.httpStr = shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
-    }
+    // if (
+    //   (currentOODItem.value.cbs_state === "finish" ||
+    //     currentOODItem.value.cbs_state === "upgrade_finish" ||
+    //     currentOODItem.value.cyfs_state === "finish") &&
+    //   currentOODItem.value.cyfs_service_state === "start" &&
+    //   meta.file_id
+    // ) {
+    //   shareCopyContent = shareCopyContent + cyfsStr + " \n";
+    //   shareCopyContent = shareCopyContent + " " + " \n ";
+    //   shareRefContent.cyfsStr = cyfsStr;
+    //   shareRefContent.httpStr = shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
+    // }
     shareCopyContent = shareCopyContent + shareStr + " \n";
     shareRefContent.shareStr = shareStr;
     copyContent.value = shareCopyContent;

@@ -171,14 +171,15 @@
                     :disabled="!scope.row.canShare"
                     >share</el-dropdown-item
                   >
+                  <!-- :disabled="scope.row.isDir && false" -->
                   <el-dropdown-item
                     :command="{ flag: 'ipfs', command: scope.row }"
-                    :disabled="scope.row.isDir && false"
+                    :disabled="true"
                     >IPFS PIN</el-dropdown-item
                   >
                   <el-dropdown-item
                     :command="{ flag: 'cyfs', command: scope.row }"
-                    :disabled="scope.row.isDir && false"
+                    :disabled="true"
                     >CYFS PIN</el-dropdown-item
                   >
                   <el-dropdown-item
@@ -246,7 +247,7 @@ import {
 import _ from "lodash";
 
 // import MyEcharts from "@/components/echarts/myEcharts";
-import ShareDialog from "../../foggieMax/home/_modules/myFiles/shareDialog";
+import ShareDialog from "@/views/foggieMax/home/_modules/myFiles/shareDialog";
 // import PinDialog from "./_modules/pinDialog";
 // import PinTaskList from "./_modules/pinTaskList";
 // import PinFormDialog from "./_modules/pinFormDialog";
@@ -449,11 +450,7 @@ const initFileData = async (data) => {
       type,
       isDir
     );
-    let { imgHttpLink: url_large } = handleImg(
-      data.content[j],
-      type,
-      isDir,
-    );
+    let { imgHttpLink: url_large } = handleImg(data.content[j], type, isDir);
     // let _url = require(`@/svg-icons/logo-dog-black.svg`);
     let cid = data.content[j].cid;
     let file_id = data.content[j].file_id;

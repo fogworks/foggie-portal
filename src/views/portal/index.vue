@@ -29,9 +29,18 @@
           <svg-icon icon-class="devices"></svg-icon>
           <template #title> Device </template>
         </el-menu-item>
-        <el-menu-item index="discover">
+        <el-menu-item disabled index="discover">
           <svg-icon icon-class="discover"></svg-icon>
-          <template #title> Discover </template>
+          <template #title>
+            <el-tooltip
+              class="box-item"
+              effect="dark"
+              content="Coming Soon"
+              placement="right"
+            >
+              Discover
+            </el-tooltip>
+          </template>
         </el-menu-item>
         <el-menu-item index="shop">
           <svg-icon icon-class="shop"></svg-icon>

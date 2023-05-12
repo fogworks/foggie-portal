@@ -26,7 +26,7 @@
           <el-form-item label="Balance">
             <span>{{ oldWalletMoney }} DMC</span>
           </el-form-item>
-          <el-form-item label="To DMC" prop="receiver">
+          <el-form-item label="To DMC Account" prop="receiver">
             <!-- <span v-if="isWalletUser">{{ form.receiver }} (Owner)</span> -->
             <el-input
               :disabled="loading"

@@ -8,7 +8,10 @@
   >
     <div class="ListTitle">
       <div>
-        <span>Order ID: {{ item.id }} </span>
+        <span
+          >Order ID: {{ item.id
+          }}{{ item.foggie_id ? `(${item.foggie_id})` : "" }}
+        </span>
         <span
           style="
             font-size: 15px;
@@ -148,20 +151,11 @@
                 font-weight: bold;
                 font-size: 20px;
                 color: #fbfbfb;
+                align-items: center;
               "
             >
               <div style="width: 160px; text-align: start">Last Challenge</div>
-              <el-progress
-                style="flex: 1"
-                :text-inside="true"
-                color="#6FE9EE"
-                :stroke-width="8"
-                :percentage="70"
-              >
-                <template #default="{ percentage }">
-                  <span>15days 0 hours 30min</span>
-                </template>
-              </el-progress>
+              <span style="font-size: 14px">15days 0 hours 30min</span>
               <svg-icon
                 v-if="item.challenge_period"
                 class="over"
@@ -312,7 +306,7 @@
 
 <script setup>
 import { ElMessage } from "element-plus";
-import { ref, reactive, toRefs, onMounted, computed, toRef } from "vue";
+import { ref, reactive, toRefs, onMounted, computed, toRef, watch } from "vue";
 import { useStore } from "vuex";
 
 import { pushMerkle, getOrderById } from "@/api/order/orderList";
@@ -327,6 +321,7 @@ import AssetsRecords from "./assetsRecords";
 import { getfilesize } from "@/utils/util.js";
 const $state = useStore();
 // const router = useRouter();
+const uploadIsShow = computed(() => $state.getters.uploadIsShow);
 const props = defineProps({
   orderId: {
     type: String,
@@ -430,12 +425,17 @@ const challengeMiner = (item) => {
     }
   });
 };
-onMounted(() => {
-  loadOrderList();
-});
 function refresh() {
   loadOrderList();
 }
+watch(uploadIsShow, (newVal, oldVal) => {
+  if (!newVal) {
+    refresh();
+  }
+});
+onMounted(() => {
+  loadOrderList();
+});
 </script>
 
 <style lang="scss" scoped>
@@ -450,9 +450,10 @@ function refresh() {
 
   .el-progress-bar__innerText {
     position: absolute;
-    right: 0px;
+    left: 0px;
     top: -18px;
     font-size: 14px;
+    margin: 0;
   }
 
   .el-progress-bar__outer {
