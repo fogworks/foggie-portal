@@ -375,6 +375,24 @@ class OrderController {
             return;
         }
 
+        var challengeFailed = challengeList.reduce((acc, cur) => {
+            if (cur.state === 6) {
+              return acc + 1;
+            } else {
+              return acc;
+            }
+          }, 0);
+
+          var challengeSuccess = challengeList.reduce((acc, cur) => {
+            if (cur.state === 5) {
+              return acc + 1;
+            } else {
+              return acc;
+            }
+          }, 0);
+        order[0]['challenge_num'] = challengeList.length;
+        order[0]['challenge_sccess'] = challengeSuccess;
+        order[0]['challenge_failed'] = challengeFailed;
         order[0]['challenge_period'] = new Date().getTime() - new Date(challengeList[0].create_time).getTime();
 
         var challengePeriod = await orderService.getChallengeExpire(orderId, email);
