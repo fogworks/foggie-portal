@@ -103,3 +103,65 @@ html.dark {
     color: #fff;
   }
 }
+
+//- ----------------------------------------------
+//- 常用字体
+//- ----------------------------------------------
+@for $i from 12 through 36 {
+  .fs#{$i} {
+    font-size: #{$i}px;
+  }
+}
+
+//- ----------------------------------------------
+//- 常用间距
+//- ----------------------------------------------
+
+@for $i from 1 through 35 {
+  // @each $item in top, right, bottom, left {
+  //   .margin-#{$item}-#{$i} {
+  //     margin-#{$item}: #{$i}px;
+  //   }
+
+  //   .padding-#{$item}-#{$i} {
+  //     padding-#{$item}: #{$i}px;
+  //   }
+  // }
+
+  .mt-#{$i} {
+    margin-top: #{$i}px;
+  }
+  .mb-#{$i} {
+    margin-bottom: #{$i}px;
+  }
+
+  .ml-#{$i} {
+    margin-left: #{$i}px;
+  }
+  .mr-#{$i} {
+    margin-right: #{$i}px;
+  }
+
+  .mx-#{$i} {
+    margin-left: #{$i}px;
+    margin-right: #{$i}px;
+  }
+
+  .px-#{$i} {
+    padding-left: #{$i}px;
+    padding-right: #{$i}px;
+  }
+
+  .pt-#{$i} {
+    padding-top: #{$i}px;
+  }
+  .pb-#{$i} {
+    padding-bottom: #{$i}px;
+  }
+  .pr-#{$i} {
+    padding-right: #{$i}px;
+  }
+  .pl-#{$i} {
+    padding-left: #{$i}px;
+  }
+}
