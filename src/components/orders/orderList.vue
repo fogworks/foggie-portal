@@ -155,9 +155,13 @@
               "
             >
               <div style="width: 160px; text-align: start">Last Challenge</div>
-              <span style="font-size: 14px">15days 0 hours 30min</span>
+              <span style="font-size: 14px">{{
+                item.challenge_period
+                  ? getSecondTime(item.challenge_period)
+                  : ""
+              }}</span>
               <svg-icon
-                v-if="item.challenge_period"
+                v-if="item.challenge_timeout"
                 class="over"
                 @click="overShow = true"
                 icon-class="overTime"
@@ -211,7 +215,15 @@
             ></svg-icon>
             <div>
               <div>User</div>
-              <div><span>12/</span><span style="color: #db001b">1</span></div>
+              <div>
+                <span>{{ item.challenge_num || 0 }}/</span>
+                <span style="color: #05f701"
+                  >{{ item.challenge_sccess || 0 }}/</span
+                >
+                <span style="color: #db001b">{{
+                  item.challenge_failed || 0
+                }}</span>
+              </div>
             </div>
             <!-- <div>
               <div>Chain</div>
@@ -316,6 +328,7 @@ import {
   ChinaTime1,
   getResidueTime,
   ChinaTime4,
+  getSecondTime,
 } from "@/utils/ChinaStandardTime";
 import AssetsRecords from "./assetsRecords";
 import { getfilesize } from "@/utils/util.js";
