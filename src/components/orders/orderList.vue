@@ -103,7 +103,7 @@
             <div>
               <div>Residue</div>
               <div>
-                <span>200</span>
+                <span>{{ item.user_pledge_amount }}</span>
               </div>
             </div>
             <div>

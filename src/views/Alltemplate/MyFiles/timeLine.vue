@@ -102,7 +102,7 @@
                     : 'normal'
                 "
                 >{{
-                  activeName == "Merkle" ? "Merkle Root #" : "Reply Hash #"
+                  activeName == "Merkle" ? "Merkle Root #" : "Data Hash #"
                 }}</span
               >
               <span
@@ -114,7 +114,9 @@
                     ? 'text-muted'
                     : 'normal'
                 "
-                >{{ item.merkle_root || item.hash_data }}</span
+                >{{
+                  activeName == "Merkle" ? item.merkle_root : item.hash_data
+                }}</span
               >
             </div>
           </div>
