@@ -171,7 +171,7 @@ module.exports = {
                     return;
                 }
                 if(doc == null || doc.length == 0){
-                    logger.error("getChallengeFromDB doc is null, state:{}, orderId:{}, email:{}", state, orderId, email);
+                    logger.error("getChallengeFromDB doc is null, orderId:{}, email:{}", orderId, email);
                     resolve(BizResultCode.GET_CHANLLENGE_RECORD_FAILED);
                     return;
                 }
