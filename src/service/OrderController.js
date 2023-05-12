@@ -458,15 +458,17 @@ class OrderController {
             return;
         }
 
-        // valid file count 
-        var fileCount = await fileService.getFileCount(orderId, email, "3");
-        if (fileCount instanceof BizResultCode) {
-            res.send(BizResult.fail(fileCount));
+        // valid used space > total space * 5% 
+        var orderInfo = await orderService.getOrderById(email, orderId);
+        if (orderInfo instanceof BizResultCode) {
+            res.send(BizResult.fail(orderInfo));
             return;
         }
 
-        if (fileCount == 0) {
-            res.send(BizResult.fail(BizResultCode.FILE_NOT_EXIST));
+        var usedSpace = orderInfo.used_space ? orderInfo.used_space : 0;
+        var totalSpace = orderInfo.total_space ? orderInfo.total_space : 0;
+        if (usedSpace < totalSpace * 0.05) {
+            res.send(BizResult.fail(BizResultCode.ORDER_USED_SPACE_NOT_ENOUGH));
             return;
         }
 
@@ -510,11 +512,7 @@ class OrderController {
             }
         });
 
-        var orderInfo = await orderService.getOrderById(email, orderId);
-        if (orderInfo instanceof BizResultCode) {
-            res.send(BizResult.fail(orderInfo));
-            return;
-        }
+        
         var foggieId = orderInfo.foggie_id;
 
         const getMerkleRequest = {

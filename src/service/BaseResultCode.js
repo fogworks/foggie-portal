@@ -72,6 +72,7 @@ class BaseResultCode {
     static UPDATE_CHANLLENGE_RECORD_FAILED = new BaseResultCode(20025, 'update challenge failed');
     static MERKLE_INCONSISTENT = new BaseResultCode(20026, 'merkle inconsistent');
     static ORDER_STATE_END = new BaseResultCode(20027, 'order state is end');
+    static ORDER_USED_SPACE_NOT_ENOUGH = new BaseResultCode(20028, 'order used space not enough');
 
     // file exception code 30000～39999
     static FILE_NOT_EXIST = new BaseResultCode(30000, 'file is not exist');

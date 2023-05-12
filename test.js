@@ -470,15 +470,7 @@ function ansChallenge() {
 // minerPushMerkle();
 // increase();
 // mint();
-const challengeList = [
-  { id: 1, createTime: '2021-01-01', age:0 },
-  { id: 2, createTime: '2021-02-01', age:0 },
-  { id: 3, createTime: '2021-03-01' }
-];
+var someObject = {}
+const usedSpace = someObject.usedSpace ? someObject.usedSpace : 0;
 
-const ageSum = challengeList.reduce((acc, cur) => {
-    return acc + (cur.age || 0);
-  }, 0);
-
-console.log(ageSum); // 输出6
-
+console.log('usedSpace:', usedSpace);
