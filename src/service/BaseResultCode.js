@@ -111,6 +111,7 @@ class BaseResultCode {
     static GENERATE_QR_CODE_FAILED = new BaseResultCode(40002, 'generating QR code failed');
     static SAVE_TRANSFER_VALID_FAILED = new BaseResultCode(40003, 'save transfer valid failed');
     static TRANSFER_VALID_FAILED = new BaseResultCode(40004, 'transfer valid failed');
+    static GET_USER_ASSET_FAILED = new BaseResultCode(40005, 'get user asset failed');
 }
 
 module.exports = BaseResultCode

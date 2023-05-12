@@ -934,6 +934,25 @@ module.exports = {
             return BizResultCode.QUERY_ORDER_FAILED;
         });
     },
+    getOrdersFromDB: async (email) => {
+
+        return new Promise((resolve, reject) => {
+            // query buy order record from NeDB
+            orderDB.find({
+                email: email
+            }, function (err, data) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.QUERY_ORDER_FAILED);
+                    return;
+                }
+                resolve(data);
+            });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.QUERY_ORDER_FAILED;
+        });
+    },
     getOrderById: async (email, orderId) => {
 
         return new Promise((resolve, reject) => {

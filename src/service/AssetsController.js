@@ -3,6 +3,7 @@ const BizResultCode = require('./BaseResultCode');
 const logger = require('./logger')('AssetsController.js');
 const assetsService = require('./AssetsService');
 const userService = require('./UserService');
+const orderService = require('./OrderService');
 const DMC = require('dmc.js');
 const config = require('config');
 const request = require('sync-request');
@@ -95,7 +96,7 @@ class AssetsController {
      * @param {*} res 
      * @returns 
      */
-    static async bindValid(req, res){
+    static async bindValid(req, res) {
         var email = req.body.email;
         var userToken = req.body.userToken;
         var secret = req.body.secret;
@@ -428,11 +429,48 @@ class AssetsController {
         var chainConfig = config.get('chainConfig')
         var httpEndpoint = chainConfig.get('httpEndpoint')
         var getTableRows = chainConfig.get('getTableRows')
-        let userAssets = JSON.parse(request('POST', httpEndpoint + getTableRows, {
-            json: { "json": true, "code": "dmc.token", "scope": scope, "table": "accounts" }
-        }).getBody('utf-8')).rows
+        try {
+            let userAssets = JSON.parse(request('POST', httpEndpoint + getTableRows, {
+                json: { "json": true, "code": "dmc.token", "scope": scope, "table": "accounts" }
+            }).getBody('utf-8')).rows
+            var orderList = await orderService.getOrdersFromDB(email);
+            if (orderList instanceof BizResultCode) {
+                logger.info('get orderList failed');
+                res.send(BizResult.success(userAssets));
+                return;
+            }
+            if (orderList.length == 0) {
+                logger.info('orderList is null');
+                res.send(BizResult.success(userAssets));
+                return;
+            }
 
-        res.send(BizResult.success(userAssets));
+            if (userAssets.length == 0) {
+                res.send(BizResult.success(userAssets));
+                return;
+            }
+
+            var totalSpace = orderList.reduce((acc, cur) => {
+                return acc + (cur.total_space || 0);
+            }, 0);
+
+            var usedSpace = orderList.reduce((acc, cur) => {
+                return acc + (cur.used_space || 0);
+            }, 0);
+
+            var order = {};
+
+            order['order_num'] = orderList.length;
+            order['total_space'] = totalSpace;
+            order['used_space'] = usedSpace;
+            userAssets.push(order);
+            res.send(BizResult.success(userAssets));
+        }
+        catch (e) {
+            logger.error(e)
+            res.send(BizResult.fail(BizResultCode.GET_USER_ASSET_FAILED));
+        }
+
     }
 }
 
