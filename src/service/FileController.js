@@ -132,6 +132,49 @@ class FileController {
         res.send(BizResult.success(result));
     }
 
+    static async uploadValid(req, res) {
+
+        var orderId = req.body.orderId;
+
+        if (!orderId) {
+            res.send(BizResult.validateFailed(orderId));
+            return;
+        }
+
+        // upload file valid challenge is end
+        var challengeList = orderService.getChallengeByState(orderId, [0, 1, 3, 7]);
+        if (challengeList instanceof BizResultCode) {
+            res.send(BizResult.fail(challengeList));
+            return;
+        }
+        if (challengeList.length > 0) {
+
+            for (const chanllenge of challengeList) {
+                if (chanllenge.state === 3) {
+                    logger.info("challenge is not end, orderId:{}", orderId);
+                    res.send(BizResult.fail(BizResultCode.ORDER_CHALLENGE_NOT_END));
+                    return;
+                }
+                if (chanllenge.state === 7) {
+                    logger.info("order is end, orderId:{}", orderId);
+                    res.send(BizResult.fail(BizResultCode.ORDER_STATE_END));
+                    return;
+                }
+                if (chanllenge.state === 0 && chanllenge.pre_merkle_root != chanllenge.merkle_root) {
+                    logger.info("merkle is inconsistent, orderId:{}", orderId);
+                    res.send(BizResult.fail(BizResultCode.MERKLE_INCONSISTENT));
+                    return;
+                }
+                if (chanllenge.state === 1 && parseInt(chanllenge.pre_merkle_root) != 0) {
+                    logger.info("merkle is inconsistent, orderId:{}", orderId);
+                    res.send(BizResult.fail(BizResultCode.MERKLE_INCONSISTENT));
+                    return;
+                }
+            }
+        }
+        res.send(BizResult.success(true));
+    }
+
     /**
      * upload file
      * 

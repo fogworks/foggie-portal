@@ -181,6 +181,10 @@ app.post("/file/upload", multipartMiddleware, (req, res) => {
   FileController.upload(req, res);
 });
 
+app.post("/file/upload_valid", jsonParser, (req, res) => {
+  FileController.uploadValid(req, res);
+});
+
 app.post("/file/create", jsonParser, (req, res) => {
   var fileName = req.body.fileName;
   var md5 = req.body.md5;
