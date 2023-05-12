@@ -1,5 +1,5 @@
 <template>
-  <div class="card card-custom clearfix">
+  <div class="card card-custom clearfix" :class="IsOpenHider ? 'cardHide' : ''">
     <div class="card-header">
       <h3 style="display: flex; align-items: center">
         <div class="card-title">
@@ -11,30 +11,45 @@
           </span>
         </div>
       </h3>
-      <el-dropdown
-        trigger="click"
-        @command="handleCommand"
-        popper-class="custom_dropdown"
-      >
-        <div class="color-box">
-          <svg-icon icon-class="more"></svg-icon>
-        </div>
-        <template #dropdown>
-          <el-dropdown-menu class="more-dropdown" slot="dropdown">
-            <el-dropdown-item
-              :command="{ flag: 'Challenge', command: 'Challenge' }"
-              >Challenge</el-dropdown-item
-            >
-            <el-dropdown-item
-              :command="{ flag: 'Arbitration', command: 'Arbitration' }"
-              >Arbitration</el-dropdown-item
-            >
-            <el-dropdown-item :command="{ flag: 'Merkle', command: 'Merkle' }"
-              >Merkle</el-dropdown-item
-            >
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
+      <div style="display: flex; align-items: center">
+        <el-button type="primary" text @click="IsOpenHider = !IsOpenHider">
+          <span v-if="IsOpenHider">Open</span>
+          <span v-else>Hide</span>
+          <el-icon>
+            <ArrowDown
+              :style="
+                IsOpenHider
+                  ? 'transition: transform 0.4s;'
+                  : 'transform: rotate(180deg);transition: transform 0.4s;'
+              "
+            />
+          </el-icon>
+        </el-button>
+        <el-dropdown
+          trigger="click"
+          @command="handleCommand"
+          popper-class="custom_dropdown"
+        >
+          <div class="color-box">
+            <img src="@/assets/more.svg" alt="" />
+          </div>
+          <template #dropdown>
+            <el-dropdown-menu class="more-dropdown" slot="dropdown">
+              <el-dropdown-item
+                :command="{ flag: 'Challenge', command: 'Challenge' }"
+                >Challenge</el-dropdown-item
+              >
+              <el-dropdown-item
+                :command="{ flag: 'Arbitration', command: 'Arbitration' }"
+                >Arbitration</el-dropdown-item
+              >
+              <el-dropdown-item :command="{ flag: 'Merkle', command: 'Merkle' }"
+                >Merkle</el-dropdown-item
+              >
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
     </div>
 
     <!-- <template v-if="activeName == 'Challenge'">
@@ -271,7 +286,7 @@
     <div
       class="card-body"
       v-infinite-scroll="dataListInfinite"
-      :infinite-scroll-immediate="true"
+      :infinite-scroll-immediate="false"
       :infinite-scroll-distance="150"
     >
       <div class="timeline">
@@ -289,8 +304,8 @@
             :class="item.state == 'success' ? 'text-success' : 'text-danger'"
           ></div>
 
-          <div class="timeline-content">
-            <span class="font-weight-bolder">{{ item.sender }}</span>
+          <div class="timeline-content" style="text-align: left">
+            <span class="font-weight-bolder">{{ item.challenger.id }}</span>
             <span
               class="font-weight-bolder fs12 ml-8"
               :class="
@@ -377,6 +392,7 @@ const data = reactive({
     dataList: [],
   },
 });
+const IsOpenHider = ref(false);
 
 /* 挑战 */
 function loadChallengeList() {
@@ -445,6 +461,7 @@ function loadArbitration() {
 
 /* 下拉加载 */
 function dataListInfinite() {
+  console.log(789);
   if (data[activeName.value].total > data[activeName.value].dataList.length) {
     data[activeName.value].pageNum += 1;
     switch (activeName.value) {
@@ -463,15 +480,9 @@ function dataListInfinite() {
     return;
   }
 }
-const handleCommand = (item) => {
-  activeName.value = item.flag;
-};
-onMounted(() => {
-  loadChallengeList();
-});
 
 watch(
-  () => activeName,
+  () => activeName.value,
   (newVal) => {
     data[newVal].pageNum = 1;
     data[newVal].dataList = [];
@@ -484,6 +495,13 @@ watch(
     }
   }
 );
+const handleCommand = (item) => {
+  activeName.value = item.flag;
+  console.log(activeName.value);
+};
+onMounted(() => {
+  loadChallengeList();
+});
 </script>
 
 <style lang="scss" scoped>
@@ -517,6 +535,17 @@ watch(
   max-width: 1960px;
   margin: 0px auto;
   margin-top: 20px;
+
+  transition: height 0.4s;
+}
+
+.card::-webkit-scrollbar {
+  display: none;
+}
+
+.cardHide {
+  overflow: hidden;
+  height: 60px;
 }
 
 .card.card-custom > .card-header {
