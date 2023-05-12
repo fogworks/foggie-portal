@@ -157,29 +157,62 @@ module.exports = {
             return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
         });
     },
+    getChallengeAllFromDB: async (orderId, email) => {
+
+        // save chanllenge record into NeDB
+        return new Promise((resolve, reject) => {
+            challengeRecordDB.find({
+                order_id: orderId,
+                email: email
+            }).sort({create_time: -1}).exec(function (err, doc) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.GET_CHANLLENGE_RECORD_FAILED);
+                    return;
+                }
+                if(doc == null || doc.length == 0){
+                    logger.error("getChallengeFromDB doc is null, state:{}, orderId:{}, email:{}", state, orderId, email);
+                    resolve(BizResultCode.GET_CHANLLENGE_RECORD_FAILED);
+                    return;
+                }
+                resolve(doc);
+            });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
+        });
+    },
+    getLastChallengeFromDB: async (orderId, email) => {
+        var challengeList = await module.exports.getChallengeAllFromDB(orderId, email);
+        if (challengeList instanceof BizResultCode) {
+            logger.info("get challenge from db failed, orderId:{}", orderId);
+            return 0;
+        }
+        return challengeList;
+    },
     getChallengeExpire: async (orderId, email) => {
         var challengeListFromChain = module.exports.getChallengeByState(orderId, [3,4,5,6,7]);
         if(challengeListFromChain instanceof BizResultCode){
             logger.info("getChallengeByState failed, orderId:{}", orderId);
-            return 0;
+            return false;
         }
         if(challengeListFromChain.length == 0){
             logger.info("getChallengeByState challengeList is null, orderId:{}", orderId);
-            return 0;
+            return false;
         }
 
         var challengeList = await module.exports.getChallengeFromDB(3, orderId, email);
         if (challengeList instanceof BizResultCode) {
             logger.info("get challenge from db failed, orderId:{}", orderId);
-            return 0;
+            return false;
         }
 
         var challenge = challengeList[0];
         // db and chain both have challenge, update challenge state by chain data
-        var challengeStateChain = challengeListFromChain[0].state;
-        if(challengeStateChain !=3){
-            module.exports.updateChallenge(challenge._id, challengeListFromChain[0].state);
-            return 0;
+        var challengeState = challengeListFromChain[0].state;
+        if(challengeState !=3){
+            module.exports.updateChallenge(challenge._id, challengeState);
+            return false;
         }
         else{
             var challengeTime = challenge.create_time;
@@ -188,9 +221,9 @@ module.exports = {
             var payChallengeTimeout = challengeConfig.get("payChallengeTimeout");
             if (period < payChallengeTimeout) {
                 logger.info("challenge is not timeout, orderId:{}", orderId);
-                return 0;
+                return false;
             }
-            return period;
+            return true;
         }
     },
     updateChallenge: async (id, state) => {

@@ -358,16 +358,28 @@ class OrderController {
             return;
         }
 
-
         var orderInfo = await orderService.getOrderById(email, orderId);
         order[0]['used_space'] = orderInfo.used_space;
         order[0]['total_space'] = orderInfo.total_space;
+        order[0]['foggie_id'] = orderInfo.foggie_id;
         var fileCount = await fileService.getFileCount(orderId, email, deviceType);
         order[0]['file_count'] = fileCount;
 
+        var challengeList = await orderService.getChallengeAllFromDB(orderId, email)
+        if(challengeList instanceof BizResultCode){
+            res.send(BizResult.success(order));
+            return;
+        }
+        if(challengeList.length == 0){
+            res.send(BizResult.success(order));
+            return;
+        }
+
+        order[0]['challenge_period'] = new Date().getTime() - new Date(challengeList[0].create_time).getTime();
+
         var challengePeriod = await orderService.getChallengeExpire(orderId, email);
-        if (challengePeriod > 0) {
-            order[0]['challenge_period'] = challengePeriod;
+        if (challengePeriod) {
+            order[0]['challenge_timeout'] = true;
         }
         res.send(BizResult.success(order));
     }
