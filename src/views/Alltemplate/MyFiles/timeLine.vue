@@ -17,7 +17,7 @@
         popper-class="custom_dropdown"
       >
         <div class="color-box">
-          <img src="@/assets/more.svg" alt="" />
+          <svg-icon icon-class="more"></svg-icon>
         </div>
         <template #dropdown>
           <el-dropdown-menu class="more-dropdown" slot="dropdown">
@@ -356,6 +356,7 @@ const props = defineProps({
 });
 const { orderId } = toRefs(props);
 const activeName = ref("Challenge");
+const isCollapse = ref(false);
 const data = reactive({
   Challenge: {
     total: 0,
@@ -509,10 +510,8 @@ watch(
 .card {
   background-color: var(--bg-color);
   transition: border-radius 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1), 0 0 0 2px rgb(190, 190, 190),
-    0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
   border-radius: 10px;
-  height: 400px;
+  max-height: 400px;
   overflow-y: auto;
   width: 100%;
   max-width: 1960px;
@@ -545,6 +544,21 @@ watch(
   top: 0px;
 
   z-index: 999;
+  .color-box {
+    // @include color-box;
+    cursor: pointer;
+    svg {
+      color: $light_blue;
+      font-size: 28px;
+      transition: all 0.8s cubic-bezier(0.075, 0.82, 0.165, 1) 0s;
+    }
+
+    &:hover {
+      svg {
+        transform: scale(1.1);
+      }
+    }
+  }
 
   .card-title {
     font-weight: 600;

@@ -18,32 +18,39 @@
           >{{ item.created_time }}</span
         >
       </div>
-      <el-link class="link" @click="recordsShow = true" :underline="false"
-        >Records
-      </el-link>
-      <div style="font-size: 15px; color: rgba(255, 255, 255, 0.7)">
-        <el-tag type="info" effect="dark" round v-if="item.state == '0'">
-          Subscription not agreed, waiting...</el-tag
-        >
-        <el-tag effect="dark" round v-if="item.state == '1'"
-          >order status delivery</el-tag
-        >
-        <el-tag type="warning" effect="dark" round v-if="item.state == '2'">
-          Insufficient deposit, the order is about to end
-        </el-tag>
-        <el-tag effect="dark" round v-if="item.state == '3'">
-          With sufficient deposit, the order is still in delivery in the next
-          cycle
-        </el-tag>
-        <el-tag type="success" effect="dark" round v-if="item.state == '4'">
-          Order has ended</el-tag
-        >
-        <el-tag type="danger" effect="dark" round v-if="item.state == '5'">
-          Order has been canceled</el-tag
-        >
-        <el-tag type="warning" effect="dark" round v-if="item.state == '6'">
-          The order will be canceled in the next cycle
-        </el-tag>
+      <div class="top-right">
+        <el-link class="link" @click="refresh" :underline="false">
+          <svg-icon icon-class="refresh"></svg-icon>
+          Refresh
+        </el-link>
+        <el-link class="link" @click="recordsShow = true" :underline="false">
+          <svg-icon icon-class="list"></svg-icon>
+          Records
+        </el-link>
+        <div style="font-size: 15px; color: rgba(255, 255, 255, 0.7)">
+          <el-tag type="info" effect="dark" round v-if="item.state == '0'">
+            Subscription not agreed, waiting...</el-tag
+          >
+          <el-tag effect="dark" round v-if="item.state == '1'"
+            >order status delivery</el-tag
+          >
+          <el-tag type="warning" effect="dark" round v-if="item.state == '2'">
+            Insufficient deposit, the order is about to end
+          </el-tag>
+          <el-tag effect="dark" round v-if="item.state == '3'">
+            With sufficient deposit, the order is still in delivery in the next
+            cycle
+          </el-tag>
+          <el-tag type="success" effect="dark" round v-if="item.state == '4'">
+            Order has ended</el-tag
+          >
+          <el-tag type="danger" effect="dark" round v-if="item.state == '5'">
+            Order has been canceled</el-tag
+          >
+          <el-tag type="warning" effect="dark" round v-if="item.state == '6'">
+            The order will be canceled in the next cycle
+          </el-tag>
+        </div>
       </div>
     </div>
     <div
@@ -156,6 +163,7 @@
                 </template>
               </el-progress>
               <svg-icon
+                v-if="item.challenge_period"
                 class="over"
                 @click="overShow = true"
                 icon-class="overTime"
@@ -280,6 +288,7 @@
     </div>
   </div>
   <AssetsRecords
+    v-if="recordsShow"
     v-model:visible="recordsShow"
     :orderId="orderId"
   ></AssetsRecords>
@@ -289,13 +298,10 @@
     width="500px"
     v-model="overShow"
   >
-    <span class="dialog-span">
-      The miners have not recovered for 20 hours. Do you want to make overtime
-      compensation?
-    </span>
+    <span class="dialog-span"> Overtime payment will terminate the order </span>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="overShow = false">calcel</el-button>
+        <el-button @click="overShow = false">NO</el-button>
         <el-button type="primary" @click="handlerOver"> YES </el-button>
       </span>
     </template>
@@ -373,7 +379,13 @@ function openMyFiles(item) {
   // router.push({ path: "/Alltemplate/MyFiles", query: { orderState: item.state } });
 }
 function handlerOver() {
-  console.log(111);
+  pay_challenge({
+    chainId: ChainId.value,
+    email: email.value,
+    orderId: props.orderId,
+  }).then((res) => {
+    console.log(res);
+  });
 }
 function popoverClick(type, item) {
   if (type == "submitMerkle") {
@@ -421,6 +433,9 @@ const challengeMiner = (item) => {
 onMounted(() => {
   loadOrderList();
 });
+function refresh() {
+  loadOrderList();
+}
 </script>
 
 <style lang="scss" scoped>
@@ -474,7 +489,17 @@ onMounted(() => {
     color: #fff;
     margin: 20px 0px;
   }
+  .top-right {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
   .link {
+    margin-right: 20px;
+    svg {
+      font-size: 22px;
+      margin-right: 5px;
+    }
     &:hover {
       color: #409eff;
     }

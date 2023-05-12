@@ -83,4 +83,11 @@ export function getArbitrationList(data) {
     data,
   });
 }
+export function pay_challenge(data) {
+  return request({
+    url: baseUrl + "/order/pay_challenge",
+    method: "post",
+    data,
+  });
+}
 

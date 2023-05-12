@@ -454,7 +454,7 @@ export default {
           // };
           // let res = await getWithdrawGoogle(data);
           scret_keyOld.value = res.data.secret;
-          scret_key.value = Base64.decode(res.data.secret);
+          scret_key.value = res.data.secret;
           // "data:image/jpg;base64," +
           authQrcode.value = res.data.imageUrl;
           account.value = res.data.account;

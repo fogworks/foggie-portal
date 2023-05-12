@@ -108,16 +108,16 @@ export default {
       // currentPage.value = 1;
       // total.value = 0;
     });
-    watch(
-      orderId,
-      (data) => {
-        initRecords();
-      },
-      {
-        immediate: true,
-        deep: true,
-      }
-    );
+    // watch(
+    //   orderId,
+    //   (data) => {
+    //     initRecords();
+    //   },
+    //   {
+    //     immediate: true,
+    //     deep: true,
+    //   }
+    // );
     onMounted(initRecords);
     return {
       activeName,
