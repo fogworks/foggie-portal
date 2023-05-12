@@ -707,13 +707,13 @@ class OrderController {
         })
     }
 
-    static getChallengeList(req, res) {
-
+    static async getChallengeList(req, res) {
+        var email = req.body.email;
         var orderId = req.body.orderId;
         var limit = req.body.limit;
         var pageNum = req.body.pageNum;
 
-        if (!orderId) {
+        if (!orderId || !email) {
             res.send(BizResult.validateFailed(orderId));
             return;
         }
@@ -726,13 +726,13 @@ class OrderController {
             skip = (pageNum - 1) * limit
         }
 
-        var resultData = orderService.getChallengeRecord(orderId, skip, limit);
+        var resultData = await orderService.getChallengeRecord(email, orderId, skip, limit);
         if (resultData instanceof BizResultCode) {
             res.send(BizResult.fail(resultData));
             return;
         }
 
-        var total = orderService.getChallengeCount(orderId);
+        var total = await orderService.getChallengeCount(orderId);
         if (total instanceof BizResultCode) {
             res.send(BizResult.fail(total));
             return;

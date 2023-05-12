@@ -139,13 +139,13 @@ module.exports = {
                 state: state,
                 order_id: orderId,
                 email: email
-            }).sort({create_time: -1}).exec(function (err, doc) {
+            }).sort({ create_time: -1 }).exec(function (err, doc) {
                 if (err) {
                     logger.error('err:', err);
                     resolve(BizResultCode.GET_CHANLLENGE_RECORD_FAILED);
                     return;
                 }
-                if(doc == null || doc.length == 0){
+                if (doc == null || doc.length == 0) {
                     logger.error("getChallengeFromDB doc is null, state:{}, orderId:{}, email:{}", state, orderId, email);
                     resolve(BizResultCode.GET_CHANLLENGE_RECORD_FAILED);
                     return;
@@ -164,13 +164,13 @@ module.exports = {
             challengeRecordDB.find({
                 order_id: orderId,
                 email: email
-            }).sort({create_time: -1}).exec(function (err, doc) {
+            }).sort({ create_time: -1 }).exec(function (err, doc) {
                 if (err) {
                     logger.error('err:', err);
                     resolve(BizResultCode.GET_CHANLLENGE_RECORD_FAILED);
                     return;
                 }
-                if(doc == null || doc.length == 0){
+                if (doc == null || doc.length == 0) {
                     logger.error("getChallengeFromDB doc is null, orderId:{}, email:{}", orderId, email);
                     resolve(BizResultCode.GET_CHANLLENGE_RECORD_FAILED);
                     return;
@@ -183,12 +183,12 @@ module.exports = {
         });
     },
     getChallengeExpire: async (orderId, email) => {
-        var challengeListFromChain = module.exports.getChallengeByState(orderId, [3,4,5,6,7]);
-        if(challengeListFromChain instanceof BizResultCode){
+        var challengeListFromChain = module.exports.getChallengeByState(orderId, [3, 4, 5, 6, 7]);
+        if (challengeListFromChain instanceof BizResultCode) {
             logger.info("getChallengeByState failed, orderId:{}", orderId);
             return false;
         }
-        if(challengeListFromChain.length == 0){
+        if (challengeListFromChain.length == 0) {
             logger.info("getChallengeByState challengeList is null, orderId:{}", orderId);
             return false;
         }
@@ -202,11 +202,11 @@ module.exports = {
         var challenge = challengeList[0];
         // db and chain both have challenge, update challenge state by chain data
         var challengeState = challengeListFromChain[0].state;
-        if(challengeState !=3){
+        if (challengeState != 3) {
             module.exports.updateChallenge(challenge._id, challengeState);
             return false;
         }
-        else{
+        else {
             var challengeTime = challenge.create_time;
             var period = new Date().getTime() - new Date(challengeTime).getTime();
             var challengeConfig = config.get("challengeConfig");
@@ -233,7 +233,7 @@ module.exports = {
                 }
             }, {}, function (err, num) {
                 if (err) {
-                    logger.error("err:" , err);
+                    logger.error("err:", err);
                     resolve(BizResultCode.UPDATE_CHANLLENGE_RECORD_FAILED);
                     return;
                 }
@@ -258,7 +258,7 @@ module.exports = {
             logger.info("get challenge count failed, orderId:{}", orderId);
             return;
         }
-        if(challengeCount == 0){
+        if (challengeCount == 0) {
             logger.info("not exist no response challenge, orderId:{}", orderId);
             // update challenge record state 
             await module.exports.updateChallenge(chanllenge._id, 8);
@@ -348,81 +348,115 @@ module.exports = {
             return BizResultCode.PAY_CHALLENGE_FAILED;
         });
     },
-    getChallengeRecord: (orderId, skip, limit) => {
+    getChallengeRecord: async (email, orderId, skip, limit) => {
+        // try {
+        //     var chainConfig = config.get('chainConfig');
+        //     var transactionAddress = chainConfig.get('transactionAddress');
+        //     var getChallengeList = chainConfig.get('getChallengeList');
 
-        try {
-            var chainConfig = config.get('chainConfig');
-            var transactionAddress = chainConfig.get('transactionAddress');
-            var getChallengeList = chainConfig.get('getChallengeList');
+        //     let body = '{\n' +
+        //         '        find_challenge(\n' +
+        //         '                skip: ' + skip + ',\n' +
+        //         '                limit: ' + limit + ',\n' +
+        //         '                where: {\n' +
+        //         '                    order_id: ' + orderId + ',\n' +
+        //         '                },\n' +
+        //         '                order: "-id",\n' +
+        //         '        ){\n' +
+        //         '            pre_merkle_root\n' +
+        //         '            pre_data_block_count\n' +
+        //         '            merkle_root\n' +
+        //         '            data_block_count\n' +
+        //         '            merkle_submitter\n' +
+        //         '            data_id\n' +
+        //         '            hash_data\n' +
+        //         '            challenge_times\n' +
+        //         '            nonce\n' +
+        //         '            state\n' +
+        //         '            user_lock_amount\n' +
+        //         '            miner_pay_amount\n' +
+        //         '            challenge_date\n' +
+        //         '            created_time\n' +
+        //         '            order {\n' +
+        //         '                id\n' +
+        //         '            }\n' +
+        //         '            challenger {\n' +
+        //         '                id\n' +
+        //         '            }\n' +
+        //         '        }\n' +
+        //         '    }'
+        //     return JSON.parse(request('POST', transactionAddress + getChallengeList, {
+        //         headers: {
+        //             'Content-Type': 'application/graphql'
+        //         },
+        //         body: body
+        //     }).getBody('utf-8')).data.find_challenge;
+        // }
+        // catch (err) {
+        //     logger.error('err:', err);
+        //     return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
+        // }
 
-            let body = '{\n' +
-                '        find_challenge(\n' +
-                '                skip: ' + skip + ',\n' +
-                '                limit: ' + limit + ',\n' +
-                '                where: {\n' +
-                '                    order_id: ' + orderId + ',\n' +
-                '                },\n' +
-                '                order: "-id",\n' +
-                '        ){\n' +
-                '            pre_merkle_root\n' +
-                '            pre_data_block_count\n' +
-                '            merkle_root\n' +
-                '            data_block_count\n' +
-                '            merkle_submitter\n' +
-                '            data_id\n' +
-                '            hash_data\n' +
-                '            challenge_times\n' +
-                '            nonce\n' +
-                '            state\n' +
-                '            user_lock_amount\n' +
-                '            miner_pay_amount\n' +
-                '            challenge_date\n' +
-                '            created_time\n' +
-                '            order {\n' +
-                '                id\n' +
-                '            }\n' +
-                '            challenger {\n' +
-                '                id\n' +
-                '            }\n' +
-                '        }\n' +
-                '    }'
-            return JSON.parse(request('POST', transactionAddress + getChallengeList, {
-                headers: {
-                    'Content-Type': 'application/graphql'
-                },
-                body: body
-            }).getBody('utf-8')).data.find_challenge;
-        }
-        catch (err) {
+        return new Promise((resolve, reject) => {
+            // query push merkle record from NeDB
+            challengeRecordDB.find({
+                order_id: orderId,
+                email: email
+            }).skip(skip).limit(limit).sort({ create_time: -1 }).exec(function (err, data) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.GET_CHANLLENGE_RECORD_FAILED);
+                    return;
+                }
+                resolve(data);
+            });
+        }).catch((err) => {
             logger.error('err:', err);
             return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
-        }
+        });
     },
-    getChallengeCount: (orderId) => {
+    getChallengeCount: async (email, orderId) => {
 
-        try {
-            var chainConfig = config.get('chainConfig');
-            var transactionAddress = chainConfig.get('transactionAddress');
-            var getChallengeList = chainConfig.get('getChallengeList');
+        // try {
+        //     var chainConfig = config.get('chainConfig');
+        //     var transactionAddress = chainConfig.get('transactionAddress');
+        //     var getChallengeList = chainConfig.get('getChallengeList');
 
-            let body = '{\n' +
-                '        count_challenge(\n' +
-                '                where: {\n' +
-                '                    order_id: ' + orderId + ',\n' +
-                '                },\n' +
-                '        )\n' +
-                '    }'
-            return JSON.parse(request('POST', transactionAddress + getChallengeList, {
-                headers: {
-                    'Content-Type': 'application/graphql'
-                },
-                body: body
-            }).getBody('utf-8')).data.count_challenge;
-        }
-        catch (err) {
+        //     let body = '{\n' +
+        //         '        count_challenge(\n' +
+        //         '                where: {\n' +
+        //         '                    order_id: ' + orderId + ',\n' +
+        //         '                },\n' +
+        //         '        )\n' +
+        //         '    }'
+        //     return JSON.parse(request('POST', transactionAddress + getChallengeList, {
+        //         headers: {
+        //             'Content-Type': 'application/graphql'
+        //         },
+        //         body: body
+        //     }).getBody('utf-8')).data.count_challenge;
+        // }
+        // catch (err) {
+        //     logger.error('err:', err);
+        //     return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
+        // }
+        return new Promise((resolve, reject) => {
+            // query push merkle record count from NeDB
+            challengeRecordDB.find({
+                order_id: orderId,
+                email: email
+            }).exec(function (err, data) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.GET_CHANLLENGE_RECORD_FAILED);
+                    return;
+                }
+                resolve(data.length);
+            });
+        }).catch((err) => {
             logger.error('err:', err);
             return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
-        }
+        });
     },
     getOrderFromChain: (orderId) => {
         var chainConfig = config.get('chainConfig')
@@ -1272,20 +1306,20 @@ module.exports = {
         });
     },
     getChainId: () => {
-        try{
+        try {
             var chainConfig = config.get('chainConfig')
             var httpEndpoint = chainConfig.get('httpEndpoint')
             var getChainInfo = chainConfig.get('getChainInfo')
-    
+
             return JSON.parse(request('POST', httpEndpoint + getChainInfo, {}).getBody('utf-8')).chain_id
         }
-        catch(e){
+        catch (e) {
             logger.error('err:', e);
             return BizResultCode.GET_CHAIN_ID_FAILED;
         }
     },
     getBenchmarkPrice: () => {
-        try{
+        try {
             var chainConfig = config.get('chainConfig')
             var httpEndpoint = chainConfig.get('httpEndpoint')
             var getTableRows = chainConfig.get('getTableRows')
@@ -1293,7 +1327,7 @@ module.exports = {
                 json: { "json": true, "code": "dmc.token", "scope": "dmc.token", "table": "bcprice" }
             }).getBody('utf-8')).rows[0].benchmark_price
         }
-        catch(e){
+        catch (e) {
             logger.error('err:', e);
             return BizResultCode.GET_BENCHMARK_PRICE_FAILED;
         }
