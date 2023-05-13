@@ -255,7 +255,7 @@
             >
               <svg-icon
                 icon-class="release"
-                size="36"
+                size="34"
                 style="margin-right: 10px"
                 @click.stop="
                   dmcType = 'release';
@@ -287,7 +287,7 @@
             >
               <svg-icon
                 icon-class="cancel"
-                size="34"
+                size="30"
                 style="margin-right: 10px"
                 @click.stop="cancelOrder(item)"
               ></svg-icon>
@@ -320,7 +320,7 @@
             >
               <svg-icon
                 icon-class="dinwei"
-                size="40"
+                size="34"
                 style="margin-right: 10px"
                 @click.stop="challengeMiner(item)"
               ></svg-icon>
