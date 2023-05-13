@@ -229,12 +229,20 @@ const handleProgress = (item) => {
     let created = new Date(item.created_at).getTime() / 1000;
     let now = new Date().getTime() / 1000 - created;
     let end = +item.expire - created;
-    return +(now / end).toFixed(2) > 100 ? 100 : +(now / end).toFixed(2);
+    return +(now / end).toFixed(2) > 100
+      ? 100
+      : +(now / end).toFixed(2)
+      ? +(now / end).toFixed(2)
+      : 0;
   } else {
     let created = +item.created_at;
     let now = new Date().getTime() - created;
     let end = new Date(item.expire).getTime() - created;
-    return +(now / end).toFixed(2) > 100 ? 100 : +(now / end).toFixed(2);
+    return +(now / end).toFixed(2) > 100
+      ? 100
+      : +(now / end).toFixed(2)
+      ? +(now / end).toFixed(2)
+      : 0;
   }
 };
 const keyWord = ref("");

@@ -136,13 +136,11 @@
                 :stroke-width="8"
                 :percentage="item.serverTime.percentage"
               >
-                <template #default="{ percentage }">
-                  <span
-                    >{{ item.serverTime.time.D }}days
-                    {{ item.serverTime.time.H }}hours
-                    {{ item.serverTime.time.M }}minutes</span
-                  >
-                </template>
+                <span
+                  >{{ item.serverTime.time.D }}days
+                  {{ item.serverTime.time.H }}hours
+                  {{ item.serverTime.time.M }}minutes</span
+                >
               </el-progress>
             </div>
             <div
@@ -217,10 +215,11 @@
             <div>
               <div>User</div>
               <div>
-                <span>{{ item.challenge_num || 0 }}/ </span>
+                <span>{{ item.challenge_num || 0 }}</span> /
                 <span style="color: #05f701"
-                  >{{ item.challenge_sccess || 0 }}/
+                  >{{ item.challenge_sccess || 0 }}
                 </span>
+                /
                 <span style="color: #db001b; cursor: pointer">{{
                   item.challenge_failed || 0
                 }}</span>
@@ -248,48 +247,84 @@
               cursor: pointer;
             "
           >
-            <svg-icon
-              icon-class="release"
-              size="36"
-              style="margin-right: 10px"
-              @click.stop="
-                dmcType = 'release';
-                dmcShow = true;
-              "
-            ></svg-icon>
-            <svg-icon
-              icon-class="prestore"
-              size="36"
-              style="margin-right: 10px"
-              @click.stop="
-                dmcType = 'prestore';
-                dmcShow = true;
-              "
-            ></svg-icon>
-            <svg-icon
-              icon-class="cancel"
-              size="34"
-              style="margin-right: 10px"
-              @click.stop="cancelOrder(item)"
-            ></svg-icon>
-            <svg-icon
-              icon-class="upload"
-              size="36"
-              style="margin-right: 10px"
-              @click.stop="openUpload(item)"
-            ></svg-icon>
+            <el-tooltip
+              class="box-item"
+              effect="dark"
+              content="Order Release"
+              placement="top"
+            >
+              <svg-icon
+                icon-class="release"
+                size="36"
+                style="margin-right: 10px"
+                @click.stop="
+                  dmcType = 'release';
+                  dmcShow = true;
+                "
+              ></svg-icon>
+            </el-tooltip>
+            <el-tooltip
+              class="box-item"
+              effect="dark"
+              content="Pre store"
+              placement="top"
+            >
+              <svg-icon
+                icon-class="prestore"
+                size="36"
+                style="margin-right: 10px"
+                @click.stop="
+                  dmcType = 'prestore';
+                  dmcShow = true;
+                "
+              ></svg-icon>
+            </el-tooltip>
+            <el-tooltip
+              class="box-item"
+              effect="dark"
+              content="Cancel Order"
+              placement="top"
+            >
+              <svg-icon
+                icon-class="cancel"
+                size="34"
+                style="margin-right: 10px"
+                @click.stop="cancelOrder(item)"
+              ></svg-icon>
+            </el-tooltip>
+            <el-tooltip
+              class="box-item"
+              effect="dark"
+              content="upload"
+              placement="top"
+            >
+              <svg-icon
+                icon-class="upload"
+                size="36"
+                style="margin-right: 10px"
+                @click.stop="openUpload(item)"
+              ></svg-icon>
+            </el-tooltip>
+
             <!-- <svg-icon
               icon-class="folder"
               size="40"
               style="margin-right: 10px"
               @click.stop="openMyFiles(item)"
             ></svg-icon> -->
-            <svg-icon
-              icon-class="dinwei"
-              size="40"
-              style="margin-right: 10px"
-              @click.stop="challengeMiner(item)"
-            ></svg-icon>
+            <el-tooltip
+              class="box-item"
+              effect="dark"
+              content="Challenge"
+              placement="top"
+            >
+              <svg-icon
+                icon-class="dinwei"
+                size="40"
+                style="margin-right: 10px"
+                @click.stop="challengeMiner(item)"
+              ></svg-icon>
+            </el-tooltip>
 
             <el-popover
               placement="bottom"
@@ -428,18 +463,16 @@ function loadOrderList() {
   getOrderById(params)
     .then((res) => {
       if (res.code == 200) {
-        for (const item of res.data) {
-          item.popoverShow = false;
-          item.created_time = ChinaTime1(new Date(item.created_time));
-          let nowDate = new Date(item.created_time);
+        res.data.popoverShow = false;
+        res.data.created_time = ChinaTime1(new Date(res.data.created_time));
+        let nowDate = new Date(res.data.created_time);
 
-          item.serverTime = getResidueTime(
-            nowDate.setDate(nowDate.getDate() + item.epoch * 7),
-            item.created_time
-          );
-        }
+        res.data.serverTime = getResidueTime(
+          nowDate.setDate(nowDate.getDate() + res.data.epoch * 7),
+          res.data.created_time
+        );
 
-        state.orderList = res.data;
+        state.orderList[0] = res.data;
       }
     })
     .catch((error) => {});
@@ -736,6 +769,9 @@ onMounted(() => {
 
     .el-col {
       position: relative;
+      svg {
+        color: #fff;
+      }
       svg {
         &:hover {
           color: #0056b5;
