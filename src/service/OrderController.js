@@ -365,31 +365,55 @@ class OrderController {
         var fileCount = await fileService.getFileCount(orderId, email, deviceType);
         order[0]['file_count'] = fileCount;
 
+        var chainConfig = config.get('chainConfig')
+        var httpEndpoint = chainConfig.get('httpEndpoint')
+        var getTableRows = chainConfig.get('getTableRows')
+        try {
+            var innermarker = JSON.parse(request('POST', httpEndpoint + getTableRows, {
+                json: { "json": true, "code": "dmc.token", "scope": "dmc.token", "table": "innermarker" }
+            }).getBody('utf-8')).rows[0]
+
+            var x = innermarker.tokenx.quantity;
+            var y = innermarker.tokeny.quantity;
+
+            var rsi = userService.getAmount(x, y, 'RSI');
+            var dmc = userService.getAmount(x, y, 'DMC');
+
+            var userRsi = order[0].miner_lock_pst_amount;
+            var epoch = 1;
+            var estimated = userService.calcEstimated(dmc, rsi, userRsi, epoch);
+            order[0]['estimated'] = estimated;
+        }
+        catch (e) {
+            logger.info('get innermarker failed, error: {}', e);
+        }
+
+
         var challengeList = await orderService.getChallengeAllFromDB(orderId, email)
-        if(challengeList instanceof BizResultCode){
+        if (challengeList instanceof BizResultCode) {
             res.send(BizResult.success(order));
             return;
         }
-        if(challengeList.length == 0){
+        if (challengeList.length == 0) {
             res.send(BizResult.success(order));
             return;
         }
 
         var challengeFailed = challengeList.reduce((acc, cur) => {
             if (cur.state === 6) {
-              return acc + 1;
+                return acc + 1;
             } else {
-              return acc;
+                return acc;
             }
-          }, 0);
+        }, 0);
 
-          var challengeSuccess = challengeList.reduce((acc, cur) => {
+        var challengeSuccess = challengeList.reduce((acc, cur) => {
             if (cur.state === 5) {
-              return acc + 1;
+                return acc + 1;
             } else {
-              return acc;
+                return acc;
             }
-          }, 0);
+        }, 0);
         order[0]['challenge_num'] = challengeList.length;
         order[0]['challenge_sccess'] = challengeSuccess;
         order[0]['challenge_failed'] = challengeFailed;
@@ -512,7 +536,7 @@ class OrderController {
             }
         });
 
-        
+
         var foggieId = orderInfo.foggie_id;
 
         const getMerkleRequest = {

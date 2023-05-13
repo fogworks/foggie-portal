@@ -266,6 +266,7 @@ module.exports = {
                 '            miner_lock_dmc_amount\n' +
                 '            price_amount\n' +
                 '            created_time\n' +
+                '            epoch\n' +
                 '            settlement_pledge_amount\n' +
                 '            lock_pledge_amount\n' +
                 '            state\n' +
@@ -294,8 +295,6 @@ module.exports = {
                 body: body
             }).getBody('utf-8')).data.find_order
 
-            // return dividendList;
-
             var chainConfig = config.get('chainConfig')
             var httpEndpoint = chainConfig.get('httpEndpoint')
             var getTableRows = chainConfig.get('getTableRows')
@@ -306,13 +305,14 @@ module.exports = {
             var x = innermarker.tokenx.quantity;
             var y = innermarker.tokeny.quantity;
 
-            var rsi = getAmount(x, y, 'RSI');
-            var dmc = getAmount(x, y, 'DMC');
+            var rsi = module.exports.getAmount(x, y, 'RSI');
+            var dmc = module.exports.getAmount(x, y, 'DMC');
 
             var resultList = [];
-            for(dividend of dividendList){
+            for (dividend of dividendList) {
                 var userRsi = dividend.user_rsi_amount;
-                var estimated = calcEstimated(dmc, rsi, userRsi);
+                var epoch = dividend.epoch;
+                var estimated = module.exports.calcEstimated(dmc, rsi, userRsi, epoch);
                 dividend['estimated'] = estimated;
                 resultList.push(dividend);
             }
@@ -346,43 +346,32 @@ module.exports = {
             logger.error('err:', e);
             return BizResultCode.GET_DIVIDEND_COUNT_FAILED;
         }
+    },
+    /**
+     * 
+     * @param {*} x  2.1903 RSI
+     * @param {*} y  455988.8667 DMC
+     * @param {*} unit  DMC/RSI
+     */
+    getAmount: (x, y, unit) => {
+        var xIndex = x.indexOf(unit);
+        var yIndex = y.indexOf(unit);
+
+        if (xIndex > -1) {
+            return x.substring(0, xIndex).trim();
+        }
+
+        if (yIndex > -1) {
+            return y.substring(0, yIndex).trim();
+        }
+        return 0;
+    },
+    calcEstimated(dmc, rsi, changeRsi, epoch) {
+        var dmc = parseFloat(dmc);
+        var rsi = parseFloat(rsi);
+        var changeRsi = parseFloat(changeRsi);
+        var epoch = parseInt(epoch);
+        var tmp = (dmc * rsi) / (rsi + changeRsi)
+        return ((dmc - tmp) * epoch).toFixed(4).padEnd(5, '0')
     }
-}
-
-/**
- * 
- * @param {*} x  2.1903 RSI
- * @param {*} y  455988.8667 DMC
- * @param {*} unit  DMC/RSI
- */
-function getAmount(x, y, unit) {
-
-    var xIndex = x.indexOf(unit);
-    var yIndex = y.indexOf(unit);
-
-    if(xIndex > -1){
-        return x.substring(0, xIndex).trim();
-    }
-
-    if(yIndex > -1){
-        return y.substring(0, yIndex).trim();
-    }
-
-    return 0;
-}
-
-/**
- * 
- * @param {*} dmc  2.1903 RSI
- * @param {*} rsi  455988.8667 DMC
- * @param {*} unit  DMC/RSI
- */
-function calcEstimated(dmc, rsi, changeRsi) {
-    
-    var dmc = parseFloat(dmc);
-    var rsi = parseFloat(rsi);
-    var changeRsi = parseFloat(changeRsi);
-    
-    var tmp = (dmc * rsi)/ (rsi+changeRsi)
-    return (dmc - tmp).toFixed(4).padEnd(5, '0')
 }
