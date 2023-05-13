@@ -159,7 +159,7 @@
               <span style="font-size: 14px">{{
                 item.challenge_period
                   ? getSecondTime(+item.challenge_period / 1000)
-                  : ""
+                  : "Not yet challenged"
               }}</span>
               <svg-icon
                 v-if="item.challenge_timeout"
@@ -342,6 +342,12 @@
     :title="dmcType == 'release' ? 'Release of pledged DMC' : 'Pre stored DMC'"
     width="500px"
     v-model="dmcShow"
+    :before-close="
+      () => {
+        amount = 0;
+        dmcShow = false;
+      }
+    "
   >
     <div
       class="dialog-span"
@@ -544,7 +550,7 @@ const handlerDMC = (type) => {
     chainId: ChainId.value,
     email: email.value,
     orderId: orderId.value,
-    amount: amount.value,
+    amount: amount.value.toFixed(4) + "",
   }).then((res) => {
     if (res.code == 200) {
       ElNotification({
@@ -552,20 +558,20 @@ const handlerDMC = (type) => {
         message: "Operation successful",
         position: "bottom-left",
       });
-      refresh();
+      dmcShow.value = false;
+      amount.value = false;
+      setTimeout(() => {
+        refresh();
+      }, 2000);
     }
   });
 };
 const cancelOrder = (item) => {
-  ElMessageBox.confirm(
-    "proxy will permanently delete the file. Continue?",
-    "Warning",
-    {
-      confirmButtonText: "OK",
-      cancelButtonText: "Cancel",
-      type: "warning",
-    }
-  ).then(() => {
+  ElMessageBox.confirm("Are you sure to cancel the order?", "Warning", {
+    confirmButtonText: "OK",
+    cancelButtonText: "Cancel",
+    type: "warning",
+  }).then(() => {
     orderCancel({
       chainId: ChainId.value,
       email: email.value,
@@ -577,7 +583,9 @@ const cancelOrder = (item) => {
           message: "Cancel completed",
           position: "bottom-left",
         });
-        refresh();
+        setTimeout(() => {
+          refresh();
+        }, 2000);
       }
     });
   });
