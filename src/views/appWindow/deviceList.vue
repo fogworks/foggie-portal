@@ -4,7 +4,7 @@
       class="search-input"
       :prefix-icon="Search"
       type="text"
-      placeholder="Name Or FID"
+      placeholder="Name Or ID"
       clearable
       v-model="keyWord"
     ></el-input>

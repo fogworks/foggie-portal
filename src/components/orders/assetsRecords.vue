@@ -21,12 +21,12 @@
       </el-tabs> -->
       <div>
         <el-table class="table-box" :data="tableData" style="width: 100%">
-          <el-table-column label="Created At" width="420">
+          <el-table-column label="Time" width="420">
             <template #default="scope">
               {{ transferTime(scope.row.create_time) }}
             </template>
           </el-table-column>
-          <el-table-column prop="change_amount" label="Amount" width="340">
+          <el-table-column prop="change_amount" label="Quantity" width="340">
             <template #default="scope">
               {{ scope.row.change_amount }}DMC
             </template>

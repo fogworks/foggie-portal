@@ -28,7 +28,7 @@
         </el-link>
         <el-link class="link" @click="recordsShow = true" :underline="false">
           <svg-icon icon-class="list"></svg-icon>
-          Records
+          Assets Records
         </el-link>
         <div style="font-size: 15px; color: rgba(255, 255, 255, 0.7)">
           <el-tag type="info" effect="dark" round v-if="item.state == '0'">
@@ -76,12 +76,7 @@
                 >
               </div>
             </div>
-            <div style="text-align: center">
-              <!-- <svg-icon
-                icon-class="money"
-                size="40"
-                style="margin-right: 10px"
-              ></svg-icon> -->
+            <!-- <div style="text-align: center">
               <div style="color: #86ffff; font-style: italic">Price</div>
               <div style="color: #86ffff; font-style: italic">（total）</div>
               <div>
@@ -90,7 +85,7 @@
                   .{{ item.miner_lock_dmc_amount.split(".")[1] }}</span
                 >
               </div>
-            </div>
+            </div> -->
             <div>
               <div>Deposit</div>
               <div>
@@ -101,21 +96,27 @@
               </div>
             </div>
             <div>
-              <div>Residue</div>
+              <div>Balance(DMC)</div>
               <div>
-                <span>{{ item.user_pledge_amount }}</span>
+                <span>{{ item.user_pledge_amount.split(".")[0] }}</span
+                >.<span style="font-size: 16px">{{
+                  item.user_pledge_amount.split(".")[1]
+                }}</span>
               </div>
             </div>
             <div>
-              <div>day Estimated</div>
+              <div>stimated Income(DMC)</div>
               <div>
-                <span>1</span><span style="font-size: 16px">.0000</span>
+                <span>{{ item.estimated.split(".")[0] }}</span
+                >.<span style="font-size: 16px">{{
+                  item.estimated.split(".")[1]
+                }}</span>
               </div>
             </div>
-            <div>
+            <!-- <div>
               <div>Punish</div>
               <div style="color: #db001b; font-weight: bold">1</div>
-            </div>
+            </div> -->
           </el-col>
           <el-col :span="10" style="text-align: center; padding: 0px 20px">
             <div
@@ -157,8 +158,8 @@
               <div style="width: 160px; text-align: start">Last Challenge</div>
               <span style="font-size: 14px">{{
                 item.challenge_period
-                  ? getSecondTime(item.challenge_period)
-                  : ""
+                  ? getSecondTime(+item.challenge_period / 1000)
+                  : "Not yet challenged"
               }}</span>
               <svg-icon
                 v-if="item.challenge_timeout"
@@ -180,7 +181,7 @@
             >
             <span style="font-size: 24px; font-weight: 600">GB</span>
           </el-col>
-          <el-col :span="9" class="bottom_col">
+          <el-col :span="7" class="bottom_col">
             <!-- <svg-icon
               icon-class="left"
               size="40"
@@ -207,7 +208,7 @@
               <div>82600</div>
             </div> -->
           </el-col>
-          <el-col :span="8" class="bottom_col">
+          <el-col :span="6" class="bottom_col">
             <svg-icon
               icon-class="hammer"
               size="40"
@@ -216,11 +217,11 @@
             <div>
               <div>User</div>
               <div>
-                <span>{{ item.challenge_num || 0 }}/</span>
+                <span>{{ item.challenge_num || 0 }}/ </span>
                 <span style="color: #05f701"
-                  >{{ item.challenge_sccess || 0 }}/</span
-                >
-                <span style="color: #db001b">{{
+                  >{{ item.challenge_sccess || 0 }}/
+                </span>
+                <span style="color: #db001b; cursor: pointer">{{
                   item.challenge_failed || 0
                 }}</span>
               </div>
@@ -238,7 +239,7 @@
             </div> -->
           </el-col>
           <el-col
-            :span="4"
+            :span="8"
             style="
               display: flex;
               justify-content: space-around;
@@ -247,6 +248,30 @@
               cursor: pointer;
             "
           >
+            <svg-icon
+              icon-class="release"
+              size="36"
+              style="margin-right: 10px"
+              @click.stop="
+                dmcType = 'release';
+                dmcShow = true;
+              "
+            ></svg-icon>
+            <svg-icon
+              icon-class="prestore"
+              size="36"
+              style="margin-right: 10px"
+              @click.stop="
+                dmcType = 'prestore';
+                dmcShow = true;
+              "
+            ></svg-icon>
+            <svg-icon
+              icon-class="cancel"
+              size="34"
+              style="margin-right: 10px"
+              @click.stop="cancelOrder(item)"
+            ></svg-icon>
             <svg-icon
               icon-class="upload"
               size="36"
@@ -312,16 +337,57 @@
       </span>
     </template>
   </el-dialog>
+  <el-dialog
+    class="account-dialog"
+    :title="dmcType == 'release' ? 'Release of pledged DMC' : 'Pre stored DMC'"
+    width="500px"
+    v-model="dmcShow"
+    :before-close="
+      () => {
+        amount = 0;
+        dmcShow = false;
+      }
+    "
+  >
+    <div
+      class="dialog-span"
+      style="display: flex; justify-content: center; align-items: center"
+    >
+      Amount
+      <el-input-number
+        style="margin-left: 20px; width: 200px"
+        v-model="amount"
+        :min="0.01"
+        :precision="4"
+        title=""
+        :controls="false"
+      ></el-input-number>
+    </div>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dmcShow = false">cancel</el-button>
+        <el-button type="primary" @click="handlerDMC(dmcType)">
+          confirm
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
 
   <!-- </div>s -->
 </template>
 
 <script setup>
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox, ElNotification } from "element-plus";
 import { ref, reactive, toRefs, onMounted, computed, toRef, watch } from "vue";
 import { useStore } from "vuex";
 
-import { pushMerkle, getOrderById } from "@/api/order/orderList";
+import {
+  pushMerkle,
+  getOrderById,
+  orderRelease,
+  orderAppend,
+  orderCancel,
+} from "@/api/order/orderList";
 import { InitiateChallenge } from "@/api/myFiles/myfiles";
 import {
   transferTime,
@@ -397,6 +463,35 @@ function handlerOver() {
 }
 function popoverClick(type, item) {
   if (type == "submitMerkle") {
+    ElMessageBox.confirm(
+      "You need to pay to take the challenge, are you sure to take the challenge?",
+      "Warning",
+      {
+        confirmButtonText: "OK",
+        cancelButtonText: "Cancel",
+        type: "warning",
+      }
+    )
+      .then(() => {
+        let params = {
+          chainId: ChainId.value,
+          email: email.value,
+          orderId: item.id,
+        };
+
+        pushMerkle(params).then((res) => {
+          if (res.code == 200) {
+            item.popoverShow = false;
+            ElMessage({
+              showClose: true,
+              message: "The merKle tree is uploaded successfully!",
+              type: "success",
+              grouping: true,
+            });
+          }
+        });
+      })
+      .catch(() => {});
     // if (item.state == "1") {
     //   ElMessage({
     //     showClose: true,
@@ -406,41 +501,95 @@ function popoverClick(type, item) {
     //   });
     //   return;
     // }
-
-    let params = {
-      chainId: ChainId.value,
-      email: email.value,
-      orderId: item.id,
-    };
-
-    pushMerkle(params).then((res) => {
-      if (res.code == 200) {
-        item.popoverShow = false;
-        ElMessage({
-          showClose: true,
-          message: "The merKle tree is uploaded successfully!",
-          type: "success",
-          grouping: true,
-        });
-      }
-    });
   }
 }
 const challengeMiner = (item) => {
-  let params = {
-    chainId: ChainId.value,
-    email: email.value,
-    orderId: item.id,
-    // md5: item.md5,
-  };
-  InitiateChallenge(params).then((res) => {
-    if (res.code == 200) {
+  ElMessageBox.confirm(
+    "You need to pay to take the challenge, are you sure to take the challenge?",
+    "Warning",
+    {
+      confirmButtonText: "OK",
+      cancelButtonText: "Cancel",
+      type: "warning",
     }
-  });
+  )
+    .then(() => {
+      let params = {
+        chainId: ChainId.value,
+        email: email.value,
+        orderId: item.id,
+        // md5: item.md5,
+      };
+      InitiateChallenge(params).then((res) => {
+        if (res.code == 200) {
+        }
+      });
+    })
+    .catch(() => {});
 };
 function refresh() {
   loadOrderList();
 }
+const dmcType = ref("");
+const dmcShow = ref(false);
+const amount = ref(0);
+const handlerDMC = (type) => {
+  if (
+    dmcType.value == "release" &&
+    +amount.value > +orderList.value[0].user_pledge_amount
+  ) {
+    ElNotification({
+      type: "error",
+      message: "Cannot exceed the Balance",
+      position: "bottom-left",
+    });
+    return false;
+  }
+  let fetchMethod = type == "release" ? orderRelease : orderAppend;
+  fetchMethod({
+    chainId: ChainId.value,
+    email: email.value,
+    orderId: orderId.value,
+    amount: amount.value.toFixed(4) + "",
+  }).then((res) => {
+    if (res.code == 200) {
+      ElNotification({
+        type: "success",
+        message: "Operation successful",
+        position: "bottom-left",
+      });
+      dmcShow.value = false;
+      amount.value = false;
+      setTimeout(() => {
+        refresh();
+      }, 2000);
+    }
+  });
+};
+const cancelOrder = (item) => {
+  ElMessageBox.confirm("Are you sure to cancel the order?", "Warning", {
+    confirmButtonText: "OK",
+    cancelButtonText: "Cancel",
+    type: "warning",
+  }).then(() => {
+    orderCancel({
+      chainId: ChainId.value,
+      email: email.value,
+      orderId: item.id,
+    }).then((res) => {
+      if (res.code == 200) {
+        ElNotification({
+          type: "success",
+          message: "Cancel completed",
+          position: "bottom-left",
+        });
+        setTimeout(() => {
+          refresh();
+        }, 2000);
+      }
+    });
+  });
+};
 watch(uploadIsShow, (newVal, oldVal) => {
   if (!newVal) {
     refresh();

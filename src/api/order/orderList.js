@@ -83,4 +83,26 @@ export function pay_challenge(data) {
     data,
   });
 }
+export function orderRelease(data) {
+  return request({
+    url: baseUrl + "/order/release",
+    method: "post",
+    data,
+  });
+}
+export function orderAppend(data) {
+  return request({
+    url: baseUrl + "/order/append",
+    method: "post",
+    data,
+  });
+}
+export function orderCancel(data) {
+  return request({
+    url: baseUrl + "/order/cancel",
+    method: "post",
+    data,
+  });
+}
+
 

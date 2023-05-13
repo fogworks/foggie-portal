@@ -1,6 +1,20 @@
 <template>
   <div>
-    <p class="welcome">Device</p>
+    <div
+      style="display: flex; justify-content: space-between; align-items: center"
+    >
+      <p class="welcome">Device</p>
+      <el-input
+        style="width: 200px"
+        class="search-input"
+        :prefix-icon="Search"
+        type="text"
+        placeholder="Name Or ID"
+        clearable
+        v-model="keyWord"
+      ></el-input>
+    </div>
+
     <ul class="deviceList">
       <WifiSearching v-if="loading"></WifiSearching>
       <li
@@ -16,7 +30,7 @@
             ? 'online'
             : 'offline',
         ]"
-        v-for="(item, index) in deviceList.list"
+        v-for="(item, index) in list"
         @click="toGuide(item)"
       >
         <span></span>
@@ -223,6 +237,21 @@ const handleProgress = (item) => {
     return +(now / end).toFixed(2) > 100 ? 100 : +(now / end).toFixed(2);
   }
 };
+const keyWord = ref("");
+const list = computed(() => {
+  if (!keyWord.value) {
+    return deviceList.list;
+  } else {
+    return deviceList.list.filter((el) => {
+      return (
+        el.device_name?.indexOf(keyWord.value) > -1 ||
+        el.dedicatedip?.indexOf(keyWord.value) > -1 ||
+        el.device_id?.indexOf(keyWord.value) > -1 ||
+        el.space_order_id?.indexOf(keyWord.value) > -1
+      );
+    });
+  }
+});
 const email = computed(() => store.getters["token/currentUser"]);
 const search = () => {
   loading.value = true;

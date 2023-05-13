@@ -101,7 +101,7 @@ export default {
               var n = t.action.rawData.act.data.asset.quantity.split(" ")[0];
               return {
                 token: "PST",
-                action: "MINT",
+                action: "Mint",
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
                 quantity: "+".concat(n),
               };
@@ -111,8 +111,8 @@ export default {
               return {
                 token: "DMC",
                 action: ""
-                  .concat("ORDER_DIVIDEND", "(")
-                  .concat("BILL_ID", ":")
+                  .concat("Over Dividend", "(")
+                  .concat("Bill ID", ":")
                   .concat(t.action.rawData.act.data.bill_id, ")"),
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
                 quantity: "+".concat(c),
@@ -125,8 +125,8 @@ export default {
                   t.action.rawData.act.data.inc.quantity.split(" ")[0]
                 ),
                 action: ""
-                  .concat("DELIVERY_DIVIDEND", "(")
-                  .concat("ORDER_ID", ":")
+                  .concat("Delivery Dividend", "(")
+                  .concat("Order ID", ":")
                   .concat(t.action.rawData.act.data.order_id, ")"),
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
               };
@@ -137,8 +137,8 @@ export default {
                 action:
                   t.action.rawData.act.data.miner ===
                   t.action.rawData.act.data.owner
-                    ? "STAKE"
-                    : "INVEST",
+                    ? "Stake"
+                    : "Invest",
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
                 quantity: "-".concat(o),
               };
@@ -174,12 +174,12 @@ export default {
                   d.from === dmc.value
                     ? "dmc.ramfee" === d.to
                       ? "ram fee" === d.memo
-                        ? "BUY_RAM" + " " + "RAM_FEE"
-                        : "SELL_RAM" + " " + "RAM_FEE"
+                        ? "Buy ram" + " " + "Ram fee"
+                        : "Sell ram" + " " + "Ram fee"
                       : "TRANSFER_PAYMENT"
                     : d.to === dmc.value && "dmc.ram" === d.from
-                    ? "SELL_RAM"
-                    : "TRANSFER_RECEIVE",
+                    ? "Sell ram"
+                    : "Transfer Receive",
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
               };
             }
@@ -193,7 +193,7 @@ export default {
                   .concat(
                     t.action.rawData.act.data.quantity.quantity.split(" ")[0]
                   ),
-                action: "TRANSFER_LOCKING",
+                action: "Transfer Locking",
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
               };
             }
@@ -203,7 +203,7 @@ export default {
                 quantity: "-".concat(
                   t.action.rawData.act.data.value.quantity.split(" ")[0]
                 ),
-                action: "BURN",
+                action: "Burn",
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
               };
             if ("exunlock" === a)
@@ -213,7 +213,7 @@ export default {
                 quantity: "+".concat(
                   t.action.rawData.act.data.quantity.quantity.split(" ")[0]
                 ),
-                action: "UNLOCK",
+                action: "Unlock",
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
               };
             if ("orderclarec" === a)
@@ -224,8 +224,8 @@ export default {
                   t.action.rawData.act.data.quantity.quantity.split(" ")[0]
                 ),
                 action: ""
-                  .concat("DELIVERY_DIVIDEND", "(")
-                  .concat("ORDER_ID", ":")
+                  .concat("Delivery Dividend", "(")
+                  .concat("Order ID", ":")
                   .concat(t.action.rawData.act.data.order_id, ")"),
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
               };
@@ -236,7 +236,7 @@ export default {
                 quantity: "-".concat(
                   t.action.rawData.act.data.quantity.quantity.split(" ")[0]
                 ),
-                action: "PRESTORE",
+                action: "Prestore",
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
               };
             if ("subordasset" === a)
@@ -246,7 +246,7 @@ export default {
                 quantity: "+".concat(
                   t.action.rawData.act.data.quantity.quantity.split(" ")[0]
                 ),
-                action: "PICK",
+                action: "Pick",
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
               };
             if ("redeemrec" === a)
@@ -255,7 +255,7 @@ export default {
                 quantity: "+".concat(
                   t.action.rawData.act.data.asset.quantity.split(" ")[0]
                 ),
-                action: "CLAIM",
+                action: "Claim",
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
               };
             if ("exchange" === a)
@@ -265,7 +265,7 @@ export default {
                 quantity: "-".concat(
                   t.action.rawData.act.data.quantity.quantity.split(" ")[0]
                 ),
-                action: "SWAP",
+                action: "Swap",
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
               };
             if ("traderecord" === a)
@@ -274,7 +274,7 @@ export default {
                 quantity: "+".concat(
                   t.action.rawData.act.data.to.quantity.split(" ")[0]
                 ),
-                action: "SWAP",
+                action: "Swap",
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
               };
             if ("addreserves" === a) {
@@ -284,7 +284,7 @@ export default {
                 quantity: "+"
                   .concat(b.tokenx.quantity, " +")
                   .concat(b.tokeny.quantity),
-                action: "ADD_LIQUIDITY",
+                action: "Add Liquidity",
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
               };
             }
@@ -293,7 +293,7 @@ export default {
               return {
                 token: "DMC RSI",
                 quantity: "-".concat(E.x.quantity, " -").concat(E.y.quantity),
-                action: "REMOVE_LIQUIDITY",
+                action: "Remove Liquidity",
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
               };
             }
@@ -310,7 +310,7 @@ export default {
                           p.unstake_net_quantity.split(" ")[0].toFixed(4)
                       )
                     : "+0.0000",
-                action: "CLAIM_RESOURCES",
+                action: "Claim Resources",
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
               };
             }
@@ -329,7 +329,7 @@ export default {
                     : "-"
                         .concat(v.dmc_asset.quantity.split(" ")[0], " -")
                         .concat(v.pst_asset.quantity.split(" ")[0]),
-                action: "LIQUIDATION",
+                action: "Liquidation",
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
               };
             }
@@ -349,7 +349,7 @@ export default {
               return {
                 token: _.changed.quantity.split(" ")[1],
                 quantity: "+".concat(_.changed.quantity.split(" ")[0]),
-                action: "COMPENSATION",
+                action: "Compensation",
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
               };
             }
@@ -374,19 +374,19 @@ export default {
                   .concat(g),
                 action:
                   "1" === O.rec_type
-                    ? "first_save"
+                    ? "First Save"
                     : "2" === O.rec_type
-                    ? "remaining_ret"
+                    ? "Remaining Ret"
                     : "3" === O.rec_type
-                    ? "user_deposit"
+                    ? "User Deposit"
                     : "6" === O.rec_type
-                    ? "over_time_fine"
+                    ? "Over time fine"
                     : "4" === O.rec_type
-                    ? "DELIVERY_INCOME"
+                    ? "Delivery Income"
                     : "5" === O.rec_type
-                    ? "DELIVERY_DIVIDEND"
+                    ? "Delivery Dividend"
                     : "7" === O.rec_type
-                    ? "cancel_return"
+                    ? "Cancel Return"
                     : O.rec_type,
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
               };
