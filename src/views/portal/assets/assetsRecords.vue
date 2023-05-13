@@ -177,7 +177,7 @@ export default {
                       ? "ram fee" === d.memo
                         ? "Buy ram" + " " + "Ram fee"
                         : "Sell ram" + " " + "Ram fee"
-                      : "TRANSFER_PAYMENT"
+                      : "Transfer payment"
                     : d.to === dmc.value && "dmc.ram" === d.from
                     ? "Sell ram"
                     : "Transfer Receive",

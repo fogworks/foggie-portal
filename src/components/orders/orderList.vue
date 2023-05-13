@@ -250,12 +250,12 @@
             <el-tooltip
               class="box-item"
               effect="dark"
-              content="Order Release"
+              content="Withdraw"
               placement="top"
             >
               <svg-icon
                 icon-class="release"
-                size="36"
+                size="34"
                 style="margin-right: 10px"
                 @click.stop="
                   dmcType = 'release';
@@ -266,7 +266,7 @@
             <el-tooltip
               class="box-item"
               effect="dark"
-              content="Pre store"
+              content="Predeposit"
               placement="top"
             >
               <svg-icon
@@ -287,7 +287,7 @@
             >
               <svg-icon
                 icon-class="cancel"
-                size="34"
+                size="30"
                 style="margin-right: 10px"
                 @click.stop="cancelOrder(item)"
               ></svg-icon>
@@ -320,7 +320,7 @@
             >
               <svg-icon
                 icon-class="dinwei"
-                size="40"
+                size="34"
                 style="margin-right: 10px"
                 @click.stop="challengeMiner(item)"
               ></svg-icon>
@@ -376,7 +376,7 @@
   <el-dialog
     append-to-body
     class="account-dialog"
-    :title="dmcType == 'release' ? 'Release of pledged DMC' : 'Pre stored DMC'"
+    :title="dmcType == 'release' ? 'Withdraw' : 'Predeposit'"
     width="500px"
     v-model="dmcShow"
     :before-close="
