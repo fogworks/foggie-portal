@@ -388,7 +388,6 @@ class OrderController {
             logger.info('get innermarker failed, error: {}', e);
         }
 
-
         var challengeList = await orderService.getChallengeAllFromDB(orderId, email)
         if (challengeList instanceof BizResultCode) {
             res.send(BizResult.success(order));
