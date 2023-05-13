@@ -1,6 +1,7 @@
 <template>
   <div>
     <el-dialog
+      append-to-body
       :before-close="cancel"
       :title="'Associated Account'"
       width="700px"

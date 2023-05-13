@@ -1,6 +1,7 @@
 <template>
   <div>
     <el-dialog
+      append-to-body
       :model-value="visible"
       :title="title[type]"
       width="600px"

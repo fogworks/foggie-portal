@@ -1,6 +1,7 @@
 <template>
   <div>
     <el-dialog
+      append-to-body
       :model-value="visible"
       class="nft-dialog"
       title=" "

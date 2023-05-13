@@ -1,6 +1,7 @@
 <template>
   <div>
     <el-dialog
+      append-to-body
       title="Pin By CID"
       :model-value="visible"
       class="pin-dialog"

@@ -182,6 +182,7 @@
       </div>
     </div>
     <el-dialog
+      append-to-body
       :title="'Sign in with Email'"
       :visible.sync="showInvitationTips"
       width="30%"

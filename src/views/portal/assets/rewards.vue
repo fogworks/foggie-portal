@@ -1,6 +1,7 @@
 <template>
   <div>
     <el-dialog
+      append-to-body
       class="withdraw-dialog"
       :model-value="visible"
       :title="title"

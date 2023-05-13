@@ -1,6 +1,7 @@
 <template>
   <div>
     <el-dialog
+      append-to-body
       width="500px"
       :before-close="cancel"
       :model-value="visible"

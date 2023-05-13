@@ -1,6 +1,7 @@
 <template>
   <div>
     <el-dialog
+      append-to-body
       :model-value="visible"
       title=" "
       width="600px"

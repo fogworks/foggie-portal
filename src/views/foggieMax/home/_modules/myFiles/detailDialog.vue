@@ -1,5 +1,6 @@
 <template>
   <el-dialog
+    append-to-body
     top="10px"
     width="1025px"
     :model-value="visible"

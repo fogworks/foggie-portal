@@ -359,6 +359,7 @@
     :orderId="orderId"
   ></AssetsRecords>
   <el-dialog
+    append-to-body
     class="account-dialog"
     title="Overtime compensation"
     width="500px"
@@ -373,6 +374,7 @@
     </template>
   </el-dialog>
   <el-dialog
+    append-to-body
     class="account-dialog"
     :title="dmcType == 'release' ? 'Release of pledged DMC' : 'Pre stored DMC'"
     width="500px"
