@@ -530,7 +530,7 @@ const amount = ref(0);
 const handlerDMC = (type) => {
   if (
     dmcType.value == "release" &&
-    +amount.value > orderList.value[0].user_pledge_amount
+    +amount.value > +orderList.value[0].user_pledge_amount
   ) {
     ElNotification({
       type: "error",
