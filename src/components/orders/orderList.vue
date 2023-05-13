@@ -250,7 +250,7 @@
             <el-tooltip
               class="box-item"
               effect="dark"
-              content="Order Release"
+              content="Withdraw"
               placement="top"
             >
               <svg-icon
@@ -266,7 +266,7 @@
             <el-tooltip
               class="box-item"
               effect="dark"
-              content="Pre store"
+              content="Predeposit"
               placement="top"
             >
               <svg-icon
@@ -376,7 +376,7 @@
   <el-dialog
     append-to-body
     class="account-dialog"
-    :title="dmcType == 'release' ? 'Release of pledged DMC' : 'Pre stored DMC'"
+    :title="dmcType == 'release' ? 'Withdraw' : 'Predeposit'"
     width="500px"
     v-model="dmcShow"
     :before-close="
