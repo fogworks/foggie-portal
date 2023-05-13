@@ -32,7 +32,7 @@ const orderDB = new NeDB({
 })
 
 module.exports = {
-    savePuskMerkleRecord: async (orderId, email, merkleRoot, blockNum, transactionId, chainBlockNum) => {
+    savePuskMerkleRecord: async (orderId, email, merkleRoot, merkleVersion, blockNum, transactionId, chainBlockNum) => {
         // save push merkle record into NeDB
         return new Promise((resolve, reject) => {
             var now = moment();
@@ -41,6 +41,7 @@ module.exports = {
                 order_id: orderId,
                 email: email,
                 merkle_root: merkleRoot,
+                merkle_version: merkleVersion,
                 block_num: blockNum,
                 transaction_id: transactionId,
                 chain_block_num: chainBlockNum,
@@ -69,6 +70,32 @@ module.exports = {
             }).skip(skip).limit(limit).sort({ create_time: -1 }).exec(function (err, data) {
                 if (err) {
                     logger.error('err:', err);
+                    resolve(BizResultCode.QUERY_PUSH_MERKLE_RECORD_FAILED);
+                    return;
+                }
+                resolve(data);
+            });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.QUERY_PUSH_MERKLE_RECORD_FAILED;
+        });
+    },
+    getPuskMerkleByRoot: async (orderId, email, merkleRoot) => {
+
+        return new Promise((resolve, reject) => {
+            // query push merkle record from NeDB
+            pushMerkleRecordDB.findOne({
+                order_id: orderId,
+                email: email,
+                merkle_root: merkleRoot
+            }, function (err, data) {
+                if (err) {
+                    logger.error('err:', err);
+                    resolve(BizResultCode.QUERY_PUSH_MERKLE_RECORD_FAILED);
+                    return;
+                }
+                if(!data){
+                    logger.info('merkle record is null, orderId:{}', orderId);
                     resolve(BizResultCode.QUERY_PUSH_MERKLE_RECORD_FAILED);
                     return;
                 }
@@ -510,7 +537,7 @@ module.exports = {
             if (order.length == 0) {
                 return BizResultCode.GET_ORDER_FROM_CHAIN_FAILED;
             }
-            return order;
+            return order[0];
         }
         catch (err) {
             logger.error('err:', err);
@@ -606,7 +633,60 @@ module.exports = {
         }
         catch (err) {
             logger.error('err:', err);
-            return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
+            return BizResultCode.GET_CHANLLENGE_FROM_CHAIN_FAILED;
+        }
+    },
+    getChallengeByOrderId: (orderId) => {
+
+        try {
+            var chainConfig = config.get('chainConfig');
+            var transactionAddress = chainConfig.get('transactionAddress');
+            var getChallengeList = chainConfig.get('getChallengeList');
+
+            let body = '{\n' +
+                '        find_challenge(\n' +
+                '                where: {\n' +
+                '                    order_id: ' + orderId + ',\n' +
+                '                },\n' +
+                '                order: "-id",\n' +
+                '        ){\n' +
+                '            pre_merkle_root\n' +
+                '            pre_data_block_count\n' +
+                '            merkle_root\n' +
+                '            data_block_count\n' +
+                '            merkle_submitter\n' +
+                '            data_id\n' +
+                '            hash_data\n' +
+                '            challenge_times\n' +
+                '            nonce\n' +
+                '            state\n' +
+                '            user_lock_amount\n' +
+                '            miner_pay_amount\n' +
+                '            challenge_date\n' +
+                '            created_time\n' +
+                '            order {\n' +
+                '                id\n' +
+                '            }\n' +
+                '            challenger {\n' +
+                '                id\n' +
+                '            }\n' +
+                '        }\n' +
+                '    }'
+            var challengeList = JSON.parse(request('POST', transactionAddress + getChallengeList, {
+                headers: {
+                    'Content-Type': 'application/graphql'
+                },
+                body: body
+            }).getBody('utf-8')).data.find_challenge;
+            if(challengeList.length == 0){
+                logger.error('challenge List is null,', err);
+                return BizResultCode.GET_CHANLLENGE_FROM_CHAIN_FAILED;
+            }
+            return challengeList[0];
+        }
+        catch (err) {
+            logger.error('err:', err);
+            return BizResultCode.GET_CHANLLENGE_FROM_CHAIN_FAILED;
         }
     },
     saveOrder: async (email, orderId, miner, user, billId, pst, totalPrice, transactionId, blockNum) => {

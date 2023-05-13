@@ -311,7 +311,7 @@ module.exports = {
             var resultList = [];
             for (dividend of dividendList) {
                 var userRsi = dividend.user_rsi_amount;
-                var epoch = dividend.epoch;
+                var epoch = 1;
                 var estimated = module.exports.calcEstimated(dmc, rsi, userRsi, epoch);
                 dividend['estimated'] = estimated;
                 resultList.push(dividend);

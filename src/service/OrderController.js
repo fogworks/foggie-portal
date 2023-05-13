@@ -359,11 +359,11 @@ class OrderController {
         }
 
         var orderInfo = await orderService.getOrderById(email, orderId);
-        order[0]['used_space'] = orderInfo.used_space;
-        order[0]['total_space'] = orderInfo.total_space;
-        order[0]['foggie_id'] = orderInfo.foggie_id;
+        order['used_space'] = orderInfo.used_space;
+        order['total_space'] = orderInfo.total_space;
+        order['foggie_id'] = orderInfo.foggie_id;
         var fileCount = await fileService.getFileCount(orderId, email, deviceType);
-        order[0]['file_count'] = fileCount;
+        order['file_count'] = fileCount;
 
         var chainConfig = config.get('chainConfig')
         var httpEndpoint = chainConfig.get('httpEndpoint')
@@ -379,10 +379,10 @@ class OrderController {
             var rsi = userService.getAmount(x, y, 'RSI');
             var dmc = userService.getAmount(x, y, 'DMC');
 
-            var userRsi = order[0].miner_lock_pst_amount;
+            var userRsi = order.miner_lock_pst_amount;
             var epoch = 1;
             var estimated = userService.calcEstimated(dmc, rsi, userRsi, epoch);
-            order[0]['estimated'] = estimated;
+            order['estimated'] = estimated;
         }
         catch (e) {
             logger.info('get innermarker failed, error: {}', e);
@@ -414,14 +414,14 @@ class OrderController {
                 return acc;
             }
         }, 0);
-        order[0]['challenge_num'] = challengeList.length;
-        order[0]['challenge_sccess'] = challengeSuccess;
-        order[0]['challenge_failed'] = challengeFailed;
-        order[0]['challenge_period'] = new Date().getTime() - new Date(challengeList[0].create_time).getTime();
+        order['challenge_num'] = challengeList.length;
+        order['challenge_sccess'] = challengeSuccess;
+        order['challenge_failed'] = challengeFailed;
+        order['challenge_period'] = new Date().getTime() - new Date(challengeList[0].create_time).getTime();
 
         var challengePeriod = await orderService.getChallengeExpire(orderId, email);
         if (challengePeriod) {
-            order[0]['challenge_timeout'] = true;
+            order['challenge_timeout'] = true;
         }
         res.send(BizResult.success(order));
     }
@@ -540,7 +540,8 @@ class OrderController {
         var foggieId = orderInfo.foggie_id;
 
         const getMerkleRequest = {
-            id: foggieId
+            id: foggieId,
+            version: 0
         };
 
         var powClient = orderService.getPowGrpcClient();
@@ -553,7 +554,8 @@ class OrderController {
             var merkleRootBytes = data.root.normalRoot;
             var merkleRoot = Buffer.from(merkleRootBytes).toString('hex');
             var dataBlockCount = data.root.totalBlocks;
-            logger.info('pushMerkle orderId{},merkleRoot{},blockCount:{}', orderId, merkleRoot, dataBlockCount);
+            var merkleVersion = data.root.version;
+            logger.info('pushMerkle orderId{},merkleRoot{},merkleVersion:{},blockCount:{}', orderId, merkleRoot, merkleVersion, dataBlockCount);
             dmcClient.transact({
                 actions: [{
                     account: "dmc.token",
@@ -575,7 +577,7 @@ class OrderController {
                 blocksBehind: 3,
                 expireSeconds: 30,
             }).then(async (result) => {
-                var savePushMerkleRecordRes = await orderService.savePuskMerkleRecord(orderId, email, merkleRoot, dataBlockCount, result.transaction_id, result.processed.block_num);
+                var savePushMerkleRecordRes = await orderService.savePuskMerkleRecord(orderId, email, merkleRoot, merkleVersion, dataBlockCount, result.transaction_id, result.processed.block_num);
                 if (savePushMerkleRecordRes instanceof BizResultCode) {
                     res.send(BizResult.fail(savePushMerkleRecordRes));
                     return;
@@ -638,18 +640,39 @@ class OrderController {
             return;
         }
 
-        // valid order status and challenge status
-        var challengeCount = orderService.getChallengeCountByState(orderId, [0]);
-        if (challengeCount instanceof BizResultCode) {
-            logger.info("get challenge count failed, orderId:{}", orderId);
-            response.send(BizResult.fail(challengeCount));
+        var orderInfo = orderService.getOrderFromChain(orderId);
+        if (orderInfo instanceof BizResultCode) {
+            logger.info("get order from chain failed, orderId:{}", orderId);
+            response.send(BizResult.fail(orderInfo));
             return;
         }
-        if (challengeCount > 0) {
-            logger.info("merkle inconsistent, orderId:{}", orderId);
-            response.send(BizResult.fail(BizResultCode.MERKLE_INCONSISTENT));
+        if (orderInfo.state == 0 || orderInfo.state == 4) {
+            logger.info("order state is invalid, can't reqchallenge, orderId:{}", orderId);
+            response.send(BizResult.fail(BizResultCode.ORDER_STATE_INVALID_CHALLENGE));
             return;
         }
+
+        // valid challenge status d
+        var challenge = orderService.getChallengeByOrderId(orderId);
+        if (challenge instanceof BizResultCode) {
+            logger.info("get challenge failed, orderId:{}", orderId);
+            response.send(BizResult.fail(challenge));
+            return;
+        }
+        if (challenge.state == 0 || challenge.state == 3 || challenge.state == 7) {
+            logger.info("challenge state is invalid, can't reqchallenge, orderId:{}", orderId);
+            response.send(BizResult.fail(BizResultCode.CHANLLENGE_STATE_INVALID_CHALLENGE));
+            return;
+        }
+
+        var merkleRoot = challenge.merkle_root;
+        var merkleRecord = await orderService.getPuskMerkleByRoot(orderId, email, merkleRoot);
+        if (merkleRecord instanceof BizResultCode) {
+            response.send(BizResult.fail(merkleRecord));
+            return;
+        }
+
+        var merkleVersion = merkleRecord.merkle_version;
 
         var privateKey = await userService.getPrivateKeyByEmail(email);
         if (privateKey instanceof BizResultCode) {
@@ -680,7 +703,7 @@ class OrderController {
         var codebook = codebooks[Math.floor(Math.random() * codebooks.length)];
         let originData = zlib.unzipSync(Buffer.from(codebook.data, 'base64'));
         let randomCharacter = Encrypt.randomString(4);
-        let nonce = randomCharacter + "#" + codebook.cid + "#" + codebook.part_id;
+        let nonce = randomCharacter + "#" + codebook.cid + "#" + codebook.part_id + "#" + merkleVersion;
         var containRandomData = Buffer.concat([originData, Buffer.from(randomCharacter)]);
         let preDataHash = DMC.ecc.sha256(containRandomData);
         let dataHash = Buffer.from(DMC.ecc.sha256(Buffer.from(preDataHash))).toString("hex");

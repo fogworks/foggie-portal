@@ -66,13 +66,16 @@ class BaseResultCode {
     static RELEASE_FAILED = new BaseResultCode(20019, 'order release dmc failed');
     static APPEND_FAILED = new BaseResultCode(20020, 'order append dmc failed');
     static CANCEL_FAILED = new BaseResultCode(20021, 'order cancel dmc failed');
-    static ORDER_CHALLENGE_NOT_END = new BaseResultCode(20022, 'order challenge not end');
+    static ORDER_CHALLENGE_NOT_RESPONSE = new BaseResultCode(20022, 'order challenge not response');
     static CHALLENGE_NO_RESPONSE = new BaseResultCode(20023, 'miner no response challenge, no allow push merkle');
     static GET_ORDER_FROM_CHAIN_FAILED = new BaseResultCode(20024, 'get order from chain failed');
     static UPDATE_CHANLLENGE_RECORD_FAILED = new BaseResultCode(20025, 'update challenge failed');
     static MERKLE_INCONSISTENT = new BaseResultCode(20026, 'merkle inconsistent');
     static ORDER_STATE_END = new BaseResultCode(20027, 'order state is end');
     static ORDER_USED_SPACE_NOT_ENOUGH = new BaseResultCode(20028, 'order used space not enough');
+    static GET_CHANLLENGE_FROM_CHAIN_FAILED = new BaseResultCode(20029, 'get challenge from chain failed');
+    static ORDER_STATE_INVALID_CHALLENGE = new BaseResultCode(20030, 'order state is invalid cannot challenge');
+    static CHANLLENGE_STATE_INVALID_CHALLENGE = new BaseResultCode(20031, 'challenge state is invalid cannot challenge');
 
     // file exception code 30000～39999
     static FILE_NOT_EXIST = new BaseResultCode(30000, 'file is not exist');
@@ -105,6 +108,7 @@ class BaseResultCode {
     static PAY_CHALLENGE_FAILED = new BaseResultCode(30027, 'pay challenge failed');
     static GET_CHAIN_ID_FAILED = new BaseResultCode(30028, 'get chain id failed');
     static GET_BENCHMARK_PRICE_FAILED = new BaseResultCode(30029, 'get benchmark price failed');
+    static ORDER_STATE_INVALID_UPLOAD = new BaseResultCode(30030, 'order state is invalid cannot upload file');
 
     // asset exception code 40000～49999
     static TRANSFER_FAILED = new BaseResultCode(40000, 'transfer failed');

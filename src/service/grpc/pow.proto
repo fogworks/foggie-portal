@@ -32,6 +32,7 @@ message CliGetMerkleRequest{
  string  id = 1;
  string cid = 2;
  int64 idx = 3;
+ int64 version = 4;
 }
 message CliMerkleInfo{
  bytes rootBytes = 1;
@@ -39,6 +40,7 @@ message CliMerkleInfo{
  int32  blocks = 3;
  bytes  normalRoot = 4;
  int64  totalBlocks= 5;
+ int64 version = 6;
 }
 message CliGetMerkleReply{
  CliMerkleInfo root = 1;
@@ -58,6 +60,7 @@ message GetIDRequest {
  string id = 1;
  int32 tid = 2;
  uint64 typ = 3;
+ int64 version = 4;
 }
 message GetIDResponse {
  string id = 1;
@@ -67,10 +70,12 @@ message MerkleIDRequest{
  string id = 1;
  string cid =2;
  int64 idx = 3;
+ int64 version = 4;
 }
 message NormalMerkleBlocks {
  string id = 1;
  int64 idx=2;
+ int64 version=3;
 }
 service PowService {
  rpc GetMerkleRoot(CliGetMerkleRequest)returns(CliGetMerkleReply){}

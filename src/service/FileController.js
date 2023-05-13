@@ -58,7 +58,7 @@ class FileController {
             return;
         }
 
-        if(codebooks.length == 0){
+        if (codebooks.length == 0) {
             res.send(BizResult.fail(BizResultCode.GET_FILE_CODEBOOK_FAILED));
             return;
         }
@@ -141,6 +141,19 @@ class FileController {
             return;
         }
 
+        // valid order state
+        var orderInfo = orderService.getOrderFromChain(orderId);
+        if (orderInfo instanceof BizResultCode) {
+            logger.info("get order from chain failed, orderId:{} ", orderId);
+            res.send(BizResult.fail(orderInfo));
+            return;
+        }
+        if (orderInfo.state == 4 || orderInfo.state == 5) {
+            logger.info("order state is invalid, can't upload file, orderId:{}", orderId);
+            res.send(BizResult.fail(BizResultCode.ORDER_STATE_INVALID_UPLOAD));
+            return;
+        }
+
         // upload file valid challenge is end
         var challengeList = orderService.getChallengeByState(orderId, [0, 1, 3, 7]);
         if (challengeList instanceof BizResultCode) {
@@ -148,11 +161,10 @@ class FileController {
             return;
         }
         if (challengeList.length > 0) {
-
             for (const chanllenge of challengeList) {
                 if (chanllenge.state === 3) {
-                    logger.info("challenge is not end, orderId:{}", orderId);
-                    res.send(BizResult.fail(BizResultCode.ORDER_CHALLENGE_NOT_END));
+                    logger.info("challenge is not response, orderId:{}", orderId);
+                    res.send(BizResult.fail(BizResultCode.ORDER_CHALLENGE_NOT_RESPONSE));
                     return;
                 }
                 if (chanllenge.state === 7) {
@@ -207,6 +219,19 @@ class FileController {
             return;
         }
 
+        // valid order state
+        var orderInfo = orderService.getOrderFromChain(orderId);
+        if (orderInfo instanceof BizResultCode) {
+            logger.info("get order from chain failed, orderId:{} ", orderId);
+            res.send(BizResult.fail(orderInfo));
+            return;
+        }
+        if (orderInfo.state == 4 || orderInfo.state == 5) {
+            logger.info("order state is invalid, can't upload file, orderId:{}", orderId);
+            res.send(BizResult.fail(BizResultCode.ORDER_STATE_INVALID_UPLOAD));
+            return;
+        }
+
         // upload file valid challenge is end
         var challengeList = orderService.getChallengeByState(orderId, [0, 1, 3, 7]);
         if (challengeList instanceof BizResultCode) {
@@ -217,8 +242,8 @@ class FileController {
 
             for (const chanllenge of challengeList) {
                 if (chanllenge.state === 3) {
-                    logger.info("challenge is not end, orderId:{}", orderId);
-                    res.send(BizResult.fail(BizResultCode.ORDER_CHALLENGE_NOT_END));
+                    logger.info("challenge is not response, orderId:{}", orderId);
+                    res.send(BizResult.fail(BizResultCode.ORDER_CHALLENGE_NOT_RESPONSE));
                     return;
                 }
                 if (chanllenge.state === 7) {
