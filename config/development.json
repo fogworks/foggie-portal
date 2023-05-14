@@ -41,7 +41,8 @@
     },
     "fileConfig":{
         "merkleBufferSize": 4096,
-        "uploadFileBufferSize": 32768
+        "uploadFileBufferSize": 32768,
+        "pushMerkleUsedSpaceRate":0
     },
     "registerCenterConfig":{
         "url":"http://154.31.41.36:8001",

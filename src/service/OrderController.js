@@ -481,6 +481,9 @@ class OrderController {
             return;
         }
 
+        var fileConfig = config.get('fileConfig');
+        var pushMerkleUsedSpaceRate = fileConfig.get('pushMerkleUsedSpaceRate');
+
         // valid used space > total space * 5% 
         var orderInfo = await orderService.getOrderById(email, orderId);
         if (orderInfo instanceof BizResultCode) {
@@ -490,7 +493,7 @@ class OrderController {
 
         var usedSpace = orderInfo.used_space ? orderInfo.used_space : 0;
         var totalSpace = orderInfo.total_space ? orderInfo.total_space : 0;
-        if (usedSpace < totalSpace * 0.05) {
+        if (usedSpace < totalSpace * pushMerkleUsedSpaceRate) {
             res.send(BizResult.fail(BizResultCode.ORDER_USED_SPACE_NOT_ENOUGH));
             return;
         }
