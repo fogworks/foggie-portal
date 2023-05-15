@@ -67,6 +67,7 @@ import DeviceList from "./deviceList";
 import { search_foggie } from "@/utils/api";
 import { sync_device } from "@/api/order/orderList";
 import { useRoute } from "vue-router";
+import useOrderList from "@/views/portal/_modules/hooks/useOrderList";
 const store = useStore();
 const route = useRoute();
 const { proxy } = getCurrentInstance();
@@ -76,18 +77,30 @@ const isCollapse = ref(false);
 const deviceData = reactive({
   data: {},
 });
+const { spaceList, getSpaceList } = useOrderList();
+
 const discoverData = computed(() => store.getters["global/discoverData"]);
 const search = () => {
   loading.value = true;
   search_foggie({ email: email.value })
     .then((res) => {
       let cur_data = res.data;
-      cur_data.forEach((r) => {
-        if (r.device_type === "space") {
-          r.expire = r.expire.slice(0, r.expire.length - 3);
+      const deviceList = cur_data.filter((el) => {
+        if (el.device_type === "space") {
+          console.log(spaceList.value);
+          const target = spaceList.value.find(
+            (item) => item.order_id == el.space_order_id
+          );
+          if (target) {
+            return true;
+          } else {
+            return false;
+          }
+        } else {
+          return true;
         }
       });
-      store.dispatch("global/setDeviceList", cur_data);
+      store.dispatch("global/setDeviceList", deviceList);
       loading.value = false;
     })
     .finally(() => {
@@ -223,10 +236,12 @@ const init = () => {
     }
   }
 };
-onActivated(() => {
+onActivated(async () => {
+  await getSpaceList();
   init();
 });
-onMounted(() => {
+onMounted(async () => {
+  await getSpaceList();
   init();
 });
 </script>

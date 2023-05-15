@@ -248,8 +248,23 @@ const search = () => {
       //     r.expire = r.expire.slice(0, r.expire.length - 3);
       //   }
       // });
-      deviceList.list = cur_data;
-      store.dispatch("global/setDeviceList", cur_data);
+      deviceList.list = cur_data.filter((el) => {
+        if (el.device_type === "space") {
+          console.log(spaceList.value);
+          const target = spaceList.value.find(
+            (item) => item.order_id == el.space_order_id
+          );
+          if (target) {
+            return true;
+          } else {
+            return false;
+          }
+        } else {
+          return true;
+        }
+      });
+
+      store.dispatch("global/setDeviceList", deviceList.list);
       loading.value = false;
     })
     .finally(() => {
@@ -257,6 +272,7 @@ const search = () => {
     });
 };
 onMounted(async () => {
+  await getSpaceList();
   search();
 });
 </script>

@@ -23,23 +23,20 @@
       <div>
         <el-table class="table-box" :data="tableData" style="width: 100%">
           <el-table-column label="Time" width="220">
-            <template #default="scope">
-              <el-tooltip
-                class="box-item"
-                effect="dark"
-                :content="typeMap[row.rec_type]"
-                placement="top"
-              >
-                {{ typeMap[row.rec_type] }}
-                {{ transferTime(scope.row.create_time) }}
-              </el-tooltip>
-            </template>
-          </el-table-column>
-          <el-table-column prop="rec_type" label="Type" width="220">
             <template #default="{ row }">
               <el-tooltip
                 class="box-item"
-                effect="dark"
+                :content="transferTime(row.create_time)"
+                placement="top"
+              >
+                {{ transferTime(row.create_time) }}
+              </el-tooltip>
+            </template>
+          </el-table-column>
+          <el-table-column prop="rec_type" label="Type" width="350">
+            <template #default="{ row }">
+              <el-tooltip
+                class="box-item"
                 :content="typeMap[row.rec_type]"
                 placement="top"
               >
@@ -47,7 +44,7 @@
               </el-tooltip>
             </template>
           </el-table-column>
-          <el-table-column prop="change_amount" label="Quantity" width="220">
+          <el-table-column prop="change_amount" label="Quantity" width="200">
             <template #default="scope">
               {{ scope.row.change_amount }}DMC
             </template>

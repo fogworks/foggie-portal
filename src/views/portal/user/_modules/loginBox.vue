@@ -14,11 +14,6 @@
                 ><InfoFilled
               /></el-icon>
             </el-tooltip>
-            <!-- <img
-              src="@/assets/system/github.png"
-              class="login_github"
-              @click="githubLogin"
-            /> -->
           </h1>
           <el-form
             class="account-form"
@@ -47,34 +42,26 @@
               />
             </el-form-item>
 
-            <el-tooltip
-              v-model="capsTooltip"
-              content="Caps lock is On"
-              placement="right"
-              manual
-            >
-              <el-form-item prop="password" v-if="haveUser">
-                <div class="my_login_right_input_img">
-                  <!-- <img
-                    src="@/assets//system/lock-blue.svg"
-                    alt="password icon"
-                    class=""
-                  /> -->
-                </div>
-                <el-input
-                  :key="passwordType"
-                  ref="password"
-                  v-model="loginForm.password"
-                  :type="passwordType"
-                  :placeholder="'Please enter password'"
-                  name="password"
-                  tabindex="2"
-                  autocomplete="on"
+            <el-form-item prop="password" v-if="haveUser">
+              <div class="my_login_right_input_img">
+                <img
+                  src="@/assets/system/lock-blue.svg"
+                  alt="password icon"
                   class=""
                 />
-              </el-form-item>
-            </el-tooltip>
-
+              </div>
+              <el-input
+                :key="passwordType"
+                ref="password"
+                v-model="loginForm.password"
+                :type="passwordType"
+                :placeholder="'Please enter password'"
+                name="password"
+                tabindex="2"
+                autocomplete="on"
+                class=""
+              />
+            </el-form-item>
             <el-form-item
               prop="promo_code"
               v-if="!haveUser && promo_code_checked"
@@ -151,33 +138,6 @@
               >
             </div>
           </el-form>
-          <!-- <div class="more_option">
-            <span>More Option</span>
-          </div> -->
-          <!-- <div class="storiesFounderLine">
-            <div class="storiesFounder">{{ "Sign in with" }}</div>
-          </div>
-          <el-button
-            type="primary"
-            style="width: 100%; margin-bottom: 30px; height: 46px"
-            @click.native.prevent="githubLogin"
-            class="ejUnNt githubBtn"
-          >
-            <img src="@/assets/system/github1.png" class="login_github" />Github
-          </el-button> -->
-          <!-- <div class="github_wrap">
-            <img
-              src="@/assets/system/github.png"
-              @click="githubLogin"
-              class="login_github"
-            />
-            <span>github</span>
-          </div> -->
-          <!-- <p
-            class="TextStyles__SmallText-h7d1e3-12 SignUpModal__Subtitle-sc-40tnuw-5 mRJhS stagger2"
-          >
-            {{ ("index.newTips") }}
-          </p> -->
         </div>
       </div>
     </div>
@@ -230,24 +190,8 @@ import {
 import { getQueryString } from "@/utils/util.js";
 const bcryptjs = require("bcryptjs");
 export default {
-  props: {
-    curProduct: {
-      type: Object,
-      default: () => ({}),
-    },
-  },
-  watch: {
-    curProduct: {
-      handler(newValue) {
-        this.cur_product = newValue;
-      },
-      immediate: true,
-      deep: true,
-    },
-  },
   data() {
     return {
-      cur_product: {},
       loginForm: {
         email: "",
         password: "",
@@ -299,9 +243,9 @@ export default {
       let res = await user();
       if (res.data && res.data.dmc) {
         window.sessionStorage.setItem("walletUser", res.data.dmc);
+        store.dispatch("global/setUserInfo", res.data);
+        this.$emit("login");
       }
-      let path = `/${this.nextPath}`;
-      this.$router.push(path);
     },
     closeLogin() {
       this.$emit("closeLogin");
@@ -427,152 +371,38 @@ export default {
         if (valid) {
           const password = this.loginForm.password;
           let hashPwd = bcryptjs.hashSync(password, 10);
-          if (this.cur_product && this.cur_product.item) {
-            let postData = {
-              email: that.loginForm.email,
-              password: hashPwd,
-              redirect: location.href,
-              product_name: this.cur_product.item.name,
-              login_type: "password",
-              order_data: {
-                // recaptcha_token: reCaptchaV3Token,
-                product_id: this.cur_product.item.id,
-                rent: this.cur_product.type,
-                total_price: this.cur_product.total_price,
-                payment_method:
-                  this.cur_product.type === "free"
-                    ? ""
-                    : this.cur_product.payment_method,
-              },
-            };
-            productLogin(postData).then((res) => {
-              if (res && res.data && res.data.order_data) {
-                that.loading = false;
-                if (res.next_step === "captcha") {
-                  that.getCaptcha();
-                  that.showCaptcha = true;
-                } else if (res && res.data) {
-                  let data = res.data;
-                  let token =
-                    data.login_data.token_type +
-                    " " +
-                    data.login_data.access_token;
-                  let refresh_token =
-                    data.login_data.token_type +
-                    " " +
-                    data.login_data.refresh_token;
-                  let user_id = data.login_data.user_id;
-                  window.localStorage.setItem("user_id", user_id);
-                  window.localStorage.setItem("refresh_token", refresh_token);
-                  let userInfo = {
-                    username: that.loginForm.email,
-                    token: token, //res.token
-                    user_id: user_id,
-                  };
-                  if (this.timer) {
-                    clearInterval(this.timer);
-                  }
-
-                  store.dispatch("login", userInfo);
-                  window.localStorage.setItem("myTab", "index");
-
-                  if (res.error) {
-                    Message({
-                      message: res.error || "Error",
-                      type: "error",
-                      duration: 5 * 1000,
-                    });
-                    this.nextPath = "index";
-                    this.getUserInfo();
-                  } else if (
-                    res.data.order_data &&
-                    res.data.login_data &&
-                    res.data.login_data.order_data
-                  ) {
-                    let order_data = res.data.login_data.order_data;
-                    if (order_data.rent === "free") {
-                      this.nextPath = "order";
-                      this.getUserInfo();
-                    } else {
-                      this.geNotFreeInfo();
-                      if (this.cur_product.payment_method === "card") {
-                        this.stripePay(
-                          res.data.order_data,
-                          res.data.order_data
-                        );
-                      } else {
-                        let order = res.data.order_data;
-                        let trans_id =
-                          order.order_transaction[
-                            order.order_transaction.length - 1
-                          ].id;
-
-                        let data = {
-                          transaction_id: trans_id,
-                          order_id: order.id,
-                          user_sender: this.cur_product.p_account_address_input,
-                          user_receiver: this.cur_product.pay_address,
-                        };
-                        orderTransaction(data).then(() => {
-                          window.localStorage.setItem("myTab", "order");
-                          this.$router.push("/order");
-                        });
-                      }
-                    }
-                  } else {
-                    this.nextPath = "index";
-                    this.getUserInfo();
-                  }
-                }
+          let postData = {
+            email: that.loginForm.email,
+            password: hashPwd,
+            // recaptcha_token: reCaptchaV3Token,
+          };
+          login(postData).then((res) => {
+            that.loading = false;
+            if (res.next_step === "captcha") {
+              that.getCaptcha();
+              that.showCaptcha = true;
+            } else if (res && res.data) {
+              let data = res.data;
+              let token = data.token_type + " " + data.access_token;
+              let refresh_token = data.token_type + " " + data.refresh_token;
+              let user_id = data.user_id;
+              window.localStorage.setItem("user_id", user_id);
+              window.localStorage.setItem("refresh_token", refresh_token);
+              let userInfo = {
+                username: that.loginForm.email,
+                token: token, //res.token
+                user_id: user_id,
+              };
+              if (this.timer) {
+                clearInterval(this.timer);
               }
-            });
-          } else {
-            let postData = {
-              email: that.loginForm.email,
-              password: hashPwd,
-              // recaptcha_token: reCaptchaV3Token,
-            };
-            login(postData).then((res) => {
+              store.dispatch("token/login", userInfo);
+
               that.loading = false;
-              if (res.next_step === "captcha") {
-                that.getCaptcha();
-                that.showCaptcha = true;
-              } else if (res && res.data) {
-                let data = res.data;
-                let token = data.token_type + " " + data.access_token;
-                let refresh_token = data.token_type + " " + data.refresh_token;
-                let user_id = data.user_id;
-                window.localStorage.setItem("user_id", user_id);
-                window.localStorage.setItem("refresh_token", refresh_token);
-                let userInfo = {
-                  username: that.loginForm.email,
-                  token: token, //res.token
-                  user_id: user_id,
-                };
-                if (this.timer) {
-                  clearInterval(this.timer);
-                }
-                store.dispatch("login", userInfo);
-                that.loading = false;
-                let dataParam = {
-                  pn: 0,
-                  ps: 10,
-                };
 
-                userOrderListPage(dataParam).then((res) => {
-                  let order = res.data;
-                  if (order && order.length) {
-                    this.nextPath = "vood";
-                    window.localStorage.setItem("myTab", "vood");
-                  } else {
-                    window.localStorage.setItem("myTab", "index");
-                    this.nextPath = "index";
-                  }
-                  this.getUserInfo();
-                });
-              }
-            });
-          }
+              this.getUserInfo();
+            }
+          });
         } else {
           console.log("error submit!!");
           return false;
@@ -643,78 +473,19 @@ export default {
     handleLogin() {
       const that = this;
       // gtag("event", "verified_account");
-      if (this.cur_product && this.cur_product.item) {
-        let postData = {
-          email: that.loginForm.email,
-          password: "",
-          redirect: location.origin,
-          login_type: "email",
-          order_data: {
-            product_id: this.cur_product.item.id,
-            product_name: this.cur_product.item.name,
-            rent: this.cur_product.type,
-            total_price: this.cur_product.total_price,
-            payment_method:
-              this.cur_product.type === "free"
-                ? ""
-                : this.cur_product.payment_method,
-          },
-          promo_code: this.loginForm.promo_code,
-        };
-        productLogin(postData).then((res) => {
-          console.log(res);
-          if (res && res.data) {
-            // set localStorage
-            localStorage.setItem(
-              "user_sender",
-              this.cur_product.p_account_address_input
-            );
-            localStorage.setItem("user_receiver", this.cur_product.pay_address);
-          }
-          if (res && res.data && res.data.is_verified) {
-            that.emailLogin();
-          } else if (res && res.data) {
-            this.$alert("login.emailLoginTips", "login.emailLogin", {
-              confirmButtonText: "OK",
-              callback: () => {},
-            });
+
+      if (!this.loginForm.promo_code) {
+        check_email_register(that.loginForm.email).then((rr) => {
+          if (rr.data && rr.data.email) {
+            this.goToRegister();
+          } else {
+            this.showInvitationTips = true;
+            this.promo_code_checked = true;
           }
         });
       } else {
-        if (!this.loginForm.promo_code) {
-          check_email_register(that.loginForm.email).then((rr) => {
-            if (rr.data && rr.data.email) {
-              this.goToRegister();
-            } else {
-              this.showInvitationTips = true;
-              this.promo_code_checked = true;
-            }
-          });
-        } else {
-          this.goToRegister();
-        }
+        this.goToRegister();
       }
-    },
-    async githubLogin() {
-      // let redirect = window.location.origin;
-      // gtag("event", "verified_account");
-      let data = "";
-      if (this.cur_product && this.cur_product.item) {
-        let state = {
-          product_id: this.cur_product.item.id,
-          rent: this.cur_product.type,
-          total_price: this.cur_product.total_price,
-          payment_method: "card",
-          // payment_method: 'blockchain',
-        };
-        data = await githubReq(JSON.stringify(state));
-      } else {
-        data = await githubReq();
-      }
-
-      let url = data && data.data.url;
-      // window.open(url);
-      window.location.href = url;
     },
     confirmRegister() {
       this.showInvitationTips = false;
