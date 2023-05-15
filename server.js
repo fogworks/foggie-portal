@@ -119,10 +119,7 @@ app.post("/user/check_account", jsonParser, (req, res) => {
 });
 
 app.post("/user/save_password", jsonParser, (req, res) => {
-  var email = req.body.email;
-  var username = req.body.username;
-  var password = req.body.password;
-  UserController.saveUserPassword(email, password, username, res);
+  UserController.saveUserPassword(req, res);
 });
 
 app.post("/user/validate_password", jsonParser, (req, res) => {
@@ -147,6 +144,10 @@ app.post("/user/dividend_list", jsonParser, (req, res) => {
 
 app.post("/user/claim_order", jsonParser, (req, res) => {
   UserController.claimOrder(req, res);
+});
+
+app.post("/user/get_username", jsonParser, (req, res) => {
+  UserController.getUsername(req, res);
 });
 
 app.post("/file/save", jsonParser, (req, res) => {

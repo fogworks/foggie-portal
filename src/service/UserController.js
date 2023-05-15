@@ -43,6 +43,18 @@ class UserController {
         res.send(BizResult.fail(BizResultCode.PASSWORD_EXIST));
     }
 
+    static async getUsername(req, res) {
+
+        var privateKey = req.body.privateKey;
+
+        var username = await userService.getUsername(privateKey);
+        if (username instanceof BizResultCode) {
+            res.send(BizResult.fail(username));
+            return;
+        }
+        res.send(BizResult.success(username));
+    }
+
     /**
      * check account
      * @param {*} req   HTTP request
@@ -64,18 +76,20 @@ class UserController {
 
     /**
      * save user password
-     * @param {*} email     foggie email
-     * @param {*} password  password
-     * @param {*} username  username
+     * @param {*} req       HTTP request
      * @param {*} res       HTTP response
      * @returns
      */
-    static async saveUserPassword(email, password, username, res) {
+    static async saveUserPassword(req, res) {
+
+        var email = req.body.email;
+        var password = req.body.password;
+
         if (!password || !email) {
             res.send(BizResult.validateFailed());
             return;
         }
-        var resultCode = await userService.saveUserInfo(email, password, username);
+        var resultCode = await userService.saveUserInfo(email, password);
         if (resultCode instanceof BizResultCode) {
             res.send(BizResult.fail(resultCode));
             return;
@@ -93,8 +107,7 @@ class UserController {
     static async resetUserPassword(req, res) {
         var password = req.body.password;
         var email = req.body.email;
-        var username = req.body.username;
-        if (!password || !email || !username) {
+        if (!password || !email) {
             res.send(BizResult.validateFailed());
             return;
         }
@@ -103,7 +116,7 @@ class UserController {
             res.send(BizResult.fail(resultCode));
             return;
         }
-        UserController.saveUserPassword(email, password, username, res);
+        UserController.saveUserPassword(email, password, res);
     }
 
     /**
@@ -179,12 +192,12 @@ class UserController {
             return;
         }
 
-        var resultCode = await userService.saveUserPrivateKey(email, privateKey);
-        if (resultCode === BizResultCode.SUCCESS) {
-            res.send(BizResult.success());
+        var result = await userService.saveUserPrivateKey(email, privateKey);
+        if (result instanceof BizResultCode) {
+            res.send(BizResult.fail(result));
             return;
         }
-        res.send(BizResult.fail(resultCode));
+        res.send(BizResult.success(result));
     }
 
     /**

@@ -3,6 +3,7 @@ const BizResultCode = require('./BaseResultCode');
 const NeDB = require('nedb');
 const moment = require('moment');
 const request = require('sync-request')
+const axios = require('axios');
 const config = require('config');
 const DMC = require('dmc.js');
 const common = require('./common');
@@ -32,6 +33,37 @@ module.exports = {
             logger.error('err:', err);
             return BizResultCode.CHECK_ACCOUNT_FAILED;
         }
+    },
+    getUsername: async (privateKey) => {
+
+        var public = DMC.ecc.privateToPublic(privateKey);
+        
+        var chainConfig = config.get('chainConfig');
+        var httpEndpoint = chainConfig.get("httpEndpoint");
+        var getAccounts = chainConfig.get("getAccounts");
+
+        var url = httpEndpoint + getAccounts
+        return new Promise((resolve, reject) => {
+            axios.get(url, {
+                data: {
+                    accounts: [""],
+                    keys: [public]
+                }
+            })
+            .then(response => {
+                var accounts = response.data.accounts;
+                if(accounts == null || accounts.length == 0){
+                    resolve(BizResultCode.GET_USERNAME_FAILED);
+                    return;
+                }
+                var account = accounts.find(item => item.authorizing_key == public);
+                resolve(account.account_name);
+            })
+            .catch(error => {
+                logger.error(error);
+                resolve(BizResultCode.GET_USERNAME_FAILED);
+            });
+        });
     },
     getUserInfo: async (email) => {
         // get userInfo from NeDB
@@ -75,7 +107,7 @@ module.exports = {
             return BizResultCode.RESET_PASSWORD_FAILED;
         });
     },
-    saveUserInfo: async (email, password, username) => {
+    saveUserInfo: async (email, password) => {
         return new Promise((resolve, reject) => {
             var nonce = Encrypt.randomString(6);
             // encrypt password
@@ -93,10 +125,10 @@ module.exports = {
                     // save password to NeDB
                     db.insert({
                         email: email,
-                        username: username,
+                        username: '',
                         password: encryptd,
                         nonce: nonce,
-                        private_key: "",
+                        private_key: '',
                         update_time: currentTime,
                         create_time: currentTime
                     }, function (err, doc2) {
@@ -160,6 +192,9 @@ module.exports = {
                 resolve(userInfo);
                 return;
             }
+
+            var username = await module.exports.getUsername(privateKey);
+
             // encrypt private key
             privateKey = Encrypt.encrypt(privateKey, userInfo.nonce);
             // get password from NeDB
@@ -168,6 +203,7 @@ module.exports = {
             }, {
                 $set: {
                     private_key: privateKey,
+                    username: username,
                     update_time: moment().format("YYYY-MM-DD HH:mm:ss")
                 }
             }, function (err, n) {
@@ -182,7 +218,7 @@ module.exports = {
                     return;
                 }
                 logger.info('save private key success');
-                resolve(BizResultCode.SUCCESS);
+                resolve(username);
             });
         }).catch((err) => {
             logger.error('err:', err);

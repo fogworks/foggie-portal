@@ -43,6 +43,7 @@ class BaseResultCode {
     static GET_DIVIDEND_COUNT_FAILED = new BaseResultCode(10015, 'get dividend count failed');
     static ACCOUNT_NOT_EXIST = new BaseResultCode(10016, 'account is not exist');
     static CHECK_ACCOUNT_FAILED = new BaseResultCode(10017, 'check account failed');
+    static GET_USERNAME_FAILED = new BaseResultCode(10018, 'get username failed');
 
     // order exceptin code 20000～29999
     static ORDER_BUY_FAILED = new BaseResultCode(20000, 'buy failed');
