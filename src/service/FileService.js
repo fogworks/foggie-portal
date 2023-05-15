@@ -489,6 +489,8 @@ module.exports = {
 
     },
     saveFileUploadRecord: async (orderId, email, filePath, md5, partNum) => {
+
+        var partNum = parseInt(partNum);
         // save file upload record into NeDB
         return new Promise((resolve, reject) => {
 
