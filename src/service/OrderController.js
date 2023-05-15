@@ -156,15 +156,17 @@ class OrderController {
     /**
      * Obtain filtered order list
      * The price range of the filtering criteria is left closed and right closed
-     * @param {*} email     
-     * @param {*} unmatchedAmount pst nuumber
-     * @param {*} period    buy period, unit week
-     * @param {*} minPrice  minimum price, unit DMC
-     * @param {*} maxPrice  maximum price, unit DMC
+     * @param {*} req       HTTP request
      * @param {*} res       HTTP response
      * @returns order list
      */
-    static async outstandingOrders(email, unmatchedAmount, period, minPrice, maxPrice, res) {
+    static async outstandingOrders(req, res) {
+
+        var email = req.body.email;
+        var unmatchedAmount = req.body.unmatchedAmount;
+        var period = req.body.period;
+        var minPrice = req.body.minPrice;
+        var maxPrice = req.body.maxPrice;
 
         if (!email || !unmatchedAmount || !period) {
             res.send(BizResult.validateFailed())
@@ -224,13 +226,17 @@ class OrderController {
             '            }\n' +
             '        }\n' +
             '    }'
-        let outstandingOrders = JSON.parse(request('POST', transactionAddress + getOutstandingOrders, {
+        var outstandingOrders = JSON.parse(request('POST', transactionAddress + getOutstandingOrders, {
             headers: {
                 'Content-Type': 'application/graphql'
             },
             body: body
-        }).getBody('utf-8')).data.find_bill
-        res.send(BizResult.success(outstandingOrders));
+        }).getBody('utf-8')).data.find_bill;
+        var orderConfig = config.get('orderConfig');
+        var outstandinglimit = orderConfig.get('outstandinglimit');
+        var sortOrders = outstandingOrders.sort((a, b) => parseFloat(b.deposit_ratio) - parseFloat(a.deposit_ratio)).slice(0, outstandinglimit);
+
+        res.send(BizResult.success(sortOrders));
     }
 
     static getChallengeCount(req, res) {
@@ -263,7 +269,7 @@ class OrderController {
         }
 
         res.send(BizResult.success(resultData));
-       
+
     }
 
     static async orderList(req, res) {

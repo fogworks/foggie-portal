@@ -27,19 +27,7 @@ var payChallengeTimer = challengeConfig.get("payChallengeTimer");
 // }, payChallengeTimer);
 
 app.post("/order/outstanding_orders", jsonParser, (req, res) => {
-  var email = req.body.email;
-  var unmatchedAmount = req.body.unmatchedAmount;
-  var period = req.body.period;
-  var minPrice = req.body.minPrice;
-  var maxPrice = req.body.maxPrice;
-  OrderController.outstandingOrders(
-    email,
-    unmatchedAmount,
-    period,
-    minPrice,
-    maxPrice,
-    res
-  );
+  OrderController.outstandingOrders(req, res);
 });
 
 app.post("/order/buy", jsonParser, (req, res) => {

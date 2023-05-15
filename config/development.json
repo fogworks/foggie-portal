@@ -52,5 +52,8 @@
     "challengeConfig":{
         "payChallengeTimeout": 300000,
         "payChallengeTimer": 120000
+    },
+    "orderConfig":{
+        "outstandinglimit": 3
     }
 }
