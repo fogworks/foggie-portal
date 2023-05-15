@@ -222,18 +222,18 @@ export default {
     const getUserAssets = () => {
       userAssets({ email: email.value }).then((res) => {
         if (res.code == 200) {
-          balanceCount.value = res.data[0].balance.quantity.slice(
+          balanceCount.value = res.data[0]?.balance.quantity.slice(
             0,
             res.data[0].balance.quantity.length - 4
           );
           withDrawMoney.value = +balanceCount.value;
-          balanceCount2.value = res.data[1].balance.quantity.slice(
+          balanceCount2.value = res.data[1]?.balance.quantity.slice(
             0,
             res.data[1].balance.quantity.length - 4
           );
-          usedSpace.value = res.data[2].used_space;
-          totalSpace.value = res.data[2].total_space;
-          totalOrder.value = res.data[2].order_num;
+          usedSpace.value = res.data[2]?.used_space;
+          totalSpace.value = res.data[2]?.total_space;
+          totalOrder.value = res.data[2]?.order_num;
         }
       });
     };
