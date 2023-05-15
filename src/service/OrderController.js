@@ -248,7 +248,29 @@ class OrderController {
         res.send(BizResult.success(result));
     }
 
-    static async orderList(email, pageNum, limit, res) {
+    static async orderListAll(req, res) {
+
+        var email = req.body.email;
+
+        if (!email) {
+            res.send(BizResult.validateFailed())
+            return;
+        }
+        var resultData = await orderService.getOrdersFromDB(email);
+        if (resultData instanceof BizResultCode) {
+            res.send(BizResult.fail(resultData));
+            return;
+        }
+
+        res.send(BizResult.success(resultData));
+       
+    }
+
+    static async orderList(req, res) {
+
+        var email = req.body.email;
+        var limit = req.body.limit;
+        var pageNum = req.body.pageNum;
 
         if (!email) {
             res.send(BizResult.validateFailed())

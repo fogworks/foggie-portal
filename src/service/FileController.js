@@ -324,8 +324,6 @@ class FileController {
                 request: request
             };
 
-            logger.info('putObjectPartReq:', putObjectPartReq);
-
             var netClient = await fileService.getProxGrpcClient(rpc, header);
             let stream = netClient.PutObjectPart(async function (err, data) {
                 if (err) {
@@ -588,7 +586,10 @@ class FileController {
         }
 
         var powClient = fileService.getPowGrpcClient();
-        let merkleStream = powClient.BuildMerkelLeaf(async function (err, data) {
+        // const pow_proto = require('./grpc/pow');
+        // const grpc = require('@grpc/grpc-js');
+        // var powClient = new pow_proto.PowService('192.168.1.114:8007' , grpc.credentials.createInsecure())
+        var merkleStream = powClient.BuildMerkelLeaf(async function (err, data) {
             if (err) {
                 logger.error('err:', err);
                 res.send(BizResult.fail(BizResultCode.BUILD_MERKLE_FAILED));
@@ -630,6 +631,8 @@ class FileController {
                     return;
                 }
 
+                logger.info('complete upload success, orderId{}, data:', data2);
+
                 res.send(BizResult.success(data2.cid));
             });
         });
@@ -646,22 +649,27 @@ class FileController {
             request: putObjectMKRequest
         };
         merkleStream.write({ req: putObjectMKReq });
-
-        try {
-            for (const file of fileUploadRecordRes) {
-                var filename = file.file_path;
-                var readStream = fs.createReadStream(filename, { highWaterMark: uploadFileBufferSize });
-                readStream.on('data', (chunk) => {
-                    merkleStream.write({ chunk: chunk });
-                });
-            }
-        } catch (err) {
-            logger.error('read file error, fileUploadRecordRes:{}, err: {}', fileUploadRecordRes, err);
+        await readFileSequentially(fileUploadRecordRes, merkleStream).catch(err => {
+            logger.error('read file error, err: {}', err);
             res.send(BizResult.fail(BizResultCode.READ_FILE_FAILED));
             return;
+        });
+        async function readFileSequentially(fileUploadRecordRes, merkleStream) {
+            try {
+                for (const file of fileUploadRecordRes) {
+                    const filename = file.file_path;
+                    const readStream = fs.createReadStream(filename, { highWaterMark: uploadFileBufferSize });
+                    for await (const chunk of readStream) {
+                        merkleStream.write({ chunk: chunk });
+                    }
+                }
+            } catch (err) {
+                logger.error('read file error, fileUploadRecordRes:{}, err: {}', fileUploadRecordRes, err);
+                res.send(BizResult.fail(BizResultCode.READ_FILE_FAILED));
+                return;
+            }
+            merkleStream.end();
         }
-
-        merkleStream.end();
     }
 }
 
