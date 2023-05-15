@@ -91,6 +91,14 @@ export function claim_order(data) {
     data,
   });
 }
+export function getDmcUsername(data) {
+  return request({
+    url: baseUrl + '/user/get_username',
+    method: 'POST',
+    data,
+  });
+}
+
 
 
 

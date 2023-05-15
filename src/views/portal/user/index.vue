@@ -2,19 +2,19 @@
   <div class="box" v-loading="loading">
     <div v-if="!userId" class="login-box">
       <img src="@/assets/login-left.png" alt="" />
-      <el-form
+      <!-- <el-form
         class="account-form"
         :model="form"
         label-position="top"
         ref="formRef"
         :rules="rules"
       >
-        <!-- <p class="top-title">
+        <p class="top-title">
           <span v-if="isLogin" @click="isLogin = !isLogin"
             >No account, go register!</span
           >
           <span v-else @click="isLogin = !isLogin">Go log in</span>
-        </p> -->
+        </p>
         <el-form-item label="Foggie Email" prop="email">
           <el-input v-model="form.email"></el-input>
         </el-form-item>
@@ -49,24 +49,18 @@
             {{ "Register" }}
           </el-button>
         </div>
-      </el-form>
-      <!-- <LoginBox></LoginBox> -->
+      </el-form> -->
+      <LoginBox @login="emitLogin"></LoginBox>
     </div>
-    <div v-else-if="userId && !hasDMC" class="login-box">
+    <div v-else-if="userId && !isLogin" class="login-box">
       <img src="@/assets/login-left.png" alt="" />
-      <el-form
+      <!-- <el-form
         class="account-form"
         :model="form"
         label-position="top"
         ref="formRef2"
         :rules="rules"
       >
-        <!-- <p class="top-title">
-          <span v-if="isLogin" @click="isLogin = !isLogin"
-            >No account, go register!</span
-          >
-          <span v-else @click="isLogin = !isLogin">Go log in</span>
-        </p> -->
         <el-form-item label="DMC Account" prop="dmcAccount">
           <el-input v-model="form.dmcAccount"></el-input>
         </el-form-item>
@@ -75,11 +69,16 @@
             Bind
           </el-button>
         </div>
-      </el-form>
+      </el-form> -->
+      <LoginPrivate
+        class="loginPrivate"
+        :userInfo="userInfo"
+        @login="emitLogin"
+      ></LoginPrivate>
       <!-- <LoginBox></LoginBox> -->
     </div>
 
-    <div class="info-box" v-else-if="hasDMC && userId">
+    <div class="info-box" v-else-if="isLogin && userId">
       <div class="info-content">
         <div class="foot-btn">
           <!-- <el-button type="danger" @click="unbindVisible = true"
@@ -121,12 +120,22 @@
 </template>
 
 <script setup>
-import { ref, reactive, getCurrentInstance, computed, inject } from "vue";
+import {
+  ref,
+  reactive,
+  getCurrentInstance,
+  computed,
+  inject,
+  watch,
+  nextTick,
+} from "vue";
 import Web3Link from "./_modules/web3Link";
 import { login, register, user, unbind_foggie, updateUser } from "@/utils/api";
 import { useStore } from "vuex";
 import LoginBox from "./_modules/loginBox";
+import LoginPrivate from "./_modules/loginPrivate";
 import { useRouter } from "vue-router";
+import usePrivateKey from "./hooks/usePrivateKey.js";
 const bcryptjs = require("bcryptjs");
 const store = useStore();
 const router = useRouter();
@@ -140,10 +149,11 @@ const form = reactive({
   confirmPassword: "",
   dmcAccount: "",
 });
-const isLogin = ref(true);
+const isLogin = ref(false);
 const formRef = ref(null);
 const unbindVisible = ref(false);
 const currentTheme = computed(() => store.getters.theme);
+const email = computed(() => store.getters.userInfo?.email);
 const handleThemeChange = (val) => {
   document.documentElement.setAttribute("class", val);
   // window.localStorage.setItem("theme", val);
@@ -221,6 +231,10 @@ const getUserInfo = () => {
     });
 };
 getUserInfo();
+
+const emitLogin = () => {
+  isLogin.value = true;
+};
 const submit = () => {
   if (loading.value) return false;
   formRef.value.validate((valid) => {
@@ -302,12 +316,24 @@ const logout = () => {
   store.dispatch("global/setUserInfo", {});
   getUserInfo();
 };
+
 const unbind = () => {
   unbindVisible.value = false;
   unbind_foggie(requestTarget).then((res) => {
     logout();
   });
 };
+// watch(
+//   email,
+//   (val) => {
+//     if (val && userId.value) {
+//       loadUserLoginStatus();
+//     }
+//   },
+//   {
+//     immediate: true,
+//   }
+// );
 </script>
 
 <style lang="scss" scoped>
@@ -344,6 +370,19 @@ const unbind = () => {
     margin-bottom: 10px;
     span:hover {
       color: $light_blue;
+    }
+  }
+  .loginPrivate {
+    position: unset;
+    transform: none;
+    :deep {
+      .el-card {
+        background: transparent;
+        box-shadow: none;
+        .el-card__header {
+          border-bottom: none;
+        }
+      }
     }
   }
 }

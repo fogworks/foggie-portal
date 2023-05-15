@@ -74,6 +74,9 @@
               </div> -->
               <div class="detailImg_box_text">
                 <p>
+                  Bill ID：<span>{{ item.id }}</span>
+                </p>
+                <p>
                   Unit price：<span>{{ item.price / 10000 }}DMC</span>
                 </p>
                 <p>
@@ -591,7 +594,7 @@ onMounted(() => {
   grid-template-rows: 1fr 1fr;
   min-width: 200px;
   max-width: 320px;
-  height: 360px;
+  height: 390px;
   border-radius: 20px;
   padding: 20px;
 
