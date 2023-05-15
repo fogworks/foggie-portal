@@ -1,6 +1,6 @@
 <template>
   <div class="box" v-loading="loading">
-    <div v-if="needLogin" class="login-box">
+    <div v-if="!userId" class="login-box">
       <img src="@/assets/login-left.png" alt="" />
       <el-form
         class="account-form"
@@ -9,12 +9,12 @@
         ref="formRef"
         :rules="rules"
       >
-        <p class="top-title">
+        <!-- <p class="top-title">
           <span v-if="isLogin" @click="isLogin = !isLogin"
             >No account, go register!</span
           >
           <span v-else @click="isLogin = !isLogin">Go log in</span>
-        </p>
+        </p> -->
         <el-form-item label="Foggie Email" prop="email">
           <el-input v-model="form.email"></el-input>
         </el-form-item>
@@ -52,8 +52,34 @@
       </el-form>
       <!-- <LoginBox></LoginBox> -->
     </div>
+    <div v-else-if="userId && !hasDMC" class="login-box">
+      <img src="@/assets/login-left.png" alt="" />
+      <el-form
+        class="account-form"
+        :model="form"
+        label-position="top"
+        ref="formRef2"
+        :rules="rules"
+      >
+        <!-- <p class="top-title">
+          <span v-if="isLogin" @click="isLogin = !isLogin"
+            >No account, go register!</span
+          >
+          <span v-else @click="isLogin = !isLogin">Go log in</span>
+        </p> -->
+        <el-form-item label="DMC Account" prop="dmcAccount">
+          <el-input v-model="form.dmcAccount"></el-input>
+        </el-form-item>
+        <div class="foot-btn">
+          <el-button :loading="loading" type="primary" @click="bindDmc">
+            Bind
+          </el-button>
+        </div>
+      </el-form>
+      <!-- <LoginBox></LoginBox> -->
+    </div>
 
-    <div class="info-box" v-else>
+    <div class="info-box" v-else-if="hasDMC && userId">
       <div class="info-content">
         <div class="foot-btn">
           <!-- <el-button type="danger" @click="unbindVisible = true"
@@ -97,7 +123,7 @@
 <script setup>
 import { ref, reactive, getCurrentInstance, computed, inject } from "vue";
 import Web3Link from "./_modules/web3Link";
-import { login, register, user, unbind_foggie } from "@/utils/api";
+import { login, register, user, unbind_foggie, updateUser } from "@/utils/api";
 import { useStore } from "vuex";
 import LoginBox from "./_modules/loginBox";
 import { useRouter } from "vue-router";
@@ -112,11 +138,11 @@ const form = reactive({
   password: "",
   email: "",
   confirmPassword: "",
+  dmcAccount: "",
 });
 const isLogin = ref(true);
 const formRef = ref(null);
 const unbindVisible = ref(false);
-const needLogin = ref(true);
 const currentTheme = computed(() => store.getters.theme);
 const handleThemeChange = (val) => {
   document.documentElement.setAttribute("class", val);
@@ -167,6 +193,15 @@ const rules = {
       trigger: "blur",
     },
   ],
+  dmcAccount: [
+    { required: true, message: "Please enter DMC Account", trigger: "blur" },
+    {
+      min: 12,
+      max: 12,
+      message: "DMC Account length is 12 digits",
+      trigger: "blur",
+    },
+  ],
   confirmPassword: {
     required: true,
     validator: validatePass2,
@@ -179,11 +214,9 @@ const getUserInfo = () => {
   user()
     .then(({ data }) => {
       store.dispatch("global/setUserInfo", data);
-      needLogin.value = false;
       loading.value = false;
     })
     .catch(() => {
-      needLogin.value = true;
       loading.value = false;
     });
 };
@@ -248,6 +281,19 @@ const handleRegister = () => {
           position: "bottom-left",
         });
       });
+    }
+  });
+};
+const userId = computed(() => store.getters.userInfo?.id || "");
+const hasDMC = computed(() => store.getters.userInfo?.dmc || "");
+const bindDmc = () => {
+  let postdata = {
+    dmc: form.dmcAccount,
+    wallet_type: "wallet",
+  };
+  updateUser(userId.value, postdata).then((res) => {
+    if (res && res.data && res.data.dmc) {
+      getUserInfo();
     }
   });
 };

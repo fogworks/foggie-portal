@@ -129,13 +129,21 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, defineEmits, getCurrentInstance } from "vue";
+import {
+  ref,
+  reactive,
+  computed,
+  defineEmits,
+  getCurrentInstance,
+  onMounted,
+} from "vue";
 import WifiSearching from "@/components/wifiSearching";
 import { useRouter } from "vue-router";
 import IPFrom from "./ipForm";
 import { search_foggie } from "@/utils/api";
 import { handleTimeStamp, transferUTCTime, getfilesize } from "@/utils/util";
 import { useStore } from "vuex";
+import useOrderList from "./hooks/useOrderList";
 const store = useStore();
 const router = useRouter();
 const { proxy } = getCurrentInstance();
@@ -148,6 +156,7 @@ const deviceList = reactive({
   ],
 });
 const visible = ref(false);
+const { spaceList, getSpaceList } = useOrderList();
 const emit = defineEmits(["next"]);
 const toGuide = (item) => {
   if (item.device_type !== "space") {
@@ -190,40 +199,8 @@ const handleID = (str) => {
     str.substring(0, 3) + "..." + str.substring(str.length - 3, str.length)
   );
 };
-const handleCommand = ({ flag, data }) => {
-  if (flag === "edit") {
-    visible.value = true;
-  } else if (flag === "delete") {
-    proxy
-      .$confirm("Are you sure to delete this device record?", "Warning", {
-        confirmButtonText: "YES",
-        cancelButtonText: "NO",
-        type: "warning",
-      })
-      .then(() => {
-        deviceList.list.splice(data, 1);
-        proxy.$notify({
-          type: "success",
-          message: "Successfully deleted",
-          position: "bottom-left",
-        });
-      })
-      .catch(() => {});
-  }
-};
-const dropMenuRef = ref(null);
-const dropMenuShow = ref(false);
 const loading = ref(false);
-const visibleChange = (val) => {
-  dropMenuShow.value = val;
-};
-const showClick = () => {
-  // if (dropMenuShow.value) {
-  //   dropMenuRef.value.handleClose();
-  // } else {
-  //   dropMenuRef.value.handleOpen();
-  // }
-};
+
 const handleProgress = (item) => {
   if (!item.device_type) {
     let created = new Date(item.created_at).getTime() / 1000;
@@ -279,7 +256,9 @@ const search = () => {
       loading.value = false;
     });
 };
-search();
+onMounted(async () => {
+  search();
+});
 </script>
 
 <style lang="scss" scoped>
