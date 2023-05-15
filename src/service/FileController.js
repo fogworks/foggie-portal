@@ -586,9 +586,6 @@ class FileController {
         }
 
         var powClient = fileService.getPowGrpcClient();
-        // const pow_proto = require('./grpc/pow');
-        // const grpc = require('@grpc/grpc-js');
-        // var powClient = new pow_proto.PowService('192.168.1.114:8007' , grpc.credentials.createInsecure())
         var merkleStream = powClient.BuildMerkelLeaf(async function (err, data) {
             if (err) {
                 logger.error('err:', err);
