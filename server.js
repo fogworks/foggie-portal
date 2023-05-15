@@ -51,10 +51,7 @@ app.post("/order/sync", jsonParser, (req, res) => {
 });
 
 app.post("/order/list", jsonParser, (req, res) => {
-  var email = req.body.email;
-  var limit = req.body.limit;
-  var pageNum = req.body.pageNum;
-  OrderController.orderList(email, pageNum, limit, res);
+  OrderController.orderListAll(req, res);
 });
 
 app.post("/order/id", jsonParser, (req, res) => {
