@@ -32,7 +32,13 @@ export const user = () => {
     method: "GET",
   });
 };
-
+export const updateUser = (id, data) => {
+  return request({
+    url: "/api/accounts/user/" + id,
+    method: "PUT",
+    data: data,
+  });
+};
 export const paynode = () => {
   return request({
     url: "/api/paynode",

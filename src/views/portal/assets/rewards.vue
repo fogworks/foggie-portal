@@ -1,7 +1,6 @@
 <template>
   <div>
     <el-dialog
-      append-to-body
       class="withdraw-dialog"
       :model-value="visible"
       :title="title"
@@ -17,7 +16,7 @@
           </el-table-column>
           <el-table-column width="150" prop="id" label="Order ID">
           </el-table-column>
-          <el-table-column width="200" label="Account" show-overflow-tooltip>
+          <el-table-column width="200" label="Account">
             <template #default="{ row }">
               {{ row.user.id }}
             </template>

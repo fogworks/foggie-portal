@@ -22,12 +22,32 @@
       </el-tabs> -->
       <div>
         <el-table class="table-box" :data="tableData" style="width: 100%">
-          <el-table-column label="Time" width="420">
+          <el-table-column label="Time" width="220">
             <template #default="scope">
-              {{ transferTime(scope.row.create_time) }}
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                :content="typeMap[row.rec_type]"
+                placement="top"
+              >
+                {{ typeMap[row.rec_type] }}
+                {{ transferTime(scope.row.create_time) }}
+              </el-tooltip>
             </template>
           </el-table-column>
-          <el-table-column prop="change_amount" label="Quantity" width="340">
+          <el-table-column prop="rec_type" label="Type" width="220">
+            <template #default="{ row }">
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                :content="typeMap[row.rec_type]"
+                placement="top"
+              >
+                {{ typeMap[row.rec_type] }}
+              </el-tooltip>
+            </template>
+          </el-table-column>
+          <el-table-column prop="change_amount" label="Quantity" width="220">
             <template #default="scope">
               {{ scope.row.change_amount }}DMC
             </template>
@@ -73,6 +93,16 @@ export default {
         label: "Withdraw",
       },
     ]);
+    const typeMap = {
+      1: "Increase Reserve",
+      2: "Reduce Reserve",
+      3: "Deposit",
+      4: "Receive Grant",
+      5: "Receive Incentive Reward",
+      6: "Storage Challenge Time-out Compensation",
+      7: "Order Cancellation Return",
+      8: "Completed Order Lock",
+    };
     const { visible, orderId } = toRefs(props);
     const tableData = ref([]);
     const withdrawData = reactive([]);
@@ -129,6 +159,7 @@ export default {
       currentPage,
       dmc,
       total,
+      typeMap,
       handleCurrentChange,
       handleCommand,
       close,
