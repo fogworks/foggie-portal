@@ -376,53 +376,6 @@ module.exports = {
         });
     },
     getChallengeRecord: async (email, orderId, skip, limit) => {
-        // try {
-        //     var chainConfig = config.get('chainConfig');
-        //     var transactionAddress = chainConfig.get('transactionAddress');
-        //     var getChallengeList = chainConfig.get('getChallengeList');
-
-        //     let body = '{\n' +
-        //         '        find_challenge(\n' +
-        //         '                skip: ' + skip + ',\n' +
-        //         '                limit: ' + limit + ',\n' +
-        //         '                where: {\n' +
-        //         '                    order_id: ' + orderId + ',\n' +
-        //         '                },\n' +
-        //         '                order: "-id",\n' +
-        //         '        ){\n' +
-        //         '            pre_merkle_root\n' +
-        //         '            pre_data_block_count\n' +
-        //         '            merkle_root\n' +
-        //         '            data_block_count\n' +
-        //         '            merkle_submitter\n' +
-        //         '            data_id\n' +
-        //         '            hash_data\n' +
-        //         '            challenge_times\n' +
-        //         '            nonce\n' +
-        //         '            state\n' +
-        //         '            user_lock_amount\n' +
-        //         '            miner_pay_amount\n' +
-        //         '            challenge_date\n' +
-        //         '            created_time\n' +
-        //         '            order {\n' +
-        //         '                id\n' +
-        //         '            }\n' +
-        //         '            challenger {\n' +
-        //         '                id\n' +
-        //         '            }\n' +
-        //         '        }\n' +
-        //         '    }'
-        //     return JSON.parse(request('POST', transactionAddress + getChallengeList, {
-        //         headers: {
-        //             'Content-Type': 'application/graphql'
-        //         },
-        //         body: body
-        //     }).getBody('utf-8')).data.find_challenge;
-        // }
-        // catch (err) {
-        //     logger.error('err:', err);
-        //     return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
-        // }
 
         return new Promise((resolve, reject) => {
             // query push merkle record from NeDB
@@ -444,29 +397,6 @@ module.exports = {
     },
     getChallengeCount: async (email, orderId) => {
 
-        // try {
-        //     var chainConfig = config.get('chainConfig');
-        //     var transactionAddress = chainConfig.get('transactionAddress');
-        //     var getChallengeList = chainConfig.get('getChallengeList');
-
-        //     let body = '{\n' +
-        //         '        count_challenge(\n' +
-        //         '                where: {\n' +
-        //         '                    order_id: ' + orderId + ',\n' +
-        //         '                },\n' +
-        //         '        )\n' +
-        //         '    }'
-        //     return JSON.parse(request('POST', transactionAddress + getChallengeList, {
-        //         headers: {
-        //             'Content-Type': 'application/graphql'
-        //         },
-        //         body: body
-        //     }).getBody('utf-8')).data.count_challenge;
-        // }
-        // catch (err) {
-        //     logger.error('err:', err);
-        //     return BizResultCode.GET_CHANLLENGE_RECORD_FAILED;
-        // }
         return new Promise((resolve, reject) => {
             // query push merkle record count from NeDB
             challengeRecordDB.find({
