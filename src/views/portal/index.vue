@@ -21,11 +21,11 @@
             </div>
           </template>
         </el-menu-item>
-        <el-menu-item index="assets" v-if="userName !== 'Login'">
+        <el-menu-item index="assets" v-if="userName !== 'Login' && ChainId">
           <svg-icon icon-class="income"></svg-icon>
           <template #title> Assets </template>
         </el-menu-item>
-        <el-menu-item index="device" v-if="userName !== 'Login'">
+        <el-menu-item index="device" v-if="userName !== 'Login' && ChainId">
           <svg-icon icon-class="devices"></svg-icon>
           <template #title> Device </template>
         </el-menu-item>
@@ -42,7 +42,7 @@
             </el-tooltip>
           </template>
         </el-menu-item>
-        <el-menu-item index="shop">
+        <el-menu-item index="shop" v-if="userName !== 'Login' && ChainId">
           <svg-icon icon-class="shop"></svg-icon>
           <template #title> Shop </template>
         </el-menu-item>
@@ -71,6 +71,7 @@ import { getChain_id } from "@/api/common.js";
 const store = useStore();
 
 let uploadIsShow = computed(() => store.getters.uploadIsShow);
+let ChainId = computed(() => store.getters.ChainId);
 const route = useRoute();
 const isCollapse = ref(false);
 const defaultActive = ref(route.path.slice(1, route.path.length));

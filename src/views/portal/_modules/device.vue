@@ -59,7 +59,7 @@
             @click.stop="copyLink(item.device_id)"
           ></svg-icon>
         </div>
-        <div
+        <!-- <div
           class="item"
           style="height: unset"
           v-if="item.device_type == 'space'"
@@ -76,51 +76,18 @@
             }}</span
           >
           Space
-        </div>
+        </div> -->
         <template v-if="!item.device_type || item.device_type === 'space'">
           <div>
             Due
             <el-progress
+              class="due-progress"
               style="width: 150px; margin-left: 5px"
               :percentage="handleProgress(item)"
               :status="handleProgress(item) == 100 ? 'warning' : ''"
             />
-            <!-- <span class="value-span">{{ handleTimeStamp(item.expire) }}</span> -->
           </div>
         </template>
-
-        <!-- <el-dropdown
-          popper-class="more-popper"
-          @visible-change="visibleChange"
-          @command="handleCommand"
-        >
-          <span>
-            <svg-icon
-              @click.stop="showClick"
-              icon-class="more"
-              class="more"
-              style="color: #000; font-size: 20px"
-            ></svg-icon>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item :command="{ flag: 'edit', data: item }">
-                <svg-icon
-                  style="margin-right: 5px"
-                  icon-class="edit"
-                ></svg-icon>
-                Edit
-              </el-dropdown-item>
-              <el-dropdown-item :command="{ flag: 'delete', data: index }">
-                <svg-icon
-                  icon-class="delete"
-                  style="margin-right: 5px"
-                ></svg-icon>
-                Delete
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown> -->
       </li>
     </ul>
     <div class="to-app" @click="router.push({ name: 'AppWindow' })">APP</div>
@@ -243,14 +210,8 @@ const search = () => {
   search_foggie({ email: email.value })
     .then((res) => {
       let cur_data = res.data;
-      // cur_data.forEach((r) => {
-      //   if (r.device_type === "space") {
-      //     r.expire = r.expire.slice(0, r.expire.length - 3);
-      //   }
-      // });
       deviceList.list = cur_data.filter((el) => {
         if (el.device_type === "space") {
-          console.log(spaceList.value);
           const target = spaceList.value.find(
             (item) => item.order_id == el.space_order_id
           );
@@ -260,10 +221,9 @@ const search = () => {
             return false;
           }
         } else {
-          return true;
+          return false;
         }
       });
-
       store.dispatch("global/setDeviceList", deviceList.list);
       loading.value = false;
     })
@@ -394,6 +354,13 @@ onMounted(async () => {
         right: 10px;
         border: none !important;
         z-index: 10;
+      }
+    }
+    .due-progress {
+      :deep {
+        .el-progress__text {
+          color: #000;
+        }
       }
     }
     // .more {

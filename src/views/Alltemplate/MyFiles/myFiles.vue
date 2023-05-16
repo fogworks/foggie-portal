@@ -115,19 +115,17 @@
         </el-table-column>
         <el-table-column label="Content / File ID" min-width="250">
           <template #default="{ row }">
-            <template v-for="item in row.idList">
-              <div v-if="item.code" class="id-box">
-                <div class="copy" v-if="item.code">
-                  <span class="id-name">{{ item.name }}</span>
-                  <span class="code">{{ item.code }}</span>
-                  <svg-icon
-                    icon-class="copy"
-                    class="copy-icon"
-                    @click="copyLink(item.code)"
-                  ></svg-icon>
-                </div>
+            <div v-if="row.cid" class="id-box">
+              <div class="copy" v-if="row.cid">
+                <!-- <span class="id-name">{{ item.name }}</span> -->
+                <span class="code">{{ row.cid }}</span>
+                <svg-icon
+                  icon-class="copy"
+                  class="copy-icon"
+                  @click="copyLink(row.cid)"
+                ></svg-icon>
               </div>
-            </template>
+            </div>
           </template>
         </el-table-column>
         <el-table-column

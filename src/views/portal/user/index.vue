@@ -50,7 +50,7 @@
           </el-button>
         </div>
       </el-form> -->
-      <LoginBox @login="emitLogin"></LoginBox>
+      <LoginBox></LoginBox>
     </div>
     <div v-else-if="userId && !isLogin" class="login-box">
       <img src="@/assets/login-left.png" alt="" />
@@ -116,6 +116,23 @@
 
       <Web3Link></Web3Link>
     </div>
+    <div v-if="!isLogin" class="story-content">
+      <div class="story-box">
+        <img src="@/assets/nft.png" alt="" />
+        <span>
+          In a land far away, young Hans lived, Working hard,<br />
+          for a farmer he served, a gold piece he received.<br />
+          A gold piece sparked the desire for adventure, a journey began,<br />
+          On the path, he met Foggie, the loyal and clever little dog, hand in
+          hand.<br />
+          Hans and Foggie, together they conquered rivers and mountains,<br />
+          Through forests they ventured, climbing steep peaks, sharing joyful
+          moments.<br />
+          The thirst for wealth lingered, always present in Hans' mind,<br />
+          Foggie revealed a magical skill, traces of treasure to find.
+        </span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -135,7 +152,7 @@ import { useStore } from "vuex";
 import LoginBox from "./_modules/loginBox";
 import LoginPrivate from "./_modules/loginPrivate";
 import { useRouter } from "vue-router";
-import usePrivateKey from "./hooks/usePrivateKey.js";
+import { getChain_id } from "@/api/common";
 const bcryptjs = require("bcryptjs");
 const store = useStore();
 const router = useRouter();
@@ -234,6 +251,7 @@ getUserInfo();
 
 const emitLogin = () => {
   isLogin.value = true;
+  getChainId();
 };
 const submit = () => {
   if (loading.value) return false;
@@ -315,6 +333,7 @@ const logout = () => {
   store.dispatch("token/logout");
   store.dispatch("global/setUserInfo", {});
   getUserInfo();
+  isLogin.value = false;
 };
 
 const unbind = () => {
@@ -334,6 +353,13 @@ const unbind = () => {
 //     immediate: true,
 //   }
 // );
+function getChainId() {
+  getChain_id().then((res) => {
+    if (res.code == 200) {
+      store.commit("clientGlobal/SAVE_ChainId", res.data);
+    }
+  });
+}
 </script>
 
 <style lang="scss" scoped>
@@ -357,7 +383,7 @@ const unbind = () => {
   align-items: center;
   width: 900px;
   margin: 0 auto;
-  padding: 50px 0;
+  padding: 20px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.6);
 
@@ -383,6 +409,32 @@ const unbind = () => {
           border-bottom: none;
         }
       }
+    }
+  }
+}
+.story-content {
+  margin-top: 10px;
+  .story-box {
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 900px;
+    border-radius: 20px;
+    text-align: left;
+    // background: rgba(255, 255, 255, 0.6);
+    // box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 0px 0.5px inset;
+    // backdrop-filter: blur(20px);
+
+    img {
+      width: 200px;
+      opacity: 0.5;
+    }
+    span {
+      font-size: 20px;
+      font-style: italic;
+      font-family: Luthier Regular !important;
+      color: #000;
     }
   }
 }

@@ -100,13 +100,7 @@
             Storage
           </div> -->
         </template>
-        <template v-if="item.device_type === 'space'">
-          <!-- <div>
-            Due
-            <span class="value-span value-span2">{{
-              handleTimeStamp(item.expire)
-            }}</span>
-          </div> -->
+        <!-- <template v-if="item.device_type === 'space'">
           <div style="height: unset">
             <span
               style="
@@ -121,7 +115,7 @@
             >
             Space
           </div>
-        </template>
+        </template> -->
       </li>
     </ul>
   </div>

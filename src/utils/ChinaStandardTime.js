@@ -143,11 +143,11 @@ export const getSecondTime = function (second_time) {
     if (min > 60) {
       min = parseInt(second_time / 60) % 60;
       var hour = parseInt(parseInt(second_time / 60) / 60);
-      time = hour + "hours" + min + "minutes";
+      time = hour + "hours " + min + "minutes";
       if (hour > 24) {
         hour = parseInt(parseInt(second_time / 60) / 60) % 24;
         var day = parseInt(parseInt(parseInt(second_time / 60) / 60) / 24);
-        time = day + "days" + hour + "hours" + min + "minutes";
+        time = day + "days " + hour + "hours " + min + "minutes";
       }
     }
   }

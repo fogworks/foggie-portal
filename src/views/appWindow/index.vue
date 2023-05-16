@@ -87,7 +87,6 @@ const search = () => {
       let cur_data = res.data;
       const deviceList = cur_data.filter((el) => {
         if (el.device_type === "space") {
-          console.log(spaceList.value);
           const target = spaceList.value.find(
             (item) => item.order_id == el.space_order_id
           );
@@ -97,7 +96,7 @@ const search = () => {
             return false;
           }
         } else {
-          return true;
+          return false;
         }
       });
       store.dispatch("global/setDeviceList", deviceList);

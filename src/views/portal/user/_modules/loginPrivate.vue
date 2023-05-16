@@ -257,12 +257,11 @@ async function SAVE_PASSWORD() {
     username: props.userInfo.dmc,
   });
 }
-
 async function importPrivateKey() {
   getDmcUsername({ privateKey: loginForm.registerForm.privateKey }).then(
     (res) => {
       if (res.code == 200) {
-        if (res.data === props.userInfo.dmc) {
+        if (props.userInfo?.dmc && res.data === props.userInfo.dmc) {
           setImportPrivateKey({
             privateKey: loginForm.registerForm.privateKey,
             email: props.userInfo.email,
@@ -270,6 +269,24 @@ async function importPrivateKey() {
             if (res.code == 200) {
               // store.commit('global/SAVE_USERNAME', res.data)
               emits("login");
+            }
+          });
+        } else if (!props.userInfo?.dmc) {
+          let postdata = {
+            dmc: props.userInfo?.dmc,
+            wallet_type: "wallet",
+          };
+          updateUser(userId.value, postdata).then((res) => {
+            if (res && res.data && res.data.dmc) {
+              setImportPrivateKey({
+                privateKey: loginForm.registerForm.privateKey,
+                email: props.userInfo.email,
+              }).then((res) => {
+                if (res.code == 200) {
+                  // store.commit('global/SAVE_USERNAME', res.data)
+                  emits("login");
+                }
+              });
             }
           });
         } else {
