@@ -50,7 +50,7 @@
           </el-button>
         </div>
       </el-form> -->
-      <LoginBox @login="emitLogin"></LoginBox>
+      <LoginBox></LoginBox>
     </div>
     <div v-else-if="userId && !isLogin" class="login-box">
       <img src="@/assets/login-left.png" alt="" />
@@ -135,7 +135,7 @@ import { useStore } from "vuex";
 import LoginBox from "./_modules/loginBox";
 import LoginPrivate from "./_modules/loginPrivate";
 import { useRouter } from "vue-router";
-import usePrivateKey from "./hooks/usePrivateKey.js";
+import { getChain_id } from "@/api/common";
 const bcryptjs = require("bcryptjs");
 const store = useStore();
 const router = useRouter();
@@ -234,6 +234,7 @@ getUserInfo();
 
 const emitLogin = () => {
   isLogin.value = true;
+  getChainId();
 };
 const submit = () => {
   if (loading.value) return false;
@@ -334,6 +335,13 @@ const unbind = () => {
 //     immediate: true,
 //   }
 // );
+function getChainId() {
+  getChain_id().then((res) => {
+    if (res.code == 200) {
+      store.commit("clientGlobal/SAVE_ChainId", res.data);
+    }
+  });
+}
 </script>
 
 <style lang="scss" scoped>

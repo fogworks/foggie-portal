@@ -59,7 +59,7 @@
             @click.stop="copyLink(item.device_id)"
           ></svg-icon>
         </div>
-        <div
+        <!-- <div
           class="item"
           style="height: unset"
           v-if="item.device_type == 'space'"
@@ -76,7 +76,7 @@
             }}</span
           >
           Space
-        </div>
+        </div> -->
         <template v-if="!item.device_type || item.device_type === 'space'">
           <div>
             Due

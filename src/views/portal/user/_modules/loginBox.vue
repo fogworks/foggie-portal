@@ -244,7 +244,6 @@ export default {
       if (res.data && res.data.dmc) {
         window.sessionStorage.setItem("walletUser", res.data.dmc);
         store.dispatch("global/setUserInfo", res.data);
-        this.$emit("login");
       }
     },
     closeLogin() {
