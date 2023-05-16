@@ -11,7 +11,12 @@
         </div>
       </h3>
       <div style="display: flex; align-items: center">
-        <el-button type="primary" text @click="IsOpenHider = !IsOpenHider">
+        <el-button
+          style="width: unset; background: transparent"
+          type="primary"
+          text
+          @click="IsOpenHider = !IsOpenHider"
+        >
           <span v-if="IsOpenHider">Open</span>
           <span v-else>Hide</span>
           <el-icon>
@@ -366,7 +371,7 @@ onMounted(() => {
   .card-title {
     font-weight: 600;
     font-size: 20px;
-    color: #181c32;
+    color: var(--text-color);
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -412,7 +417,7 @@ onMounted(() => {
         width: 150px;
         flex-shrink: 0;
         font-size: 13px;
-        color: #3f4254 !important;
+        color: var(--text-color) !important;
         position: relative;
 
         font-weight: 600 !important;

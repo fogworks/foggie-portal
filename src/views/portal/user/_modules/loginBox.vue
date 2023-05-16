@@ -216,7 +216,7 @@ export default {
         ],
       },
       haveChoose: false,
-      haveUser: false,
+      haveUser: true,
       showCaptcha: false,
       passwordType: "password",
       capsTooltip: false,

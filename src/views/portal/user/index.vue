@@ -116,6 +116,23 @@
 
       <Web3Link></Web3Link>
     </div>
+    <div v-if="!isLogin" class="story-content">
+      <div class="story-box">
+        <img src="@/assets/nft.png" alt="" />
+        <span>
+          In a land far away, young Hans lived, Working hard,<br />
+          for a farmer he served, a gold piece he received.<br />
+          A gold piece sparked the desire for adventure, a journey began,<br />
+          On the path, he met Foggie, the loyal and clever little dog, hand in
+          hand.<br />
+          Hans and Foggie, together they conquered rivers and mountains,<br />
+          Through forests they ventured, climbing steep peaks, sharing joyful
+          moments.<br />
+          The thirst for wealth lingered, always present in Hans' mind,<br />
+          Foggie revealed a magical skill, traces of treasure to find.
+        </span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -316,6 +333,7 @@ const logout = () => {
   store.dispatch("token/logout");
   store.dispatch("global/setUserInfo", {});
   getUserInfo();
+  isLogin.value = false;
 };
 
 const unbind = () => {
@@ -365,7 +383,7 @@ function getChainId() {
   align-items: center;
   width: 900px;
   margin: 0 auto;
-  padding: 50px 0;
+  padding: 20px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.6);
 
@@ -391,6 +409,32 @@ function getChainId() {
           border-bottom: none;
         }
       }
+    }
+  }
+}
+.story-content {
+  margin-top: 10px;
+  .story-box {
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 900px;
+    border-radius: 20px;
+    text-align: left;
+    // background: rgba(255, 255, 255, 0.6);
+    // box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 0px 0.5px inset;
+    // backdrop-filter: blur(20px);
+
+    img {
+      width: 200px;
+      opacity: 0.5;
+    }
+    span {
+      font-size: 20px;
+      font-style: italic;
+      font-family: Luthier Regular !important;
+      color: #000;
     }
   }
 }

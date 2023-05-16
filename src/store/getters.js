@@ -5,6 +5,7 @@ const getters = {
   theme: state => state.global.theme,
   userInfo: state => state.global.userInfo,
   ChainId: state => state.clientGlobal.ChainId, //
+  email: state => state.token.currentUser,
   clientPassword: state => state.clientGlobal.clientPassword,  // 
   uploadFileList: state => state.upload.uploadFileList,
 }

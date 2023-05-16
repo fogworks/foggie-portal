@@ -58,6 +58,10 @@ initFoggieDate();
   src: url("~@/assets/Farrington-7B.ttf");
   src: url("~@/assets/Farrington7B.woff2");
 }
+@font-face {
+  font-family: Luthier Regular;
+  src: url("~@/assets/Luthier Regular.ttf");
+}
 
 img {
   height: auto;
