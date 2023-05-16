@@ -206,7 +206,6 @@ import {
   computed,
   inject,
 } from "vue";
-import { switchCase } from "@babel/types";
 
 import { useStore } from "vuex";
 
@@ -218,7 +217,14 @@ const email = computed(() => store.getters.userInfo?.email);
 let loading = ref(false);
 let dialogIsShow = ref(false);
 let curReferenceRate = ref(0);
-
+const props = defineProps({
+  balanceCount: {
+    type: Number,
+    default: 0,
+  },
+});
+const emit = defineEmits(["getAssets"]);
+const balanceCount = toRefs(props);
 const state = reactive({
   formLine: {
     week: "",
@@ -289,6 +295,13 @@ function blurPrestoreDMC() {
   if (state.formLine.prestoreDMC == "") {
     ElMessage({
       message: `The deposit amount cannot be empty`,
+      type: "warning",
+      grouping: true,
+    });
+    return false;
+  } else if (+orderDetail.aggregate > +balanceCount.value) {
+    ElMessage({
+      message: `Cannot exceed the maximum balance of the account`,
       type: "warning",
       grouping: true,
     });
@@ -399,6 +412,7 @@ async function submit() {
             type: "success",
             grouping: true,
           });
+          emit("getAssets");
           filterOrder();
         } else {
           ElMessageBox.confirm(

@@ -42,7 +42,7 @@
               />
             </el-form-item>
 
-            <el-form-item prop="password" v-if="haveUser">
+            <el-form-item prop="password">
               <div class="my_login_right_input_img">
                 <img
                   src="@/assets/system/lock-blue.svg"
@@ -62,16 +62,16 @@
                 class=""
               />
             </el-form-item>
-            <el-form-item
+            <!-- <el-form-item
               prop="promo_code"
               v-if="!haveUser && promo_code_checked"
             >
               <div class="my_login_right_input_img">
-                <!-- <img
+                <img
                   src="@/assets/system/promo_code.svg"
                   alt="email icon"
                   class=""
-                /> -->
+                />
               </div>
               <el-input
                 ref="promo_code"
@@ -82,7 +82,7 @@
                 tabindex="1"
                 autocomplete="on"
               />
-            </el-form-item>
+            </el-form-item> -->
 
             <el-form-item prop="captcha_text" v-if="haveUser && showCaptcha">
               <el-input
@@ -111,7 +111,7 @@
               @click.native.prevent="handleLogin"
               v-if="!haveUser && !haveChoose"
               class="ejUnNt"
-              >{{ "Sign In / Register" }}</el-button
+              >{{ "Register" }}</el-button
             >
             <el-button
               :loading="loading"
@@ -123,18 +123,18 @@
               >{{ "Sign in with Password" }}</el-button
             >
             <div class="Register_btn" v-if="!haveUser">
-              <el-checkbox
+              <!-- <el-checkbox
                 v-model="promo_code_checked"
                 class="invitation_code_name"
                 >{{ "Invitation code" }}</el-checkbox
-              >
+              > -->
               <span @click="passwordLogin" class="password_login">
-                {{ "Sign in with Password" }}?</span
+                {{ "Sign in with Password" }}</span
               >
             </div>
             <div class="Register_btn" v-if="haveUser">
               <span @click="toEmailLogin" class="password_login">
-                {{ "Sign in with Email" }}?</span
+                {{ "Register" }}</span
               >
             </div>
           </el-form>

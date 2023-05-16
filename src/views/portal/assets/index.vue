@@ -56,7 +56,7 @@
             style="width: 100%; height: 50px"
             :options="lastWeekOptions"
           ></MyEcharts> -->
-          {{ totalOrder }}
+          {{ deviceList.length }}
           <!-- {{  lastweekCount }} -->
           <!-- <div class="dmc">DMC</div> -->
         </div>
@@ -128,6 +128,8 @@ import Withdraw from "./withDraw";
 import AssetsRecords from "./assetsRecords";
 import BigNumber from "bignumber.js";
 import MyEcharts from "@/components/echarts/myEcharts";
+import useOrderList from "@/views/portal/_modules/hooks/useOrderList";
+
 import {
   user,
   ydaReward,
@@ -170,55 +172,7 @@ export default {
       () => store.getters["global/currentOODItem"]
     );
     const email = computed(() => store.getters["token/currentUser"]);
-    // const lastWeekOptions = reactive({
-    //   color: "#fff",
-    //   grid: {
-    //     top: 5,
-    //     left: 5,
-    //     right: 5,
-    //     bottom: 5,
-    //   },
-    //   tooltip: {
-    //     show: true,
-    //     trigger: "axis",
-    //     axisPointer: {
-    //       type: "none",
-    //     },
-    //   },
-    //   xAxis: {
-    //     type: "category",
-    //     data: [],
-    //     show: false,
-    //   },
-    //   yAxis: {
-    //     show: false,
-    //     type: "value",
-    //   },
-    //   series: [
-    //     {
-    //       symbol: "none",
-    //       data: [],
-    //       type: "line",
-    //       smooth: 0.6,
-    //       itemStyle: {
-    //         color: new echarts.graphic.LinearGradient(0, 0, 1, 1, [
-    //           {
-    //             offset: 0,
-    //             color: "#188df0",
-    //           },
-    //           {
-    //             offset: 0,
-    //             color: "#7165dd",
-    //           },
-    //         ]),
-    //       },
-    //       lineStyle: {
-    //         color: "#67d8dd",
-    //         width: 2,
-    //       },
-    //     },
-    //   ],
-    // });
+    const { deviceList, search } = useOrderList();
     const getUserAssets = () => {
       userAssets({ email: email.value }).then((res) => {
         if (res.code == 200) {
@@ -240,7 +194,9 @@ export default {
     // const estimateDMC = ref(0);
     const adminCategoriesListInit = async () => {
       // getDMC();
+
       getUserAssets();
+      search();
       // initYesterdayScore();
       // initBills();
     };
@@ -444,6 +400,7 @@ export default {
       adminCategoriesListInit();
     });
     return {
+      deviceList,
       addNum,
       email,
       estimateNum,

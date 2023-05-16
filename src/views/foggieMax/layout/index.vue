@@ -59,13 +59,9 @@ export default {
 
   setup(props) {
     const deviceData = reactive(props.deviceData);
-    const requestTarget = reactive({
-      ip: deviceData.dedicatedip,
-      device_id: deviceData.device_id,
-    });
 
     provide("deviceData", deviceData);
-    provide("requestTarget", requestTarget);
+    provide("requestTarget", deviceData);
 
     const store = useStore();
     if (
@@ -101,7 +97,7 @@ export default {
     const isInSetup = ref(false);
     const initFoggieDate = async () => {
       loading.value = true;
-      detected_net(requestTarget).then((res) => {
+      detected_net(deviceData).then((res) => {
         if (res.result.detected_net) {
           haveNet.value = true;
         } else {
@@ -127,7 +123,7 @@ export default {
     };
     const getServiceInfo = () => {
       loading.value = true;
-      get_service_info(requestTarget)
+      get_service_info(deviceData)
         .then(async ({ result }) => {
           if (haveNet.value) {
             if (

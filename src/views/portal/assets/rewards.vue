@@ -141,9 +141,14 @@ const checkDisabled = (row) => {
   if (row.state == 1 && row.challenge[0].state == 6) {
     return false;
   }
-  if (row.state == 4 && row.challenge[0].state == 7) {
-    console.log(row);
+  if (row.state == 1 && row.challenge[0].state == 4) {
     return false;
+  }
+  if (row.state == 4 && row.challenge[0].state == 7) {
+    return false;
+  }
+  if (row.state == 1 && row.challenge[0].state == 3) {
+    return true;
   }
   return true;
 };

@@ -114,16 +114,10 @@ import useOrderList from "./hooks/useOrderList";
 const store = useStore();
 const router = useRouter();
 const { proxy } = getCurrentInstance();
-const deviceList = reactive({
-  list: [
-    // {
-    //   name: "xx",
-    //   url: "dasdas",
-    // },
-  ],
-});
+
 const visible = ref(false);
-const { spaceList, getSpaceList } = useOrderList();
+const { loading, list, handleProgress, copyLink, handleID, search } =
+  useOrderList();
 const emit = defineEmits(["next"]);
 const toGuide = (item) => {
   if (item.device_type !== "space") {
@@ -146,93 +140,7 @@ const toGuide = (item) => {
     });
   }
 };
-const copyLink = (text) => {
-  var input = document.createElement("input");
-  input.value = text;
-  document.body.appendChild(input);
-  input.select();
-  document.execCommand("Copy");
-  document.body.removeChild(input);
-  // let str = `Copying  ${type} successful!`;
-  // this.$message.success(str);
-  proxy.$notify({
-    message: "Copy succeeded",
-    type: "success",
-    position: "bottom-left",
-  });
-};
-const handleID = (str) => {
-  return (
-    str.substring(0, 3) + "..." + str.substring(str.length - 3, str.length)
-  );
-};
-const loading = ref(false);
-
-const handleProgress = (item) => {
-  if (!item.device_type) {
-    let created = new Date(item.created_at).getTime() / 1000;
-    let now = new Date().getTime() / 1000 - created;
-    let end = +item.expire - created;
-    return +(now / end).toFixed(2) > 100
-      ? 100
-      : +(now / end).toFixed(2)
-      ? +(now / end).toFixed(2)
-      : 0;
-  } else {
-    let created = +item.created_at;
-    let now = new Date().getTime() - created;
-    let end = new Date(item.expire).getTime() - created;
-    return +(now / end).toFixed(2) > 100
-      ? 100
-      : +(now / end).toFixed(2)
-      ? +(now / end).toFixed(2)
-      : 0;
-  }
-};
-const keyWord = ref("");
-const list = computed(() => {
-  if (!keyWord.value) {
-    return deviceList.list;
-  } else {
-    return deviceList.list.filter((el) => {
-      return (
-        el.device_name?.indexOf(keyWord.value) > -1 ||
-        el.dedicatedip?.indexOf(keyWord.value) > -1 ||
-        el.device_id?.indexOf(keyWord.value) > -1 ||
-        el.space_order_id?.indexOf(keyWord.value) > -1
-      );
-    });
-  }
-});
-const email = computed(() => store.getters["token/currentUser"]);
-const search = () => {
-  loading.value = true;
-  search_foggie({ email: email.value })
-    .then((res) => {
-      let cur_data = res.data;
-      deviceList.list = cur_data.filter((el) => {
-        if (el.device_type === "space") {
-          const target = spaceList.value.find(
-            (item) => item.order_id == el.space_order_id
-          );
-          if (target) {
-            return true;
-          } else {
-            return false;
-          }
-        } else {
-          return false;
-        }
-      });
-      store.dispatch("global/setDeviceList", deviceList.list);
-      loading.value = false;
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-};
 onMounted(async () => {
-  await getSpaceList();
   search();
 });
 </script>
