@@ -51,7 +51,8 @@
     },
     "challengeConfig":{
         "payChallengeTimeout": 300000,
-        "payChallengeTimer": 120000
+        "payChallengeTimer": 120000,
+        "userDoEvil": 0
     },
     "orderConfig":{
         "outstandinglimit": 3

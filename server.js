@@ -20,8 +20,8 @@ const OperController = require("./src/service/OperController");
 const OrderTimer = require("./src/service/OrderTimer");
 var jsonParser = bodyParser.json();
 
-var challengeConfig = config.get("challengeConfig");
-var payChallengeTimer = challengeConfig.get("payChallengeTimer");
+// var challengeConfig = config.get("challengeConfig");
+// var payChallengeTimer = challengeConfig.get("payChallengeTimer");
 // setInterval(function () {
 //   OrderTimer.payChallengeTimer();
 // }, payChallengeTimer);

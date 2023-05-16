@@ -683,7 +683,7 @@ class OrderController {
         }
 
         // valid balance
-        
+
 
         // valid challenge status
         var challenge = orderService.getChallengeByOrderId(orderId);
@@ -737,6 +737,15 @@ class OrderController {
         let originData = zlib.unzipSync(Buffer.from(codebook.data, 'base64'));
         let randomCharacter = Encrypt.randomString(4);
         let nonce = randomCharacter + "#" + codebook.cid + "#" + codebook.part_id + "#" + merkleVersion;
+
+        // test user do evil
+        var challengeConfig = config.get("challengeConfig");
+        var userDoEvil = challengeConfig.get("userDoEvil");
+        if (userDoEvil == 1) {
+            var doEvilPartId = codebook.part_id + 1;
+            nonce = randomCharacter + "#" + codebook.cid + "#" + doEvilPartId + "#" + merkleVersion + "#";
+        }
+
         var containRandomData = Buffer.concat([originData, Buffer.from(randomCharacter)]);
         let preDataHash = DMC.ecc.sha256(containRandomData);
         let dataHash = Buffer.from(DMC.ecc.sha256(Buffer.from(preDataHash))).toString("hex");
