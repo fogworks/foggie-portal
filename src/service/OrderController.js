@@ -8,7 +8,7 @@ const zlib = require('zlib')
 const userService = require('./UserService')
 const orderService = require('./OrderService')
 const fileService = require('./FileService')
-const Encrypt = require('./Encrypt')
+const Encrypt = require('./Encrypt');
 
 const fileConfig = config.get('fileConfig');
 const merkleBufferSize = fileConfig.get('merkleBufferSize');
@@ -566,7 +566,6 @@ class OrderController {
             }
         });
 
-
         var foggieId = orderInfo.foggie_id;
 
         const getMerkleRequest = {
@@ -683,7 +682,15 @@ class OrderController {
         }
 
         // valid balance
-
+        var balance = orderInfo.user_pledge_amount;
+        var pstNumber = orderInfo.miner_lock_pst_amount;
+        var amount = orderInfo.price_amount;
+        var price = parseFloat(amount) / parseFloat(pstNumber);
+        if((price * 10) > parseFloat(balance)){
+            logger.info("dmc is not enough, can't reqchallenge, orderId:{}", orderId);
+            response.send(BizResult.fail(BizResultCode.ORDER_DMC_NOT_ENOUGH));
+            return;
+        }
 
         // valid challenge status
         var challenge = orderService.getChallengeByOrderId(orderId);
@@ -819,7 +826,7 @@ class OrderController {
             return;
         }
 
-        var total = await orderService.getChallengeCount(orderId);
+        var total = await orderService.getChallengeCount(email, orderId);
         if (total instanceof BizResultCode) {
             res.send(BizResult.fail(total));
             return;
@@ -934,6 +941,19 @@ class OrderController {
 
         if (!email || !chainId || !orderId) {
             res.send(BizResult.validateFailed());
+            return;
+        }
+
+        var order = orderService.getOrderFromChain(orderId);
+        if (order instanceof BizResultCode) {
+            logger.info("get order from chain failed, orderId:{}", orderId);
+            res.send(BizResult.fail(order));
+            return;
+        }
+        // valid order state
+        if (order.state > 0) {
+            logger.error("order state is invalid, can't cancel, orderId:{}", orderId);
+            res.send(BizResult.fail(BizResultCode.ORDER_STATE_INVALID_CANCEL));
             return;
         }
 
