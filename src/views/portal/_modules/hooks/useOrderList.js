@@ -35,10 +35,9 @@ export default function useOrderList() {
                             return false;
                         }
                     } else {
-                        return false;
+                        return true;
                     }
                 });
-                console.log(deviceList.value, 'deviceList.value')
                 store.dispatch("global/setDeviceList", deviceList.value);
                 loading.value = false;
             })

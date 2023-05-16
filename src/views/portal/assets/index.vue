@@ -49,7 +49,7 @@
         </div>
         <div
           class="flex items-center"
-          style="justify-content: center; font-size: 20px"
+          style="justify-content: center; font-size: 26px"
         >
           <!-- <div class="plus-icon">+</div> -->
           <!-- <MyEcharts
@@ -513,7 +513,7 @@ export default {
   .today-grid {
     display: grid;
     align-items: center;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 2fr 1fr 2fr;
     padding-bottom: 15px;
     border-bottom: 1px solid #fff3;
 
@@ -579,7 +579,7 @@ export default {
   // font-family: Farrington7B !important;
   > span {
     margin: 0;
-    font-size: 14px;
+    font-size: 16px;
     letter-spacing: 1px;
     font-family: Farrington7B !important;
   }

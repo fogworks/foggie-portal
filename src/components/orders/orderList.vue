@@ -70,10 +70,10 @@
             <div>
               <div>Price</div>
               <div>
-                <span>{{ item.price_amount.split(".")[0] }}</span
-                ><span style="font-size: 16px"
-                  >.{{ item.price_amount.split(".")[1] }}</span
-                >
+                <span>{{ item.price.split(".")[0] }}</span
+                >.<span style="font-size: 16px">{{
+                  item.price.split(".")[1]
+                }}</span>
               </div>
             </div>
             <!-- <div style="text-align: center">
@@ -90,8 +90,8 @@
               <div>Deposit</div>
               <div>
                 <span>{{ item.deposit_amount.split(".")[0] }}</span
-                ><span style="font-size: 16px">
-                  .{{ item.deposit_amount.split(".")[1] }}</span
+                >.<span style="font-size: 16px">
+                  {{ item.deposit_amount.split(".")[1] }}</span
                 >
               </div>
             </div>
@@ -473,7 +473,9 @@ function loadOrderList() {
           nowDate.setDate(nowDate.getDate() + res.data.epoch * 7),
           res.data.created_time
         );
-
+        res.data.price = (
+          +res.data.price_amount / +res.data.miner_lock_pst_amount
+        ).toFixed(4);
         state.orderList[0] = res.data;
       }
     })
