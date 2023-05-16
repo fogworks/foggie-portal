@@ -284,14 +284,14 @@ class FileController {
         }
 
         // peerId
-        var orderInfo = await orderService.getOrderById(email, orderId);
+        var orderFromDB = await orderService.getOrderById(email, orderId);
 
-        if (orderInfo instanceof BizResultCode) {
-            res.send(BizResult.fail(orderInfo));
+        if (orderFromDB instanceof BizResultCode) {
+            res.send(BizResult.fail(orderFromDB));
             return;
         }
-        var peerId = orderInfo.peer_id;
-        var foggieId = orderInfo.foggie_id;
+        var peerId = orderFromDB.peer_id;
+        var foggieId = orderFromDB.foggie_id;
 
         const header = {
             peerId: peerId,
@@ -299,11 +299,11 @@ class FileController {
             token: token
         };
         var file = req.files.file;
-        var rpc = orderInfo.rpc;
+        var rpc = orderFromDB.rpc;
 
         //small file upload
         if (parseInt(fileCategory) == 1) {
-            await smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, res, fileCategory, orderId, email, peerId, file, foggieId);
+            await smallFileUpload(fileName, md5, fileSize, fileType, orderFromDB, header, res, fileCategory, orderId, email, peerId, file, foggieId);
         }
         // big file upload
         else if (parseInt(fileCategory) == 2) {
@@ -453,6 +453,15 @@ class FileController {
         var orderInfo = await orderService.getOrderById(email, orderId);
         if (orderInfo instanceof BizResultCode) {
             res.send(BizResult.fail(orderInfo));
+            return;
+        }
+
+        // valid used space
+        var usedSpace = orderInfo.used_space;
+        var totalSpace = orderInfo.total_space;
+        if (usedSpace + fileSize > totalSpace) {
+            logger.error("used space is over, orderId:{}, usedSpace:{}, fileSize:{} totalSpace:{}", orderId, usedSpace, fileSize, totalSpace);
+            res.send(BizResult.fail(BizResultCode.ORDER_REMAINING_SPACE_NOT_ENOUGH));
             return;
         }
         var peerId = orderInfo.peer_id;
@@ -672,7 +681,18 @@ class FileController {
 
 module.exports = FileController
 
-async function smallFileUpload(fileName, md5, fileSize, fileType, rpc, header, res, fileCategory, orderId, email, peerId, file, foggieId) {
+async function smallFileUpload(fileName, md5, fileSize, fileType, orderFromDB, header, res, fileCategory, orderId, email, peerId, file, foggieId) {
+
+    // valid used space
+    var usedSpace = orderFromDB.used_space;
+    var totalSpace = orderFromDB.total_space;
+    if (usedSpace + fileSize > totalSpace) {
+        logger.error("used space is over, orderId:{}, usedSpace:{}, fileSize:{} totalSpace:{}", orderId, usedSpace, fileSize, totalSpace);
+        res.send(BizResult.fail(BizResultCode.ORDER_REMAINING_SPACE_NOT_ENOUGH));
+        return;
+    }
+
+    var rpc = orderFromDB.rpc;
     var netClient = await fileService.getProxGrpcClient(rpc, header);
     const request = {
         key: fileName,

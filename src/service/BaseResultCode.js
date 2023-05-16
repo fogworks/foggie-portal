@@ -110,6 +110,8 @@ class BaseResultCode {
     static GET_CHAIN_ID_FAILED = new BaseResultCode(30028, 'get chain id failed');
     static GET_BENCHMARK_PRICE_FAILED = new BaseResultCode(30029, 'get benchmark price failed');
     static ORDER_STATE_INVALID_UPLOAD = new BaseResultCode(30030, 'order state is invalid cannot upload file');
+    static ORDER_REMAINING_SPACE_NOT_ENOUGH = new BaseResultCode(30031, 'order remaining space not enough');
+
 
     // asset exception code 40000～49999
     static TRANSFER_FAILED = new BaseResultCode(40000, 'transfer failed');

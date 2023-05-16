@@ -535,6 +535,7 @@ module.exports = {
             }).getBody('utf-8')).data.find_order;
 
             if (order.length == 0) {
+                logger.error('query order from chain is null,orderId:{}', orderId);
                 return BizResultCode.GET_ORDER_FROM_CHAIN_FAILED;
             }
             return order[0];

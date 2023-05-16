@@ -682,7 +682,10 @@ class OrderController {
             return;
         }
 
-        // valid challenge status d
+        // valid balance
+        
+
+        // valid challenge status
         var challenge = orderService.getChallengeByOrderId(orderId);
         if (challenge instanceof BizResultCode) {
             logger.info("get challenge failed, orderId:{}", orderId);
