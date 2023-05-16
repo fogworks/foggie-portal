@@ -49,14 +49,14 @@
         </div>
         <div
           class="flex items-center"
-          style="justify-content: center; font-size: 20px"
+          style="justify-content: center; font-size: 26px"
         >
           <!-- <div class="plus-icon">+</div> -->
           <!-- <MyEcharts
             style="width: 100%; height: 50px"
             :options="lastWeekOptions"
           ></MyEcharts> -->
-          {{ totalOrder }}
+          {{ deviceList.length }}
           <!-- {{  lastweekCount }} -->
           <!-- <div class="dmc">DMC</div> -->
         </div>
@@ -128,6 +128,8 @@ import Withdraw from "./withDraw";
 import AssetsRecords from "./assetsRecords";
 import BigNumber from "bignumber.js";
 import MyEcharts from "@/components/echarts/myEcharts";
+import useOrderList from "@/views/portal/_modules/hooks/useOrderList";
+
 import {
   user,
   ydaReward,
@@ -170,55 +172,7 @@ export default {
       () => store.getters["global/currentOODItem"]
     );
     const email = computed(() => store.getters["token/currentUser"]);
-    // const lastWeekOptions = reactive({
-    //   color: "#fff",
-    //   grid: {
-    //     top: 5,
-    //     left: 5,
-    //     right: 5,
-    //     bottom: 5,
-    //   },
-    //   tooltip: {
-    //     show: true,
-    //     trigger: "axis",
-    //     axisPointer: {
-    //       type: "none",
-    //     },
-    //   },
-    //   xAxis: {
-    //     type: "category",
-    //     data: [],
-    //     show: false,
-    //   },
-    //   yAxis: {
-    //     show: false,
-    //     type: "value",
-    //   },
-    //   series: [
-    //     {
-    //       symbol: "none",
-    //       data: [],
-    //       type: "line",
-    //       smooth: 0.6,
-    //       itemStyle: {
-    //         color: new echarts.graphic.LinearGradient(0, 0, 1, 1, [
-    //           {
-    //             offset: 0,
-    //             color: "#188df0",
-    //           },
-    //           {
-    //             offset: 0,
-    //             color: "#7165dd",
-    //           },
-    //         ]),
-    //       },
-    //       lineStyle: {
-    //         color: "#67d8dd",
-    //         width: 2,
-    //       },
-    //     },
-    //   ],
-    // });
+    const { deviceList, search } = useOrderList();
     const getUserAssets = () => {
       userAssets({ email: email.value }).then((res) => {
         if (res.code == 200) {
@@ -240,7 +194,9 @@ export default {
     // const estimateDMC = ref(0);
     const adminCategoriesListInit = async () => {
       // getDMC();
+
       getUserAssets();
+      search();
       // initYesterdayScore();
       // initBills();
     };
@@ -444,6 +400,7 @@ export default {
       adminCategoriesListInit();
     });
     return {
+      deviceList,
       addNum,
       email,
       estimateNum,
@@ -556,7 +513,7 @@ export default {
   .today-grid {
     display: grid;
     align-items: center;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 2fr 1fr 2fr;
     padding-bottom: 15px;
     border-bottom: 1px solid #fff3;
 
@@ -622,7 +579,7 @@ export default {
   // font-family: Farrington7B !important;
   > span {
     margin: 0;
-    font-size: 14px;
+    font-size: 16px;
     letter-spacing: 1px;
     font-family: Farrington7B !important;
   }

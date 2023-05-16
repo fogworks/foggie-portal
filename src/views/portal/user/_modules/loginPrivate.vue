@@ -2,7 +2,9 @@
   <div class="logincontent">
     <el-card class="box-card">
       <template #header>
-        <div class="card-header">Pin Code</div>
+        <div class="card-header">
+          {{ passwordIsExist ? "Private key" : "Pin Code" }}
+        </div>
       </template>
       <div class="text item my_login_box">
         <el-form

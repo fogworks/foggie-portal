@@ -118,14 +118,20 @@
   <div class="back" v-if="!isShop" @click="handleActive">
     <svg-icon icon-class="back"></svg-icon>
   </div>
-  <Storage v-if="!isShop && active === 'storage'"></Storage>
+  <Storage
+    :balanceCount="balanceCount"
+    @getAssets="getUserAssets"
+    v-if="!isShop && active === 'storage'"
+  ></Storage>
   <Foggie v-if="!isShop && active === 'foggie'"></Foggie>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed, onMounted } from "vue";
 import Storage from "./_modules/storage";
 import Foggie from "./_modules/foggie";
+import { userAssets } from "@/api/order/orderList.js";
+import { useStore } from "vuex";
 // import Storage from "@/views/Alltemplate/Storage/Storage";
 const isShop = ref(true);
 const active = ref("");
@@ -133,6 +139,20 @@ const handleActive = (val = "") => {
   isShop.value = !isShop.value;
   active.value = val;
 };
+const store = useStore();
+const balanceCount = ref(0);
+const email = computed(() => store.getters.email);
+const getUserAssets = () => {
+  userAssets({ email: email.value }).then((res) => {
+    if (res.code == 200) {
+      balanceCount.value = +res.data[0]?.balance.quantity.slice(
+        0,
+        res.data[0].balance.quantity.length - 4
+      );
+    }
+  });
+};
+onMounted(getUserAssets);
 </script>
 
 <style lang="scss" scoped>
