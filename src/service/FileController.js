@@ -459,7 +459,7 @@ class FileController {
         // valid used space
         var usedSpace = orderInfo.used_space;
         var totalSpace = orderInfo.total_space;
-        if (usedSpace + fileSize > totalSpace) {
+        if (usedSpace + parseInt(fileSize) > totalSpace) {
             logger.error("used space is over, orderId:{}, usedSpace:{}, fileSize:{} totalSpace:{}", orderId, usedSpace, fileSize, totalSpace);
             res.send(BizResult.fail(BizResultCode.ORDER_REMAINING_SPACE_NOT_ENOUGH));
             return;
@@ -686,7 +686,7 @@ async function smallFileUpload(fileName, md5, fileSize, fileType, orderFromDB, h
     // valid used space
     var usedSpace = orderFromDB.used_space;
     var totalSpace = orderFromDB.total_space;
-    if (usedSpace + fileSize > totalSpace) {
+    if (usedSpace + parseInt(fileSize) > totalSpace) {
         logger.error("used space is over, orderId:{}, usedSpace:{}, fileSize:{} totalSpace:{}", orderId, usedSpace, fileSize, totalSpace);
         res.send(BizResult.fail(BizResultCode.ORDER_REMAINING_SPACE_NOT_ENOUGH));
         return;
