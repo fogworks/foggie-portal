@@ -36,6 +36,16 @@
             @click="copyLink(shareRefContent.cyfsStr)"
           ></svg-icon>
         </div>
+        <div class="user-info link-row" v-if="shareRefContent.foggieStr">
+          <a :href="shareRefContent.foggieStr || ''" target="_blank">
+            {{ handleID(shareRefContent.foggieStr) || "" }}
+          </a>
+          <svg-icon
+            icon-class="copy"
+            class="copy-icon"
+            @click="copyLink(shareRefContent.foggieStr)"
+          ></svg-icon>
+        </div>
         <div class="user-info link-row" v-if="shareRefContent.httpStr">
           <a :href="shareRefContent.httpStr || ''" target="_blank">
             {{ handleID(shareRefContent.httpStr) || "" }}

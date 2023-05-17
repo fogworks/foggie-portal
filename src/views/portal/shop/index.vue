@@ -30,8 +30,8 @@
           </div>
         </div>
       </div>
-      <!-- <button @click="handleActive('foggie')">Buy now</button> -->
-      <button disabled>Coming Soon</button>
+      <button @click="handleActive('foggie')">Buy now</button>
+      <!-- <button disabled>Coming Soon</button> -->
     </div>
 
     <div class="card">

@@ -107,8 +107,9 @@ const downloadItem = () => {
         // let type = r.type;
 
         // const url = window.URL.createObjectURL(new Blob([r]));
+        let token = store.getters.token;
 
-        let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip1}&port=${port}&Id=${id1}&peerId=${peerId}`;
+        let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip1}&port=${port}&Id=${id1}&peerId=${peerId}&type=foggie&token=${token}`;
 
         const link = document.createElement("a");
         link.style.display = "none";

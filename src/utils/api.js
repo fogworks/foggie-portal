@@ -85,7 +85,7 @@ export const refreshToken = () => {
 };
 
 //File LIST
-export const oodFileList = (deviceData, prefix) => {
+export const oodFileList = (email, type, token, deviceData, prefix) => {
   let url = "/list_files",
     // prefix = "",
     delimiter = "/",
@@ -103,6 +103,9 @@ export const oodFileList = (deviceData, prefix) => {
     version_id_marker,
     key_marker,
     deviceData,
+    type,
+    token,
+    email
   };
 
   return request({
@@ -112,7 +115,7 @@ export const oodFileList = (deviceData, prefix) => {
   });
 };
 
-export const find_objects = (orderId, peerId, fileId) => {
+export const find_objects = (token, deviceData, fileId) => {
   let url = "/find_objects",
     prefix = "",
     delimiter = "/",
@@ -130,9 +133,9 @@ export const find_objects = (orderId, peerId, fileId) => {
     continuation_token,
     version_id_marker,
     key_marker,
-    Id: orderId,
-    peerId,
     fileId,
+    deviceData,
+    token
   };
 
   return request({
@@ -170,7 +173,7 @@ export const oodFileStatus = (ID, type) => {
   });
 };
 
-export const file_delete = (item, peerId, Id) => {
+export const file_delete = (token, item, deviceData) => {
   let objects = [
     { pubkey: item.pubkey ? item.pubkey : encodeURIComponent(item.key) },
   ];
@@ -178,11 +181,11 @@ export const file_delete = (item, peerId, Id) => {
   let object_type = item.type;
   let url = `/file_delete`;
   let data = {
-    Id,
-    peerId,
+    deviceData,
     cids,
     objects,
     object_type,
+    token
   };
   return request({
     url: url,

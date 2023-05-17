@@ -99,6 +99,9 @@ export default {
     orderId: {
       type: String,
     },
+    email: {
+      type: String
+    }
   },
   setup(props, { emit }) {
     const device_id = "";
@@ -109,6 +112,7 @@ export default {
     const detailData = reactive(props.detailData);
     const orderId = reactive(props.orderId);
     const deviceData = reactive(props.deviceData);
+    const email = reactive(props.email);
     const store = useStore();
     const router = useRouter();
     const theme = computed(() => store.getters.theme);
@@ -172,7 +176,8 @@ export default {
         // let meta = data.meta;
         let peer_id = deviceData.peer_id;
         // let httpStr = `${location.origin}/#/detailFog?pubkey=${meta.pubkey}&name=${item.key}&isFolder=${isFolder}`;
-        let httpStr = `foggie://${peer_id}/${orderId}/${item.cid}`;
+        let foggieStr = `foggie://${peer_id}/${orderId}/${item.cid}`;
+        let httpStr = `http://${deviceData.rpc.split(':')[0]}/fog/${deviceData.foggie_id}/${item.cid}`;
         let cyfsStr = item.file_id
           ? `cyfs://o/${ood_id_cyfs}/${item.file_id}`
           : "";
@@ -186,7 +191,9 @@ export default {
         shareCopyContent = shareCopyContent + " " + " \n ";
         shareCopyContent = shareCopyContent + httpStr + " \n";
         shareCopyContent = shareCopyContent + " " + " \n ";
+        shareRefContent.foggieStr = foggieStr;
         shareRefContent.httpStr = httpStr;
+        
 
         // shareCopyContent = shareCopyContent + ipfsStr + " \n";
         // shareCopyContent = shareCopyContent + " " + " \n ";
@@ -231,7 +238,7 @@ export default {
       let port = deviceData.rpc.split(":")[1];
       let Id = deviceData.foggie_id;
       let peerId = deviceData.peer_id;
-      let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
+      let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email}`;
 
       var oA = document.createElement("a");
       oA.download = item.name;
@@ -271,13 +278,14 @@ export default {
       downloadItem,
       copySecret,
       router,
-      shareRefContent,
+      // shareRefContent,
       showShareDialog,
       shareRefContent,
       visible,
       proxy,
       copyContent,
       deviceData,
+      email,
       beforeClose,
       ipfsPin,
     };
