@@ -303,6 +303,8 @@ class FileController {
         var file = req.files.file;
         var rpc = orderFromDB.rpc;
 
+        logger.info("upload file, file:{}", file);
+
         logger.info("upload file, header:{}", header);
 
         //small file upload
@@ -441,7 +443,7 @@ class FileController {
      */
     static async create(email, fileName, md5, fileType, fileSize, orderId, deviceType, res) {
 
-        if (!fileName || !fileType || !fileSize || !orderId || !md5 || !email || !deviceType) {
+        if (!fileName || !fileSize || !orderId || !md5 || !email || !deviceType) {
             res.send(BizResult.validateFailed());
             return;
         }

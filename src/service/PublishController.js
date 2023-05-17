@@ -74,5 +74,6 @@ class PublishController {
       grpc.credentials.createInsecure()
     );
   }
+
 }
 module.exports = PublishController;
