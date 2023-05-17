@@ -365,13 +365,16 @@ const refresh = () => {
   if (tableLoading.value) return;
   getFileList("", breadcrumbList.prefix);
 };
+const email = computed(() => store.getters.userInfo?.email);
 const getFileList = function (scroll, prefix) {
   let list_prefix = "";
   if (prefix?.length) {
     list_prefix = prefix.join("/");
   }
   tableLoading.value = true;
-  oodFileList(deviceData, list_prefix)
+  let token = store.getters.token;
+  let type = "foggie";
+  oodFileList(email.value, type, token, deviceData, list_prefix)
     .then((res) => {
       if (res && res.content) {
         initFileData(res);
@@ -575,7 +578,8 @@ const handleImg = (type, ID, cid, key, isDir, ip, port, peerId) => {
     type = "img";
     // imgHttpLink = `${location}/d/${ID}/${pubkey}?new_w=200`;
     // imgHttpLink = `${location}/object?pubkey=${pubkey}&new_w=${size}`;
-    imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${ID}&peerId=${peerId}`;
+    let token = store.getters.token;
+    imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${ID}&peerId=${peerId}&type=foggie&token=${token}`;
 
     // foggie://peerid/spaceid/cid
   } else {
@@ -768,7 +772,8 @@ const downloadItem = (item) => {
   // let Id = item.id;
   let Id = deviceData.foggie_id;
   let peerId = deviceData.peer_id;
-  let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
+  let token = store.getters.token;
+  let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=foggie&token=${token}`;
 
   var oA = document.createElement("a");
   oA.download = item.name;
@@ -784,9 +789,8 @@ const downloadItem = (item) => {
 };
 const deleteItem = (item) => {
   tableLoading.value = true;
-  let peerId = deviceData.peer_id;
-  let Id = deviceData.foggie_id;
-  file_delete(item, peerId, Id).then((res) => {
+  let token = store.getters.token;
+  file_delete(token, item, deviceData).then((res) => {
     if (res && res.data) {
       proxy.$notify({
         type: "success",
@@ -841,10 +845,9 @@ const doSearch = async () => {
     getFileList("", breadcrumbList.prefix);
   } else {
     tableLoading.value = true;
-    let orderId = deviceData.foggie_id;
-    let peer_id = deviceData.peer_id;
     breadcrumbList.prefix = [];
-    let data = await find_objects(orderId, peer_id, keyWord.value);
+    let token = store.getters.token;
+    let data = await find_objects(token, deviceData, keyWord.value);
     tableData.data = [];
     initFileData(data);
   }

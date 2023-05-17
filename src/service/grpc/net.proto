@@ -38,9 +38,19 @@ message GetFileRelay {
   uint64 size = 2;
 }
 
+message PinPay {
+  int32 copied = 1;
+  string trxId = 2;
+}
+message StagePin{
+  Header header = 1;
+  PinRequest request =2;
+//  PinPay pay = 3;
+
+}
 message StageRequest {
   oneof Option{
-    string peerId =1;
+    StagePin pin =1;
     bytes chunk = 2;
   }
 }
@@ -71,6 +81,7 @@ message PutObjectRequest {
   string md5 = 2;
   int64 contentLength =3;
   string contentType = 4;
+  bool stageOnly = 5;
 }
 
 message PutObjectReq {
@@ -100,6 +111,7 @@ message CompleteMultipartRequest{
   string key = 1;
   string uploadId= 2;
   CompletePartUpload completeUpload=3;
+  bool stageOnly = 4;
 }
 message CompleteMultipartReq{
     Header header = 1;
@@ -211,6 +223,12 @@ message Object{
   int64  size=4;
   string contentType = 5;
   string cid = 6;
+  string fileId = 7;
+  bool isPin = 8;
+  bool isPinCyfs = 9;
+  string pinExp = 10;
+  string CyfsExp = 11;
+  string OOD = 12;
 }
 message ListObjectsResp{
   repeated string commonPrefixes =1;
@@ -245,46 +263,113 @@ message ListMultipartUploadResponse {
   string delimiter = 9;
   repeated string commonPrefixes = 10;
 }
-message GetMerkleRequest{
-  string  id = 1;
-  string cid = 2;
-}
 
-message MerkleInfo{
-  bytes rootBytes = 1;
-  string root = 2;
-  string rootDb = 3;
-  int32  blocks = 4;
+message UnpinRequest{
+    string cid = 1;
+    string stype = 2;
 }
-message GetMerkleReply{
-  MerkleInfo root = 1;
-  MerkleInfo cidRoot = 2;
+message UnPinReq{
+  Header header = 1;
+  UnpinRequest request = 2;
+
 }
 message PinRequest{
-  string cid = 1;
+    string cid = 1;
+    string stype = 2;
+    int64 exp=3;
+    bool pin = 4;
+    bool isDir = 5;
+    string key = 6;
 }
 message PinResp{
   string cid = 1;
+  string status = 2;
 }
 message PinReq{
   Header header = 1;
   PinRequest request = 2;
-
+  PinPay pay = 3;
 }
-message GetMerkleHashRequest{
-  string id = 1;
+
+message PeerInfo{
+  Header header = 1;
+}
+message PeerIds {
+  repeated string ids = 1;
+}
+message PeerInfoResp{
+  repeated Header  peerInfos= 1;
+}
+message DeletePeerIdResp{
+  string status = 1;
+  string  id = 2;
+}
+message DeletePeerIdsResp {
+  repeated DeletePeerIdResp deletes = 1;
+}
+
+message PingRequest {
+  Header header = 1;
+}
+message PingResponse {
+  string peerID = 1;
+}
+
+message FindRequest{
+  Header header = 1;
   string cid = 2;
-  RangeRequest range = 3;
-  bytes  nonce = 4;
+  string key = 3;
+  string fileId = 4;
 }
-message GetMerkleHashResponse{
-  string hash = 1;
+message Objects {
+  repeated Object contents = 1;
 }
 
+message Links {
+  Link meta = 1;
+  repeated Link links = 2;
+}
+message Link {
+  string name = 1;
+  string path = 2;
+  string hash = 3;
+  int32 type = 4;
+  uint64 size = 5;
+}
+
+message SearchRequest {
+  Header header = 1;
+  string cid = 2;
+  string key = 3;
+}
+message SearchResponse {
+  oneof Option{
+    Link object = 1;
+    Links links= 2;
+    bytes chunk = 3;
+  }
+
+}
+
+message RequestSummaryIds {
+  Header header = 1;
+  repeated string ids = 2;
+}
+message SummaryInfo {
+  string id = 1;
+  int64 total = 2;
+  int64 count = 3;
+}
+message SummaryInfos{
+  repeated SummaryInfo contents = 1;
+}
 service API {
   rpc Pin(PinReq)returns(PinResp){}
-  rpc GetMerkle(GetMerkleRequest)returns(GetMerkleReply){}
-  rpc GetMerkleHash(GetMerkleHashRequest)returns(GetMerkleHashResponse){}
+  rpc Ping(PingRequest)returns(PingResponse){}
+  rpc AddPeerStore(PeerInfo)returns(PeerInfoResp){}
+  rpc DelPeerStore(PeerIds)returns(DeletePeerIdResp){}
+  rpc ListPeerStoreInfos(PeerIds)returns (PeerInfoResp){}
+
   rpc GetHostID(GetHostIDRequest) returns(GetHostIDReply){}
   rpc GetToken(stream GetTokenRequest)returns(stream GetTokenReply){}
   rpc Stage(stream StageRequest) returns (StageResponse) {}
@@ -297,5 +382,9 @@ service API {
   rpc ListObjectParts(ListPartsReq)returns(ListPartsResponse){}
   rpc ListObjects(ListObjectsReq)returns(ListObjectsResp){}
   rpc GetObject(GetRequest) returns (stream GetResponse) {}
+  rpc GetObjectInfo(GetRequest) returns (Object) {}
   rpc DeleteObject(DeleteObjectReq)returns(DeleteResp){}
+  rpc SearchObject(SearchRequest) returns (stream SearchResponse) {}
+  rpc FindObjects(FindRequest) returns (Objects) {}
+  rpc SummaryInfo(RequestSummaryIds)returns(SummaryInfos){}
 }

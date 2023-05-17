@@ -155,7 +155,9 @@ export default {
         let _key = encodeURIComponent(key);
         let data = await shareLink(device_id, _key);
         let meta = data.meta;
-        let httpStr = `http://${deviceData.dedicatedip}/#/detailFog?pubkey=${meta.pubkey}&name=${item.key}&isFolder=${isFolder}`;
+        let foggieStr = `http://${deviceData.dedicatedip}/#/detailFog?pubkey=${meta.pubkey}&name=${item.key}&isFolder=${isFolder}`;
+        // let foggieStr = `foggie://${peer_id}/${orderId}/${item.cid}`;
+        let httpStr = `http://${deviceData.rpc.split(':')[0]}/fog/${deviceData.foggie_id}/${item.cid}`;
 
         let cyfsStr = `cyfs://o/${ood_id_cyfs}/${meta.file_id}`;
         let ipfsStr = `ipfs://${meta.cid}`;
@@ -171,6 +173,7 @@ export default {
         shareCopyContent = shareCopyContent + " " + " \n ";
         shareCopyContent = shareCopyContent + httpStr + " \n";
         shareCopyContent = shareCopyContent + " " + " \n ";
+        shareRefContent.foggieStr = foggieStr;
         shareRefContent.httpStr = httpStr;
 
         // if (
@@ -225,7 +228,8 @@ export default {
       // let Id = orderId;
       let Id = deviceData.value.foggie_id;
       let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
-      let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
+      let token = store.getters.token;
+      let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&space=foggie&token=${token}`;
 
       var oA = document.createElement("a");
       oA.download = item.name;

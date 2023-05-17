@@ -214,6 +214,7 @@
     :orderId="orderId"
     :detailData="detailData"
     :deviceData="deviceData"
+    :email="email"
   ></DetailDialog>
 </template>
 
@@ -347,8 +348,14 @@ function openUpload() {
   store.commit("upload/openUpload", orderId.value);
 }
 
+
 const loadFileList = async () => {
+  let token = '';
+  let type = "space";
   let data = await oodFileList(
+    email.value,
+    type,
+    token,
     deviceData.value,
     breadcrumbList.prefix.join("/")
   );
@@ -610,7 +617,7 @@ const handleImg = (item, type, isDir) => {
     // port = 8007;
     // let Id = orderId.value;
     // let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
-    imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
+    imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
   } else {
     isSystemImg = true;
   }
@@ -771,7 +778,7 @@ const downloadItem = (item) => {
   // let Id = orderId.value;
   let Id = deviceData.value.foggie_id;
   let peerId = deviceData.value.peer_id;
-  let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}`;
+  let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
 
   var oA = document.createElement("a");
   oA.download = item.name;
@@ -821,7 +828,9 @@ const getFileList = function (scroll, prefix) {
     list_prefix = prefix.join("/");
   }
   tableLoading.value = true;
-  oodFileList(deviceData.value, list_prefix)
+  let token = '';
+  let type = "space";
+  oodFileList(email.value, type, token, deviceData.value, list_prefix)
     .then((res) => {
       if (res && res.content) {
         initFileData(res);
@@ -835,9 +844,9 @@ const doSearch = async () => {
   } else {
     tableLoading.value = true;
     // let orderId = deviceData.value.space_order_id;
-    let peer_id = deviceData.value.peer_id;
     breadcrumbList.prefix = [];
-    let data = await find_objects(orderId.value, peer_id, keyWord.value);
+    let token = store.getters.token;
+    let data = await find_objects(token, deviceData, keyWord.value);
     tableData.data = [];
     initFileData(data);
 

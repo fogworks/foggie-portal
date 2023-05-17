@@ -203,14 +203,14 @@ export default {
         email: [
           {
             required: true,
-            message: "login.emailInput",
+            message: "Please Enter email address",
             trigger: "blur",
           },
         ],
         password: [
           {
             required: true,
-            message: "login.passowdRequired",
+            message: "Please enter password",
             trigger: "blur",
           },
         ],
@@ -315,7 +315,7 @@ export default {
     emailLogin() {
       const that = this;
       this.haveUser = false;
-      this.$alert("login.emailLoginTips", "login.emailLogin", {
+      this.$alert("A verification link has been sent to your email address, please check your email to verify and sign in your account.", "Sign in with Email", {
         confirmButtonText: "OK",
         callback: () => {
           that.$refs.loginForm.validate((valid) => {
@@ -505,7 +505,7 @@ export default {
         if (res && res.data && res.data.is_verified) {
           this.emailLogin();
         } else if (res && res.data) {
-          this.$alert("login.emailLoginTips", "login.emailLogin", {
+          this.$alert("A verification link has been sent to your email address, please check your email to verify and sign in your account.", "Sign in with Email", {
             confirmButtonText: "OK",
             callback: () => {},
           });

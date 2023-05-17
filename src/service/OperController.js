@@ -6,6 +6,7 @@ const grpc = require("@grpc/grpc-js");
 const config = require("config");
 const { chunk } = require("lodash");
 const FileType = import('file-type');
+const userService = require('./UserService');
 // const {fileTypeFromStream} = 'file-type';
 // const { da } = require("element-plus/es/locale");
 
@@ -28,7 +29,16 @@ class PublishController {
     let key = req.key;
     let start = req.start;
     let length = req.length;
-    token = "11111";
+    let type = req.type;
+    
+    if (type === 'space') {
+      token = await userService.getToken4UploadFile(req.email, Id);
+      if (token instanceof BizResultCode) {
+        res.send(BizResult.fail(token));
+        return;
+      }
+    }
+    
     const header = {
       peerId,
       Id,
@@ -89,16 +99,9 @@ class PublishController {
     let ip_address = req.body.ip_address;
     let port = req.body.port;
     let token = req.body.token;
-    let peerId = req.body.peerId;
+    let peerId = req.body.deviceData.peer_id;
 
-    let Id = req.body.Id;
-
-    // let Id = "4321";
-    // test
-    // Id = "100";
-
-    token = "11111";
-    // peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+    let Id = req.body.deviceData.foggie_id;
 
     if (!object_type || !objects || !cids) {
       res.send(BizResult.validateFailed());
@@ -137,11 +140,20 @@ class PublishController {
     let token = req.body.token;
     let peerId = req.body.deviceData.peer_id;
     let Id = req.body.deviceData.foggie_id;
+    let email = req.body.email;
+    let type = req.body.type;
 
     // test
     // peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
     // Id = "34";
-    token = "11111";
+    // token = "11111";
+    if (type === 'space') {
+      token = await userService.getToken4UploadFile(email, req.body.deviceData.space_order_id);
+      if (token instanceof BizResultCode) {
+        res.send(BizResult.fail(token));
+        return;
+      }
+    }
 
     const header = {
       peerId,
@@ -195,13 +207,16 @@ class PublishController {
     let ip_address = req.body.ip_address;
     let port = req.body.port;
     let token = req.body.token;
-    let peerId = req.body.peerId;
-    let Id = req.body.Id;
+    let peerId = req.body.deviceData.peer_id;
+    let Id = req.body.deviceData.foggie_id;
 
-    // test
-    peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
-    // Id = "34";
-    token = "11111";
+    if (type === 'space') {
+      token = await userService.getToken4UploadFile(email, req.body.deviceData.space_order_id);
+      if (token instanceof BizResultCode) {
+        res.send(BizResult.fail(token));
+        return;
+      }
+    }
 
     const header = {
       peerId,
