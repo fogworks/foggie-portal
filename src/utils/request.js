@@ -147,6 +147,7 @@ service.interceptors.response.use(
         // });
         return;
       } else if (code === 420) {
+        store.dispatch("global/setUserInfo", {});
         let res = await refreshToken();
 
         if (res && res.data && res.data.access_token) {
