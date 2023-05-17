@@ -5,7 +5,7 @@ const merkle = require('merkle');
 ////////////////////////////////////////////user///////////
 var dmc_client = DMC({
     chainId: "bb6e31180359e169335481bad672aadf57cfb5787379bedb6a5dce916fcb0ac5",
-    keyProvider: "5HsrwqjEJHsvqKgh4LDKwWQsfKK9UZygPYCspRaVfwM3recZCMn",
+    keyProvider: "5HsrwqjEJHsvqKgh4LDKwWQsfKK9UZygPYCspRaVfwM3recZC44",
     httpEndpoint: "http://156.242.10.10:5802",
     logger: {
         log: null,
@@ -209,12 +209,12 @@ function order() {
             ],
             data: {
                 owner: "tbliuca12345",
-                bill_id: "182",
+                bill_id: "98",
                 benchmark_price: "10000",
                 epoch: "24",
                 price_range: 3,
                 asset: {
-                    quantity: "2 PST",
+                    quantity: "1 PST",
                     contract: "datamall"
                 },
                 reserve: {

@@ -79,6 +79,7 @@ class BaseResultCode {
     static CHANLLENGE_STATE_INVALID_CHALLENGE = new BaseResultCode(20031, 'challenge state is invalid cannot challenge');
     static ORDER_DMC_NOT_ENOUGH = new BaseResultCode(20032, 'dmc is not enough, cannot reqchallenge');
     static ORDER_STATE_INVALID_CANCEL = new BaseResultCode(20033, 'order state is invalid cannot cancel');
+    static BALANCE_NOT_ENOUGH = new BaseResultCode(20034, 'user balance is not enough, cannot buy order');
 
     // file exception code 30000～39999
     static FILE_NOT_EXIST = new BaseResultCode(30000, 'file is not exist');

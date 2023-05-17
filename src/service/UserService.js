@@ -35,8 +35,6 @@ module.exports = {
         }
     },
     getUsername: async (privateKey) => {
-
-        var public = DMC.ecc.privateToPublic(privateKey);
         
         var chainConfig = config.get('chainConfig');
         var httpEndpoint = chainConfig.get("httpEndpoint");
@@ -44,6 +42,9 @@ module.exports = {
 
         var url = httpEndpoint + getAccounts
         return new Promise((resolve, reject) => {
+
+            var public = DMC.ecc.privateToPublic(privateKey);
+            logger.info('public key: ', public);
             axios.get(url, {
                 data: {
                     accounts: [""],
@@ -63,6 +64,9 @@ module.exports = {
                 logger.error(error);
                 resolve(BizResultCode.GET_USERNAME_FAILED);
             });
+        }).catch((err) => {
+            logger.error('err:', err);
+            return BizResultCode.GET_USERNAME_FAILED;
         });
     },
     getUserInfo: async (email) => {
@@ -402,7 +406,7 @@ module.exports = {
         }
         return 0;
     },
-    calcEstimated(dmc, rsi, changeRsi, epoch) {
+    calcEstimated: (dmc, rsi, changeRsi, epoch) => {
         var dmc = parseFloat(dmc);
         var rsi = parseFloat(rsi);
         var changeRsi = parseFloat(changeRsi);

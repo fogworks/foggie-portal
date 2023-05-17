@@ -7,7 +7,6 @@ const orderService = require('./OrderService');
 const DMC = require('dmc.js');
 const config = require('config');
 const request = require('sync-request');
-const common = require('./common');
 
 class AssetsController {
 
@@ -424,53 +423,40 @@ class AssetsController {
             return;
         }
         var username = userInfo.username;
-        var scope = common.walletNameToNumber(username);
 
-        var chainConfig = config.get('chainConfig')
-        var httpEndpoint = chainConfig.get('httpEndpoint')
-        var getTableRows = chainConfig.get('getTableRows')
-        try {
-            let userAssets = JSON.parse(request('POST', httpEndpoint + getTableRows, {
-                json: { "json": true, "code": "dmc.token", "scope": scope, "table": "accounts" }
-            }).getBody('utf-8')).rows
-            var orderList = await orderService.getOrdersFromDB(email);
-            if (orderList instanceof BizResultCode) {
-                logger.info('get orderList failed');
-                res.send(BizResult.success(userAssets));
-                return;
-            }
-            if (orderList.length == 0) {
-                logger.info('orderList is null');
-                res.send(BizResult.success(userAssets));
-                return;
-            }
+        var userAssets = assetsService.getUserAssets(username);
+        if (userAssets instanceof BizResultCode) {
+            res.send(BizResult.fail(userAssets));
+            return;
+        }
 
-            if (userAssets.length == 0) {
-                res.send(BizResult.success(userAssets));
-                return;
-            }
-
-            var totalSpace = orderList.reduce((acc, cur) => {
-                return acc + (cur.total_space || 0);
-            }, 0);
-
-            var usedSpace = orderList.reduce((acc, cur) => {
-                return acc + (cur.used_space || 0);
-            }, 0);
-
-            var order = {};
-
-            order['order_num'] = orderList.length;
-            order['total_space'] = totalSpace;
-            order['used_space'] = usedSpace;
-            userAssets.push(order);
+        var orderList = await orderService.getOrdersFromDB(email);
+        if (orderList instanceof BizResultCode) {
+            logger.info('get orderList failed');
             res.send(BizResult.success(userAssets));
+            return;
         }
-        catch (e) {
-            logger.error(e)
-            res.send(BizResult.fail(BizResultCode.GET_USER_ASSET_FAILED));
+        if (orderList.length == 0) {
+            logger.info('orderList is null');
+            res.send(BizResult.success(userAssets));
+            return;
         }
 
+        var totalSpace = orderList.reduce((acc, cur) => {
+            return acc + (cur.total_space || 0);
+        }, 0);
+
+        var usedSpace = orderList.reduce((acc, cur) => {
+            return acc + (cur.used_space || 0);
+        }, 0);
+
+        var order = {};
+
+        order['order_num'] = orderList.length;
+        order['total_space'] = totalSpace;
+        order['used_space'] = usedSpace;
+        userAssets.push(order);
+        res.send(BizResult.success(userAssets));
     }
 }
 

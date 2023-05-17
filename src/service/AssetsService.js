@@ -5,6 +5,7 @@ const moment = require('moment');
 const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
 const config = require('config');
+const request = require('sync-request');
 const common = require('./common');
 const path = require('path');
 const dbConfig = config.get('dbConfig');
@@ -150,10 +151,10 @@ module.exports = {
                 resolve(BizResultCode.TRANSFER_VALID_FAILED);
             }
         })
-        .catch((err) => {
-            logger.error('err:', err);
-            return BizResultCode.SAVE_TRANSFER_VALID_FAILED;
-        });
+            .catch((err) => {
+                logger.error('err:', err);
+                return BizResultCode.SAVE_TRANSFER_VALID_FAILED;
+            });
     },
     saveTradeRecord: (from, to, amount, memo, type, transactionId, blockNum) => {
         var now = moment().format('YYYY-MM-DD HH:mm:ss');
@@ -173,5 +174,50 @@ module.exports = {
                 logger.error('saveTradeRecord err:', err);
             }
         });
+    },
+    getUserAssets: (username) => {
+        var scope = common.walletNameToNumber(username);
+        var chainConfig = config.get('chainConfig')
+        var httpEndpoint = chainConfig.get('httpEndpoint')
+        var getTableRows = chainConfig.get('getTableRows')
+        try {
+            let userAssets = JSON.parse(request('POST', httpEndpoint + getTableRows, {
+                json: { "json": true, "code": "dmc.token", "scope": scope, "table": "accounts" }
+            }).getBody('utf-8')).rows
+
+            if (!userAssets) {
+                logger.error('userAssets is null');
+                return BizResultCode.GET_USER_ASSET_FAILED;
+            }
+
+            if (userAssets.length == 0) {
+                logger.error('userAssets.length is 0');
+                return BizResultCode.GET_USER_ASSET_FAILED;
+            }
+
+            return userAssets;
+
+        }
+        catch (err) {
+            logger.error('err:', err);
+            return BizResultCode.GET_USER_ASSET_FAILED;
+        }
+    },
+    getAssetsAmount: (arr, unit) => {
+
+        try{
+            for (const asset of arr) {
+                var quantity = asset.balance.quantity;
+                var index = quantity.indexOf(unit);
+    
+                if (index > -1) {
+                    return quantity.substring(0, index).trim();
+                }
+            }
+        }
+        catch(err){
+            logger.error('err:', err);
+        }
+        return 0;
     }
 }

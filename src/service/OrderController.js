@@ -8,6 +8,7 @@ const zlib = require('zlib')
 const userService = require('./UserService')
 const orderService = require('./OrderService')
 const fileService = require('./FileService')
+const assetsService = require('./AssetsService')
 const Encrypt = require('./Encrypt');
 
 const fileConfig = config.get('fileConfig');
@@ -55,10 +56,24 @@ class OrderController {
         var userInfo = await userService.getUserInfo(email);
         if (userInfo instanceof BizResultCode) {
             logger.info('userInfo is null');
-            res.send(BizResult.fail(userInfo));
+            response.send(BizResult.fail(userInfo));
             return;
         }
         var username = userInfo.username;
+
+        // valid balance
+        var userAssets = assetsService.getUserAssets(username);
+        if (userAssets instanceof BizResultCode) {
+            response.send(BizResult.fail(userAssets));
+            return;
+        }
+
+        var dmc = assetsService.getAssetsAmount(userAssets, 'DMC');
+        if(parseFloat(dmc) < parseFloat(totalPrice)){
+            response.send(BizResult.fail(BizResultCode.BALANCE_NOT_ENOUGH));
+            return;
+        }
+
         // benchmarkPrice*10000
         var benchmark = (benchmarkPrice * 10000).toString()
         var dmc_client = DMC({

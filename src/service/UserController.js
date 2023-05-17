@@ -5,7 +5,7 @@ const Encrypt = require('./Encrypt');
 const userService = require('./UserService');
 const DMC = require('dmc.js');
 const config = require('config');
-const OrderService = require('./OrderService');
+const orderService = require('./OrderService');
 
 class UserController {
 
@@ -214,7 +214,7 @@ class UserController {
             return;
         }
 
-        var email = await OrderService.getEmailByOrderId(orderId);
+        var email = await orderService.getEmailByOrderId(orderId);
         var token = await userService.getToken4UploadFile(email, orderId);
         if (token instanceof BizResultCode) {
             res.send(BizResult.fail(token));
