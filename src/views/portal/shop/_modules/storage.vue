@@ -5,14 +5,8 @@
       <div class="homeBoxHeader">
         <div class="homeBoxHeader-left">
           <div>
-            <span style="font-size: 16px; margin-right: 5px"
-              >*Purchase cycle</span
-            >
-            <el-input-number
-              v-model.number="formLine.week"
-              :min="24"
-              placeholder="Purchase cycle"
-            />
+            <span style="font-size: 16px; margin-right: 5px">*Purchase cycle</span>
+            <el-input-number v-model.number="formLine.week" :min="24" placeholder="Purchase cycle" />
             <span style="font-size: 16px; margin-left: 5px">Week</span>
           </div>
           <div>
@@ -20,11 +14,7 @@
               Current benchmark price:{{ Number(curReferenceRate).toFixed(4) }}
               DMC
             </div>
-            <el-input
-              v-model="formLine.quantity"
-              placeholder="Purchase quantity"
-              style="width: 220px"
-            >
+            <el-input v-model="formLine.quantity" placeholder="Purchase quantity" style="width: 220px">
               <template #prefix>
                 <svg-icon icon-class="search2" size="25"></svg-icon>
               </template>
@@ -44,29 +34,17 @@
               <el-option label="unlimited price" :value="0" />
             </el-select>
           </div> -->
-          <el-button
-            style="margin-top: 10px; border-radius: 30px"
-            type="primary"
-            round
-            @click="filterOrder"
-            :loading="loading"
-            >Filter</el-button
-          >
+          <el-button style="margin-top: 10px; border-radius: 30px" type="primary" round @click="filterOrder"
+            :loading="loading">Filter</el-button>
         </div>
         <div class="homeBoxHeader-right clearfix">
-          <el-button type="primary" style="border-radius: 30px" round
-            >Reset</el-button
-          >
+          <el-button type="primary" style="border-radius: 30px" round>Reset</el-button>
         </div>
       </div>
       <div class="hr"></div>
 
       <div class="destroyBox">
-        <div
-          class="Img_box"
-          v-for="(item, index) in filterOrderList"
-          :key="index"
-        >
+        <div class="Img_box" v-for="(item, index) in filterOrderList" :key="index">
           <div class="detailImg">
             <div class="detailImg_box" :class="returnBG(index)">
               <!-- <div class="detailImg_box_Img">
@@ -80,9 +58,7 @@
                   Unit price：<span>{{ item.price / 10000 }}DMC</span>
                 </p>
                 <p>
-                  Deposit：<span
-                    >{{ (item.price / 10000) * item.deposit_ratio }}DMC</span
-                  >
+                  Deposit：<span>{{ (item.price / 10000) * item.deposit_ratio * formLine.quantity }}DMC</span>
                 </p>
                 <p>
                   Purchase quantity：<span>{{ formLine.quantity }}GB</span>
@@ -94,9 +70,7 @@
                   Deposit multiple：<span>{{ item.deposit_ratio }}</span>
                 </p>
                 <p>
-                  Total order price：<span
-                    >{{ computeTotalPrices(item) }}DMC</span
-                  >
+                  Total order price：<span>{{ computeTotalPrices(item) }}DMC</span>
                 </p>
                 <p>
                   Custom Pledge Rate：<span>{{
@@ -105,13 +79,8 @@
                 </p>
                 <p>{{ item.created_time }}</p>
               </div>
-              <el-button
-                type="primary"
-                round
-                style="margin: 40px auto 0; opacity: 0"
-                @click="purchasePST(item)"
-                >Buy</el-button
-              >
+              <el-button type="primary" round style="margin: 40px auto 0; opacity: 0"
+                @click="purchasePST(item)">Buy</el-button>
             </div>
           </div>
         </div>
@@ -129,20 +98,10 @@
               <div>Total order price：{{ orderDetail.total }} DMC</div>
             </div>
             <label>Deposit amount:</label>
-            <div
-              class="formBox clearfix"
-              style="margin-left: 20px; margin-top: 15px"
-            >
-              <el-input
-                v-model="formLine.prestoreDMC"
-                maxlength="6"
-                :placeholder="`Minimum pre-storage${(
-                  orderDetail.total - orderDetail.deposit
-                ).toFixed(4)}`"
-                style="width: 270px"
-                @input="inputPrestoreDMC"
-                @blur="blurPrestoreDMC"
-              >
+            <div class="formBox clearfix" style="margin-left: 20px; margin-top: 15px">
+              <el-input v-model="formLine.prestoreDMC" maxlength="6" :placeholder="`Minimum pre-storage${(
+                orderDetail.total - orderDetail.deposit
+              ).toFixed(4)}`" style="width: 270px" @input="inputPrestoreDMC" @blur="blurPrestoreDMC">
                 <template #prefix>
                   <svg-icon icon-class="search2" size="25"></svg-icon>
                 </template>
@@ -150,32 +109,26 @@
                   <span style="font-size: 16px">DMC</span>
                 </template>
               </el-input>
-              <div
-                style="
+              <div style="
                   margin-left: 15px;
                   font-size: 14px;
                   color: #ff6e6e;
                   margin-top: 5px;
-                "
-              >
+                ">
                 Estimated service time to
                 {{
                   orderDetail.serverTime ? orderDetail.serverTime : "--"
                 }}，about {{ orderDetail.week ? orderDetail.week : "--" }} Week
               </div>
             </div>
-            <label style="margin-top: 15px; display: inline-block"
-              >Deposit:{{ orderDetail.deposit }}DMC</label
-            >
+            <label style="margin-top: 15px; display: inline-block">Deposit:{{ orderDetail.deposit }}DMC</label>
             <div class="total">
               Total:
               {{ orderDetail.aggregate ? orderDetail.aggregate : "--" }} DMC
             </div>
             <div class="button">
               <el-button @click="dialogIsShow = false">Cancel</el-button>
-              <el-button type="primary" :loading="loading" @click="submit"
-                >Buy</el-button
-              >
+              <el-button type="primary" :loading="loading" @click="submit">Buy</el-button>
             </div>
           </div>
         </div>
@@ -326,7 +279,7 @@ function blurPrestoreDMC() {
 function inputPrestoreDMC(text) {
   text = text.replace(/[^0-9\.]/g, "");
   state.formLine.prestoreDMC = text;
-  state.orderDetail.week = Math.round(text / state.orderDetail.price);
+  state.orderDetail.week = Math.round(text / (state.orderDetail.price*state.formLine.quantity));
   if (state.orderDetail.week) {
     state.orderDetail.serverTime = ChinaTime4(
       state.orderDetail.week * 7,
@@ -343,8 +296,8 @@ function inputPrestoreDMC(text) {
 
 function computeTotalPrices(item) {
   let total =
-    (item.price / 10000) * state.formLine.week +
-    (item.price / 10000) * item.deposit_ratio;
+    (item.price / 10000) * state.formLine.week * state.formLine.quantity +
+    (item.price / 10000) * item.deposit_ratio * state.formLine.quantity;
   total = Math.round(total * 10000) / 10000;
   return total.toFixed(4);
 }
@@ -362,7 +315,7 @@ function purchasePST(item) {
   state.orderDetail.total = computeTotalPrices(item);
   state.orderDetail.deposit = (
     (item.price / 10000) *
-    item.deposit_ratio
+    item.deposit_ratio * state.formLine.quantity
   ).toFixed(4);
   dialogIsShow.value = true;
 }
@@ -415,7 +368,7 @@ async function submit() {
           emit("getAssets");
           filterOrder();
         } else if (res.code == 20034) {
-           ElMessage({
+          ElMessage({
             message: res.msg,
             type: "error",
             grouping: true,
@@ -433,7 +386,7 @@ async function submit() {
             .then(async () => {
               order_sync();
             })
-            .catch(() => {});
+            .catch(() => { });
         }
       })
       .catch((error) => {
@@ -541,7 +494,7 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 
-.homeBoxHeader-left > div {
+.homeBoxHeader-left>div {
   margin-right: 30px;
   margin-top: 15px;
 }
@@ -569,8 +522,7 @@ onMounted(() => {
   width: 100%;
   height: 6px;
   background: #ececec;
-  background: linear-gradient(120deg, rgb(224, 195, 252), rgb(142, 197, 252))
-    rgb(255, 255, 255);
+  background: linear-gradient(120deg, rgb(224, 195, 252), rgb(142, 197, 252)) rgb(255, 255, 255);
   margin-top: 30px;
 }
 
@@ -639,7 +591,7 @@ onMounted(() => {
     position: relative;
     padding-top: 10px;
 
-    & > p:not(:last-child) {
+    &>p:not(:last-child) {
       font-style: normal;
       font-size: 18px;
       line-height: 160%;
@@ -666,7 +618,7 @@ onMounted(() => {
       white-space: pre-wrap;
     }
 
-    & > p:last-child {
+    &>p:last-child {
       font-style: normal;
       font-weight: normal;
       font-size: 15px;
@@ -710,7 +662,7 @@ onMounted(() => {
     flex-wrap: wrap;
     padding: 15px;
 
-    & > div {
+    &>div {
       min-width: 100%;
       flex: 1 0 auto;
       height: 25px;
@@ -733,6 +685,7 @@ onMounted(() => {
     justify-content: space-evenly;
     align-items: center;
     margin-top: 30px;
+
     :deep {
       .el-button {
         border-radius: 99px;
