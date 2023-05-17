@@ -138,6 +138,7 @@ service.interceptors.response.use(
         // removeToken();
         // removeAccessToken();
         // router.push("/login");
+        store.dispatch("global/setUserInfo", {});
         router.push("/user");
         // Message({
         //   message: res.error || "Error",
@@ -158,6 +159,7 @@ service.interceptors.response.use(
             user_id: "",
           };
           store.dispatch("token/login", userInfo);
+          store.dispatch("global/setUserInfo", res.data);
           window.localStorage.setItem("last_refresh_token", token);
           //   setToken(token);
           return service(response.config);

@@ -414,6 +414,12 @@ async function submit() {
           });
           emit("getAssets");
           filterOrder();
+        } else if (res.code == 20034) {
+           ElMessage({
+            message: res.msg,
+            type: "error",
+            grouping: true,
+          });
         } else {
           ElMessageBox.confirm(
             "Failed to pay the bill, do you want to try again!",
@@ -431,6 +437,9 @@ async function submit() {
         }
       })
       .catch((error) => {
+        loading.value = false;
+      })
+      .finally(() => {
         loading.value = false;
       });
   }

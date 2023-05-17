@@ -76,7 +76,9 @@ const route = useRoute();
 const isCollapse = ref(false);
 const defaultActive = ref(route.path.slice(1, route.path.length));
 
-const userName = computed(() => store.getters["token/currentUser"] || "Login");
+// const userName = computed(() => store.getters["token/currentUser"] || "Login");
+const userName = computed(() => store.getters.userInfo?.email || "Login");
+
 const changeCollapse = () => {
   isCollapse.value = !isCollapse.value;
 };

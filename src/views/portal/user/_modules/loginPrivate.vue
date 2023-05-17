@@ -269,7 +269,6 @@ async function importPrivateKey() {
             email: props.userInfo.email,
           }).then((res) => {
             if (res.code == 200) {
-              // store.commit('global/SAVE_USERNAME', res.data)
               emits("login");
             }
           });
@@ -298,6 +297,12 @@ async function importPrivateKey() {
             position: "bottom-left",
           });
         }
+      } else {
+        ElNotification({
+          type: "error",
+          message: "Incorrect private key filling",
+          position: "bottom-left",
+        });
       }
     }
   );

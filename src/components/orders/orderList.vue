@@ -288,6 +288,7 @@
               <svg-icon
                 icon-class="cancel"
                 size="30"
+                v-if="item.state == 0"
                 style="margin-right: 10px"
                 @click.stop="cancelOrder(item)"
               ></svg-icon>
