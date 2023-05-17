@@ -75,10 +75,8 @@ import {
   setresetPassword,
 } from "@/api/common";
 import { useStore } from "vuex";
-import { useRouter } from "vue-router";
 const emits = defineEmits(["closeDialog"]);
 const store = useStore();
-const router = useRouter();
 const registerFormRef = ref();
 let loading = ref(false);
 let isRegisterPassword = ref(false);

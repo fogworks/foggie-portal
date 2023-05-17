@@ -283,6 +283,8 @@ class FileController {
             return;
         }
 
+
+
         // peerId
         var orderFromDB = await orderService.getOrderById(email, orderId);
 
@@ -300,6 +302,8 @@ class FileController {
         };
         var file = req.files.file;
         var rpc = orderFromDB.rpc;
+
+        logger.info("upload file, header:{}", header);
 
         //small file upload
         if (parseInt(fileCategory) == 1) {

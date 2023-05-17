@@ -318,17 +318,6 @@ const handleRegister = () => {
 };
 const userId = computed(() => store.getters.userInfo?.id || "");
 const hasDMC = computed(() => store.getters.userInfo?.dmc || "");
-const bindDmc = () => {
-  let postdata = {
-    dmc: form.dmcAccount,
-    wallet_type: "wallet",
-  };
-  updateUser(userId.value, postdata).then((res) => {
-    if (res && res.data && res.data.dmc) {
-      getUserInfo();
-    }
-  });
-};
 const logout = () => {
   store.dispatch("token/logout");
   store.dispatch("global/setUserInfo", {});
