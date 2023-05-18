@@ -2,6 +2,7 @@ const process = require('node:process');
 const path = require('path');
 const log4js = require('log4js');
 const config = require('config');
+const common = require('./common');
 const logConfig = config.get('logConfig');
 const logFileName = logConfig.get('logFileName');
 
@@ -17,7 +18,7 @@ log4js.configure({
         // 每个日志文件 size 200MB，保留10个文件
         app: {
             type: 'file',
-            filename: process.env.HOME + path.sep + logFileName,
+            filename: common.getHomePath() + path.sep + logFileName,
             maxLogSize: 100485760,
             backups: 10
         }

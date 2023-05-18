@@ -579,13 +579,6 @@ module.exports = {
             return BizResultCode.GET_FILE_UPLOAD_RECORD_FAILED;
         });
     },
-    getNetGrpcClient: () => {
-        var grpcConfig = config.get('grpcConfig');
-        var ip = grpcConfig.get("ip");
-        var port = grpcConfig.get("port");
-        return new net_proto.API(ip + ':' + port, grpc.credentials.createInsecure());
-
-    },
     getPowGrpcClient: () => {
         var grpcConfig = config.get('grpcConfig');
         var ip = grpcConfig.get("ip");

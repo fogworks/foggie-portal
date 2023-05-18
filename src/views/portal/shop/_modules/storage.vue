@@ -81,7 +81,11 @@
                 </p>
                 <p>
                   Deposit：<span
-                    >{{ (item.price / 10000) * item.deposit_ratio }}DMC</span
+                    >{{
+                      (item.price / 10000) *
+                      item.deposit_ratio *
+                      formLine.quantity
+                    }}DMC</span
                   >
                 </p>
                 <p>
@@ -326,7 +330,9 @@ function blurPrestoreDMC() {
 function inputPrestoreDMC(text) {
   text = text.replace(/[^0-9\.]/g, "");
   state.formLine.prestoreDMC = text;
-  state.orderDetail.week = Math.round(text / state.orderDetail.price);
+  state.orderDetail.week = Math.round(
+    text / (state.orderDetail.price * state.formLine.quantity)
+  );
   if (state.orderDetail.week) {
     state.orderDetail.serverTime = ChinaTime4(
       state.orderDetail.week * 7,
@@ -343,8 +349,8 @@ function inputPrestoreDMC(text) {
 
 function computeTotalPrices(item) {
   let total =
-    (item.price / 10000) * state.formLine.week +
-    (item.price / 10000) * item.deposit_ratio;
+    (item.price / 10000) * state.formLine.week * state.formLine.quantity +
+    (item.price / 10000) * item.deposit_ratio * state.formLine.quantity;
   total = Math.round(total * 10000) / 10000;
   return total.toFixed(4);
 }
@@ -362,7 +368,8 @@ function purchasePST(item) {
   state.orderDetail.total = computeTotalPrices(item);
   state.orderDetail.deposit = (
     (item.price / 10000) *
-    item.deposit_ratio
+    item.deposit_ratio *
+    state.formLine.quantity
   ).toFixed(4);
   dialogIsShow.value = true;
 }
@@ -733,6 +740,7 @@ onMounted(() => {
     justify-content: space-evenly;
     align-items: center;
     margin-top: 30px;
+
     :deep {
       .el-button {
         border-radius: 99px;
