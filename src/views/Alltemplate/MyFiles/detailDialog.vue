@@ -248,7 +248,7 @@ export default {
       oA.remove();
       proxy.$notify({
         type: "success",
-        message: "Download succeeded",
+        message: "Downloading",
         position: "bottom-left",
       });
     };
