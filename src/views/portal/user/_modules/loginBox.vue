@@ -133,7 +133,7 @@
               >
             </div>
             <div class="Register_btn" v-if="haveUser">
-              <span @click="toEmailLogin" class="password_login">
+              <span @click="handleRegister" class="password_login">
                 {{ "Register" }}</span
               >
             </div>
@@ -195,6 +195,7 @@ export default {
       loginForm: {
         email: "",
         password: "",
+        confirmPassword: "",
         captcha_text: "",
         promo_code: "",
       },
@@ -239,6 +240,25 @@ export default {
     }
   },
   methods: {
+    handleRegister() {
+      this.$refs.loginForm.validate((valid) => {
+        if (valid) {
+          let hashPwd = bcryptjs.hashSync(this.loginForm.password, 10);
+          let postData = {
+            email: this.loginForm.email,
+            password: hashPwd,
+            confirm: hashPwd,
+          };
+          register(postData).then((res) => {
+            proxy.$notify({
+              type: "success",
+              message: "Successfully register",
+              position: "bottom-left",
+            });
+          });
+        }
+      });
+    },
     async getUserInfo() {
       let res = await user();
       if (res.data && res.data.dmc) {

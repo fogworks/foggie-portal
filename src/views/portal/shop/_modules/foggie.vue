@@ -8,7 +8,7 @@
       frameborder="no"
       border="0"
       class="flexItem"
-      style="width: 1000px; height: 1000px"
+      style="width: 100%; height: calc(100vh - 105px)"
     ></iframe>
   </div>
 </template>
