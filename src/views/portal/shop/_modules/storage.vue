@@ -278,8 +278,8 @@ function filterOrder() {
   if (state.formLine.priceSection) {
     // params.minPrice = state.selectionOption[state.formLine.priceSection].min;
     // params.maxPrice = state.selectionOption[state.formLine.priceSection].max;
-    params.minPrice = "";
-    params.maxPrice = "";
+    // params.minPrice = "";
+    // params.maxPrice = "";
   }
   loading.value = true;
   getOrderFilterList(params)
