@@ -299,23 +299,7 @@ const submit = () => {
     }
   });
 };
-const handleRegister = () => {
-  formRef.value.validate((valid) => {
-    if (valid) {
-      let postData = {
-        email: form.email,
-        register_type: "email",
-      };
-      register(postData).then((res) => {
-        proxy.$notify({
-          type: "success",
-          message: "Successfully register",
-          position: "bottom-left",
-        });
-      });
-    }
-  });
-};
+
 const userId = computed(() => store.getters.userInfo?.id || "");
 const hasDMC = computed(() => store.getters.userInfo?.dmc || "");
 const logout = () => {
