@@ -276,8 +276,10 @@ function filterOrder() {
     period: state.formLine.week,
   };
   if (state.formLine.priceSection) {
-    params.minPrice = state.selectionOption[state.formLine.priceSection].min;
-    params.maxPrice = state.selectionOption[state.formLine.priceSection].max;
+    // params.minPrice = state.selectionOption[state.formLine.priceSection].min;
+    // params.maxPrice = state.selectionOption[state.formLine.priceSection].max;
+    params.minPrice = "";
+    params.maxPrice = "";
   }
   loading.value = true;
   getOrderFilterList(params)
