@@ -458,13 +458,13 @@ function ansChallenge() {
     })
 }
 
-// reqChallenge();
+reqChallenge();
 // paychallenge()
 // ansChallenge();
 // claimorder();
 // findChallenge();
 // transfer();
-order();
+// order();
 // userPushMerkle();
 // bill();
 // minerPushMerkle();
