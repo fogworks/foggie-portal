@@ -65,7 +65,7 @@ service.interceptors.request.use(
       config.headers = header;
     } else {
       if (
-        config.url === "/api/accounts/login" &&
+        config.url.indexOf("/api/accounts/login")  > -1 &&
         config["Content-Type"] === "application/x-www-form-urlencoded"
       ) {
         config.headers["Content-Type"] = "application/x-www-form-urlencoded";
