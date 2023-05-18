@@ -65,7 +65,11 @@ const hasLink = computed(() => {
 let pin_arr = reactive({
   lsit: [],
 });
+const isShow = false;
 const downloadItem = () => {
+  if (!isShow) {
+    return;
+  }
   let cid = keyWord.value;
   // test Qmay112YzDqKkRWZKh8dChv32Fifcz4L7kWmTXZ2GAixLo
   if (cid) {

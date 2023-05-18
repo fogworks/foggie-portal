@@ -1,9 +1,10 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, screen, nativeImage } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
-const isDevelopment = process.env.NODE_ENV !== 'production'
+const isDevelopment = process.env.NODE_ENV !== 'production';
+const path = require("path")
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -12,17 +13,37 @@ protocol.registerSchemesAsPrivileged([
 
 async function createWindow() {
   // Create the browser window.
+  let size = screen.getPrimaryDisplay().workAreaSize
+  let width = parseInt(size.width * 0.8)
+  let height = parseInt(size.height * 0.8)
+
+  function getTrayIcon() {
+    if (process.platform !== 'darwin') {
+      // windows
+      return path.join(__static, 'dog.ico');
+    }
+    return path.join(__static, 'dog1.png');
+  }
+  
+
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width,
+    height,
+    // fullscreen: true,
     backgroundColor: '#fff',
     webPreferences: {
 
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
-      contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION
-    }
+      // nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
+      // contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION,
+      contextIsolation: false,
+      nodeIntegration: true,
+      nodeIntegrationInWorker: true,
+      enableRemoteModule: true,
+      webSecurity: false
+    },
+    icon: nativeImage.createFromPath(getTrayIcon()),
   })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {

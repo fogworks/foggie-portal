@@ -4,6 +4,7 @@ import setting from "@/setting";
 const { baseUrl } = setting;
 
 export function getChain_id() {
+  console.log('+++++++++++', baseUrl)
   return request({
     url: baseUrl + "/order/get_chain_id",
     method: "get",
@@ -93,7 +94,8 @@ export function claim_order(data) {
 }
 export function getDmcUsername(data) {
   return request({
-    url: baseUrl + '/user/get_username',
+    // url: baseUrl + '/user/get_username',
+    url: '/client_api/user/get_username',
     method: 'POST',
     data,
   });

@@ -1,10 +1,13 @@
 import request from "@/utils/request";
+import setting from "@/setting";
+
+const { apiUrl, baseUrl } = setting;
 
 
 
 export const register = (data) => {
   return request({
-    url: "/api/accounts/user",
+    url: `${apiUrl}/api/accounts/user`,
     method: "POST",
     data: data,
   });
@@ -12,7 +15,7 @@ export const register = (data) => {
 
 export const login = (data) => {
   return request({
-    url: "/api/accounts/login",
+    url: `${apiUrl}/api/accounts/login`,
     method: "POST",
     data: data,
     "Content-Type": "application/x-www-form-urlencoded",
@@ -21,34 +24,34 @@ export const login = (data) => {
 
 export const logouts = (data) => {
   return request({
-    url: "/api/accounts/logout",
+    url: `${apiUrl}/api/accounts/logout`,
     method: "POST",
     data: data,
   });
 };
 export const user = () => {
   return request({
-    url: "/api/accounts/info",
+    url: `${apiUrl}/api/accounts/info`,
     method: "GET",
   });
 };
 export const updateUser = (id, data) => {
   return request({
-    url: "/api/accounts/user/" + id,
+    url: `${apiUrl}/api/accounts/user/${id}`,
     method: "PUT",
     data: data,
   });
 };
 export const paynode = () => {
   return request({
-    url: "/api/paynode",
+    url: `${apiUrl}/api/paynode`,
     method: "GET",
   });
 };
 
 export const createPayments = (data) => {
   return request({
-    url: "/api/payments",
+    url: `${apiUrl}/api/payments`,
     method: "POST",
     data: data,
   });
@@ -56,14 +59,14 @@ export const createPayments = (data) => {
 
 export const checkpayment = (uuid) => {
   return request({
-    url: "/api/checkpayment?uuid=" + uuid,
+    url: `${apiUrl}/api/checkpayment?uuid=${uuid}`,
     method: "GET",
   });
 };
 
 export const completepayment = (data) => {
   return request({
-    url: "/api/completepayment",
+    url: `${apiUrl}/api/completepayment`,
     method: "POST",
     data: data,
   });
@@ -71,7 +74,7 @@ export const completepayment = (data) => {
 
 export const transactions = (data) => {
   return request({
-    url: "/api/oms/transactions",
+    url: `${apiUrl}/api/oms/transactions`,
     method: "POST",
     data: data,
   });
@@ -79,14 +82,14 @@ export const transactions = (data) => {
 
 export const refreshToken = () => {
   return request({
-    url: "/api/accounts/refresh_token",
+    url: `${apiUrl}/api/accounts/refresh_token`,
     method: "POST",
   });
 };
 
 //File LIST
 export const oodFileList = (email, type, token, deviceData, prefix) => {
-  let url = "/list_files",
+  let url = `${baseUrl}/list_files`,
     // prefix = "",
     delimiter = "/",
     max_keys = "50",
@@ -116,7 +119,7 @@ export const oodFileList = (email, type, token, deviceData, prefix) => {
 };
 
 export const find_objects = (token, deviceData, fileId) => {
-  let url = "/find_objects",
+  let url = `${baseUrl}/find_objects`,
     prefix = "",
     delimiter = "/",
     max_keys = "50",
@@ -179,7 +182,7 @@ export const file_delete = (token, item, deviceData) => {
   ];
   let cids = [item.cid];
   let object_type = item.type;
-  let url = `/file_delete`;
+  let url = `${baseUrl}/file_delete`;
   let data = {
     deviceData,
     cids,
@@ -259,7 +262,7 @@ export const voodInfoCheck = (vpsId) => {
 
 export const voodActivate = (data) => {
   return request({
-    url: `/api/vps/vood_activate`,
+    url: `${apiUrl}/api/vps/vood_activate`,
     method: "POST",
     data: data,
   });
@@ -511,7 +514,7 @@ export const get_service_info = (target) => {
 
 export const get_foggie_dmc = (data) => {
   return request({
-    url: `/api/accounts/get_foggie_dmc`,
+    url: `${apiUrl}/api/accounts/get_foggie_dmc`,
     method: "POST",
     data,
   });
@@ -534,7 +537,7 @@ export const unbind_foggie = (target) => {
 
 export const search_foggie = (data) => {
   return request({
-    url: `/api/accounts/search_foggie`,
+    url: `${apiUrl}/api/accounts/search_foggie`,
     method: "POST",
     data,
   });
@@ -611,7 +614,7 @@ export const detected_net = (target) => {
 
 //getIP
 export const getIP = () => {
-  let url = `/getIP`;
+  let url = `${baseUrl}/getIP`;
   return request({
     url: url,
     method: "GET",
@@ -620,7 +623,7 @@ export const getIP = () => {
 
 //portalPing
 export const portalPing = (data) => {
-  let url = "/portal_ping";
+  let url = "${baseUrl}/portal_ping";
   return request({
     url: url,
     method: "POST",
@@ -630,7 +633,7 @@ export const portalPing = (data) => {
 
 //socket_ip
 export const socketIP = (data) => {
-  let url = "/socket_ip";
+  let url = "${baseUrl}/socket_ip";
   return request({
     url: url,
     method: "POST",
@@ -640,7 +643,7 @@ export const socketIP = (data) => {
 
 //ping_url
 export const pingUrl = (data) => {
-  let url = "/get_max_info";
+  let url = "${baseUrl}/get_max_info";
   return request({
     url: url,
     method: "POST",
@@ -650,7 +653,7 @@ export const pingUrl = (data) => {
 
 //get_net_status
 export const getNetStatus = (data) => {
-  let url = `/get_net_status`;
+  let url = `${baseUrl}/get_net_status`;
   return request({
     url: url,
     method: "POST",
@@ -659,7 +662,7 @@ export const getNetStatus = (data) => {
 };
 
 export const search_object = (data) => {
-  let url = `/search_object`;
+  let url = `${baseUrl}/search_object`;
   return request({
     url: url,
     method: "POST",
