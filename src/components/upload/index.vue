@@ -10,7 +10,7 @@
           single file is 2GB. If there are large files, you can choose to slice
           them with tools before uploading
         </div>
-        <div class="my_top_uploadText">The OOD you have chosen is: 456</div>
+        <!-- <div class="my_top_uploadText">The OOD you have chosen is: 456</div> -->
       </div>
       <uploader
         style="position: relative"
@@ -28,9 +28,9 @@
           <uploader-btn class="uploader-btn" :single="true"
             >Select File</uploader-btn
           >
-          <uploader-btn class="uploader-btn" :directory="true" :single="true"
+          <!-- <uploader-btn class="uploader-btn" :directory="true" :single="true"
             >Select a folder</uploader-btn
-          >
+          > -->
         </uploader-drop>
       </uploader>
 
