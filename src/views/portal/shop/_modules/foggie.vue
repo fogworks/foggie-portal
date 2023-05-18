@@ -41,10 +41,12 @@ import { useStore } from "vuex";
 
 const store = useStore();
 
-const token = computed(() => store.getters["token/login"]);
+const token = computed(() => store.getters["token/token"]);
 
 // const username = computed(() => store.getters.userInfo?.dmc);
 const email = computed(() => store.getters.userInfo?.email);
+const user_id = computed(() => window.localStorage.getItem("user_id"));
+const userInfo = computed(() => store.getters.userInfo);
 
 let iframeRef = ref(null);
 let iframeWindow = ref(null);
@@ -53,13 +55,21 @@ const handleMessage = (event) => {
 };
 const sendMessage = () => {
   iframeRef.value.onload = function () {
-    iframeWindow.postMessage({ token: token.value });
+    iframeRef.value.contentWindow.postMessage(
+      {
+        userInfo: JSON.stringify({
+          username: email.value,
+          token: token.value, //res.token
+          user_id: user_id.value,
+        }),
+      },
+      "*"
+    );
   };
 };
 
 onMounted(() => {
   window.addEventListener("message", handleMessage);
-  iframeWindow = iframeRef.value.contentWindow;
   sendMessage();
 });
 </script>

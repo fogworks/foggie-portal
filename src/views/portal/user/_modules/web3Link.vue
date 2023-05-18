@@ -8,16 +8,28 @@
       Read data available on the public IPFS/CYFS network with Foggie (at
       https://foggie.fogworks.io),Add your content ID (CID) below to try it out.
     </p>
-    <el-input class="search-input" v-model="keyWord" placeholder="cid...">
+    <el-input
+      :disabled="!hasLink"
+      class="search-input"
+      v-model="keyWord"
+      placeholder="cid..."
+    >
       <template #prepend>
-        <el-select v-model="checked" placeholder="Select" style="width: 115px">
+        <el-select
+          :disabled="!hasLink"
+          v-model="checked"
+          placeholder="Select"
+          style="width: 115px"
+        >
           <el-option label="ipfs://" value="ipfs" />
           <el-option label="foggie://" value="foggie" />
           <el-option label="cyfs://" value="cyfs" disabled />
         </el-select>
       </template>
       <template #suffix>
-        <el-button type="primary" @click="downloadItem">GO</el-button>
+        <el-button :disabled="!hasLink" type="primary" @click="downloadItem"
+          >GO</el-button
+        >
       </template>
     </el-input>
     <div class="dir-div">
@@ -33,31 +45,23 @@
 </template>
 
 <script setup>
-import { ref, reactive, getCurrentInstance } from "vue";
+import { ref, reactive, computed, onMounted, getCurrentInstance } from "vue";
 import { search_object } from "@/utils/api.js";
+import useOrderList from "@/views/portal/_modules/hooks/useOrderList";
 
 const keyWord = ref("");
 const cur_item = ref({});
 const { proxy } = getCurrentInstance();
 const checked = ref("ipfs");
-const download = () => {
-  if (keyWord.value) {
-    // test Qmay112YzDqKkRWZKh8dChv32Fifcz4L7kWmTXZ2GAixLo
-    let downloadUrl = `https://w3s.link/ipfs/${keyWord.value}`;
-    var oA = document.createElement("a");
-    oA.download = name;
-    oA.href = downloadUrl;
-    document.body.appendChild(oA);
-    oA.click();
-    oA.remove();
-  } else {
-    proxy.$notify({
-      type: "warning",
-      message: "Please enter the cid",
-      position: "bottom-left",
-    });
-  }
-};
+const { list, search } = useOrderList();
+const hasLink = computed(() => {
+  return list.value.some(
+    (el) =>
+      el.device_type == "" ||
+      el.device_type == "foggie_max" ||
+      el.device_type == "foggie"
+  );
+});
 let pin_arr = reactive({
   lsit: [],
 });
@@ -157,6 +161,7 @@ const next_download = (item) => {
   cur_item.value = item;
   downloadItem();
 };
+onMounted(search);
 </script>
 
 <style lang="scss" scoped>

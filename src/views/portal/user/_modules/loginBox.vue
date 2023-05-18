@@ -62,6 +62,26 @@
                 class=""
               />
             </el-form-item>
+            <el-form-item v-if="!haveUser" prop="confirmPassword">
+              <div class="my_login_right_input_img">
+                <img
+                  src="@/assets/system/lock-blue.svg"
+                  alt="password icon"
+                  class=""
+                />
+              </div>
+              <el-input
+                :key="passwordType"
+                ref="password"
+                v-model="loginForm.confirmPassword"
+                :type="passwordType"
+                :placeholder="'Please confirm password'"
+                name="password"
+                tabindex="2"
+                autocomplete="on"
+                class=""
+              />
+            </el-form-item>
             <!-- <el-form-item
               prop="promo_code"
               v-if="!haveUser && promo_code_checked"
@@ -108,7 +128,7 @@
               :loading="loading"
               type="primary"
               style="width: 100%; margin-bottom: 30px; height: 46px"
-              @click.native.prevent="handleLogin"
+              @click.native.prevent="goToRegister"
               v-if="!haveUser && !haveChoose"
               class="ejUnNt"
               >{{ "Register" }}</el-button
@@ -133,7 +153,7 @@
               >
             </div>
             <div class="Register_btn" v-if="haveUser">
-              <span @click="handleRegister" class="password_login">
+              <span @click="haveUser = false" class="password_login">
                 {{ "Register" }}</span
               >
             </div>
@@ -191,6 +211,26 @@ import { getQueryString } from "@/utils/util.js";
 const bcryptjs = require("bcryptjs");
 export default {
   data() {
+    const validatePass2 = (rule, value, callback) => {
+      if (value === "") {
+        callback(new Error("Please input the password again"));
+      } else if (value !== this.loginForm.password) {
+        callback(new Error("Two inputs don't match!"));
+      } else {
+        callback();
+      }
+    };
+    const validateEmail = (rule, value, callback) => {
+      if (value === "") {
+        callback(new Error("Please Enter email address"));
+      } else if (
+        !/^[0-9a-zA-Z_.-]+[@][0-9a-zA-Z_.-]+([.][a-zA-Z]+){1,2}$/.test(value)
+      ) {
+        callback(new Error("Please enter the correct email format!"));
+      } else {
+        callback();
+      }
+    };
     return {
       loginForm: {
         email: "",
@@ -207,6 +247,10 @@ export default {
             message: "Please Enter email address",
             trigger: "blur",
           },
+          {
+            validator: validateEmail,
+            trigger: "blur",
+          },
         ],
         password: [
           {
@@ -214,7 +258,18 @@ export default {
             message: "Please enter password",
             trigger: "blur",
           },
+          {
+            min: 8,
+            max: 16,
+            message: "The password length must be 8-16 characters.",
+            trigger: "blur",
+          },
         ],
+        confirmPassword: {
+          required: true,
+          validator: validatePass2,
+          trigger: "blur",
+        },
       },
       haveChoose: false,
       haveUser: true,
@@ -240,25 +295,6 @@ export default {
     }
   },
   methods: {
-    handleRegister() {
-      this.$refs.loginForm.validate((valid) => {
-        if (valid) {
-          let hashPwd = bcryptjs.hashSync(this.loginForm.password, 10);
-          let postData = {
-            email: this.loginForm.email,
-            password: hashPwd,
-            confirm: hashPwd,
-          };
-          register(postData).then((res) => {
-            proxy.$notify({
-              type: "success",
-              message: "Successfully register",
-              position: "bottom-left",
-            });
-          });
-        }
-      });
-    },
     async getUserInfo() {
       let res = await user();
       if (res.data && res.data.dmc) {
@@ -335,33 +371,37 @@ export default {
     emailLogin() {
       const that = this;
       this.haveUser = false;
-      this.$alert("A verification link has been sent to your email address, please check your email to verify and sign in your account.", "Sign in with Email", {
-        confirmButtonText: "OK",
-        callback: () => {
-          that.$refs.loginForm.validate((valid) => {
-            if (valid) {
-              // if (this.is_verified) {
-              let postData = {
-                email: that.loginForm.email,
-                redirect: window.location.origin,
-              };
-              emailLogin(postData).then((res) => {
-                if (res && res.data) {
-                  that.$message({
-                    type: "success",
-                    message: res.data,
-                    // message: that.("login.haveseedEmail"),
-                  });
-                }
-              });
-              // }
-            } else {
-              console.log("error submit!!");
-              return false;
-            }
-          });
-        },
-      });
+      this.$alert(
+        "A verification link has been sent to your email address, please check your email to verify and sign in your account.",
+        "Sign in with Email",
+        {
+          confirmButtonText: "OK",
+          callback: () => {
+            that.$refs.loginForm.validate((valid) => {
+              if (valid) {
+                // if (this.is_verified) {
+                let postData = {
+                  email: that.loginForm.email,
+                  redirect: window.location.origin,
+                };
+                emailLogin(postData).then((res) => {
+                  if (res && res.data) {
+                    that.$message({
+                      type: "success",
+                      message: res.data,
+                      // message: that.("login.haveseedEmail"),
+                    });
+                  }
+                });
+                // }
+              } else {
+                console.log("error submit!!");
+                return false;
+              }
+            });
+          },
+        }
+      );
     },
     passwordLogin() {
       this.haveUser = true;
@@ -514,24 +554,52 @@ export default {
       this.showInvitationTips = false;
     },
     goToRegister() {
-      let postData = {
-        register_type: "email",
-        email: this.loginForm.email,
-        redirect: window.location.origin,
-        promo_code: this.loginForm.promo_code,
-      };
-      // gtag("event", "email_sent");
-      register(postData).then((res) => {
-        if (res && res.data && res.data.is_verified) {
-          this.emailLogin();
-        } else if (res && res.data) {
-          this.$alert("A verification link has been sent to your email address, please check your email to verify and sign in your account.", "Sign in with Email", {
-            confirmButtonText: "OK",
-            callback: () => {},
+      this.$refs.loginForm.validate((valid) => {
+        if (valid) {
+          // let hashPwd = bcryptjs.hashSync(this.loginForm.password, 10);
+          let hashPwd = this.loginForm.password;
+          let postData = {
+            email: this.loginForm.email,
+            password: hashPwd,
+            confirm: hashPwd,
+          };
+          register(postData).then((res) => {
+            if (res && res.data && res.data.is_verified) {
+              this.haveUser = true;
+            } else if (res && res.data) {
+              proxy.$notify({
+                type: "success",
+                message: "Successfully register",
+                position: "bottom-left",
+              });
+            }
           });
         }
       });
     },
+    // goToRegister() {
+    //   let postData = {
+    //     register_type: "email",
+    //     email: this.loginForm.email,
+    //     redirect: window.location.origin,
+    //     promo_code: this.loginForm.promo_code,
+    //   };
+    //   // gtag("event", "email_sent");
+    //   register(postData).then((res) => {
+    //     if (res && res.data && res.data.is_verified) {
+    //       this.emailLogin();
+    //     } else if (res && res.data) {
+    //       this.$alert(
+    //         "A verification link has been sent to your email address, please check your email to verify and sign in your account.",
+    //         "Sign in with Email",
+    //         {
+    //           confirmButtonText: "OK",
+    //           callback: () => {},
+    //         }
+    //       );
+    //     }
+    //   });
+    // },
     isInvitationTipsClose() {
       this.showInvitationTips = false;
     },

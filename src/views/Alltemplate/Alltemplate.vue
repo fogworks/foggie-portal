@@ -8,9 +8,12 @@
       :userInfo="userInfo"
     ></login>
     <template v-else>
-      <orderList :orderId="orderId"></orderList>
-      <TimeLine :orderId="orderId"></TimeLine>
-      <myFiles :orderId="orderId" :deviceData="deviceData"></myFiles>
+      <orderList @setState="setState" :orderId="orderId"></orderList>
+      <myFiles
+        :state="state"
+        :orderId="orderId"
+        :deviceData="deviceData"
+      ></myFiles>
     </template>
   </div>
 </template>
@@ -27,7 +30,6 @@ import {
 } from "vue";
 import orderList from "@/components/orders/orderList.vue";
 import myFiles from "@/views/Alltemplate/MyFiles/myFiles";
-import TimeLine from "./MyFiles/timeLine";
 // import customDialog from "@/components-V3/customDialog";
 import login from "@/components/login";
 import { useStore } from "vuex";
@@ -57,13 +59,16 @@ store.commit("upload/setOrderId", orderId);
 //   store.commit('upload/setOrderId', orderId)
 // }
 store.commit("upload/setDeviceType", "3");
+const state = ref(0);
 
 watch(
   () => props.deviceData,
   (newValue) => {},
   { immediate: true, deep: true }
 );
-
+const setState = (val) => {
+  state.value = val;
+};
 function closeDialog() {
   customDialogIsShow.value = false;
 }
@@ -75,49 +80,10 @@ function loadChainId() {
     }
   });
 }
+const orderListRef = ref(null);
 onMounted(() => {
   loadChainId();
 });
-
-// let isMobile = ref(false);
-// let asideWidth = ref("236px");
-
-// watch(
-//   isMobile,
-//   (newValue) => {
-//     if (!newValue) {
-//       asideWidth.value = "236px";
-//     } else {
-//       asideWidth.value = "60px";
-//     }
-//   },
-//   { immediate: true }
-// );
-
-// const { body } = document;
-// const WIDTH = 992; //
-
-// onBeforeMount(() => {
-//   window.addEventListener("resize", $_resizeHandler);
-// });
-
-// onBeforeUnmount(() => {
-//   window.removeEventListener("resize", $_resizeHandler);
-// });
-// onMounted(() => {
-//   isMobile.value = $_isMobile();
-//   loadChainId()
-// });
-
-// function $_isMobile() {
-//   const rect = body.getBoundingClientRect();
-//   return rect.width - 1 < WIDTH;
-// }
-// function $_resizeHandler() {
-//   if (!document.hidden) {
-//     isMobile.value = $_isMobile();
-//   }
-// }
 </script>
 
 <style lang="scss" scoped>

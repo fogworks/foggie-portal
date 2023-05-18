@@ -17,6 +17,7 @@
     <div class="flex justify-between items-center">
       <el-button
         class="top-btn"
+        :disabled="[4, 5].includes(state)"
         @click="openUpload"
         key="plain"
         type="primary"
@@ -268,15 +269,6 @@ const chainId = computed(() => store.getters.ChainId);
 const email = computed(() => store.getters.userInfo?.email);
 const deviceType = computed(() => store.getters.deviceType);
 
-const orderState = computed(() => {
-  let state = route.query.orderState;
-  if (state == 0 || state == 4 || state == 5) {
-    return false;
-  } else {
-    return true;
-  }
-});
-
 watch(
   () => store.getters.uploadIsShow,
   (newVal, oldVal) => {
@@ -299,34 +291,37 @@ const props = defineProps({
     default: "",
   },
   deviceData: Object,
+  state: {
+    type: [String, Number],
+  },
 });
 const syncDialog = ref(false);
 const taskDisplay = ref(false);
 const closeRightUpload = () => {
   taskDisplay.value = false;
 };
-const { currentOODItem, orderId, deviceData } = toRefs(props);
+const { currentOODItem, orderId, deviceData, state } = toRefs(props);
 const sortList = [
   {
-    prop: "create_time",
+    prop: "date",
     label: "Newest Upload",
     key: 1,
     order: 1,
   },
   {
-    prop: "create_time",
+    prop: "date",
     label: "Oldest Upload",
     key: 2,
     order: 0,
   },
   {
-    prop: "file_path",
+    prop: "name",
     label: "Alphabetical A-Z",
     key: 3,
     order: 0,
   },
   {
-    prop: "file_path",
+    prop: "name",
     label: "Alphabetical Z-A",
     key: 4,
     order: 1,
@@ -348,9 +343,8 @@ function openUpload() {
   store.commit("upload/openUpload", orderId.value);
 }
 
-
 const loadFileList = async () => {
-  let token = '';
+  let token = "";
   let type = "space";
   let data = await oodFileList(
     email.value,
@@ -828,7 +822,7 @@ const getFileList = function (scroll, prefix) {
     list_prefix = prefix.join("/");
   }
   tableLoading.value = true;
-  let token = '';
+  let token = "";
   let type = "space";
   oodFileList(email.value, type, token, deviceData.value, list_prefix)
     .then((res) => {

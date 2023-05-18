@@ -272,9 +272,9 @@ async function importPrivateKey() {
               emits("login");
             }
           });
-        } else if (!props.userInfo?.dmc) {
+        } else if (!props.userInfo?.dmc && res.data) {
           let postdata = {
-            dmc: props.userInfo?.dmc,
+            dmc: res.data,
             wallet_type: "wallet",
           };
           updateUser(userId.value, postdata).then((res) => {

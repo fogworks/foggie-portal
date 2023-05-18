@@ -52,34 +52,8 @@
       </el-form> -->
       <LoginBox></LoginBox>
     </div>
-    <div v-else-if="userId && !isLogin" class="login-box">
-      <img src="@/assets/login-left.png" alt="" />
-      <!-- <el-form
-        class="account-form"
-        :model="form"
-        label-position="top"
-        ref="formRef2"
-        :rules="rules"
-      >
-        <el-form-item label="DMC Account" prop="dmcAccount">
-          <el-input v-model="form.dmcAccount"></el-input>
-        </el-form-item>
-        <div class="foot-btn">
-          <el-button :loading="loading" type="primary" @click="bindDmc">
-            Bind
-          </el-button>
-        </div>
-      </el-form> -->
-      <LoginPrivate
-        class="loginPrivate"
-        :userInfo="userInfo"
-        @login="emitLogin"
-      ></LoginPrivate>
-      <!-- <LoginBox></LoginBox> -->
-    </div>
-
-    <div class="info-box" v-else-if="isLogin && userId">
-      <div class="info-content">
+    <div class="info-box" v-if="userId">
+      <div class="info-content" v-if="userId">
         <div class="foot-btn">
           <!-- <el-button type="danger" @click="unbindVisible = true"
             >Unbind</el-button
@@ -114,9 +88,35 @@
         </div>
       </div>
 
-      <Web3Link></Web3Link>
+      <Web3Link v-if="isLogin && userId"></Web3Link>
     </div>
-    <div v-if="!isLogin" class="story-content">
+    <div v-if="userId && !isLogin" class="login-box">
+      <img src="@/assets/login-left.png" alt="" />
+      <!-- <el-form
+        class="account-form"
+        :model="form"
+        label-position="top"
+        ref="formRef2"
+        :rules="rules"
+      >
+        <el-form-item label="DMC Account" prop="dmcAccount">
+          <el-input v-model="form.dmcAccount"></el-input>
+        </el-form-item>
+        <div class="foot-btn">
+          <el-button :loading="loading" type="primary" @click="bindDmc">
+            Bind
+          </el-button>
+        </div>
+      </el-form> -->
+      <LoginPrivate
+        class="loginPrivate"
+        :userInfo="userInfo"
+        @login="emitLogin"
+      ></LoginPrivate>
+      <!-- <LoginBox></LoginBox> -->
+    </div>
+
+    <!-- <div v-if="!isLogin" class="story-content">
       <div class="story-box">
         <img src="@/assets/nft.png" alt="" />
         <span>
@@ -132,7 +132,7 @@
           Foggie revealed a magical skill, traces of treasure to find.
         </span>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -160,6 +160,7 @@ const isNew = ref(false); //
 // const form = reactive(props.form);
 const { proxy } = getCurrentInstance();
 const requestTarget = inject("requestTarget");
+
 const form = reactive({
   password: "",
   email: "",

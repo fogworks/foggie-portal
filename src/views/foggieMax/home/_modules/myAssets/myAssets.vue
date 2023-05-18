@@ -6,14 +6,14 @@
           <img class="title-img" src="@/assets/assets-title.png" alt="" />
           <div class="title">Assets</div>
         </div>
-        <a
+        <!-- <a
           class="flex items-center records"
           @click.prevent="recordsVisible = true"
         >
           <div>Records</div>
 
           <img class="list-img" src="@/assets/assets-more-list.png" alt="" />
-        </a>
+        </a> -->
       </div>
       <div class="today-grid" style="border: none; padding: 0">
         <div class="sub-title">Toady's</div>
@@ -524,7 +524,7 @@ export default {
   .today-grid {
     display: grid;
     align-items: center;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 2fr 1fr 1fr;
     padding-bottom: 15px;
     border-bottom: 1px solid #fff3;
 

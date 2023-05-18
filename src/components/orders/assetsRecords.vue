@@ -91,14 +91,18 @@ export default {
       },
     ]);
     const typeMap = {
-      1: "Increase Reserve",
-      2: "Reduce Reserve",
+      1: "Increase order deposit",
+      2: "Reduce order deposit",
       3: "Deposit",
-      4: "Receive Grant",
-      5: "Receive Incentive Reward",
-      6: "Storage Challenge Time-out Compensation",
-      7: "Order Cancellation Return",
-      8: "Completed Order Lock",
+      4: "Deliver",
+      5: "Incentive",
+      6: "Order Update",
+      7: "Initiate a Challenge",
+      8: "Responding to challenges",
+      9: "Arbitrate",
+      10: "Overtime compensation return",
+      11: "Order lock return",
+      12: "Order End",
     };
     const { visible, orderId } = toRefs(props);
     const tableData = ref([]);

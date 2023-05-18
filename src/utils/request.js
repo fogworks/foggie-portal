@@ -14,6 +14,7 @@ import { refreshToken } from "@/utils/api";
 import { getTokenMap } from "@/utils/tokenMap";
 import Qs from "qs";
 import { getToken } from "./auth";
+import { ElNotification } from 'element-plus'
 // import { hmac } from "./util.js";
 
 const service = axios.create({
@@ -110,6 +111,7 @@ service.interceptors.request.use(
 // response interceptor
 service.interceptors.response.use(
   async (response) => {
+
     const res = response.data;
     if (
       response.config.url.indexOf("/api/paynode") > -1 ||
@@ -134,6 +136,11 @@ service.interceptors.response.use(
       return res;
     }
     if (code && code !== 200) {
+      ElNotification({
+        type: 'error',
+        message: res.error || res.mag || 'error',
+        position: 'bottom-left'
+      })
       if (code === 401 || code === 403) {
         // removeToken();
         // removeAccessToken();

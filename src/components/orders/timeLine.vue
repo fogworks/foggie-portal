@@ -1,5 +1,5 @@
 <template>
-  <div class="card card-custom clearfix" :class="IsOpenHider ? 'cardHide' : ''">
+  <div class="card card-custom clearfix">
     <div class="card-header">
       <h3 style="display: flex; align-items: center">
         <div class="card-title">
@@ -11,24 +11,6 @@
         </div>
       </h3>
       <div style="display: flex; align-items: center">
-        <el-button
-          style="width: unset; background: transparent"
-          type="primary"
-          text
-          @click="IsOpenHider = !IsOpenHider"
-        >
-          <span v-if="IsOpenHider">Open</span>
-          <span v-else>Hide</span>
-          <el-icon>
-            <ArrowDown
-              :style="
-                IsOpenHider
-                  ? 'transition: transform 0.4s;'
-                  : 'transform: rotate(180deg);transition: transform 0.4s;'
-              "
-            />
-          </el-icon>
-        </el-button>
         <el-dropdown
           trigger="click"
           @command="handleCommand"
@@ -182,7 +164,6 @@ const data = reactive({
     dataList: [],
   },
 });
-const IsOpenHider = ref(true);
 
 function loadChallengeList() {
   let params = {

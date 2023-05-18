@@ -579,7 +579,7 @@ export default {
   // font-family: Farrington7B !important;
   > span {
     margin: 0;
-    font-size: 16px;
+    font-size: 14px;
     letter-spacing: 1px;
     font-family: Farrington7B !important;
   }

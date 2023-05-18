@@ -179,7 +179,7 @@
             >
             <span style="font-size: 24px; font-weight: 600">GB</span>
           </el-col>
-          <el-col :span="7" class="bottom_col">
+          <el-col :span="6" class="bottom_col">
             <!-- <svg-icon
               icon-class="left"
               size="40"
@@ -206,7 +206,7 @@
               <div>82600</div>
             </div> -->
           </el-col>
-          <el-col :span="6" class="bottom_col">
+          <el-col :span="5" class="bottom_col">
             <svg-icon
               icon-class="hammer"
               size="40"
@@ -238,7 +238,7 @@
             </div> -->
           </el-col>
           <el-col
-            :span="8"
+            :span="10"
             style="
               display: flex;
               justify-content: space-around;
@@ -250,10 +250,24 @@
             <el-tooltip
               class="box-item"
               effect="dark"
+              content="Challenge/Merkle List"
+              placement="top"
+            >
+              <svg-icon
+                icon-class="list"
+                size="40"
+                style="margin-right: 10px"
+                @click.stop="timeLineShow = !timeLineShow"
+              ></svg-icon>
+            </el-tooltip>
+            <el-tooltip
+              class="box-item"
+              effect="dark"
               content="Withdraw"
               placement="top"
             >
               <svg-icon
+                v-if="![4, 5].includes(item.state)"
                 icon-class="release"
                 size="34"
                 style="margin-right: 10px"
@@ -270,6 +284,7 @@
               placement="top"
             >
               <svg-icon
+                v-if="![4, 5].includes(item.state)"
                 icon-class="prestore"
                 size="36"
                 style="margin-right: 10px"
@@ -288,7 +303,7 @@
               <svg-icon
                 icon-class="cancel"
                 size="30"
-                v-if="item.state == 0"
+                v-if="item.state == 0 && ![4, 5].includes(item.state)"
                 style="margin-right: 10px"
                 @click.stop="cancelOrder(item)"
               ></svg-icon>
@@ -300,6 +315,7 @@
               placement="top"
             >
               <svg-icon
+                v-if="![4, 5].includes(item.state)"
                 icon-class="upload"
                 size="36"
                 style="margin-right: 10px"
@@ -320,6 +336,7 @@
               placement="top"
             >
               <svg-icon
+                v-if="![4, 5].includes(item.state)"
                 icon-class="dinwei"
                 size="34"
                 style="margin-right: 10px"
@@ -344,7 +361,7 @@
                 </div>
               </div>
               <template #reference>
-                <div>
+                <div v-if="![4, 5].includes(item.state)">
                   <svg-icon icon-class="setting" size="30"></svg-icon>
                 </div>
               </template>
@@ -354,6 +371,7 @@
       </div>
     </div>
   </div>
+  <TimeLine :orderId="orderId" v-if="timeLineShow"></TimeLine>
   <AssetsRecords
     v-if="recordsShow"
     v-model:visible="recordsShow"
@@ -418,7 +436,7 @@
 import { ElMessage, ElMessageBox, ElNotification } from "element-plus";
 import { ref, reactive, toRefs, onMounted, computed, toRef, watch } from "vue";
 import { useStore } from "vuex";
-
+import TimeLine from "./timeLine";
 import {
   pushMerkle,
   getOrderById,
@@ -437,8 +455,10 @@ import {
 import AssetsRecords from "./assetsRecords";
 import { getfilesize } from "@/utils/util.js";
 const $state = useStore();
+const emits=defineEmits(['setState'])
 // const router = useRouter();
 const uploadIsShow = computed(() => $state.getters.uploadIsShow);
+const timeLineShow = ref(false);
 const props = defineProps({
   orderId: {
     type: String,
@@ -478,6 +498,7 @@ function loadOrderList() {
           +res.data.price_amount / +res.data.miner_lock_pst_amount
         ).toFixed(4);
         state.orderList[0] = res.data;
+        emits("setState", orderList.value[0].state);
       }
     })
     .catch((error) => {});
