@@ -781,11 +781,6 @@ const downloadItem = (item) => {
   document.body.appendChild(oA);
   oA.click();
   oA.remove();
-  proxy.$notify({
-    type: "success",
-    message: "Download succeeded",
-    position: "bottom-left",
-  });
 };
 const deleteItem = (item) => {
   tableLoading.value = true;

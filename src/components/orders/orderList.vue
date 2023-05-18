@@ -455,7 +455,7 @@ import {
 import AssetsRecords from "./assetsRecords";
 import { getfilesize } from "@/utils/util.js";
 const $state = useStore();
-const emits=defineEmits(['setState'])
+const emits = defineEmits(["setState"]);
 // const router = useRouter();
 const uploadIsShow = computed(() => $state.getters.uploadIsShow);
 const timeLineShow = ref(false);

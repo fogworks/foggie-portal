@@ -66,14 +66,14 @@
           </div>
         </div>
       </div>
-      <!-- <a
+      <a
         style="width: 90%"
         target="_blank"
         href="https://www.indiegogo.com/projects/foggie-max-the-world-s-first-personal-web3-server#/"
       >
         <button style="width: 100%">Buy now</button>
-      </a> -->
-      <button disabled>Coming Soon</button>
+      </a>
+      <!-- <button disabled>Coming Soon</button> -->
     </div>
 
     <div class="card">
