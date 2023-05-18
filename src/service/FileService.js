@@ -583,6 +583,7 @@ module.exports = {
         var grpcConfig = config.get('grpcConfig');
         var ip = grpcConfig.get("ip");
         var port = grpcConfig.get("port");
+        logger.info('grpc address:', ip + ':' + port);
         return new pow_proto.PowService(ip + ':' + port, grpc.credentials.createInsecure());
     },
     getProxGrpcClient: async (rpc, header) => {
