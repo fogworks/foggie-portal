@@ -8,7 +8,7 @@
       Read data available on the public IPFS/CYFS network with Foggie (at
       https://foggie.fogworks.io),Add your content ID (CID) below to try it out.
     </p>
-    <el-input class="search-input" v-model="keyWord" placeholder="cid...">
+    <el-input class="search-input" v-model="keyWord" disabled="" placeholder="cid...">
       <template #prepend>
         <el-select v-model="checked" placeholder="Select" style="width: 115px">
           <el-option label="ipfs://" value="ipfs" />
@@ -17,7 +17,7 @@
         </el-select>
       </template>
       <template #suffix>
-        <el-button type="primary" @click="downloadItem">GO</el-button>
+        <el-button type="primary" @click="downloadItem" disabled="">GO</el-button>
       </template>
     </el-input>
     <div class="dir-div">
@@ -61,7 +61,11 @@ const download = () => {
 let pin_arr = reactive({
   lsit: [],
 });
+const isShow = false
 const downloadItem = () => {
+  if (!isShow) {
+    return;
+  }
   let cid = keyWord.value;
   // test Qmay112YzDqKkRWZKh8dChv32Fifcz4L7kWmTXZ2GAixLo
   if (cid) {

@@ -80,6 +80,7 @@ import {
 import fileList from "../upload/fileList.vue";
 import uploader from "vue-simple-uploader";
 import { useStore } from "vuex";
+import { ElMessage } from "element-plus";
 
 import { APIClient } from "@/pb/node_grpc_web_pb";
 

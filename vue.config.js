@@ -38,6 +38,17 @@ module.exports = defineConfig({
       preProcessor: "scss",
       patterns: [path.resolve(__dirname, "./src/static/style/index.scss")],
     },
+    electronBuilder: {
+      builderOptions: {
+        appId: 'contact@vofocorp.com',
+        mac: {
+          icon: 'public/dog1.icns'
+        },
+        win: {
+          icon: 'public/dog.ico'
+        }
+      }
+    }
   },
   lintOnSave: true,
   devServer: {
