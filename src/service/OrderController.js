@@ -189,7 +189,7 @@ class OrderController {
         }
 
         var moment = require('moment')
-        var expireTime = moment().add(period, "weeks").utc().format()
+        var expireTime = moment().add(period, "weeks").utc().format();
 
         var chainConfig = config.get('chainConfig')
         var createTime = chainConfig.get('createTime')
@@ -205,7 +205,7 @@ class OrderController {
         var username = userInfo.username;
         // minPrice & maxPrice is not null
         var price = ""
-        if (typeof (minPrice) !== "undefined" && typeof (maxPrice) !== "undefined") {
+        if (minPrice && maxPrice) {
             price = "price: { between: [" + parseInt(minPrice * 10000) + "," + parseInt(maxPrice * 10000) + "]}";
         }
         let body = '{\n' +
@@ -247,6 +247,7 @@ class OrderController {
             },
             body: body
         }).getBody('utf-8')).data.find_bill;
+
         var orderConfig = config.get('orderConfig');
         var outstandinglimit = orderConfig.get('outstandinglimit');
         var sortOrders = outstandingOrders.sort((a, b) => parseFloat(b.deposit_ratio) - parseFloat(a.deposit_ratio)).slice(0, outstandinglimit);
@@ -459,6 +460,7 @@ class OrderController {
         order['challenge_num'] = challengeList.length;
         order['challenge_sccess'] = challengeSuccess;
         order['challenge_failed'] = challengeFailed;
+        order['challenge_other'] = challengeList.length - challengeSuccess - challengeFailed;
         order['challenge_period'] = new Date().getTime() - new Date(challengeList[0].create_time).getTime();
 
         var challengePeriod = await orderService.getChallengeExpire(orderId, email);

@@ -393,8 +393,9 @@ module.exports = {
                 if (docs.length === 0) {
                     var offsetArr = [];
                     var offset = 0;
-                    // The file size is smaller than the block size, returning []
+                    // The file size is smaller than the block size, returning [0]
                     if (fileSize < blockSize) {
+                        offsetArr.push(offset);
                         resolve(offsetArr);
                         return;
                     }

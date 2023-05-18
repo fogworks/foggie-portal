@@ -116,7 +116,7 @@ class UserController {
             res.send(BizResult.fail(resultCode));
             return;
         }
-        UserController.saveUserPassword(email, password, res);
+        UserController.saveUserPassword(req, res);
     }
 
     /**

@@ -196,9 +196,7 @@ module.exports = {
                 resolve(userInfo);
                 return;
             }
-
             var username = await module.exports.getUsername(privateKey);
-
             // encrypt private key
             privateKey = Encrypt.encrypt(privateKey, userInfo.nonce);
             // get password from NeDB
