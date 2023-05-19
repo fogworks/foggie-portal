@@ -842,7 +842,8 @@ const doSearch = async () => {
     tableLoading.value = true;
     breadcrumbList.prefix = [];
     let token = store.getters.token;
-    let data = await find_objects(token, deviceData, keyWord.value);
+    let type = "foggie";
+    let data = await find_objects(email.value, type, token, deviceData, keyWord.value);
     tableData.data = [];
     initFileData(data);
   }

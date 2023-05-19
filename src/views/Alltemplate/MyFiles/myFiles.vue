@@ -835,7 +835,8 @@ const doSearch = async () => {
     // let orderId = deviceData.value.space_order_id;
     breadcrumbList.prefix = [];
     let token = store.getters.token;
-    let data = await find_objects(token, deviceData, keyWord.value);
+    let type = "space";
+    let data = await find_objects(email.value, type, token, deviceData, keyWord.value);
     tableData.data = [];
     initFileData(data);
 

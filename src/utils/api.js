@@ -118,7 +118,7 @@ export const oodFileList = (email, type, token, deviceData, prefix) => {
   });
 };
 
-export const find_objects = (token, deviceData, fileId) => {
+export const find_objects = (email, type ,token, deviceData, fileId) => {
   let url = `${baseUrl}/find_objects`,
     prefix = "",
     delimiter = "/",
@@ -138,7 +138,9 @@ export const find_objects = (token, deviceData, fileId) => {
     key_marker,
     fileId,
     deviceData,
-    token
+    token,
+    email,
+    type
   };
 
   return request({
