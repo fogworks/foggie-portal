@@ -4,7 +4,6 @@ import setting from "@/setting";
 const { baseUrl } = setting;
 
 export function getChain_id() {
-  console.log('+++++++++++', baseUrl)
   return request({
     url: baseUrl + "/order/get_chain_id",
     method: "get",

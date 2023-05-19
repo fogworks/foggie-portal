@@ -40,24 +40,23 @@ module.exports = defineConfig({
     },
     electronBuilder: {
       builderOptions: {
-        appId: 'contact@vofocorp.com',
+        appId: "contact@vofocorp.com",
         mac: {
-          icon: 'public/dog1.icns'
+          icon: "public/dog1.icns",
         },
         win: {
-          icon: 'public/dog.ico'
-        }
-      }
-    }
+          icon: "public/dog.ico",
+        },
+      },
+    },
   },
   lintOnSave: true,
   devServer: {
     port: port,
     open: true,
-    // overlay: {
-    //   warnings: false,
-    //   errors: true,
-    // },
+    client: {
+      overlay: false
+    },
     proxy: {
       "/api/paynode": {
         target: `http://154.31.0.29:8088`,

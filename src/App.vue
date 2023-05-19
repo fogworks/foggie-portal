@@ -7,13 +7,13 @@ import { user, detected_net } from "@/utils/api.js";
 import { useStore } from "vuex";
 const store = useStore();
 const initFoggieDate = async () => {
-  detected_net().then((res) => {
-    if (res.result.detected_net) {
-      store.dispatch("global/setDetected_net", true);
-    } else {
-      store.dispatch("global/setDetected_net", false);
-    }
-  });
+  // detected_net().then((res) => {
+  //   if (res.result.detected_net) {
+  //     store.dispatch("global/setDetected_net", true);
+  //   } else {
+  //     store.dispatch("global/setDetected_net", false);
+  //   }
+  // });
   let data = await user();
   if (data) {
     store.dispatch("global/setUserInfo", {

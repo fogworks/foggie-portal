@@ -73,12 +73,12 @@ service.interceptors.response.use(
     loadingInstance ? loadingInstance.close() : "";
     ElNotification({
       type: 'error',
-      message: error.response.data.msg || error.msg || 'network error',
+      message: error?.response?.data.msg || error.msg || 'network error',
       // grouping: true,
       // type: "error",
       position: 'bottom-left'
     });
-    // ElMessage.error(error.response.data.msg || error.msg);
+    ElMessage.error(error?.response?.data.msg || error.msg);
     return Promise.reject(error);
   }
 );
