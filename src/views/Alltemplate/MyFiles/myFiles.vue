@@ -836,7 +836,7 @@ const doSearch = async () => {
     breadcrumbList.prefix = [];
     let token = store.getters.token;
     let type = "space";
-    let data = await find_objects(email.value, type, token, deviceData, keyWord.value);
+    let data = await find_objects(email.value, type, token, deviceData.value, keyWord.value);
     tableData.data = [];
     initFileData(data);
 
@@ -857,7 +857,7 @@ const setPrefix = (item, isTop = false) => {
   emits("currentPrefix", breadcrumbList.prefix);
 };
 watch(breadcrumbList, (val) => {
-  getFileList("", val.prefix);
+  // getFileList("", val.prefix);
 });
 watch(
   () => currentOODItem,

@@ -118,16 +118,14 @@ export const oodFileList = (email, type, token, deviceData, prefix) => {
   });
 };
 
-export const find_objects = (email, type ,token, deviceData, fileId) => {
+export const find_objects = (email, type ,token, deviceData, key_marker) => {
   let url = `${baseUrl}/find_objects`,
     prefix = "",
     delimiter = "/",
     max_keys = "50",
     start_after = "",
     continuation_token = "",
-    version_id_marker = "",
-    key_marker = "";
-
+    version_id_marker = "";
   let data = {
     prefix,
     delimiter,
@@ -136,7 +134,6 @@ export const find_objects = (email, type ,token, deviceData, fileId) => {
     continuation_token,
     version_id_marker,
     key_marker,
-    fileId,
     deviceData,
     token,
     email,
