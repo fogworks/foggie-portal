@@ -294,6 +294,17 @@ export default {
       this.loginForm.promo_code = location.href.split("pcode=")[1].substr(0, 6);
     }
   },
+  watch: {
+    haveUser() {
+      this.loginForm = {
+        email: "",
+        password: "",
+        confirmPassword: "",
+        captcha_text: "",
+        promo_code: "",
+      };
+    },
+  },
   methods: {
     async getUserInfo() {
       let res = await user();
@@ -566,12 +577,22 @@ export default {
           register(postData).then((res) => {
             if (res && res.data && res.data.is_verified) {
               this.haveUser = true;
-            } else if (res && res.data) {
-              proxy.$notify({
+              this.$notify({
                 type: "success",
-                message: "Successfully register",
+                message: "Registration successful, please log in",
                 position: "bottom-left",
               });
+            } else if (res && res.data) {
+              this.$alert(
+                "A verification link has been sent to your email address, please check your email to verify and sign in your account.",
+                "Activate your account",
+                {
+                  confirmButtonText: "OK",
+                  callback: () => {
+                    this.haveUser = true;
+                  },
+                }
+              );
             }
           });
         }

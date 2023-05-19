@@ -376,32 +376,20 @@
               ></svg-icon>
             </el-tooltip>
 
-            <el-popover
-              placement="bottom"
-              :ref="'popover_' + index"
-              v-model:visible="item.popoverShow"
-              :show-arrow="true"
-              popper-class="tabsPopover"
-              trigger="hover"
+            <el-tooltip
+              class="box-item"
+              effect="dark"
+              content="Upload Merkle"
+              placement="top"
             >
-              <div class="popoverBox">
-                <div
-                  class="popoverBox_item"
-                  @click.stop="popoverClick('submitMerkle', item)"
-                >
-                  Upload Merkle
-                </div>
-              </div>
-              <template #reference>
-                <div v-if="![4, 5].includes(item.state)">
-                  <svg-icon
-                    style="color: rgb(16 57 255)"
-                    icon-class="setting"
-                    size="30"
-                  ></svg-icon>
-                </div>
-              </template>
-            </el-popover>
+              <svg-icon
+                v-if="![4, 5].includes(item.state)"
+                @click.stop="popoverClick('submitMerkle', item)"
+                style="color: rgb(16 57 255)"
+                icon-class="setting"
+                size="30"
+              ></svg-icon>
+            </el-tooltip>
           </el-col>
         </el-row>
       </div>

@@ -96,10 +96,10 @@
       <div class="content">
         <div class="title">NFT</div>
         <div>
-          <img style="width: 170px" src="@/assets/nft.png" alt="" />
+          <img style="width: 220px" src="@/assets/nft.png" alt="" />
           <!-- <svg-icon icon-class="logo-dog"></svg-icon> -->
         </div>
-        <div class="price">$68</div>
+        <!-- <div class="price">$68</div> -->
         <div class="description">
           <!-- Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at
           posuere eros. Interdum et malesuada fames ac ante ipsum primis in
