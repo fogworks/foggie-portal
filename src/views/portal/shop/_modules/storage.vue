@@ -196,7 +196,8 @@ import {
   orderSync,
 } from "@/api/order/filterOrder.js";
 import { getChain_id } from "@/api/common.js";
-import { transferTime, ChinaTime4 } from "@/utils/ChinaStandardTime.js";
+import { ChinaTime4 } from "@/utils/ChinaStandardTime.js";
+import { transferUTCTime } from "@/utils/util.js";
 import customDialog from "@/components-V3/customDialog";
 import { ElMessage, ElMessageBox } from "element-plus";
 import {
@@ -266,6 +267,16 @@ watch(curReferenceRate, (newVal) => {
   state.selectionOption["3"].min = Math.round(newVal * 1000 * 0.7) / 1000;
   state.selectionOption["3"].max = Math.round(newVal * 1000 * 1.3) / 1000;
 });
+watch(
+  () => [formLine.value.week, formLine.value.quantity],
+  (val) => {
+    filterOrderList.value = [];
+  },
+  {
+    immediate: true,
+    deep: true,
+  }
+);
 
 function filterOrder() {
   let params = {
@@ -286,7 +297,7 @@ function filterOrder() {
     .then((res) => {
       if (res.code == 200) {
         for (const item of res.data) {
-          item.created_time = transferTime(item.created_time);
+          item.created_time = transferUTCTime(item.created_time);
         }
 
         state.filterOrderList = res.data;

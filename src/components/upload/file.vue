@@ -1152,9 +1152,9 @@ export default {
   height: 100%;
   background: linear-gradient(
     171deg,
-    #272eef 0%,
-    #207ee4 42%,
-    #e392ff 100%
+    #8388fe 0%,
+    #519ff4 42%,
+    #b783c9 100%
   ) !important;
   transform: translateX(-100%);
   overflow: hidden;
@@ -1191,7 +1191,7 @@ export default {
   float: left;
   position: relative;
   height: 100%;
-  color: #e4dcdc;
+  color: #000;
 }
 
 .uploader-file-name {
@@ -1200,7 +1200,7 @@ export default {
   white-space: nowrap;
   text-overflow: ellipsis;
   text-indent: 14px;
-  color: #e4dcdc;
+  color: #000;
 }
 
 .uploader-file-bucketName {

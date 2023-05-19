@@ -3,7 +3,9 @@
     <el-card class="box-card">
       <template #header>
         <div class="card-header">
-          {{ passwordIsExist ? "Private key" : "Pin Code" }}
+          {{
+            passwordIsExist && !isRegisterPassword ? "Private key" : "Pin Code"
+          }}
         </div>
       </template>
       <div class="text item my_login_box">
@@ -24,7 +26,7 @@
             </div>
             <el-input
               class=""
-              :show-password="false"
+              show-password
               type="password"
               v-model="registerForm.password"
               placeholder="Please input a Pin Code"
@@ -40,27 +42,33 @@
             </div>
             <el-input
               class=""
-              :show-password="false"
+              show-password
               type="password"
               v-model="registerForm.confirmPassword"
               placeholder="Please confirm the Pin Code"
             />
           </el-form-item>
-          <el-form-item prop="confirmPassword" v-if="passwordIsExist">
+          <el-form-item
+            prop="privateKey"
+            v-if="passwordIsExist && !isRegisterPassword"
+          >
             <div class="my_login_right_input_img">
               <svg-icon icon-class="password3" size="23"></svg-icon>
             </div>
             <el-input
               class=""
-              type="text"
+              show-password
+              type="password"
               v-model="registerForm.privateKey"
               placeholder="Please input the private key"
             />
           </el-form-item>
           <div class="Register_btn" v-if="passwordIsExist">
             <div>
-              <span @click="isRegisterPassword = true" class="password_login"
-                >Reset password</span
+              <span
+                @click="isRegisterPassword = !isRegisterPassword"
+                class="password_login"
+                >{{ !isRegisterPassword ? "Reset password" : "Login" }}</span
               >
             </div>
           </div>
@@ -373,6 +381,9 @@ onMounted(() => {
   padding: 0px;
   border-radius: 30px;
   height: 45px;
+  .el-input__suffix {
+    width: 35px;
+  }
 }
 
 .my_login_box ::v-deep .el-input__inner {

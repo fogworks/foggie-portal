@@ -26,10 +26,10 @@
             <template #default="{ row }">
               <el-tooltip
                 class="box-item"
-                :content="transferTime(row.create_time)"
+                :content="transferUTCTime(row.create_time)"
                 placement="top"
               >
-                {{ transferTime(row.create_time) }}
+                {{ transferUTCTime(row.create_time) }}
               </el-tooltip>
             </template>
           </el-table-column>
@@ -67,7 +67,7 @@
 import { reactive, ref, onMounted, computed, watch, toRefs, inject } from "vue";
 import { historyReward, getWithdrawList } from "@/utils/api.js";
 import { orderAssetsList } from "@/api/order/orderList.js";
-import { transferTime } from "@/utils/util.js";
+import { transferUTCTime } from "@/utils/util.js";
 import { useStore } from "vuex";
 export default {
   props: {
@@ -166,7 +166,7 @@ export default {
       close,
       initRecords,
       toDmcLink,
-      transferTime,
+      transferUTCTime,
     };
   },
 };

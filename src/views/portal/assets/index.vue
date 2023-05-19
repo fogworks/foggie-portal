@@ -196,7 +196,6 @@ export default {
       // getDMC();
 
       getUserAssets();
-      search();
       // initYesterdayScore();
       // initBills();
     };
@@ -394,6 +393,7 @@ export default {
       getUserInfo();
       // initAccountMoney();
       getUserAssets();
+      search();
     });
     onMounted(() => {
       // getUserAssets();

@@ -215,14 +215,46 @@
             <div>
               <div>User</div>
               <div>
-                <span>{{ item.challenge_num || 0 }}</span> /
-                <span style="color: #05f701"
-                  >{{ item.challenge_sccess || 0 }}
-                </span>
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  content="Total"
+                  placement="top"
+                >
+                  <span>{{ item.challenge_num || 0 }}</span>
+                </el-tooltip>
                 /
-                <span style="color: #db001b; cursor: pointer">{{
-                  item.challenge_failed || 0
-                }}</span>
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  content="Pending"
+                  placement="top"
+                >
+                  <span>{{ item.challenge_other || 0 }}</span>
+                </el-tooltip>
+                /
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  content="Success"
+                  placement="top"
+                >
+                  <span style="color: #05f701"
+                    >{{ item.challenge_sccess || 0 }}
+                  </span>
+                </el-tooltip>
+
+                /
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  content="Error"
+                  placement="top"
+                >
+                  <span style="color: #db001b; cursor: pointer">{{
+                    item.challenge_failed || 0
+                  }}</span>
+                </el-tooltip>
               </div>
             </div>
             <!-- <div>
@@ -362,7 +394,11 @@
               </div>
               <template #reference>
                 <div v-if="![4, 5].includes(item.state)">
-                  <svg-icon icon-class="setting" size="30"></svg-icon>
+                  <svg-icon
+                    style="color: rgb(16 57 255)"
+                    icon-class="setting"
+                    size="30"
+                  ></svg-icon>
                 </div>
               </template>
             </el-popover>
@@ -453,7 +489,7 @@ import {
   getSecondTime,
 } from "@/utils/ChinaStandardTime";
 import AssetsRecords from "./assetsRecords";
-import { getfilesize } from "@/utils/util.js";
+import { getfilesize, transferUTCTime } from "@/utils/util.js";
 const $state = useStore();
 const emits = defineEmits(["setState"]);
 // const router = useRouter();
@@ -487,7 +523,7 @@ function loadOrderList() {
     .then((res) => {
       if (res.code == 200) {
         res.data.popoverShow = false;
-        res.data.created_time = ChinaTime1(new Date(res.data.created_time));
+        res.data.created_time = transferUTCTime(res.data.created_time);
         let nowDate = new Date(res.data.created_time);
 
         res.data.serverTime = getResidueTime(
@@ -520,7 +556,37 @@ function handlerOver() {
     console.log(res);
   });
 }
+const uploadFileList = computed(() => $state.getters.uploadFileList);
 function popoverClick(type, item) {
+  let cantUpload = uploadFileList.value[props.orderId]?.some((el) => {
+    if (el.paused) {
+      return true;
+    }
+    if (!el.completed && !el.error && !el.paused) {
+      return true;
+    }
+  });
+  let totalPST = orderList.value[0].total_space;
+  let uploadLine = Math.round(+totalPST * 0.05);
+  let used_space = orderList.value[0].used_space;
+  if (uploadLine > used_space) {
+    let needSpace = getfilesize(uploadLine - used_space);
+    ElNotification({
+      type: "warning",
+      message: `At least ${needSpace} of files need to be uploaded to upload merkle`,
+      position: "bottom-left",
+    });
+    return false;
+  }
+  if (cantUpload) {
+    ElNotification({
+      type: "warning",
+      message:
+        "Please wait for the file upload to finish before uploading Merkle",
+      position: "bottom-left",
+    });
+    return false;
+  }
   if (type == "submitMerkle") {
     ElMessageBox.confirm(
       "You need to pay to take the challenge, are you sure to take the challenge?",

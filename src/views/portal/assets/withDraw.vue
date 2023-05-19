@@ -58,15 +58,6 @@
               <span @click="getAll" class="text-button">ALL Amounts</span>
             </div>
           </el-form-item>
-          <el-form-item label="Gas Fee">
-            <span class="gas-fee">{{ gasfee }} DMC </span>
-            <span class="gas-fee-tips"
-              >(1% service charge needs to be deducted)</span
-            >
-          </el-form-item>
-          <el-form-item label="Total">
-            <span class="total">{{ total }} DMC</span>
-          </el-form-item>
         </el-form>
       </div>
       <template v-if="!dialogLoading" #footer>
@@ -287,8 +278,6 @@ export default {
       balance: "0.00",
       receiver: "",
       walletMoney: 0,
-      gasfee: "0.0",
-      total: "",
     });
     const withdrawForm = reactive({
       my_auth_input: "",
@@ -315,12 +304,7 @@ export default {
     const loading = ref(false);
     const showErrorTips = ref(false);
     const googleErrorTip = ref("");
-    let gasfee = computed(() => {
-      return (Number(form.walletMoney) * 0.01).toFixed(4);
-    });
-    let total = computed(() => {
-      return (Number(form.walletMoney) + Number(gasfee.value)).toFixed(4);
-    });
+
     const validateReceiver = (rule, value, cb) => {
       if (!value) {
         cb(new Error("Please enter the account address to withdraw"));
@@ -428,9 +412,7 @@ export default {
       (data) => {
         if (data) {
           oldWalletMoney.value = data;
-          actualMoeny.value = Number(
-            Number(oldWalletMoney.value) / 1.01
-          ).toFixed(4);
+          actualMoeny.value = Number(oldWalletMoney.value);
           form.walletMoney = +actualMoeny.value;
         }
       },
@@ -656,8 +638,6 @@ export default {
       getAll,
       next,
       copySecret,
-      total,
-      gasfee,
       withdrawForm,
       withdrawFormRef,
       showGoogleKey,
