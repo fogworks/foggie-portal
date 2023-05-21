@@ -309,7 +309,7 @@ export default {
   methods: {
     async getUserInfo() {
       let res = await user();
-      if (res.data && res.data.dmc) {
+      if (res.data) {
         window.sessionStorage.setItem("walletUser", res.data.dmc);
         store.dispatch("global/setUserInfo", res.data);
       }
