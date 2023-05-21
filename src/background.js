@@ -43,7 +43,7 @@ async function createWindow() {
       enableRemoteModule: true,
       webSecurity: false
     },
-    icon: nativeImage.createFromPath(getTrayIcon()),
+    // icon: nativeImage.createFromPath(getTrayIcon()),
   })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
