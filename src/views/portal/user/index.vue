@@ -253,6 +253,7 @@ getUserInfo();
 const emitLogin = () => {
   isLogin.value = true;
   getChainId();
+  getUserInfo();
 };
 const submit = () => {
   if (loading.value) return false;

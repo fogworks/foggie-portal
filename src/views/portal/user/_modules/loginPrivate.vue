@@ -101,7 +101,7 @@
 </template>
 <script setup>
 import { ElMessage, ElMessageBox, ElNotification } from "element-plus";
-import { ref, reactive, watch, toRefs, onMounted } from "vue";
+import { ref, reactive, watch, toRefs, onMounted, computed } from "vue";
 import {
   getUserLoginStatus,
   setImportPrivateKey,
@@ -109,6 +109,7 @@ import {
   setresetPassword,
   getDmcUsername,
 } from "@/api/common";
+import { updateUser } from "@/utils/api";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 const emits = defineEmits(["closeDialog", "login"]);
@@ -268,6 +269,7 @@ async function SAVE_PASSWORD() {
     username: props.userInfo.dmc,
   });
 }
+const userId = computed(() => store.getters.userInfo?.id || "");
 async function importPrivateKey() {
   getDmcUsername({ privateKey: loginForm.registerForm.privateKey }).then(
     (res) => {
