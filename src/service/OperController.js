@@ -63,10 +63,7 @@ class PublishController {
 
     let call = client.GetObject(GetRequest);
 
-    // let successfulReports = [];
-    // let totalLength = 0;
     console.log("++++++++download", GetRequest);
-    // let failedReports = [];
     call.on("data", (employeeStream) => {
       if (employeeStream?.chunk) {
         res.write(employeeStream.chunk);

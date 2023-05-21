@@ -306,7 +306,7 @@ function blurPrestoreDMC() {
     state.orderDetail.total - state.orderDetail.deposit
   ) {
     ElMessage({
-      message: `The deposit amount cannot be less than${(
+      message: `The deposit amount cannot be less than ${(
         state.orderDetail.total - state.orderDetail.deposit
       ).toFixed(4)}`,
       type: "warning",

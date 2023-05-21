@@ -108,7 +108,16 @@
                 </template> -->
                 <!-- <img v-else :src="row.imgUrl" alt="" /> -->
               </div>
-              <div>
+              <el-tooltip
+                v-if="!row.isPersistent"
+                class="box-item"
+                effect="dark"
+                content="Not Persisted"
+                placement="top-start"
+              >
+                <div><i class="i-ersistent">*</i> {{ row.name }}</div>
+              </el-tooltip>
+              <div v-if="row.isPersistent">
                 {{ row.name }}
               </div>
             </div>
@@ -490,6 +499,8 @@ const initFileData = async (data) => {
       name = name.split(data.prefix)[1];
     }
 
+    let isPersistent = data.content[j].isPersistent;
+
     let item = {
       isDir: isDir,
       name,
@@ -519,6 +530,7 @@ const initFileData = async (data) => {
       isSystemImg,
       canShare: cid ? true : false,
       is_local,
+      isPersistent,
     };
     // data[i] = item;
     // getCidShare(device_id.value, data[i].cid);
@@ -859,7 +871,14 @@ const doSearch = async () => {
     // let orderId = deviceData.value.space_order_id;
     breadcrumbList.prefix = [];
     let token = store.getters.token;
-    let data = await find_objects(token, deviceData, keyWord.value);
+    let type = "space";
+    let data = await find_objects(
+      email.value,
+      type,
+      token,
+      deviceData.value,
+      keyWord.value
+    );
     tableData.data = [];
     initFileData(data);
 
@@ -880,7 +899,7 @@ const setPrefix = (item, isTop = false) => {
   emits("currentPrefix", breadcrumbList.prefix);
 };
 watch(breadcrumbList, (val) => {
-  getFileList("", val.prefix);
+  // getFileList("", val.prefix);
 });
 watch(
   () => currentOODItem,
@@ -1176,5 +1195,14 @@ onMounted(() => {
       color: #{$light_blue};
     }
   }
+}
+.i-ersistent {
+  color: #e6a23c;
+  font-size: 12px;
+  width: 10px;
+  height: 26px;
+  display: inline-block;
+  text-align: center;
+  cursor: pointer;
 }
 </style>

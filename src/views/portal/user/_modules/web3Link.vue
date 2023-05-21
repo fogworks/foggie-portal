@@ -45,15 +45,17 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, getCurrentInstance } from "vue";
+import { ref, reactive, computed, onMounted, getCurrentInstance} from "vue";
 import { search_object } from "@/utils/api.js";
 import useOrderList from "@/views/portal/_modules/hooks/useOrderList";
+import { useStore } from "vuex";
 
 const keyWord = ref("");
 const cur_item = ref({});
 const { proxy } = getCurrentInstance();
 const checked = ref("ipfs");
 const { list, search } = useOrderList();
+const store = useStore();
 const hasLink = computed(() => {
   return list.value.some(
     (el) =>
@@ -83,6 +85,7 @@ const downloadItem = () => {
     let id1 = "baeqacmjq";
     let id2 = 36;
     let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+    let token = store.getters.token;
     let data1 = {
       cid,
       key,
@@ -90,6 +93,7 @@ const downloadItem = () => {
       peerId,
       ip: ip1,
       port,
+      token
     };
     let data2 = {
       cid,
@@ -98,6 +102,7 @@ const downloadItem = () => {
       peerId,
       ip: ip2,
       port,
+      token
     };
     pin_arr.list = [];
     search_object(data1).then(async (r) => {
