@@ -23,6 +23,7 @@
         fail.
       </div>
       <el-form
+        @submit.native.prevent
         label-position="top"
         :model="syncForm"
         :rules="syncrules"

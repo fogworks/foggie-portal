@@ -9,6 +9,7 @@
       class="ip-dialog"
     >
       <el-form
+        @submit.native.prevent
         class="ip-form"
         ref="ipFormRef"
         :model="form"

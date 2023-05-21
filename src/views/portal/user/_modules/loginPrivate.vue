@@ -10,6 +10,7 @@
       </template>
       <div class="text item my_login_box">
         <el-form
+          @submit.native.prevent
           ref="registerFormRef"
           :model="registerForm"
           :rules="registerRules"
@@ -63,16 +64,6 @@
               placeholder="Please input the private key"
             />
           </el-form-item>
-          <div class="Register_btn" v-if="passwordIsExist">
-            <div>
-              <span
-                @click="isRegisterPassword = !isRegisterPassword"
-                class="password_login"
-                >{{ !isRegisterPassword ? "Reset password" : "Login" }}</span
-              >
-            </div>
-          </div>
-
           <el-button
             v-if="!passwordIsExist"
             class="ejUnNt loginButtom"
@@ -93,6 +84,16 @@
           >
             Confirm
           </el-button>
+          <!-- <el-button
+            v-if="passwordIsExist && isRegisterPassword"
+            class="ejUnNt loginButtom"
+            type="primary"
+            :loading="loading"
+            style="width: 100%; margin-bottom: 30px; height: 46px"
+            @click="resetPassword"
+          >
+            Confirm
+          </el-button> -->
         </el-form>
       </div>
     </el-card>

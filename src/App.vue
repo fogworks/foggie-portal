@@ -1,11 +1,13 @@
 <template>
-  <router-view />
+  <router-view v-if="canShow" />
 </template>
 
 <script setup>
+import { ref } from "vue";
 import { user, detected_net } from "@/utils/api.js";
 import { useStore } from "vuex";
 const store = useStore();
+const canShow = ref(false);
 const initFoggieDate = async () => {
   detected_net().then((res) => {
     if (res.result.detected_net) {
@@ -20,6 +22,7 @@ const initFoggieDate = async () => {
       ...data.data,
     });
   }
+  canShow.value = true;
 };
 initFoggieDate();
 </script>

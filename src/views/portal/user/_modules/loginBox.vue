@@ -16,6 +16,7 @@
             </el-tooltip>
           </h1>
           <el-form
+            @submit.native.prevent
             class="account-form"
             ref="loginForm"
             :model="loginForm"

@@ -12,6 +12,7 @@
     >
       <div v-loading="dialogLoading">
         <el-form
+          @submit.native.prevent
           v-if="!dialogLoading"
           label-position="left"
           class="withdraw-form"
@@ -104,6 +105,7 @@
         </div>
         <div class="auth_input" v-if="scret_key && !withDrawBtn">
           <el-form
+            @submit.native.prevent
             :rules="withdrawRules"
             ref="authorFormRef"
             class="withdraw-form"
@@ -175,6 +177,7 @@
       v-model="showGoogleBtn"
     >
       <el-form
+        @submit.native.prevent
         :model="withdrawForm"
         ref="withdrawFormRef"
         label-position="left"

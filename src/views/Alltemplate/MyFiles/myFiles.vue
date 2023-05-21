@@ -251,9 +251,8 @@ import ShareDialog from "@/views/foggieMax/home/_modules/myFiles/shareDialog";
 // import PinDialog from "./_modules/pinDialog";
 // import PinTaskList from "./_modules/pinTaskList";
 // import PinFormDialog from "./_modules/pinFormDialog";
-import { getfilesize } from "@/utils/util.js";
-import { transferTime } from "@/utils/util.js";
-
+import { transferTime, transferUTCTime, getfilesize } from "@/utils/util.js";
+import { getSecondTime } from "@/utils/ChinaStandardTime";
 // import { getFileType } from "@/utils/getFileType";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
@@ -294,13 +293,18 @@ const props = defineProps({
   state: {
     type: [String, Number],
   },
+  createdTime: {
+    type: String,
+    default: "",
+  },
 });
 const syncDialog = ref(false);
 const taskDisplay = ref(false);
 const closeRightUpload = () => {
   taskDisplay.value = false;
 };
-const { currentOODItem, orderId, deviceData, state } = toRefs(props);
+const { currentOODItem, orderId, deviceData, state, createdTime } =
+  toRefs(props);
 const sortList = [
   {
     prop: "date",
@@ -339,8 +343,28 @@ let tableData = reactive({
   pageNum: 1,
 });
 const { data, total, pageSize, pageNum } = toRefs(tableData);
-function openUpload() {
+function countDownRun(timestamp) {
+  // let nowTime = new Date(transferUTCTime(new Date())).getTime();
+  // let endTime =
+  //   new Date(transferUTCTime(createdTime.value)).getTime() + 1000 * 60 * 3;
+  // let time = +endTime - +nowTime;
+  // if (time > 0) {
+  //   console.log(
+  //     new Date(transferUTCTime(new Date())),
+  //     new Date(transferUTCTime(createdTime.value))
+  //   );
+  //   let content = "Upload files after " + getSecondTime(+time / 1000);
+  //   proxy.$notify({
+  //     type: "waning",
+  //     message: content,
+  //     position: "bottom-left",
+  //   });
+  // } else {
   store.commit("upload/openUpload", orderId.value);
+  // }
+}
+function openUpload() {
+  countDownRun();
 }
 
 const loadFileList = async () => {

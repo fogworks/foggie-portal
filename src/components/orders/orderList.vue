@@ -227,7 +227,7 @@
                 <el-tooltip
                   class="box-item"
                   effect="dark"
-                  content="Pending"
+                  content="Normal"
                   placement="top"
                 >
                   <span>{{ item.challenge_other || 0 }}</span>
@@ -523,6 +523,7 @@ function loadOrderList() {
         ).toFixed(4);
         state.orderList[0] = res.data;
         emits("setState", orderList.value[0].state);
+        emits("setTime", orderList.value[0].created_time);
       }
     })
     .catch((error) => {});

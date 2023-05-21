@@ -7,7 +7,13 @@
     />
     <img v-else src="@/assets/login-left.png" alt="" />
     <div>
-      <el-form class="account-form" :model="form" ref="formRef" :rules="rules">
+      <el-form
+        @submit.native.prevent
+        class="account-form"
+        :model="form"
+        ref="formRef"
+        :rules="rules"
+      >
         <el-form-item prop="password">
           <el-input
             type="password"

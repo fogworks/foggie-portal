@@ -8,10 +8,15 @@
       :userInfo="userInfo"
     ></login>
     <template v-else>
-      <orderList @setState="setState" :orderId="orderId"></orderList>
+      <orderList
+        @setState="setState"
+        @setTime="setTime"
+        :orderId="orderId"
+      ></orderList>
       <myFiles
         :state="state"
         :orderId="orderId"
+        :createdTime="createdTime"
         :deviceData="deviceData"
       ></myFiles>
     </template>
@@ -60,7 +65,7 @@ store.commit("upload/setOrderId", orderId);
 // }
 store.commit("upload/setDeviceType", "3");
 const state = ref(0);
-
+const createdTime = ref("");
 watch(
   () => props.deviceData,
   (newValue) => {},
@@ -68,6 +73,9 @@ watch(
 );
 const setState = (val) => {
   state.value = val;
+};
+const setTime = (val) => {
+  createdTime.value = val;
 };
 function closeDialog() {
   customDialogIsShow.value = false;

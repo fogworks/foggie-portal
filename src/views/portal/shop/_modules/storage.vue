@@ -20,9 +20,12 @@
               Current benchmark price:{{ Number(curReferenceRate).toFixed(4) }}
               DMC
             </div>
-            <el-input
+            <el-input-number
               v-model="formLine.quantity"
               placeholder="Purchase quantity"
+              :min="1"
+              :precision="0"
+              :controls="false"
               style="width: 220px"
             >
               <template #prefix>
@@ -31,7 +34,7 @@
               <template #suffix>
                 <span style="font-size: 16px">GB</span>
               </template>
-            </el-input>
+            </el-input-number>
           </div>
 
           <!-- <div>

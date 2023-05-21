@@ -1,6 +1,7 @@
 <template>
   <div>
     <el-form
+      @submit.native.prevent
       class="account-form"
       :model="form"
       label-position="top"

@@ -102,7 +102,7 @@
                     : 'normal'
                 "
                 >{{
-                  activeName == "Merkle" ? item.merkle_root : item.hash_data
+                  activeName == "Merkle" ? item.merkle_root : item.data_hash
                 }}</span
               >
             </div>

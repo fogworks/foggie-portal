@@ -6,6 +6,7 @@
       </template>
       <div class="text item my_login_box">
         <el-form
+        @submit.native.prevent
           ref="registerFormRef"
           :model="registerForm"
           :rules="registerRules"

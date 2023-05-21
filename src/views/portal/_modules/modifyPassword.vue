@@ -2,6 +2,7 @@
   <div>
     <p class="welcome">Modify Password</p>
     <el-form
+      @submit.native.prevent
       class="account-form"
       :model="form"
       label-position="top"

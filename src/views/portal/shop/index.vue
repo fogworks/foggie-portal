@@ -10,23 +10,23 @@
         <div class="description">
           <div>
             <svg-icon icon-class="yes" size="20"></svg-icon>
-            Earn crypto rewards while you sleep
+            2 CPU 4 Thread Processor
           </div>
           <div>
             <svg-icon icon-class="yes" size="20"></svg-icon>
-            Mint NFTs
+            4 GB RAM
           </div>
           <div>
             <svg-icon icon-class="yes" size="20"></svg-icon>
-            Avoid censorship
+            30 mbps Optimized Bandwidth
           </div>
           <div>
             <svg-icon icon-class="yes" size="20"></svg-icon>
-            Minimize digital piracy
+            Independent Static IP Address
           </div>
           <div>
             <svg-icon icon-class="yes" size="20"></svg-icon>
-            Run privacy-first dApps
+            80/130 GB High PerformanceSSD
           </div>
         </div>
       </div>
