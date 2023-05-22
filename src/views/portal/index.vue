@@ -73,6 +73,7 @@ const store = useStore();
 let uploadIsShow = computed(() => store.getters.uploadIsShow);
 let ChainId = computed(() => store.getters.ChainId);
 const route = useRoute();
+
 const isCollapse = ref(false);
 const defaultActive = ref(route.path.slice(1, route.path.length));
 

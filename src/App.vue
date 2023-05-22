@@ -6,6 +6,7 @@
 import { ref } from "vue";
 import { user, detected_net } from "@/utils/api.js";
 import { useStore } from "vuex";
+import { getToken } from "@/utils/auth";
 const store = useStore();
 const canShow = ref(false);
 const initFoggieDate = async () => {
@@ -16,11 +17,13 @@ const initFoggieDate = async () => {
   //     store.dispatch("global/setDetected_net", false);
   //   }
   // });
-  let data = await user();
-  if (data) {
-    store.dispatch("global/setUserInfo", {
-      ...data.data,
-    });
+  if (getToken()) {
+    let data = await user();
+    if (data) {
+      store.dispatch("global/setUserInfo", {
+        ...data.data,
+      });
+    }
   }
   canShow.value = true;
 };

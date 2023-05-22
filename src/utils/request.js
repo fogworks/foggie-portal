@@ -13,7 +13,7 @@ import router from "@/router";
 import { refreshToken } from "@/utils/api";
 import { getTokenMap } from "@/utils/tokenMap";
 import Qs from "qs";
-import { getToken } from "./auth";
+import { getToken, setToken, removeToken } from "./auth";
 import { ElNotification } from 'element-plus'
 // import { hmac } from "./util.js";
 
@@ -66,7 +66,7 @@ service.interceptors.request.use(
       config.headers = header;
     } else {
       if (
-        config.url.indexOf("/api/accounts/login")  > -1 &&
+        config.url.indexOf("/api/accounts/login") > -1 &&
         config["Content-Type"] === "application/x-www-form-urlencoded"
       ) {
         config.headers["Content-Type"] = "application/x-www-form-urlencoded";
@@ -142,7 +142,7 @@ service.interceptors.response.use(
         position: 'bottom-left'
       })
       if (code === 401 || code === 403) {
-        // removeToken();
+        removeToken();
         // removeAccessToken();
         // router.push("/login");
         store.dispatch("global/setUserInfo", {});
@@ -155,6 +155,7 @@ service.interceptors.response.use(
         return;
       } else if (code === 420) {
         store.dispatch("global/setUserInfo", {});
+        removeToken();
         router.push("/user");
         let res = await refreshToken();
 

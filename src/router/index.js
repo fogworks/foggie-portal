@@ -147,7 +147,11 @@ router.beforeEach((to, from, next) => {
     // store.commit('global/setActiveIndex', to.meta.headerRoute)
     document.title = "Foggie Portal";
   }
+  // if (!store.getters.userInfo.email) {
+  //   next('/user')
+  // } else {
   next();
+  // }
 });
 
 router.afterEach((to, from) => { });
