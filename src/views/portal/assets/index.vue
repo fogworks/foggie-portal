@@ -31,7 +31,7 @@
               placement="top"
               :append-to-body="false"
             >
-              {{ getfilesize(usedSpace) }}
+              {{ getfilesize(usedSpace) || "0.00 B" }}
             </el-tooltip>
             /
             <el-tooltip
@@ -41,7 +41,7 @@
               placement="top"
               :append-to-body="false"
             >
-              {{ getfilesize(totalSpace) }}
+              {{ getfilesize(totalSpace) || "0.00 B" }}
             </el-tooltip>
 
             <!-- <span title="Already Earned">{{ addNum }}</span>/<span title="Estimated Benefits">{{ estimateNum }}</span> -->

@@ -252,7 +252,7 @@ import {
   find_objects,
   publishPin,
 } from "@/utils/api.js";
-
+import moment from "moment";
 import _ from "lodash";
 
 // import MyEcharts from "@/components/echarts/myEcharts";
@@ -353,24 +353,20 @@ let tableData = reactive({
 });
 const { data, total, pageSize, pageNum } = toRefs(tableData);
 function countDownRun(timestamp) {
-  // let nowTime = new Date(transferUTCTime(new Date())).getTime();
-  // let endTime =
-  //   new Date(transferUTCTime(createdTime.value)).getTime() + 1000 * 60 * 3;
-  // let time = +endTime - +nowTime;
-  // if (time > 0) {
-  //   console.log(
-  //     new Date(transferUTCTime(new Date())),
-  //     new Date(transferUTCTime(createdTime.value))
-  //   );
-  //   let content = "Upload files after " + getSecondTime(+time / 1000);
-  //   proxy.$notify({
-  //     type: "waning",
-  //     message: content,
-  //     position: "bottom-left",
-  //   });
-  // } else {
-  store.commit("upload/openUpload", orderId.value);
-  // }
+  let nowTime = new Date().getTime();
+  let endTime = new Date(createdTime.value).getTime() + 1000 * 60 * 3;
+  let time = +endTime - +nowTime;
+  console.log(new Date(), new Date(createdTime.value));
+  if (time > 0) {
+    let content = "Upload files after " + getSecondTime(+time / 1000);
+    proxy.$notify({
+      type: "warning",
+      message: content,
+      position: "bottom-left",
+    });
+  } else {
+    store.commit("upload/openUpload", orderId.value);
+  }
 }
 function openUpload() {
   countDownRun();

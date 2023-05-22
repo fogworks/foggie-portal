@@ -530,7 +530,21 @@ function loadOrderList() {
 }
 
 function openUpload(item) {
-  $state.commit("upload/openUpload", item.id);
+  let nowTime = new Date().getTime();
+  let endTime =
+    new Date(orderList.value[0].created_time).getTime() + 1000 * 60 * 3;
+  let time = +endTime - +nowTime;
+  console.log(new Date(), new Date(orderList.value[0].created_time));
+  if (time > 0) {
+    let content = "Upload files after " + getSecondTime(+time / 1000);
+    ElNotification({
+      type: "warning",
+      message: content,
+      position: "bottom-left",
+    });
+  } else {
+    $state.commit("upload/openUpload", item.id);
+  }
 }
 function openMyFiles(item) {
   $state.commit("upload/setOrderId", item.id);
