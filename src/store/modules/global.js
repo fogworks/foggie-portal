@@ -16,11 +16,15 @@ export default {
           },
         },
     discoverData: {},
+    hasReady: false
   },
   mutations: {
     SET_THEME: (state, theme) => {
       state.theme = theme;
       window.localStorage.setItem("theme", theme);
+    },
+    SET_hasReady: (state, bool) => {
+      state.hasReady = bool;
     },
     SET_currentOODItem: (state, data) => {
       state.currentOODItem = data;
@@ -44,6 +48,9 @@ export default {
     },
   },
   actions: {
+    setHasReady({ commit }, bool) {
+      commit("SET_hasReady", bool);
+    },
     setTheme({ commit }, theme) {
       commit("SET_THEME", theme);
     },

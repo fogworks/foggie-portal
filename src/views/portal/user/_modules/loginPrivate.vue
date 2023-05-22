@@ -280,6 +280,8 @@ async function importPrivateKey() {
             email: props.userInfo.email,
           }).then((res) => {
             if (res.code == 200) {
+              store.dispatch("global/setHasReady", true);
+
               emits("login");
             }
           });
@@ -295,6 +297,8 @@ async function importPrivateKey() {
                 email: props.userInfo.email,
               }).then((res) => {
                 if (res.code == 200) {
+                  store.dispatch("global/setHasReady", true);
+
                   // store.commit('global/SAVE_USERNAME', res.data)
                   emits("login");
                 }

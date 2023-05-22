@@ -147,7 +147,7 @@ router.beforeEach((to, from, next) => {
     // store.commit('global/setActiveIndex', to.meta.headerRoute)
     document.title = "Foggie Portal";
   }
-  if (!store.getters.userInfo.email) {
+  if (!store.getters.hasReady) {
     if (to.name !== 'User' && to.name !== 'Discover') {
       next({ name: 'User' })
     } else {
