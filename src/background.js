@@ -20,9 +20,9 @@ async function createWindow() {
   function getTrayIcon() {
     if (process.platform !== 'darwin') {
       // windows
-      return path.join(__static, 'dog.ico');
+      return path.join(__static, 'f1.ico');
     }
-    return path.join(__static, 'dog1.png');
+    return path.join(__static, 'f1.png');
   }
   
 
