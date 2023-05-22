@@ -395,7 +395,7 @@
       </div>
     </div>
   </div>
-  <TimeLine :orderId="orderId" v-if="timeLineShow"></TimeLine>
+  <TimeLine ref="timeLineRef" :orderId="orderId" v-if="timeLineShow"></TimeLine>
   <AssetsRecords
     v-if="recordsShow"
     v-model:visible="recordsShow"
@@ -497,6 +497,7 @@ const email = computed(() => $state.getters.userInfo?.email);
 const state = reactive({
   orderList: [],
 });
+const timeLineRef = ref(null);
 const { orderList } = toRefs(state);
 const recordsShow = ref(false);
 const { orderId } = toRefs(props);
@@ -616,6 +617,11 @@ function popoverClick(type, item) {
               type: "success",
               grouping: true,
             });
+            if (timeLineShow.value) {
+              setTimeout(() => {
+                timeLineRef.value.loadMerkleList();
+              }, 2000);
+            }
           }
         });
       })
@@ -650,6 +656,11 @@ const challengeMiner = (item) => {
       };
       InitiateChallenge(params).then((res) => {
         if (res.code == 200) {
+          if (timeLineShow.value) {
+            setTimeout(() => {
+              timeLineRef.value.loadChallengeList();
+            }, 2000);
+          }
         }
       });
     })

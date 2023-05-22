@@ -264,6 +264,10 @@ const handleCommand = (item) => {
 onMounted(() => {
   loadChallengeList();
 });
+defineExpose({
+  loadChallengeList,
+  loadMerkleList,
+});
 </script>
 
 <style lang="scss" scoped>

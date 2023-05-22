@@ -356,7 +356,6 @@ function countDownRun(timestamp) {
   let nowTime = new Date().getTime();
   let endTime = new Date(createdTime.value).getTime() + 1000 * 60 * 3;
   let time = +endTime - +nowTime;
-  console.log(new Date(), new Date(createdTime.value));
   if (time > 0) {
     let content = "Upload files after " + getSecondTime(+time / 1000);
     proxy.$notify({
