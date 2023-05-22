@@ -106,7 +106,6 @@ const downloadItem = () => {
     };
     pin_arr.list = [];
     search_object(data1).then(async (r) => {
-      console.log("++++++++++++data1", r);
       if (r.links) {
         pin_arr.list = r.links;
         let k = keyWord.value;

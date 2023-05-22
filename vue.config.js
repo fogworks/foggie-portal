@@ -42,10 +42,10 @@ module.exports = defineConfig({
       builderOptions: {
         appId: "contact@vofocorp.com",
         mac: {
-          // icon: "public/dog1.icns",
+          icon: "public/f1.icns",
         },
         win: {
-          // icon: "public/dog.ico",
+          icon: "public/f1.ico",
         },
       },
     },
