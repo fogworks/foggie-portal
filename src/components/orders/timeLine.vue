@@ -177,7 +177,8 @@ function loadChallengeList() {
       if (res.code == 200) {
         data.Challenge.total = res.data.count;
         for (const item of res.data.list) {
-          item.createdAt = transferUTCTime(item.created_time);
+          // item.createdAt = transferUTCTime(item.create_time);
+          item.createdAt = item.create_time;
           if (item.state == 3) {
             item.state = "";
             item.stateTitle = "Challenging";
@@ -214,7 +215,8 @@ function loadMerkleList() {
       if (res.code == 200) {
         data.Merkle.total = res.data.count;
         for (const item of res.data.list) {
-          item.createdAt = transferUTCTime(item.createdAt);
+          // item.createdAt = transferUTCTime(item.create_time);
+          item.createdAt = item.create_time;
           item.state = "success";
         }
         data.Merkle.dataList = data.Merkle.dataList.concat(res.data.list);
