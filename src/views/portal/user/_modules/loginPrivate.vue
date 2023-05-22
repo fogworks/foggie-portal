@@ -72,7 +72,7 @@
             style="width: 100%; margin-bottom: 30px; height: 46px"
             @click="submit(registerFormRef)"
           >
-            register as a new user
+            Confirm
           </el-button>
           <el-button
             v-if="passwordIsExist"

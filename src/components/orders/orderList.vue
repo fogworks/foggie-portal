@@ -299,7 +299,6 @@
               placement="top"
             >
               <svg-icon
-                v-if="![4, 5].includes(item.state)"
                 icon-class="release"
                 size="34"
                 style="margin-right: 10px"
