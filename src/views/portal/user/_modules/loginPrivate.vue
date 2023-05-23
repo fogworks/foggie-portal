@@ -417,6 +417,7 @@ onMounted(() => {
   background: #f2f6ff;
   border-radius: 20px;
   opacity: 1;
+  border: none;
 }
 
 .Register_btn {

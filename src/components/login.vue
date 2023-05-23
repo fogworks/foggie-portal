@@ -6,7 +6,7 @@
       </template>
       <div class="text item my_login_box">
         <el-form
-        @submit.native.prevent
+          @submit.native.prevent
           ref="registerFormRef"
           :model="registerForm"
           :rules="registerRules"
@@ -59,7 +59,7 @@
             style="width: 100%; margin-bottom: 30px; height: 46px"
             @click="submit(registerFormRef)"
           >
-            Log in/register as a new user
+            Confirm
           </el-button>
         </el-form>
       </div>

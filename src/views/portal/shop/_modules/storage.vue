@@ -135,7 +135,7 @@
               <div>Buying cycle：{{ formLine.week }}Week</div>
               <div>Total order price：{{ orderDetail.total }} DMC</div>
             </div>
-            <label>Deposit amount:</label>
+            <label>Prestore amount:</label>
             <div
               class="formBox clearfix"
               style="margin-left: 20px; margin-top: 15px"
@@ -143,7 +143,7 @@
               <el-input
                 v-model="formLine.prestoreDMC"
                 maxlength="6"
-                :placeholder="`Minimum pre-storage${(
+                :placeholder="`Minimum ${(
                   orderDetail.total - orderDetail.deposit
                 ).toFixed(4)}`"
                 style="width: 270px"
@@ -327,9 +327,10 @@ function blurPrestoreDMC() {
     });
     return false;
   } else if (
-    state.formLine.prestoreDMC <
-    state.orderDetail.total - state.orderDetail.deposit
+    (+state.formLine.prestoreDMC).toFixed(4) <
+    (state.orderDetail.total - state.orderDetail.deposit).toFixed(4)
   ) {
+    console.log(state.orderDetail.total, state.orderDetail.deposit);
     ElMessage({
       message: `The deposit amount cannot be less than ${(
         state.orderDetail.total - state.orderDetail.deposit
@@ -454,7 +455,7 @@ async function submit() {
             }
           )
             .then(async () => {
-              order_sync();
+              order_sync(res.data);
             })
             .catch(() => {});
         }
@@ -468,16 +469,22 @@ async function submit() {
   }
 }
 const maxRetry = ref(0);
-const order_sync = async () => {
+const order_sync = async (transactionId) => {
   maxRetry.value++;
   if (maxRetry.value > 5) {
     maxRetry.value = 0;
+    ElMessage({
+      message: `Failed to pay, please pay again`,
+      type: "error",
+      grouping: true,
+    });
     loading.value = false;
     return false;
   }
   orderSync({
     email: email.value,
     billId: state.orderDetail.orderID,
+    transactionId,
   }).then((req) => {
     if (req.code == 200) {
       state.formLine.prestoreDMC = "";

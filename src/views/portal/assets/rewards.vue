@@ -38,7 +38,7 @@
               <el-button
                 :loading="btnLoading"
                 class="collect-btn"
-                :disabled="checkDisabled(row)"
+                :disabled="!+row.settlement_pledge_amount > 0"
                 style="width: unset; height: unset; border-radius: 99px"
                 type="primary"
                 link
@@ -73,7 +73,6 @@ import {
 import { transferUTCTime } from "@/utils/util";
 import { useStore } from "vuex";
 import { dividend_list, claim_order } from "@/api/common.js";
-import RippleInk from "@/components/rippleInk";
 const emits = defineEmits(["update:visible", "reload"]);
 const store = useStore();
 const btnLoading = ref(false);

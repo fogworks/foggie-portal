@@ -378,7 +378,7 @@
               <svg-icon
                 icon-class="cancel"
                 size="30"
-                v-if="item.state == 0 && ![4, 5].includes(item.state)"
+                v-if="item.state == 0 && checkCancel()"
                 style="margin-right: 10px"
                 @click.stop="cancelOrder(item)"
               ></svg-icon>
@@ -572,7 +572,18 @@ function loadOrderList() {
     })
     .catch((error) => {});
 }
-
+function checkCancel() {
+  let nowTime = new Date().getTime();
+  let endTime =
+    new Date(orderList.value?.[0]?.created_time).getTime() +
+    1000 * 60 * 60 * 24 * 7;
+  let time = +endTime - +nowTime;
+  if (time > 0) {
+    return false;
+  } else {
+    return true;
+  }
+}
 function openUpload(item) {
   let nowTime = new Date().getTime();
   let endTime =
@@ -636,12 +647,12 @@ function popoverClick(type, item) {
   }
   if (type == "submitMerkle") {
     ElMessageBox.confirm(
-      "You need to pay to take the challenge, are you sure to take the challenge?",
+      "<Strong>Are you sure to upload Merkel?</Strong> <br /><span>This behavior is to verify the reliability of the storage provider and is also a prerequisite for conducting storage challenges without payment. <br/> If there is any inconsistency, you can choose to refund.</span>",
       "Warning",
       {
         confirmButtonText: "OK",
         cancelButtonText: "Cancel",
-        type: "warning",
+        dangerouslyUseHTMLString: true,
       }
     )
       .then(() => {
@@ -682,12 +693,12 @@ function popoverClick(type, item) {
 }
 const challengeMiner = (item) => {
   ElMessageBox.confirm(
-    "You need to pay to take the challenge, are you sure to take the challenge?",
+    "<Strong>You need to pay to take the challenge, are you sure to take the challenge?</Strong><br />This behavior is to verify the consistency of your data (when you suspect there is a problem with your data).<br /> When Merkel reaches an agreement, the challenge can be initiated, and the storage party will respond within 24 hours.<br /> <strong>But a fee is required.</strong>  <br />If the verification is successful, a processing fee of 10% of the PST unit price is required.<br /> If there is inconsistency, the storage party can arbitrate. <br />Please do not cheat in any way, otherwise the storage party will successfully arbitrate and you will need to pay a handling fee of 100 times.",
     "Warning",
     {
       confirmButtonText: "OK",
       cancelButtonText: "Cancel",
-      type: "warning",
+      dangerouslyUseHTMLString: true,
     }
   )
     .then(() => {
