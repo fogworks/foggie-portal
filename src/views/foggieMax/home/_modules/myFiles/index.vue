@@ -843,7 +843,13 @@ const doSearch = async () => {
     breadcrumbList.prefix = [];
     let token = store.getters.token;
     let type = "foggie";
-    let data = await find_objects(email.value, type, token, deviceData.value, keyWord.value);
+    let data = await find_objects(
+      email.value,
+      type,
+      token,
+      deviceData.value,
+      keyWord.value
+    );
     tableData.data = [];
     initFileData(data);
   }
@@ -854,7 +860,7 @@ const setPrefix = (item, isTop = false) => {
     if (!breadcrumbList.prefix.length) return;
     breadcrumbList.prefix = [];
   } else {
-    breadcrumbList.prefix = breadcrumbList.prefix.filter((el, index) => {
+    breadcrumbList.prefix = breadcrumbList?.prefix?.filter((el, index) => {
       let targetIndex = 0;
       if (el === item) targetIndex = index;
       return index <= targetIndex;

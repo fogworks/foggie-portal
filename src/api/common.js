@@ -94,7 +94,7 @@ export function claim_order(data) {
 export function getDmcUsername(data) {
   return request({
     // url: baseUrl + '/user/get_username',
-    url: '/client_api/user/get_username',
+    url: baseUrl + '/user/get_username',
     method: 'POST',
     data,
   });

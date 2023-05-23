@@ -21,11 +21,11 @@
             </div>
           </template>
         </el-menu-item>
-        <el-menu-item index="assets" v-if="userName !== 'Login' && ChainId">
+        <el-menu-item index="assets" v-if="hasReady">
           <svg-icon icon-class="income"></svg-icon>
           <template #title> Assets </template>
         </el-menu-item>
-        <el-menu-item index="device" v-if="userName !== 'Login' && ChainId">
+        <el-menu-item index="device" v-if="hasReady">
           <svg-icon icon-class="devices"></svg-icon>
           <template #title> Device </template>
         </el-menu-item>
@@ -42,7 +42,7 @@
             </el-tooltip>
           </template>
         </el-menu-item>
-        <el-menu-item index="shop" v-if="userName !== 'Login' && ChainId">
+        <el-menu-item index="shop" v-if="hasReady">
           <svg-icon icon-class="shop"></svg-icon>
           <template #title> Shop </template>
         </el-menu-item>
@@ -64,20 +64,24 @@
 
 <script setup>
 import upload from "@/components/upload";
-import { ref, computed } from "vue";
+import { ref, computed, watchEffect } from "vue";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
+import { getUserLoginStatus } from "@/api/common";
 import { getChain_id } from "@/api/common.js";
 const store = useStore();
 
 let uploadIsShow = computed(() => store.getters.uploadIsShow);
 let ChainId = computed(() => store.getters.ChainId);
 const route = useRoute();
+
 const isCollapse = ref(false);
 const defaultActive = ref(route.path.slice(1, route.path.length));
 
 // const userName = computed(() => store.getters["token/currentUser"] || "Login");
 const userName = computed(() => store.getters.userInfo?.email || "Login");
+const email = computed(() => store.getters.userInfo?.email);
+const hasReady = computed(() => store.getters.hasReady);
 
 const changeCollapse = () => {
   isCollapse.value = !isCollapse.value;
@@ -90,6 +94,21 @@ const getChainId = () => {
   });
 };
 getChainId();
+function loadUserLoginStatus() {
+  let params = {
+    email: email.value,
+  };
+  getUserLoginStatus(params).then((res) => {
+    if (res.code == 10002) {
+      store.dispatch("global/setHasReady", true);
+    } else {
+      store.dispatch("global/setHasReady", false);
+    }
+  });
+}
+watchEffect(() => {
+  loadUserLoginStatus();
+});
 </script>
 
 <style lang="scss" scoped>

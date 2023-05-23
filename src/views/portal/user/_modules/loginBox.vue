@@ -5,7 +5,7 @@
         <div class="my_login_right">
           <h1 class="my_login_right_title stagger1">
             Sign In
-            <el-tooltip
+            <!-- <el-tooltip
               class="item"
               content="A new account will be registered during the first login, please enter the verification code to log in your account."
               placement="top-start"
@@ -13,7 +13,7 @@
               <el-icon class="el-icon-info question_icon"
                 ><InfoFilled
               /></el-icon>
-            </el-tooltip>
+            </el-tooltip> -->
           </h1>
           <el-form
             @submit.native.prevent

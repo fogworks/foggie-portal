@@ -71,14 +71,14 @@
           <div class="plus-num">{{ nftCount }}</div>
           <div class="dmc nft">NFT</div>
         </div> -->
-          <div class="flex today-right">
+          <!-- <div class="flex today-right">
             <div class="color-box">
               <el-button @click="WithdrawVisible = true">
                 <RippleInk></RippleInk>
                 Renew</el-button
               >
             </div>
-          </div>
+          </div> -->
         </template>
         <template v-else>
           <div class="flex items-center">

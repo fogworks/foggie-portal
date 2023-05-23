@@ -147,7 +147,15 @@ router.beforeEach((to, from, next) => {
     // store.commit('global/setActiveIndex', to.meta.headerRoute)
     document.title = "Foggie Portal";
   }
-  next();
+  if (!store.getters.hasReady) {
+    if (to.name !== 'User' && to.name !== 'Discover') {
+      next({ name: 'User' })
+    } else {
+      next()
+    }
+  } else {
+    next();
+  }
 });
 
 router.afterEach((to, from) => { });

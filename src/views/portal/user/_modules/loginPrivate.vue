@@ -72,7 +72,7 @@
             style="width: 100%; margin-bottom: 30px; height: 46px"
             @click="submit(registerFormRef)"
           >
-            register as a new user
+            Confirm
           </el-button>
           <el-button
             v-if="passwordIsExist"
@@ -280,6 +280,8 @@ async function importPrivateKey() {
             email: props.userInfo.email,
           }).then((res) => {
             if (res.code == 200) {
+              store.dispatch("global/setHasReady", true);
+
               emits("login");
             }
           });
@@ -295,6 +297,8 @@ async function importPrivateKey() {
                 email: props.userInfo.email,
               }).then((res) => {
                 if (res.code == 200) {
+                  store.dispatch("global/setHasReady", true);
+
                   // store.commit('global/SAVE_USERNAME', res.data)
                   emits("login");
                 }

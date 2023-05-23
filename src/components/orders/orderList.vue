@@ -299,7 +299,6 @@
               placement="top"
             >
               <svg-icon
-                v-if="![4, 5].includes(item.state)"
                 icon-class="release"
                 size="34"
                 style="margin-right: 10px"
@@ -395,7 +394,7 @@
       </div>
     </div>
   </div>
-  <TimeLine :orderId="orderId" v-if="timeLineShow"></TimeLine>
+  <TimeLine ref="timeLineRef" :orderId="orderId" v-if="timeLineShow"></TimeLine>
   <AssetsRecords
     v-if="recordsShow"
     v-model:visible="recordsShow"
@@ -497,6 +496,7 @@ const email = computed(() => $state.getters.userInfo?.email);
 const state = reactive({
   orderList: [],
 });
+const timeLineRef = ref(null);
 const { orderList } = toRefs(state);
 const recordsShow = ref(false);
 const { orderId } = toRefs(props);
@@ -530,7 +530,21 @@ function loadOrderList() {
 }
 
 function openUpload(item) {
-  $state.commit("upload/openUpload", item.id);
+  let nowTime = new Date().getTime();
+  let endTime =
+    new Date(orderList.value[0].created_time).getTime() + 1000 * 60 * 3;
+  let time = +endTime - +nowTime;
+  console.log(new Date(), new Date(orderList.value[0].created_time));
+  if (time > 0) {
+    let content = "Upload files after " + getSecondTime(+time / 1000);
+    ElNotification({
+      type: "warning",
+      message: content,
+      position: "bottom-left",
+    });
+  } else {
+    $state.commit("upload/openUpload", item.id);
+  }
 }
 function openMyFiles(item) {
   $state.commit("upload/setOrderId", item.id);
@@ -602,6 +616,11 @@ function popoverClick(type, item) {
               type: "success",
               grouping: true,
             });
+            if (timeLineShow.value) {
+              setTimeout(() => {
+                timeLineRef.value.loadMerkleList();
+              }, 2000);
+            }
           }
         });
       })
@@ -636,6 +655,11 @@ const challengeMiner = (item) => {
       };
       InitiateChallenge(params).then((res) => {
         if (res.code == 200) {
+          if (timeLineShow.value) {
+            setTimeout(() => {
+              timeLineRef.value.loadChallengeList();
+            }, 2000);
+          }
         }
       });
     })
