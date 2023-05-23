@@ -14,10 +14,7 @@
     "postuninstall": "electron-builder install-app-deps",
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make",
-    "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --out=target  --icon=public/favicon.ico",
-    "package-win32": "electron-packager . --overwrite --platform=win32 --arch=ia32 --out=target  --icon=public/favicon.ico",
-    "package-win64": "electron-packager . --overwrite --platform=win32 --arch=x64 --out=target  --icon=public/favicon.ico"
+    "make": "electron-forge make"
   },
   "main": "./background.js",
   "dependencies": {
