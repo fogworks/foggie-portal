@@ -307,6 +307,9 @@ const list = computed(() => {
       .el-progress-bar__outer {
         background: #ccc;
       }
+      .el-progress__text {
+        color: #000;
+      }
     }
     &.isActive {
       :deep {

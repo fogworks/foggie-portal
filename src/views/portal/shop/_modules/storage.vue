@@ -523,6 +523,11 @@ onMounted(() => {
   .el-input-number__increase {
     background-color: transparent;
   }
+  .el-input__wrapper {
+    .el-input__inner {
+      color: #000;
+    }
+  }
 }
 
 .viewContainer {
@@ -713,6 +718,7 @@ onMounted(() => {
 
 .dialogBody {
   margin-top: 25px;
+  color: #000;
 
   label {
     position: relative;

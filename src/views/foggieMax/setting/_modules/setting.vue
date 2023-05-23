@@ -7,15 +7,12 @@
         <p>After resetting, the device needs to be reinitialized</p>
       </div>
     </div>
-    <div class="content">
+    <!-- <div class="content">
       <div class="item-box" v-for="item in kitsList">
         <div class="name">
           {{ item.label }}
         </div>
         <div class="action">
-          <!-- <span> Reset </span> -->
-          <!-- <span> Open </span>
-          <span> Close </span> -->
           <el-switch
             v-model="item.status"
             size="large"
@@ -29,7 +26,7 @@
           />
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 

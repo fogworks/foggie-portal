@@ -438,7 +438,7 @@ defineExpose({
       .timeline-content {
         padding-left: 10px;
         font-size: 14px;
-        color: #3f4254 !important;
+        color: var(--text-color-777) !important;
       }
 
       .timeline-badge::before {

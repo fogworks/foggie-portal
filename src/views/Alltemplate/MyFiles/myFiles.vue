@@ -95,12 +95,11 @@
               style="display: flex; align-items: center; padding-left: 15px"
               @click.prevent="toDetail(row)"
             >
-              <div class="name-img">
-                <img
-                  v-if="row.type === 'application/x-directory'"
-                  src="@/assets/folder.png"
-                  alt=""
-                />
+              <div
+                class="name-img"
+                v-if="row.type === 'application/x-directory'"
+              >
+                <img src="@/assets/folder.png" alt="" />
 
                 <!-- <template v-else-if="row.isSystemImg">
                   <img v-show="theme" src="@/assets/logo-dog-black.svg" alt="" />
@@ -109,13 +108,14 @@
                 <!-- <img v-else :src="row.imgUrl" alt="" /> -->
               </div>
               <el-tooltip
-                v-if="!row.isPersistent"
                 class="box-item"
                 effect="dark"
                 content="Not Persisted"
                 placement="top-start"
               >
-                <div><i class="i-ersistent">*</i> {{ row.name }}</div>
+                <div v-if="!row.isPersistent">
+                  <i class="i-ersistent">*</i> {{ row.name }}
+                </div>
               </el-tooltip>
               <div v-if="row.isPersistent">
                 {{ row.name }}

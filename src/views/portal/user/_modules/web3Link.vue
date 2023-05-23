@@ -45,7 +45,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, getCurrentInstance} from "vue";
+import { ref, reactive, computed, onMounted, getCurrentInstance } from "vue";
 import { search_object } from "@/utils/api.js";
 import useOrderList from "@/views/portal/_modules/hooks/useOrderList";
 import { useStore } from "vuex";
@@ -93,7 +93,7 @@ const downloadItem = () => {
       peerId,
       ip: ip1,
       port,
-      token
+      token,
     };
     let data2 = {
       cid,
@@ -102,7 +102,7 @@ const downloadItem = () => {
       peerId,
       ip: ip2,
       port,
-      token
+      token,
     };
     pin_arr.list = [];
     search_object(data1).then(async (r) => {
@@ -191,6 +191,11 @@ onMounted(search);
         .el-icon {
           color: #fff;
         }
+      }
+    }
+    > .el-input__wrapper {
+      .el-input__inner {
+        color: #000;
       }
     }
   }

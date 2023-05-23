@@ -30,27 +30,71 @@
           <svg-icon icon-class="list"></svg-icon>
           Assets Records
         </el-link>
-        <div style="font-size: 15px; color: rgba(255, 255, 255, 0.7)">
-          <el-tag type="info" effect="dark" round v-if="item.state == '0'">
+        <div
+          style="font-size: 15px; color: rgba(255, 255, 255, 0.7)"
+          class="right-tag"
+        >
+          <el-tag
+            type="info"
+            title="Subscription not agreed, waiting..."
+            effect="dark"
+            round
+            v-if="item.state == '0'"
+          >
             Subscription not agreed, waiting...</el-tag
           >
-          <el-tag effect="dark" round v-if="item.state == '1'"
+
+          <el-tag
+            effect="dark"
+            title="order status delivery"
+            round
+            v-if="item.state == '1'"
             >order status delivery</el-tag
           >
-          <el-tag type="warning" effect="dark" round v-if="item.state == '2'">
+          <el-tag
+            title="Insufficient deposit, the order is about to end"
+            type="warning"
+            effect="dark"
+            round
+            v-if="item.state == '2'"
+          >
             Insufficient deposit, the order is about to end
           </el-tag>
-          <el-tag effect="dark" round v-if="item.state == '3'">
+          <el-tag
+            title="With sufficient deposit, the order is still in delivery in the next
+            cycle"
+            effect="dark"
+            round
+            v-if="item.state == '3'"
+          >
             With sufficient deposit, the order is still in delivery in the next
             cycle
           </el-tag>
-          <el-tag type="success" effect="dark" round v-if="item.state == '4'">
+          <el-tag
+            title="Order has ended"
+            type="success"
+            effect="dark"
+            round
+            v-if="item.state == '4'"
+          >
             Order has ended</el-tag
           >
-          <el-tag type="danger" effect="dark" round v-if="item.state == '5'">
+          <el-tag
+            title="Order has been canceled"
+            type="danger"
+            effect="dark"
+            round
+            v-if="item.state == '5'"
+          >
             Order has been canceled</el-tag
           >
-          <el-tag type="warning" effect="dark" round v-if="item.state == '6'">
+          <el-tag
+            title="The order will be canceled in the next cycle"
+            type="warning"
+            effect="dark"
+            round
+            v-if="item.state == '6'"
+          >
             The order will be canceled in the next cycle
           </el-tag>
         </div>
@@ -299,8 +343,8 @@
               placement="top"
             >
               <svg-icon
-                icon-class="release"
-                size="34"
+                icon-class="withdraw"
+                size="36"
                 style="margin-right: 10px"
                 @click.stop="
                   dmcType = 'release';
@@ -774,6 +818,7 @@ onMounted(() => {
 
   background: rgba(50, 61, 109, 0.5);
   background: linear-gradient(180deg, #3913b8 0%, #75e0e6 100%);
+  background: var(--liner-gradient);
   box-shadow: rgb(255 255 255 / 20%) 0px 0px 0px 0.5px inset;
   backdrop-filter: blur(40px);
   border-radius: 20px;
@@ -794,6 +839,18 @@ onMounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
+    .right-tag {
+      :deep {
+        .el-tag {
+          display: inline-block;
+          max-width: 300px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          line-height: 24px;
+        }
+      }
+    }
   }
   .link {
     margin-right: 20px;
@@ -866,6 +923,7 @@ onMounted(() => {
         font-size: 19px;
         color: #dddddd;
         color: #3d3d3d;
+        color: var(--text-color);
         font-weight: 600;
         line-height: 40px;
         text-align: center;
