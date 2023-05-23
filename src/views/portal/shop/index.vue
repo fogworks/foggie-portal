@@ -235,7 +235,7 @@ onMounted(getUserAssets);
 
 .content .description {
   color: rgba(255, 255, 255, 0.6);
-  margin-top: 10px;
+  margin-top: 25px;
   font-size: 14px;
   text-align: left;
   > div {

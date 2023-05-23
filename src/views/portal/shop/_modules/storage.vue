@@ -497,7 +497,7 @@ const order_sync = async (transactionId) => {
         grouping: true,
       });
     } else {
-      order_sync();
+      order_sync(transactionId);
     }
   });
 };

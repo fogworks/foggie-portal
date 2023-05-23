@@ -631,7 +631,7 @@ function popoverClick(type, item) {
     let needSpace = getfilesize(uploadLine - used_space);
     ElNotification({
       type: "warning",
-      message: `At least ${needSpace} of files need to be uploaded to upload merkle`,
+      message: `At least ${needSpace} of files need to be uploaded to upload Merkle`,
       position: "bottom-left",
     });
     return false;
@@ -647,7 +647,7 @@ function popoverClick(type, item) {
   }
   if (type == "submitMerkle") {
     ElMessageBox.confirm(
-      "<Strong>Are you sure to upload Merkel?</Strong> <br /><span>This behavior is to verify the reliability of the storage provider and is also a prerequisite for conducting storage challenges without payment. <br/> If there is any inconsistency, you can choose to refund.</span>",
+      "<Strong>Are you sure to upload Merkle?</Strong> <br /><span>This behavior is to verify the reliability of the storage provider and is also a prerequisite for conducting storage challenges without payment. <br/> If there is any inconsistency, you can choose to refund. <br /> <strong>Once Merkle reaches an agreement, revenue can be generated.</strong> </span>",
       "Warning",
       {
         confirmButtonText: "OK",
@@ -667,7 +667,7 @@ function popoverClick(type, item) {
             item.popoverShow = false;
             ElMessage({
               showClose: true,
-              message: "The merKle tree is uploaded successfully!",
+              message: "The Merkle tree is uploaded successfully!",
               type: "success",
               grouping: true,
             });
