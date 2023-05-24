@@ -1,34 +1,12 @@
 <template>
   <div class="uploader-file" :status="status">
-    <slot
-      :file="file"
-      :list="list"
-      :status="status"
-      :paused="paused"
-      :error="error"
-      :response="response"
-      :average-speed="averageSpeed"
-      :formated-average-speed="formatedAverageSpeed"
-      :current-speed="currentSpeed"
-      :is-complete="isComplete"
-      :is-uploading="isUploading"
-      :size="size"
-      :formated-size="formatedSize"
-      :uploaded-size="uploadedSize"
-      :progress="progress"
-      :progress-style="progressStyle"
-      :progressing-class="progressingClass"
-      :time-remaining="timeRemaining"
-      :formated-time-remaining="formatedTimeRemaining"
-      :type="type"
-      :extension="extension"
-      :file-category="fileCategory"
-    >
-      <div
-        class="uploader-file-progress"
-        :class="progressingClass"
-        :style="progressStyle"
-      />
+    <slot :file="file" :list="list" :status="status" :paused="paused" :error="error" :response="response"
+      :average-speed="averageSpeed" :formated-average-speed="formatedAverageSpeed" :current-speed="currentSpeed"
+      :is-complete="isComplete" :is-uploading="isUploading" :size="size" :formated-size="formatedSize"
+      :uploaded-size="uploadedSize" :progress="progress" :progress-style="progressStyle"
+      :progressing-class="progressingClass" :time-remaining="timeRemaining"
+      :formated-time-remaining="formatedTimeRemaining" :type="type" :extension="extension" :file-category="fileCategory">
+      <div class="uploader-file-progress" :class="progressingClass" :style="progressStyle" />
       <div class="uploader-file-info">
         <div class="uploader-file-name" :title="file.name">
           <img class="iconfont-uploadType" :src="fileIcon" />
@@ -51,27 +29,13 @@
           </span>
         </div>
         <div class="uploader-file-actions" v-if="status !== 'success'">
-          <span
-            class="uploader-file-pause"
-            v-show="isBigFile"
-            @click="pause()"
-          />
-          <span
-            class="uploader-file-resume"
-            v-show="!ISCIDING"
-            @click="resume()"
-          />️
+          <span class="uploader-file-pause" v-show="isBigFile" @click="pause()" />
+          <span class="uploader-file-resume" v-show="!ISCIDING" @click="resume()" />️
           <span class="uploader-file-retry" @click="retry()" />
           <span class="uploader-file-remove" @click="remove()" />
         </div>
-        <div
-          class="uploader-file-actions"
-          v-if="status === 'success'"
-          @click="fileShare"
-        >
-          <div
-            style="color: #3f2dec; text-decoration: underline; cursor: pointer"
-          >
+        <div class="uploader-file-actions" v-if="status === 'success'" @click="fileShare">
+          <div style="color: #3f2dec; text-decoration: underline; cursor: pointer">
             Share
           </div>
         </div>
@@ -433,7 +397,7 @@ export default {
         fileSize: file.value.size,
         deviceType: file.value.deviceType,
       };
-      SaveFile(params).then((res) => {});
+      SaveFile(params).then((res) => { });
     }
 
     const toPath = () => {
@@ -684,6 +648,7 @@ export default {
                 let index = 0;
                 let errorUploadArray = [];
                 res[0].forEach((res, nindex) => {
+
                   if (res.status == "fulfilled" && res.value?.code == 200) {
                     let blobFileArrayIndex = curUploadIndex[nindex];
                     blobFileArray.value[blobFileArrayIndex][1] = true;
@@ -712,7 +677,7 @@ export default {
                   }
                 }
               })
-              .catch((error) => {});
+              .catch((error) => { });
           } else {
             resolve();
           }
@@ -880,7 +845,7 @@ export default {
             averageSpeed.value =
               Number(
                 (NUMBER.value - lastNUMBER.value) /
-                  (100 * ArrayProgress.value.length * time)
+                (100 * ArrayProgress.value.length * time)
               ) * file.value.size;
           }
           lastTime.value = curTime;
@@ -911,29 +876,35 @@ export default {
     };
     const remove = () => {
       if (file.value.size > FILE_SIZE && upload_id.value) {
-        const deletReq = new DeleteObjectReq();
-        const DeleteRequest = new DeleteObjectRequest();
-        const uploadID = new Upload();
-        deletReq.setHeader(header);
+        if (abortController.value) abortController.value.abort("Cancel request");
+        isPause.value = true;
+        paused.value = true;
+        aborted.value = false;
+        emit("remove", file.value.id);
+        file.value.cancel();
+        // const deletReq = new DeleteObjectReq();
+        // const DeleteRequest = new DeleteObjectRequest();
+        // const uploadID = new Upload();
+        // deletReq.setHeader(header);
 
-        uploadID.setKey(encodeURIComponent(file.value.urlFileName));
-        uploadID.setUploadid(upload_id.value);
+        // uploadID.setKey(encodeURIComponent(file.value.urlFileName));
+        // uploadID.setUploadid(upload_id.value);
 
-        DeleteRequest.setCidsList([""]);
-        DeleteRequest.setObjectType("multipart");
-        DeleteRequest.setObjectsList([uploadID]);
-        deletReq.setRequest(DeleteRequest);
+        // DeleteRequest.setCidsList([""]);
+        // DeleteRequest.setObjectType("multipart");
+        // DeleteRequest.setObjectsList([uploadID]);
+        // deletReq.setRequest(DeleteRequest);
 
-        if (abortController.value)
-          abortController.value.abort("Cancel request");
+        // if (abortController.value)
+        //   abortController.value.abort("Cancel request");
 
-        client.deleteObject(deletReq, {}, (error, res) => {
-          isPause.value = true;
-          paused.value = true;
-          aborted.value = false;
-          emit("remove", file.value.id);
-          file.value.cancel();
-        });
+        // client.deleteObject(deletReq, {}, (error, res) => {
+        //   isPause.value = true;
+        //   paused.value = true;
+        //   aborted.value = false;
+        //   emit("remove", file.value.id);
+        //   file.value.cancel();
+        // });
       } else {
         if (abortController.value)
           abortController.value.abort("Cancel request");
@@ -954,7 +925,7 @@ export default {
       let res = message;
       try {
         res = JSON.parse(message);
-      } catch (e) {}
+      } catch (e) { }
       response.value = res;
     };
     const fileEventsHandler = (event, args) => {
@@ -1150,12 +1121,10 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    171deg,
-    #8388fe 0%,
-    #519ff4 42%,
-    #b783c9 100%
-  ) !important;
+  background: linear-gradient(171deg,
+      #8388fe 0%,
+      #519ff4 42%,
+      #b783c9 100%) !important;
   transform: translateX(-100%);
   overflow: hidden;
 }
@@ -1283,7 +1252,7 @@ export default {
   width: 10%;
 }
 
-.uploader-file-actions > span {
+.uploader-file-actions>span {
   display: none;
   float: left;
   width: 16px;
@@ -1295,7 +1264,7 @@ export default {
   background-position: 0 0;
 }
 
-.uploader-file-actions > span:hover {
+.uploader-file-actions>span:hover {
   background-position-x: -21px;
 }
 
