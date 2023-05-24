@@ -588,10 +588,10 @@ function openUpload(item) {
   let nowTime = new Date().getTime();
   let endTime =
     new Date(orderList.value[0].created_time).getTime() + 1000 * 60 * 3;
-  let time = +endTime - +nowTime;
+  let time = ((+endTime - +nowTime) / 1000).toFixed(0);
   console.log(new Date(), new Date(orderList.value[0].created_time));
   if (time > 0) {
-    let content = "Upload files after " + getSecondTime(+time / 1000);
+    let content = "Upload files after " + getSecondTime(+time);
     ElNotification({
       type: "warning",
       message: content,
