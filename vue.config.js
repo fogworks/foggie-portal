@@ -41,6 +41,7 @@ module.exports = defineConfig({
     electronBuilder: {
       builderOptions: {
         appId: "contact@vofocorp.com",
+        asar: false,
         mac: {
           icon: "public/f1.icns",
         },
