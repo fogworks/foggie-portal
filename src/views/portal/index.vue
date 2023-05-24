@@ -99,10 +99,10 @@ function loadUserLoginStatus() {
     email: email.value,
   };
   getUserLoginStatus(params).then((res) => {
-    if (res.code == 10002) {
-      store.dispatch("global/setHasReady", true);
-    } else {
+    if (res.code == 10001) {
       store.dispatch("global/setHasReady", false);
+    } else if (res.code == 10002 || res.code == 10007) {
+      store.dispatch("global/setHasReady", true);
     }
   });
 }

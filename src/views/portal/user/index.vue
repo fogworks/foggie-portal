@@ -307,6 +307,7 @@ const hasDMC = computed(() => store.getters.userInfo?.dmc || "");
 const logout = () => {
   store.dispatch("token/logout");
   store.dispatch("global/setUserInfo", {});
+  store.dispatch("global/setHasReady", false);
   getUserInfo();
   isLogin.value = false;
 };

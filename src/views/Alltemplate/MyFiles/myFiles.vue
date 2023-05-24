@@ -364,7 +364,8 @@ function countDownRun(timestamp) {
       position: "bottom-left",
     });
   } else {
-    store.commit("upload/openUpload", orderId.value);
+    store.commit("upload/setUploadOptions", deviceData.value);
+    // store.commit("upload/openUpload", orderId.value);
   }
 }
 function openUpload() {

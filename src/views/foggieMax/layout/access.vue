@@ -81,6 +81,7 @@ const getAccessPass = () => {
       }
     })
     .catch((err) => {
+      loading.value = false;
       // getAccessPass();
     });
 };

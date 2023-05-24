@@ -12,6 +12,7 @@
         @setState="setState"
         @setTime="setTime"
         :orderId="orderId"
+        :deviceData="deviceData"
       ></orderList>
       <myFiles
         :state="state"
@@ -49,11 +50,11 @@ const userInfo = computed(() => store.getters.userInfo);
 let customDialogIsShow = ref(true);
 const clientPassword = computed(() => store.getters.clientPassword);
 
-if (clientPassword.value) {
-  customDialogIsShow.value = false;
-} else {
-  customDialogIsShow.value = true;
-}
+// if (clientPassword.value) {
+//   customDialogIsShow.value = false;
+// } else {
+//   customDialogIsShow.value = true;
+// }
 
 store.commit("upload/setOrderId", orderId);
 // if (deviceData.device_type == 'foggie_max' || deviceData.device_type == 'foggie' || deviceData.device_type == '') {

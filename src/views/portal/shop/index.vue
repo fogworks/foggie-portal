@@ -132,12 +132,24 @@ import Storage from "./_modules/storage";
 import Foggie from "./_modules/foggie";
 import { userAssets } from "@/api/order/orderList.js";
 import { useStore } from "vuex";
+import usePrivateKey from "@/views/portal/user/_modules/hooks/usePrivateKey";
+
 // import Storage from "@/views/Alltemplate/Storage/Storage";
 const isShop = ref(true);
 const active = ref("");
-const handleActive = (val = "") => {
-  isShop.value = !isShop.value;
-  active.value = val;
+const { passwordIsExist, loadUserLoginStatus } = usePrivateKey();
+
+const handleActive = async (val = "") => {
+  if (val == "storage") {
+    await loadUserLoginStatus();
+    if (passwordIsExist.value) {
+      isShop.value = !isShop.value;
+      active.value = val;
+    }
+  } else {
+    isShop.value = !isShop.value;
+    active.value = val;
+  }
 };
 const store = useStore();
 const balanceCount = ref(0);

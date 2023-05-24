@@ -531,6 +531,9 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  deviceData: {
+    type: Object,
+  },
 });
 const overShow = ref(false);
 const ChainId = computed(() => $state.getters.ChainId);
@@ -543,7 +546,7 @@ const state = reactive({
 const timeLineRef = ref(null);
 const { orderList } = toRefs(state);
 const recordsShow = ref(false);
-const { orderId } = toRefs(props);
+const { orderId, deviceData } = toRefs(props);
 function loadOrderList() {
   let params = {
     orderId: props.orderId,
@@ -598,7 +601,9 @@ function openUpload(item) {
       position: "bottom-left",
     });
   } else {
-    $state.commit("upload/openUpload", item.id);
+    store.commit("upload/setUploadOptions", deviceData.value);
+
+    // $state.commit("upload/openUpload", item.id);
   }
 }
 function openMyFiles(item) {
