@@ -31,6 +31,7 @@ import Access from "./access";
 import Welcome from "../welcome";
 import Setting from "../setting";
 import { useStore } from "vuex";
+import { sync_device } from "@/api/order/orderList";
 import { get_service_info, detected_net } from "@/utils/api.js";
 import {
   ref,
@@ -62,27 +63,6 @@ export default {
 
     provide("deviceData", deviceData);
     provide("requestTarget", deviceData);
-
-    const store = useStore();
-    if (
-      deviceData.device_type == "foggie_max" ||
-      deviceData.device_type == "foggie" ||
-      deviceData.device_type == ""
-    ) {
-      let orderId = readonly(deviceData.foggie_id);
-      // test
-      // orderId = 100;
-      store.commit("upload/setOrderId", orderId);
-      if (deviceData.device_type == "foggie_max") {
-        store.commit("upload/setDeviceType", "2");
-      } else {
-        store.commit("upload/setDeviceType", "1");
-      }
-    } else {
-      const orderId = readonly(deviceData.foggie_id);
-      store.commit("upload/setOrderId", orderId);
-      store.commit("upload/setDeviceType", "3");
-    }
 
     const accessible = ref(false);
     const loading = ref(false);
