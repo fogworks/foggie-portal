@@ -81,6 +81,7 @@
         :infinite-scroll-immediate="false"
         infinite-scroll-distance="'150px'"
         :infinite-scroll-disabled="false"
+        :row-style="rowState"
       >
         <el-table-column
           label="Name"
@@ -107,17 +108,29 @@
                 </template> -->
                 <!-- <img v-else :src="row.imgUrl" alt="" /> -->
               </div>
+
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                content="File needs to be re-uploaded"
+                placement="top-start"
+              >
+                <div v-if="!row.is_local">
+                  {{ row.name }}
+                </div>
+              </el-tooltip>
+
               <el-tooltip
                 class="box-item"
                 effect="dark"
                 content="Not Persisted"
                 placement="top-start"
               >
-                <div v-if="!row.isPersistent">
+                <div v-if="!row.isPersistent && row.is_local">
                   <i class="i-ersistent">*</i> {{ row.name }}
                 </div>
               </el-tooltip>
-              <div v-if="row.isPersistent">
+              <div v-if="row.isPersistent && row.is_local">
                 {{ row.name }}
               </div>
             </div>
@@ -269,13 +282,23 @@ import { useStore } from "vuex";
 const store = useStore();
 const route = useRoute();
 const { proxy } = getCurrentInstance();
-const emits = defineEmits(["currentPrefix"]);
+const emits = defineEmits(["currentPrefix", "getLocal"]);
 
 // const orderId = computed(() => store.getters.orderId);
 
 const chainId = computed(() => store.getters.ChainId);
 const email = computed(() => store.getters.userInfo?.email);
 const deviceType = computed(() => store.getters.deviceType);
+
+const rowState = ({ row }) => {
+  let style = {};
+  if (!row.is_local) {
+    style = {
+      backgroundColor: "yellow",
+    };
+  }
+  return style;
+};
 
 watch(
   () => store.getters.uploadIsShow,
@@ -291,6 +314,7 @@ watch(
 const keyWord = ref("");
 const tableLoading = ref(false);
 const showShareDialog = ref(false);
+const canMerkle = ref(true);
 
 const props = defineProps({
   currentOODItem: Object,
@@ -424,6 +448,13 @@ const initFileData = async (data) => {
   if (!data) {
     return;
   }
+  if (data.err) {
+    proxy.$notify({
+      type: "warning",
+      message: "Failed to fetch data, please try again later",
+      position: "bottom-left",
+    });
+  }
   let params = {
     email: email.value,
     orderId: orderId.value,
@@ -485,10 +516,16 @@ const initFileData = async (data) => {
 
     let is_local = false;
     for (let k = 0; k < localFiles.length; k++) {
-      if (localFiles[k].cid === data.content.cid) {
+      if (localFiles[k].cid === data.content[j].cid) {
         is_local = true;
         break;
       }
+    }
+    // test
+    // is_local = false;
+    if (!is_local) {
+      canMerkle.value = false;
+      emits("getLocal", false);
     }
     let name = decodeURIComponent(data.content[j].key);
     if (data.prefix) {

@@ -407,15 +407,43 @@
             <el-tooltip
               class="box-item"
               effect="dark"
+              content="Yellow files in the list need to be re-uploaded"
+              placement="top"
+            >
+              <svg-icon
+                v-if="!isLocal"
+                icon-class="dinwei"
+                size="34"
+                style="margin-right: 10px"
+              ></svg-icon>
+            </el-tooltip>
+            <el-tooltip
+              class="box-item"
+              effect="dark"
               content="Challenge"
               placement="top"
             >
               <svg-icon
-                v-if="![4, 5].includes(item.state)"
+                v-if="![4, 5].includes(item.state) && isLocal"
                 icon-class="dinwei"
                 size="34"
                 style="margin-right: 10px"
                 @click.stop="challengeMiner(item)"
+              ></svg-icon>
+            </el-tooltip>
+
+
+            <el-tooltip
+              class="box-item"
+              effect="dark"
+              content="Yellow files in the list need to be re-uploaded"
+              placement="top"
+            >
+              <svg-icon
+                v-if="!isLocal"
+                style="color: rgb(16 57 255)"
+                icon-class="setting"
+                size="30"
               ></svg-icon>
             </el-tooltip>
 
@@ -426,7 +454,7 @@
               placement="top"
             >
               <svg-icon
-                v-if="![4, 5].includes(item.state)"
+                v-if="![4, 5].includes(item.state) && isLocal"
                 @click.stop="popoverClick('submitMerkle', item)"
                 style="color: rgb(16 57 255)"
                 icon-class="setting"
@@ -539,6 +567,9 @@ const props = defineProps({
     type: Object,
     default: () => ({ data: {} }),
   },
+  isLocal: {
+    type: Boolean,
+  }
 });
 
 const overShow = ref(false);
