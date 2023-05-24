@@ -196,7 +196,7 @@ function loadChallengeList() {
             item.stateTitle = "Challenge timeout";
           }
         }
-        data.Challenge.dataList = data.Challenge.dataList.concat(res.data.list);
+        data.Challenge.dataList = res.data.list;
       }
     })
     .catch((error) => {
@@ -219,7 +219,7 @@ function loadMerkleList() {
           item.createdAt = item.create_time;
           item.state = "success";
         }
-        data.Merkle.dataList = data.Merkle.dataList.concat(res.data.list);
+        data.Merkle.dataList = res.data.list;
         console.log(data.Merkle.dataList);
       }
     })

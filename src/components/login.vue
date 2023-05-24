@@ -189,8 +189,7 @@ function submit(FormRef) {
                 );
 
                 loading.value = false;
-
-                emits("closeDialog");
+                loadUserLoginStatus();
 
                 // router.push({ path: '/Alltemplate/Home' })
               } else {
@@ -268,6 +267,7 @@ function loadUserLoginStatus() {
       passwordIsExist.value = false;
     } else if (res.code == 10002) {
       passwordIsExist.value = true;
+      emits("closeDialog");
     } else if (res.code == 10007) {
       importPrivateKey();
     }
