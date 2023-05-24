@@ -14,12 +14,14 @@
         :orderId="orderId"
         :activeDeviceData="activeDeviceData"
         :deviceData="deviceData"
+        :isLocal="isLocal"
       ></orderList>
       <myFiles
         :state="state"
         :orderId="orderId"
         :createdTime="createdTime"
         :deviceData="deviceData"
+        @getLocal="getLocal"
       ></myFiles>
     </template>
   </div>
@@ -59,6 +61,11 @@ const orderId = readonly(props.deviceData.space_order_id);
 const userInfo = computed(() => store.getters.userInfo);
 let customDialogIsShow = ref(true);
 const clientPassword = computed(() => store.getters.clientPassword);
+const isLocal = ref(true);
+
+const getLocal = (val)=>{
+  isLocal.value = val;
+}
 
 // if (clientPassword.value) {
 //   customDialogIsShow.value = false;

@@ -11,6 +11,8 @@ export function fileUpload(data, controller, callback) {
       "Content-Type": "multipart/form-data",
     },
     timeout: 600000,
+    // timeout: 1000,
+
     data,
     signal: controller.signal,
     onUploadProgress: function (progressEvent) {
