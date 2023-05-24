@@ -118,7 +118,7 @@ export const oodFileList = (email, type, token, deviceData, prefix) => {
   });
 };
 
-export const find_objects = (email, type ,token, deviceData, key_marker) => {
+export const find_objects = (email, type, token, deviceData, key_marker) => {
   let url = `${baseUrl}/find_objects`,
     prefix = "",
     delimiter = "/",
@@ -266,7 +266,21 @@ export const voodActivate = (data) => {
     data: data,
   });
 };
-
+export const check_coupon_number = (coupon_num) => {
+  if (coupon_num && coupon_num !== null) {
+    return request({
+      url: `${apiUrl}/api/coupon/check_coupon_number?coupon_number=${coupon_num}`,
+      method: "GET",
+    });
+  }
+};
+export const orderRecharge = (data) => {
+  return request({
+    url: `${apiUrl}/api/oms/order_renewal`,
+    method: "POST",
+    data: data,
+  });
+};
 export const OwnerBills = (account) => {
   if (account && account !== null) {
     let url = `/x/bills?owner_id=${account}`;

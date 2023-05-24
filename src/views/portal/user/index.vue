@@ -159,7 +159,6 @@ const router = useRouter();
 const isNew = ref(false); //
 // const form = reactive(props.form);
 const { proxy } = getCurrentInstance();
-const requestTarget = inject("requestTarget");
 
 const form = reactive({
   password: "",
@@ -308,16 +307,17 @@ const logout = () => {
   store.dispatch("token/logout");
   store.dispatch("global/setUserInfo", {});
   store.dispatch("global/setHasReady", false);
+  window.localStorage.removeItem("tokenMap");
   getUserInfo();
   isLogin.value = false;
 };
 
-const unbind = () => {
-  unbindVisible.value = false;
-  unbind_foggie(requestTarget).then((res) => {
-    logout();
-  });
-};
+// const unbind = () => {
+//   unbindVisible.value = false;
+//   unbind_foggie().then((res) => {
+//     logout();
+//   });
+// };
 // watch(
 //   email,
 //   (val) => {

@@ -76,6 +76,12 @@ export default {
     const hasReady = ref(false);
     const isInSetup = ref(false);
     const initFoggieDate = async () => {
+      // if (!deviceData.device_type) {
+      //   accessible.value = true;
+      //   hasReady.value = true;
+      //   haveNet.value = true;
+      //   return;
+      // }
       loading.value = true;
       detected_net(deviceData).then((res) => {
         if (res.result.detected_net) {
@@ -128,18 +134,6 @@ export default {
           loading.value = false;
         });
     };
-    // watch(
-    //   accessible,
-    //   (val) => {
-    //     if (val) {
-    //       loading.value = true;
-    //       getServiceInfo();
-    //     }
-    //   },
-    //   {
-    //     immediate: true,
-    //   }
-    // );
     const accessCallback = () => {
       getServiceInfo();
     };

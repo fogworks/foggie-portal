@@ -436,7 +436,7 @@ const initFileData = async (data) => {
   localFiles = r.data.list;
 
   tableData.data = [];
-  for (let i = 0; i < data.commonPrefixes.length; i++) {
+  for (let i = 0; i < data.commonPrefixes?.length; i++) {
     let item = {
       isDir: true,
       name: decodeURIComponent(data.commonPrefixes[i]),
@@ -467,7 +467,7 @@ const initFileData = async (data) => {
     tableData.data.push(item);
   }
 
-  for (let j = 0; j < data.content.length; j++) {
+  for (let j = 0; j < data.content?.length; j++) {
     let date = transferTime(data.content[j].lastModified);
     let isDir = false;
     const type = data.content[j].key.substring(

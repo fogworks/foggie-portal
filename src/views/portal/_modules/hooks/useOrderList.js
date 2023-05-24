@@ -102,6 +102,7 @@ export default function useOrderList() {
     };
 
     return {
+        keyWord,
         loading,
         spaceList,
         deviceList,

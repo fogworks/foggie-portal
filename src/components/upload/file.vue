@@ -431,7 +431,7 @@ export default {
         orderId: file.value.orderId,
         filePath: encodeURIComponent(file.value.urlFileName),
         fileSize: file.value.size,
-        deviceType: file.value.deviceType,
+        deviceType: +file.value.deviceType,
       };
       SaveFile(params).then((res) => {});
     }
@@ -486,7 +486,7 @@ export default {
       form.append("file", smallFile.file, name);
       form.append("fileCategory", 1);
       form.append("email", email.value);
-      form.append("deviceType", smallFile.deviceType);
+      form.append("deviceType", +smallFile.deviceType);
       form.append("fileName", encodeURIComponent(name));
       form.append("md5", fileMd5.value);
       form.append("wholeMd5", fileMd5.value);
@@ -532,7 +532,7 @@ export default {
           token: token,
           peerId: peerId,
           email: email.value,
-          deviceType: file.value.deviceType,
+          deviceType: +file.value.deviceType,
         };
 
         uploadMultipart(params)
@@ -571,7 +571,7 @@ export default {
                   let blob = blobSlice.call(file.value.file, start, end);
                   currentChunk1++;
                   let form = new FormData();
-                  form.append("deviceType", file.value.deviceType);
+                  form.append("deviceType", +file.value.deviceType);
 
                   form.append("fileCategory", "2");
                   form.append(
@@ -822,9 +822,9 @@ export default {
             // token: token,
             // peerId: peerId,
             fileSize: file.value.size,
-            // email: email.value,
+            email: email.value,
             md5: fileMd5.value,
-            deviceType: file.value.deviceType,
+            deviceType: +file.value.deviceType,
           };
 
           fileComplete(params)

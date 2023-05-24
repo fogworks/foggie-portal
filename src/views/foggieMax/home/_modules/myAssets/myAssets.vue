@@ -73,7 +73,7 @@
         </div> -->
           <!-- <div class="flex today-right">
             <div class="color-box">
-              <el-button @click="WithdrawVisible = true">
+              <el-button @click="rechargeOrder">
                 <RippleInk></RippleInk>
                 Renew</el-button
               >
@@ -108,6 +108,7 @@
         v-model:visible="NftDialogVisible"
         :nft-link="nftLink"
       ></NftDialog>
+      <ReNew ref="reNewRef"></ReNew>
     </div>
   </div>
 </template>
@@ -115,6 +116,7 @@
 <script>
 import { ref, reactive, onMounted, watchEffect, toRefs, inject } from "vue";
 import NftDialog from "./nftDialog";
+import ReNew from "./reNew";
 import Rewards from "./rewards";
 import AssetsRecords from "@/components/orders/assetsRecords";
 import BigNumber from "bignumber.js";
@@ -137,6 +139,7 @@ export default {
     MyEcharts,
     RippleInk,
     NftDialog,
+    ReNew,
   },
   props: {
     currentOODItem: {
@@ -157,6 +160,7 @@ export default {
     const WithdrawVisible = ref(false);
     const NftDialogVisible = ref(false);
     const lastweekCount = ref(0);
+    const reNewRef = ref(null);
     const lastWeekOptions = reactive({
       color: "#fff",
       grid: {
@@ -206,6 +210,9 @@ export default {
         },
       ],
     });
+    const rechargeOrder = () => {
+      reNewRef.value.rechargeOrder();
+    };
     // const estimateDMC = ref(0);
     const adminCategoriesListInit = async () => {
       getDMC();
@@ -396,6 +403,7 @@ export default {
       currentOODItem,
       nftLink,
       deviceData,
+      reNewRef,
       adminCategoriesListInit,
       getDMC,
       initYesterdayScore,
@@ -403,6 +411,7 @@ export default {
       initAmount,
       reload,
       handleTimeStamp,
+      rechargeOrder,
     };
   },
 };

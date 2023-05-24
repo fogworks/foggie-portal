@@ -417,7 +417,7 @@ const initFileData = async (data) => {
     tableData.data.push(item);
   }
 
-  for (let j = 0; j < data.content.length; j++) {
+  for (let j = 0; j < data.content?.length; j++) {
     let date = transferTime(data.content[j].lastModified);
     let isDir = false;
     const type = data.content[j].key.substring(

@@ -104,6 +104,7 @@ import {
   getCurrentInstance,
   onMounted,
 } from "vue";
+import { Search } from "@element-plus/icons-vue";
 import WifiSearching from "@/components/wifiSearching";
 import { useRouter } from "vue-router";
 import IPFrom from "./ipForm";
@@ -116,7 +117,7 @@ const router = useRouter();
 const { proxy } = getCurrentInstance();
 
 const visible = ref(false);
-const { loading, list, handleProgress, copyLink, handleID, search } =
+const { keyWord, loading, list, handleProgress, copyLink, handleID, search } =
   useOrderList();
 const emit = defineEmits(["next"]);
 const toGuide = (item) => {

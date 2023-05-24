@@ -146,6 +146,9 @@ service.interceptors.response.use(
         // removeAccessToken();
         // router.push("/login");
         store.dispatch("global/setUserInfo", {});
+        store.dispatch("global/setHasReady", false);
+        window.localStorage.removeItem("tokenMap");
+
         router.push("/user");
         // Message({
         //   message: res.error || "Error",
@@ -155,6 +158,8 @@ service.interceptors.response.use(
         return;
       } else if (code === 420) {
         store.dispatch("global/setUserInfo", {});
+        store.dispatch("global/setHasReady", false);
+        window.localStorage.removeItem("tokenMap");
         removeToken();
         router.push("/user");
         let res = await refreshToken();

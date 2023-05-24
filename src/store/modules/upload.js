@@ -29,13 +29,13 @@ const mutations = {
       state.orderId = data.device_id
 
       if (data.device_type == "foggie_max") {
-        state.deviceType = '2'
+        state.deviceType = 2
       } else {
-        state.deviceType = '1'
+        state.deviceType = 1
       }
     } else {
       state.orderId = data.space_order_id
-      state.deviceType = '3'
+      state.deviceType = 3
     }
     state.uploadIsShow = true;
   }
