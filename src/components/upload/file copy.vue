@@ -432,10 +432,7 @@ export default {
         type: "paused",
       };
       emit("chanStatus", data);
-      if (abortController.value) {
-        abortController.value.abort("Cancel request");
-      }
-
+      abortController.value.abort("Cancel request");
       file.value.cancel();
     };
     const smallLoad = async (smallFile) => {
@@ -505,82 +502,7 @@ export default {
         uploadMultipart(params)
           .then((res) => {
             if (res.code == 200) {
-              upload_id.value = res.data.uploadId;
-              ISCIDING.value = true;
-              let spark = new SparkMD5.ArrayBuffer();
-              let blobSlice =
-                File.prototype.slice ||
-                File.prototype.mozSlice ||
-                File.prototype.webkitSlice;
-              let chunks = Math.ceil(file.value.size / CHUNK_SIZE);
-              let currentChunk1 = 0;
-              let fileReader = new FileReader();
-              file.value.totalChunkCounts = chunks;
-              loadNext();
-              fileReader.onload = (e) => {
-                spark.append(e.target.result);
-                let start = currentChunk1 * CHUNK_SIZE;
-                let end =
-                  start + CHUNK_SIZE >= file.value.size
-                    ? file.value.size
-                    : start + CHUNK_SIZE;
-                let blob = blobSlice.call(file.value.file, start, end);
-                currentChunk1++;
-                let form = new FormData();
-                form.append("deviceType", file.value.deviceType);
-
-                form.append("fileCategory", "2");
-                form.append(
-                  "fileName",
-                  encodeURIComponent(file.value.urlFileName)
-                );
-                form.append("email", email.value);
-                form.append("uploadId", upload_id.value);
-                form.append("md5", spark.end());
-                form.append("partId", currentChunk1);
-                form.append("fileSize", end - start);
-                form.append("wholeFileSize", file.value.size);
-                form.append("wholeMd5", fileMd5.value);
-                form.append("minOffset", start);
-                form.append("maxOffset", end);
-                form.append("peerId", peerId);
-                form.append("token", token);
-                form.append("orderId", file.value.orderId);
-                form.append("file", blob, file.value.urlFileName);
-
-                if (currentChunk1 == chunks) {
-                  spark.destroy();
-                }
-                blobFileArray.value.push([form, false]);
-                ArrayProgress.value.push(0);
-                if (currentChunk1 < chunks) {
-                  loadNext();
-                } else {
-                  ISCIDING.value = false;
-                  isUploading.value = true;
-                  multipartUpload(file);
-                }
-              };
-              fileReader.onerror = () => {
-                file.value.cancel();
-              };
-
-              function loadNext() {
-                if (file.value && file.value.size) {
-                  let start = currentChunk1 * CHUNK_SIZE;
-                  let end =
-                    start + CHUNK_SIZE >= file.value.size
-                      ? file.value.size
-                      : start + CHUNK_SIZE;
-                  fileReader.readAsArrayBuffer(
-                    blobSlice.call(file.value.file, start, end)
-                  );
-                } else {
-                }
-              }
-
-            } else {
-              if (res.code == 30032) {
+              if (res.data.duplicateUpload) {
                 completed.value = true;
                 progress.value = 100;
                 let data = {
@@ -591,9 +513,82 @@ export default {
                 emit("chanStatus", data);
                 emit("getStatus", "Upload Success");
               } else {
-                _fileError();
-              }
+                upload_id.value = res.data.uploadId;
+                ISCIDING.value = true;
+                let spark = new SparkMD5.ArrayBuffer();
+                let blobSlice =
+                  File.prototype.slice ||
+                  File.prototype.mozSlice ||
+                  File.prototype.webkitSlice;
+                let chunks = Math.ceil(file.value.size / CHUNK_SIZE);
+                let currentChunk1 = 0;
+                let fileReader = new FileReader();
+                file.value.totalChunkCounts = chunks;
+                loadNext();
+                fileReader.onload = (e) => {
+                  spark.append(e.target.result);
+                  let start = currentChunk1 * CHUNK_SIZE;
+                  let end =
+                    start + CHUNK_SIZE >= file.value.size
+                      ? file.value.size
+                      : start + CHUNK_SIZE;
+                  let blob = blobSlice.call(file.value.file, start, end);
+                  currentChunk1++;
+                  let form = new FormData();
+                  form.append("deviceType", file.value.deviceType);
 
+                  form.append("fileCategory", "2");
+                  form.append(
+                    "fileName",
+                    encodeURIComponent(file.value.urlFileName)
+                  );
+                  form.append("email", email.value);
+                  form.append("uploadId", upload_id.value);
+                  form.append("md5", spark.end());
+                  form.append("partId", currentChunk1);
+                  form.append("fileSize", end - start);
+                  form.append("wholeFileSize", file.value.size);
+                  form.append("wholeMd5", fileMd5.value);
+                  form.append("minOffset", start);
+                  form.append("maxOffset", end);
+                  form.append("peerId", peerId);
+                  form.append("token", token);
+                  form.append("orderId", file.value.orderId);
+                  form.append("file", blob, file.value.urlFileName);
+
+                  if (currentChunk1 == chunks) {
+                    spark.destroy();
+                  }
+                  blobFileArray.value.push([form, false]);
+                  ArrayProgress.value.push(0);
+                  if (currentChunk1 < chunks) {
+                    loadNext();
+                  } else {
+                    ISCIDING.value = false;
+                    isUploading.value = true;
+                    multipartUpload(file);
+                  }
+                };
+                fileReader.onerror = () => {
+                  file.value.cancel();
+                };
+
+                function loadNext() {
+                  if (file.value && file.value.size) {
+                    let start = currentChunk1 * CHUNK_SIZE;
+                    let end =
+                      start + CHUNK_SIZE >= file.value.size
+                        ? file.value.size
+                        : start + CHUNK_SIZE;
+                    fileReader.readAsArrayBuffer(
+                      blobSlice.call(file.value.file, start, end)
+                    );
+                  } else {
+                  }
+                }
+              }
+            } else {
+              _fileError();
             }
           })
           .catch((error) => {
@@ -627,7 +622,7 @@ export default {
       }
 
       async function uploadChunk() {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
           let isLast = false;
 
           if (currentChunk.value + 1 == blobFileArray.value.length) {
@@ -648,20 +643,21 @@ export default {
               return fileUpload(item[0], abortController.value, UploadProgress);
             });
 
-            Promise.allSettled(request)
+            await Promise.allSettled(request)
               .then(async (...res) => {
                 let index = 0;
                 let errorUploadArray = [];
-                res[0].forEach((item, nindex) => {
-                  console.log(item);
-                  if (item.status == "fulfilled" && item.value?.code !== 200) {
-                    console.log(item);
+                res[0].forEach((res, nindex) => {
+                  console.log(res);
+                  if(res.status == "fulfilled" && res.value?.code !== 200){
+                    console.log(res);
+                    debugger
                   }
-                  if (item.status == "fulfilled" && item.value?.code == 200) {
+                  if (res.status == "fulfilled" && res.value?.code == 200) {
                     let blobFileArrayIndex = curUploadIndex[nindex];
                     blobFileArray.value[blobFileArrayIndex][1] = true;
                     multipartFileArray.value.push({
-                      etag: item.value?.data,
+                      etag: res.value?.data,
                       partNumber: curUploadIndex[nindex] + 1,
                     });
                     index++;
@@ -669,6 +665,9 @@ export default {
                     errorUploadArray.push(curUploadIndex[nindex]);
                   }
                 });
+
+                
+
                 if (index == request.length) {
                   resolve(res);
                 } else {
@@ -747,26 +746,19 @@ export default {
 
       function retryUpload(request = [], errorUploadArray) {
         return new Promise((resolve, reject) => {
+
           axios
             .all(request)
             .then(
               axios.spread((...res) => {
-                if (res.every(element => element.code == 200)) {
-                  res.forEach((element, index) => {
-                    multipartFileArray.value.push({
-                      etag: element.data,
-                      partNumber: Number(errorUploadArray[index]) + 1,
-                    });
-                    blobFileArray.value[errorUploadArray[index]][1] = true;
+                res.forEach((element, index) => {
+                  multipartFileArray.value.push({
+                    etag: element.data,
+                    partNumber: Number(errorUploadArray[index]) + 1,
                   });
-                  resolve(true);
-                } else {
-                  if (abortController.value.signal.aborted) {
-                    return "Cancel request";
-                  } else {
-                    resolve(false);
-                  }
-                }
+                  blobFileArray.value[errorUploadArray[index]][1] = true;
+                });
+                resolve(true);
               })
             )
             .catch((error) => {

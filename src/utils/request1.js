@@ -2,9 +2,7 @@ import axios from "axios";
 import { ElMessage, ElLoading, ElNotification } from "element-plus";
 import _ from "lodash";
 import { getToken, removeToken } from "@/utils/auth";
-import router from "@/router";
 
-import store from "@/store";
 
 const service = axios.create({
   timeout: 5000000,
@@ -73,12 +71,12 @@ service.interceptors.response.use(
     loadingInstance ? loadingInstance.close() : "";
     ElNotification({
       type: 'error',
-      message: error?.response?.data.msg || error.msg || 'network error',
+      message: error?.response?.data.msg || error.msg || error.message || 'network error' ,
       // grouping: true,
       // type: "error",
       position: 'bottom-left'
     });
-    ElMessage.error(error?.response?.data.msg || error.msg);
+    ElMessage.error(error?.response?.data.msg || error.msg || error.message);
     return Promise.reject(error);
   }
 );
