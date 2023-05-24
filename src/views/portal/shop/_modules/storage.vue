@@ -330,7 +330,6 @@ function blurPrestoreDMC() {
     (+state.formLine.prestoreDMC).toFixed(4) <
     (state.orderDetail.total - state.orderDetail.deposit).toFixed(4)
   ) {
-    console.log(state.orderDetail.total, state.orderDetail.deposit);
     ElMessage({
       message: `The deposit amount cannot be less than ${(
         state.orderDetail.total - state.orderDetail.deposit
@@ -438,13 +437,7 @@ async function submit() {
           });
           emit("getAssets");
           filterOrder();
-        } else if (res.code == 20034) {
-          //  ElMessage({
-          //   message: res.msg,
-          //   type: "error",
-          //   grouping: true,
-          // });
-        } else {
+        } else if (res.code == 20003 || res.code == 20007) {
           ElMessageBox.confirm(
             "Failed to pay the bill, do you want to try again!",
             "Warning",
@@ -458,6 +451,12 @@ async function submit() {
               order_sync(res.data);
             })
             .catch(() => {});
+        } else {
+          //  ElMessage({
+          //   message: res.msg,
+          //   type: "error",
+          //   grouping: true,
+          // });
         }
       })
       .catch((error) => {
@@ -496,6 +495,7 @@ const order_sync = async (transactionId) => {
         type: "success",
         grouping: true,
       });
+      emit("getAssets");
     } else {
       order_sync(transactionId);
     }
