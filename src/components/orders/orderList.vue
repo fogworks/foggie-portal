@@ -526,6 +526,7 @@ const emits = defineEmits(["setState"]);
 // const router = useRouter();
 const uploadIsShow = computed(() => $state.getters.uploadIsShow);
 const timeLineShow = ref(false);
+
 const props = defineProps({
   orderId: {
     type: String,
@@ -534,7 +535,12 @@ const props = defineProps({
   deviceData: {
     type: Object,
   },
+  activeDeviceData: {
+    type: Object,
+    default: () => ({ data: {} }),
+  },
 });
+
 const overShow = ref(false);
 const ChainId = computed(() => $state.getters.ChainId);
 const deviceType = computed(() => $state.getters.deviceType);
@@ -546,7 +552,19 @@ const state = reactive({
 const timeLineRef = ref(null);
 const { orderList } = toRefs(state);
 const recordsShow = ref(false);
-const { orderId, deviceData } = toRefs(props);
+const { orderId, deviceData, activeDeviceData } = toRefs(props);
+watch(
+  activeDeviceData,
+  (val) => {
+    if (val.data.space_order_id == orderId.value) {
+      loadOrderList();
+    }
+  },
+  {
+    deep: true,
+    immediate: true,
+  }
+);
 function loadOrderList() {
   let params = {
     orderId: props.orderId,

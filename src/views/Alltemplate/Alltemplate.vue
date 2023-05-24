@@ -12,6 +12,7 @@
         @setState="setState"
         @setTime="setTime"
         :orderId="orderId"
+        :activeDeviceData="activeDeviceData"
         :deviceData="deviceData"
       ></orderList>
       <myFiles
@@ -43,8 +44,17 @@ import { useStore } from "vuex";
 import { getChain_id } from "@/api/common.js";
 import { provide, defineExpose, computed, defineProps, readonly } from "vue";
 const store = useStore();
-const props = defineProps(["deviceData"]);
-const { deviceData } = toRefs(props);
+const props = defineProps({
+  deviceData: {
+    type: Object,
+    default: {},
+  },
+  activeDeviceData: {
+    type: Object,
+    default: () => ({ data: {} }),
+  },
+});
+const { deviceData, activeDeviceData } = toRefs(props);
 const orderId = readonly(props.deviceData.space_order_id);
 const userInfo = computed(() => store.getters.userInfo);
 let customDialogIsShow = ref(true);

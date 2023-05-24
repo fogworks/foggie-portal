@@ -3,11 +3,13 @@ import { useStore } from 'vuex'
 import {
     getUserLoginStatus,
     setImportPrivateKey,
+    getDmcUsername
 } from "@/api/common";
-import { ElMessageBox } from 'element-plus'
+import { ElMessageBox, ElNotification } from 'element-plus'
 export default function usePrivateKey() {
     const store = useStore()
     const email = computed(() => store.getters.userInfo.email)
+    const dmc = computed(() => store.getters.userInfo.dmc)
     const passwordIsExist = ref(false)
     function loadUserLoginStatus() {
         let params = {
@@ -36,16 +38,55 @@ export default function usePrivateKey() {
             // inputErrorMessage: 'Invalid Email',
             beforeClose: (action, instance, done) => {
                 if (action === "confirm") {
-                    setImportPrivateKey({
-                        privateKey: instance.inputValue,
-                        email: email.value,
-                    }).then((res) => {
-                        if (res.code == 200) {
-                            passwordIsExist.value = true;
-                            // store.commit('global/SAVE_USERNAME', res.data)
-                            done();
+                    getDmcUsername({ privateKey: instance.inputValue }).then(
+                        (res) => {
+                            if (res.code == 200) {
+                                if (res.data === dmc.value) {
+                                    setImportPrivateKey({
+                                        privateKey: instance.inputValue,
+                                        email: email.value,
+                                    }).then((res) => {
+                                        if (res.code == 200) {
+                                            passwordIsExist.value = true;
+                                            // store.commit('global/SAVE_USERNAME', res.data)
+                                            done();
+                                        }
+                                    });
+                                } else if (!dmc.value && res.data) {
+                                    let postdata = {
+                                        dmc: res.data,
+                                        wallet_type: "wallet",
+                                    };
+                                    updateUser(userId.value, postdata).then((res) => {
+                                        if (res && res.data && res.data.dmc) {
+                                            setImportPrivateKey({
+                                                privateKey: instance.inputValue,
+                                                email: email.value,
+                                            }).then((res) => {
+                                                if (res.code == 200) {
+                                                    passwordIsExist.value = true;
+                                                    // store.commit('global/SAVE_USERNAME', res.data)
+                                                    done();
+                                                }
+                                            });
+                                        }
+                                    });
+                                } else {
+                                    ElNotification({
+                                        type: "error",
+                                        message: "Incorrect private key filling",
+                                        position: "bottom-left",
+                                    });
+                                }
+                            } else {
+                                ElNotification({
+                                    type: "error",
+                                    message: "Incorrect private key filling",
+                                    position: "bottom-left",
+                                });
+                            }
                         }
-                    });
+                    );
                 } else {
                     done();
                 }
