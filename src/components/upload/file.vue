@@ -689,10 +689,6 @@ export default {
                 let index = 0;
                 let errorUploadArray = [];
                 res[0].forEach((item, nindex) => {
-                  console.log(item);
-                  if (item.status == "fulfilled" && item.value?.code !== 200) {
-                    console.log(item);
-                  }
                   if (item.status == "fulfilled" && item.value?.code == 200) {
                     let blobFileArrayIndex = curUploadIndex[nindex];
                     blobFileArray.value[blobFileArrayIndex][1] = true;
