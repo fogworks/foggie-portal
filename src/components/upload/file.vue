@@ -648,7 +648,7 @@ export default {
                 let index = 0;
                 let errorUploadArray = [];
                 res[0].forEach((res, nindex) => {
-
+                  console.log(res);
                   if (res.status == "fulfilled" && res.value?.code == 200) {
                     let blobFileArrayIndex = curUploadIndex[nindex];
                     blobFileArray.value[blobFileArrayIndex][1] = true;
@@ -740,6 +740,7 @@ export default {
 
       function retryUpload(request = [], errorUploadArray) {
         return new Promise((resolve, reject) => {
+
           axios
             .all(request)
             .then(
@@ -882,6 +883,7 @@ export default {
         aborted.value = false;
         emit("remove", file.value.id);
         file.value.cancel();
+
         // const deletReq = new DeleteObjectReq();
         // const DeleteRequest = new DeleteObjectRequest();
         // const uploadID = new Upload();
