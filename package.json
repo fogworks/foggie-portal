@@ -9,7 +9,7 @@
     "electron:build": "vue-cli-service electron:build",
     "electron:build_": "vue-cli-service electron:build -m --x64",
     "electron:serve": "vue-cli-service electron:serve",
-    "electron:serve2": "concurrently \"vue-cli-service electron:serve\" \"export NODE_ENV=development\" \"node --experimental-fetch server.js\"",
+    "electron:serve2": "vue-cli-service electron:serve",
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps",
     "start": "electron-forge start",

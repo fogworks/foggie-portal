@@ -385,7 +385,7 @@ const getFileList = function (scroll, prefix) {
 
 const initFileData = async (data) => {
   tableData.data = [];
-  for (let i = 0; i < data.commonPrefixes.length; i++) {
+  for (let i = 0; i < data.commonPrefixes?.length; i++) {
     let name = decodeURIComponent(data.commonPrefixes[i]);
     let item = {
       isDir: true,
@@ -883,7 +883,8 @@ watch(
 );
 defineExpose({ doSearch });
 const upload = () => {
-  store.commit("upload/openUpload", deviceData.device_id);
+  store.commit("upload/setUploadOptions", deviceData);
+  // store.commit("upload/openUpload", deviceData.device_id);
 };
 </script>
 

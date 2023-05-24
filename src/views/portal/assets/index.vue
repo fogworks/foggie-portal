@@ -77,7 +77,7 @@
 
         <div class="flex today-right">
           <div class="color-box">
-            <el-button @click="WithdrawVisible = true">
+            <el-button @click="openWithdraw">
               <RippleInk></RippleInk>
               Withdraw</el-button
             >
@@ -142,6 +142,7 @@ import { userAssets } from "@/api/order/orderList.js";
 import * as echarts from "echarts";
 import { getfilesize } from "@/utils/util";
 import RippleInk from "@/components/rippleInk";
+import usePrivateKey from "@/views/portal/user/_modules/hooks/usePrivateKey";
 import { useStore } from "vuex";
 export default {
   components: {
@@ -205,6 +206,13 @@ export default {
     const currentDmc = ref(0.0);
     const noOrderShow = ref(false);
     const closeNoBoxShow = ref(false);
+    const { passwordIsExist, loadUserLoginStatus } = usePrivateKey();
+    const openWithdraw = async () => {
+      await loadUserLoginStatus();
+      if (passwordIsExist.value) {
+        WithdrawVisible = true;
+      }
+    };
     function openNoVoodDialog() {
       closeNoBoxShow.value = true;
     }
@@ -312,6 +320,7 @@ export default {
       // initAmount,
       reload,
       getfilesize,
+      openWithdraw,
     };
   },
 };

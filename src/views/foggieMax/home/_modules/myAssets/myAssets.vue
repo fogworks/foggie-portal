@@ -150,8 +150,6 @@ export default {
     const { currentOODItem } = toRefs(props);
     const addNum = ref(0);
     const estimateNum = ref(0);
-    const balanceCount = ref(0);
-    const withDrawMoney = ref(0);
     const nftCount = ref(0);
     // const visible = ref(false);
     const recordsVisible = ref(false);
@@ -218,10 +216,6 @@ export default {
       let owner_id = sessionStorage.getItem("walletUser")
         ? sessionStorage.getItem("walletUser")
         : "";
-      getAssets(owner_id).then((r) => {
-        balanceCount.value = r.amount;
-        nftCount.value = r.nft;
-      });
 
       lastweekReward(owner_id).then((rr) => {
         lastWeekOptions.xAxis.data = rr?.map((el) => el.day);
@@ -340,12 +334,7 @@ export default {
     const walletUser = ref("");
     const walletType = ref("");
     const myQrcode = ref("");
-    const currentDmc = ref(0.0);
-    const noOrderShow = ref(false);
-    const closeNoBoxShow = ref(false);
-    function openNoVoodDialog() {
-      closeNoBoxShow.value = true;
-    }
+
     function getUserInfo() {
       user().then((res) => {
         if (res.data) {
@@ -381,30 +370,7 @@ export default {
       });
     }
     const nftLink = ref("");
-    async function initAccountMoney() {
-      let DMCUser = window.sessionStorage.getItem("walletUser") || "";
-      let user_info = await user();
-      if (user_info && user_info.data && user_info.data.dmc) {
-        DMCUser = user_info.data.dmc;
-      }
-      if (DMCUser) {
-        let data = await getAssets(DMCUser);
-        if (data && data.amount) {
-          currentDmc.value = Number(data.amount).toFixed(4);
-          // let item = {
-          //   key: "dmcAssets",
-          //   value: currentDmc.value,
-          // };
-          withDrawMoney.value = currentDmc.value;
-          // this.$emit("handleCollectTopData", item.key, item.value);
-          // this.$emit("handleCollectTopData", "nft_link", nft_link);
-          window.sessionStorage.setItem("myAssets", data.amount);
-        }
-        if (data?.nft_link) {
-          nftLink.value = data.nft_link;
-        }
-      }
-    }
+
     const reload = () => {
       setTimeout(() => {
         adminCategoriesListInit();
@@ -412,17 +378,13 @@ export default {
     };
     watchEffect(() => {
       getUserInfo();
-      initAccountMoney();
     });
     onMounted(adminCategoriesListInit);
     return {
       addNum,
       estimateNum,
-      withDrawMoney,
-      noOrderShow,
       walletUser,
       walletType,
-      balanceCount,
       nftCount,
       // visible,
       recordsVisible,
@@ -434,7 +396,6 @@ export default {
       currentOODItem,
       nftLink,
       deviceData,
-      openNoVoodDialog,
       adminCategoriesListInit,
       getDMC,
       initYesterdayScore,

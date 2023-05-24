@@ -407,15 +407,43 @@
             <el-tooltip
               class="box-item"
               effect="dark"
+              content="Yellow files in the list need to be re-uploaded"
+              placement="top"
+            >
+              <svg-icon
+                v-if="!isLocal"
+                icon-class="dinwei"
+                size="34"
+                style="margin-right: 10px"
+              ></svg-icon>
+            </el-tooltip>
+            <el-tooltip
+              class="box-item"
+              effect="dark"
               content="Challenge"
               placement="top"
             >
               <svg-icon
-                v-if="![4, 5].includes(item.state)"
+                v-if="![4, 5].includes(item.state) && isLocal"
                 icon-class="dinwei"
                 size="34"
                 style="margin-right: 10px"
                 @click.stop="challengeMiner(item)"
+              ></svg-icon>
+            </el-tooltip>
+
+
+            <el-tooltip
+              class="box-item"
+              effect="dark"
+              content="Yellow files in the list need to be re-uploaded"
+              placement="top"
+            >
+              <svg-icon
+                v-if="!isLocal"
+                style="color: rgb(16 57 255)"
+                icon-class="setting"
+                size="30"
               ></svg-icon>
             </el-tooltip>
 
@@ -426,7 +454,7 @@
               placement="top"
             >
               <svg-icon
-                v-if="![4, 5].includes(item.state)"
+                v-if="![4, 5].includes(item.state) && isLocal"
                 @click.stop="popoverClick('submitMerkle', item)"
                 style="color: rgb(16 57 255)"
                 icon-class="setting"
@@ -526,12 +554,24 @@ const emits = defineEmits(["setState"]);
 // const router = useRouter();
 const uploadIsShow = computed(() => $state.getters.uploadIsShow);
 const timeLineShow = ref(false);
+
 const props = defineProps({
   orderId: {
     type: String,
     default: "",
   },
+  deviceData: {
+    type: Object,
+  },
+  activeDeviceData: {
+    type: Object,
+    default: () => ({ data: {} }),
+  },
+  isLocal: {
+    type: Boolean,
+  }
 });
+
 const overShow = ref(false);
 const ChainId = computed(() => $state.getters.ChainId);
 const deviceType = computed(() => $state.getters.deviceType);
@@ -543,7 +583,19 @@ const state = reactive({
 const timeLineRef = ref(null);
 const { orderList } = toRefs(state);
 const recordsShow = ref(false);
-const { orderId } = toRefs(props);
+const { orderId, deviceData, activeDeviceData } = toRefs(props);
+watch(
+  activeDeviceData,
+  (val) => {
+    if (val.data.space_order_id == orderId.value) {
+      loadOrderList();
+    }
+  },
+  {
+    deep: true,
+    immediate: true,
+  }
+);
 function loadOrderList() {
   let params = {
     orderId: props.orderId,
@@ -598,7 +650,9 @@ function openUpload(item) {
       position: "bottom-left",
     });
   } else {
-    $state.commit("upload/openUpload", item.id);
+    store.commit("upload/setUploadOptions", deviceData.value);
+
+    // $state.commit("upload/openUpload", item.id);
   }
 }
 function openMyFiles(item) {

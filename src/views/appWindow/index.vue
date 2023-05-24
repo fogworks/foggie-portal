@@ -17,7 +17,11 @@
           :deviceData="item"
           v-if="item.device_type === 'foggie_max' || !item.device_type"
         ></FoggieMax>
-        <FoggieClient :deviceData="item" v-else></FoggieClient>
+        <FoggieClient
+          :activeDeviceData="deviceData"
+          :deviceData="item"
+          v-else
+        ></FoggieClient>
       </div>
     </template>
     <div class="app-left left-collapse" v-else>
@@ -131,9 +135,24 @@ const clickItem = (data) => {
   }
 };
 const syncDevice = async (data) => {
+  let deviceType;
+  if (
+    data.device_type == "foggie_max" ||
+    data.device_type == "foggie" ||
+    data.device_type == ""
+  ) {
+    if (data.device_type == "foggie_max") {
+      deviceType = "2";
+    } else {
+      deviceType = "1";
+    }
+  } else {
+    deviceType = "3";
+  }
   let d = {
     email: email.value,
     deviceId: data.device_id,
+    deviceType,
   };
   await sync_device(d)
     .then(() => {})

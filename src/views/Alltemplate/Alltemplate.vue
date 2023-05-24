@@ -12,12 +12,16 @@
         @setState="setState"
         @setTime="setTime"
         :orderId="orderId"
+        :activeDeviceData="activeDeviceData"
+        :deviceData="deviceData"
+        :isLocal="isLocal"
       ></orderList>
       <myFiles
         :state="state"
         :orderId="orderId"
         :createdTime="createdTime"
         :deviceData="deviceData"
+        @getLocal="getLocal"
       ></myFiles>
     </template>
   </div>
@@ -42,18 +46,32 @@ import { useStore } from "vuex";
 import { getChain_id } from "@/api/common.js";
 import { provide, defineExpose, computed, defineProps, readonly } from "vue";
 const store = useStore();
-const props = defineProps(["deviceData"]);
-const { deviceData } = toRefs(props);
+const props = defineProps({
+  deviceData: {
+    type: Object,
+    default: {},
+  },
+  activeDeviceData: {
+    type: Object,
+    default: () => ({ data: {} }),
+  },
+});
+const { deviceData, activeDeviceData } = toRefs(props);
 const orderId = readonly(props.deviceData.space_order_id);
 const userInfo = computed(() => store.getters.userInfo);
 let customDialogIsShow = ref(true);
 const clientPassword = computed(() => store.getters.clientPassword);
+const isLocal = ref(true);
 
-if (clientPassword.value) {
-  customDialogIsShow.value = false;
-} else {
-  customDialogIsShow.value = true;
+const getLocal = (val)=>{
+  isLocal.value = val;
 }
+
+// if (clientPassword.value) {
+//   customDialogIsShow.value = false;
+// } else {
+//   customDialogIsShow.value = true;
+// }
 
 store.commit("upload/setOrderId", orderId);
 // if (deviceData.device_type == 'foggie_max' || deviceData.device_type == 'foggie' || deviceData.device_type == '') {

@@ -336,6 +336,7 @@ function loadUserLoginStatus() {
       passwordIsExist.value = true;
       emits("login");
     } else if (res.code == 10007) {
+      emits("login");
       passwordIsExist.value = true;
       // importPrivateKey();
     }
