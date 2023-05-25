@@ -83,28 +83,6 @@
                 class=""
               />
             </el-form-item>
-            <!-- <el-form-item
-              prop="promo_code"
-              v-if="!haveUser && promo_code_checked"
-            >
-              <div class="my_login_right_input_img">
-                <img
-                  src="@/assets/system/promo_code.svg"
-                  alt="email icon"
-                  class=""
-                />
-              </div>
-              <el-input
-                ref="promo_code"
-                v-model="loginForm.promo_code"
-                :placeholder="'Invitation code (optional)'"
-                name="promo_code"
-                type="text"
-                tabindex="1"
-                autocomplete="on"
-              />
-            </el-form-item> -->
-
             <el-form-item prop="captcha_text" v-if="haveUser && showCaptcha">
               <el-input
                 ref="captcha_text"
@@ -445,6 +423,7 @@ export default {
           let postData = {
             email: that.loginForm.email,
             password: hashPwd,
+            is_client: true,
             // recaptcha_token: reCaptchaV3Token,
           };
           login(postData).then((res) => {

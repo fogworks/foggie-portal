@@ -149,7 +149,7 @@
               </div>
             </div>
             <div>
-              <div>stimated Income(DMC)</div>
+              <div>Estimated Income(DMC)</div>
               <div>
                 <span>{{ item.estimated.split(".")[0] }}</span
                 >.<span style="font-size: 16px">{{
@@ -573,7 +573,6 @@ const props = defineProps({
 
 const overShow = ref(false);
 const ChainId = computed(() => $state.getters.ChainId);
-const deviceType = computed(() => $state.getters.deviceType);
 
 const email = computed(() => $state.getters.userInfo?.email);
 const state = reactive({
@@ -599,7 +598,7 @@ function loadOrderList() {
   let params = {
     orderId: props.orderId,
     email: email.value,
-    deviceType: deviceType.value,
+    deviceType: 3,
   };
 
   getOrderById(params)

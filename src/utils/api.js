@@ -35,6 +35,12 @@ export const user = () => {
     method: "GET",
   });
 };
+export const Captcha = () => {
+  return request({
+    url: `${apiUrl}/api/accounts/captcha`,
+    method: "GET",
+  });
+};
 export const updateUser = (id, data) => {
   return request({
     url: `${apiUrl}/api/accounts/user/${id}`,

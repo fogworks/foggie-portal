@@ -87,6 +87,7 @@ const goHome = inject("goHome");
 const requestTarget = inject("requestTarget");
 const { hasExternalNetwork } = toRefs(props);
 const rate = ref(0);
+const count = ref(0);
 const timeCallback = (max) => {
   return () => {
     if (rate.value >= Number(max)) {
@@ -275,7 +276,6 @@ function hashCode(strValue) {
   hash = Math.floor(Math.abs(hash) / 63336);
   return hash;
 }
-const count = ref(0);
 const getInstallStatus = (type) => {
   return new Promise((resolve, reject) => {
     const getStatus = () => {

@@ -5,11 +5,13 @@ import {
     setImportPrivateKey,
     getDmcUsername
 } from "@/api/common";
+import { updateUser } from '@/utils/api'
 import { ElMessageBox, ElNotification } from 'element-plus'
 export default function usePrivateKey() {
     const store = useStore()
     const email = computed(() => store.getters.userInfo.email)
     const dmc = computed(() => store.getters.userInfo.dmc)
+    const userId = computed(() => store.getters.userInfo?.id || "")
     const passwordIsExist = ref(false)
     function loadUserLoginStatus() {
         let params = {
@@ -53,11 +55,11 @@ export default function usePrivateKey() {
                                         }
                                     });
                                 } else if (!dmc.value && res.data) {
-                                    let postdata = {
+                                    let postData = {
                                         dmc: res.data,
                                         wallet_type: "wallet",
                                     };
-                                    updateUser(userId.value, postdata).then((res) => {
+                                    updateUser(userId.value, postData).then((res) => {
                                         if (res && res.data && res.data.dmc) {
                                             setImportPrivateKey({
                                                 privateKey: instance.inputValue,
