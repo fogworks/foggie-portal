@@ -1,7 +1,7 @@
 // import * as cyfs from "cyfs-sdk";
 // ip":["154.64.63.133:1320"],"access_token":"ZKtO7dWHmh5U"
 import { voodInfoCheck, voodActivate } from "./api";
-export async function createDID(vpsId) {
+export async function createDID(vpsId, requestTarget) {
   const g_oodName = "";
   const g_didName = "";
   const buildDid = new BuildDid();
@@ -23,12 +23,13 @@ export async function createDID(vpsId) {
   }
   const peopleInfoObj = peopleRet.unwrap();
 
-  const r = await buildDid.getUniqueId(vpsId);
+  const r = await buildDid.getUniqueId(vpsId, requestTarget);
   if (!r.isIpCanUse) {
     console.error(`current vpsId(${vpsId}) is invalid.`);
     return;
   }
   const g_uniqueId = r.g_uniqueId;
+  console.log(g_uniqueId, 'g_uniqueId');
   const g_country = 0;
   const g_city = 0;
   const deviceInfo = {
@@ -42,7 +43,9 @@ export async function createDID(vpsId) {
     nick_name: g_oodName,
     category: cyfs.DeviceCategory.OOD,
   };
+  console.log(deviceInfo, 'deviceInfo');
   const deviceRet = buildDid.createDevice(deviceInfo);
+  console.log(deviceRet, 'deviceRet');
   if (deviceRet.err) {
     console.error(
       `createDevice owner: ${deviceInfo.owner} failed: ${deviceRet}`
@@ -77,6 +80,7 @@ export async function createDID(vpsId) {
   );
   const private_key_r = gen.unwrap().sub_key(path);
   if (private_key_r.err) {
+    console.log(private_key_r, 'private_key_r');
     return private_key_r;
   }
   const private_key = private_key_r.unwrap();
@@ -120,6 +124,15 @@ export async function createDID(vpsId) {
   if (!deviceUpChainR) {
     console.error(`upChain device failed.`);
   }
+  console.log({
+    owner: peopleInfoObj.object.to_hex().unwrap(),
+    did: peopleInfoObj.object.people_id().to_base_58(),
+    desc: deviceInfoObj.device.to_hex().unwrap(),
+    sec: deviceInfoObj.privateKey.to_vec().unwrap().toHex(),
+    mnemonic: peopleInfo.mnemonic,
+    device_id: deviceInfoObj.device.device_id().to_base_58(),
+    g_uniqueId,
+  }, "111111111111111111111111111");
   return {
     owner: peopleInfoObj.object.to_hex().unwrap(),
     did: peopleInfoObj.object.people_id().to_base_58(),
@@ -284,11 +297,11 @@ class BuildDid {
       privateKey: private_key,
     });
   }
-  async getUniqueId(vpsId) {
+  async getUniqueId(vpsId, requestTarget) {
     let isIpCanUse = false;
     let g_uniqueId = "";
     try {
-      const checkVoodRet = await voodInfoCheck(vpsId);
+      const checkVoodRet = await voodInfoCheck(vpsId, requestTarget);
       // const activeteResponse = await fetch(
       // 	`http://${ip}/check?access_token=${token}`,
       // 	{

@@ -537,6 +537,7 @@ import {
   orderRelease,
   orderAppend,
   orderCancel,
+  pay_challenge,
 } from "@/api/order/orderList";
 import { InitiateChallenge } from "@/api/myFiles/myfiles";
 import {
@@ -661,9 +662,14 @@ function handlerOver() {
   pay_challenge({
     chainId: ChainId.value,
     email: email.value,
-    orderId: props.orderId,
+    orderId: orderId.value,
   }).then((res) => {
     console.log(res);
+    ElNotification({
+      type: "success",
+      message: `Operation successful`,
+      position: "bottom-left",
+    });
   });
 }
 const uploadFileList = computed(() => $state.getters.uploadFileList);

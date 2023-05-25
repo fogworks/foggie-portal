@@ -258,10 +258,11 @@ export const IPFSSync = (ood_id, data) => {
   });
 };
 
-export const voodInfoCheck = (vpsId) => {
+export const voodInfoCheck = (vpsId, target) => {
   return request({
     url: `/v1/service/check_cyfs`,
     method: "GET",
+    target
   });
 };
 

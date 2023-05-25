@@ -35,6 +35,7 @@ export default function usePrivateKey() {
             confirmButtonText: "OK",
             cancelButtonText: "Cancel",
             inputPlaceholder: "Please enter the private key",
+            inputType: 'password',
             // inputPattern:
             //   /[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\w](?:[\w-]*[\w])?\.)+[\w](?:[\w-]*[\w])?/,
             // inputErrorMessage: 'Invalid Email',
@@ -92,7 +93,7 @@ export default function usePrivateKey() {
                 } else {
                     done();
                 }
-            },
+            }
         })
             .then(({ value }) => { })
             .catch(() => { });

@@ -58,6 +58,7 @@
                 :type="passwordType"
                 :placeholder="'Please enter password'"
                 name="password"
+                show-password
                 tabindex="2"
                 autocomplete="on"
                 class=""
@@ -78,6 +79,7 @@
                 :type="passwordType"
                 :placeholder="'Please confirm password'"
                 name="password"
+                show-password
                 tabindex="2"
                 autocomplete="on"
                 class=""
@@ -642,6 +644,9 @@ export default {
         border-radius: 99px;
         color: #000;
         --el-input-placeholder-color: #727272;
+      }
+      .el-input__suffix {
+        width: 35px;
       }
     }
     .check-item {

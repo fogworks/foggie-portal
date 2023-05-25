@@ -74,7 +74,7 @@ import {
   reset_vood,
 } from "@/utils/api";
 import NextButton from "@/components/nextButton";
-import { createDID, activeVOOD } from "@/utils/did.js";
+import { createDID } from "@/utils/did.js";
 // import CircleProgress from "@/components/circleProgress";
 const emit = defineEmits(["next", "update:preShow"]);
 const props = defineProps({
@@ -104,6 +104,7 @@ const statusMap = {
   finish: "Finish",
   fail: "Installation failed",
 };
+const resetCount = ref(0);
 const resetMethod = async () => {
   return new Promise((resolve, reject) => {
     const rest = () => {
@@ -117,8 +118,9 @@ const resetMethod = async () => {
           }
         })
         .catch(() => {
-          count.value++;
+          resetCount.value++;
           if (count.value > 3) {
+            resetCount.value = 0;
             reject(false);
             return false;
           }
@@ -135,11 +137,11 @@ const installSVC = async (isFinish) => {
     await activate_sev(requestTarget);
     svcTimer = setInterval(
       timeCallback(hasExternalNetwork.value ? 66 : 99),
-      hasExternalNetwork.value ? 1000 : 500
+      hasExternalNetwork.value ? 500 : 300
     );
     let svcFinish = await getInstallStatus("svc");
     if (svcFinish) {
-      clearInterval(cbsTimer);
+      clearInterval(svcTimer);
       rate.value = hasExternalNetwork.value ? 66 : 100;
       return true;
     } else {
@@ -160,7 +162,8 @@ const installSVC = async (isFinish) => {
 };
 const installCYFS = async (isFinish) => {
   try {
-    const bindInfoObj = await createDID("");
+    const bindInfoObj = await createDID("", requestTarget);
+    console.log(bindInfoObj, "bindInfoObjbindInfoObjbindInfoObj");
     if (bindInfoObj && bindInfoObj.g_uniqueId) {
       const index = calcIndex(bindInfoObj.g_uniqueId);
       const bind_info = {
@@ -190,19 +193,24 @@ const installCYFS = async (isFinish) => {
           if (count.value > 3) {
             return false;
           }
-          installCYFS();
+          setTimeout(() => {
+            installCYFS();
+          }, 5000);
         })
         .finally(() => {});
     } else {
       count.value++;
-
       if (count.value > 3) return false;
-      installCYFS();
+      setTimeout(() => {
+        installCYFS();
+      }, 5000);
     }
   } catch {
     count.value++;
     if (count.value > 3) return false;
-    installCYFS();
+    setTimeout(() => {
+      installCYFS();
+    }, 5000);
   }
 };
 const isInstall = ref(false);
