@@ -432,7 +432,6 @@
               ></svg-icon>
             </el-tooltip>
 
-
             <el-tooltip
               class="box-item"
               effect="dark"
@@ -569,7 +568,7 @@ const props = defineProps({
   },
   isLocal: {
     type: Boolean,
-  }
+  },
 });
 
 const overShow = ref(false);
@@ -764,6 +763,11 @@ const challengeMiner = (item) => {
       };
       InitiateChallenge(params).then((res) => {
         if (res.code == 200) {
+          ElNotification({
+            type: "success",
+            message: `Successfully initiated the challenge`,
+            position: "bottom-left",
+          });
           if (timeLineShow.value) {
             setTimeout(() => {
               timeLineRef.value.loadChallengeList();

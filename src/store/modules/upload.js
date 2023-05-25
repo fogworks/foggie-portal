@@ -26,6 +26,7 @@ const mutations = {
       data.device_type == "foggie" ||
       data.device_type == "") {
 
+      // state.orderId = data.device_id
       state.orderId = data.device_id
 
       if (data.device_type == "foggie_max") {

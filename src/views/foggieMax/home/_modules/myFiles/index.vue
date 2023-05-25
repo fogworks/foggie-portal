@@ -366,13 +366,14 @@ const refresh = () => {
   getFileList("", breadcrumbList.prefix);
 };
 const email = computed(() => store.getters.userInfo?.email);
+const tokenMap = computed(() => store.getters.tokenMap);
 const getFileList = function (scroll, prefix) {
   let list_prefix = "";
   if (prefix?.length) {
     list_prefix = prefix.join("/");
   }
   tableLoading.value = true;
-  let token = store.getters.token;
+  let token = tokenMap.value[deviceData.device_id];
   let type = "foggie";
   oodFileList(email.value, type, token, deviceData, list_prefix)
     .then((res) => {

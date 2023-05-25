@@ -294,7 +294,7 @@ const rowState = ({ row }) => {
   let style = {};
   if (!row.is_local) {
     style = {
-      backgroundColor: "yellow",
+      backgroundColor: "#e17f7f",
     };
   }
   return style;
