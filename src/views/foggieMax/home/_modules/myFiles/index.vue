@@ -18,7 +18,7 @@
     </el-breadcrumb>
     <div class="flex justify-between items-center">
       <el-button
-        :disabled="!hasCBS"
+        :disabled="!hasSVC"
         class="top-btn"
         @click="upload"
         key="plain"
@@ -51,7 +51,7 @@
         class="top-btn refresh"
         key="plain"
         link
-        :disabled="!hasIPFS"
+        :disabled="!hasSVC"
         type="primary"
         @click="syncDialog = true"
       >
@@ -171,7 +171,7 @@
                 <el-dropdown-menu class="more-dropdown" slot="dropdown">
                   <el-dropdown-item
                     :command="{ flag: 'share', command: scope.row }"
-                    :disabled="!scope.row.canShare || !hasCBS"
+                    :disabled="!scope.row.canShare || !hasSVC"
                     >share</el-dropdown-item
                   >
                   <el-dropdown-item
@@ -333,7 +333,7 @@ const sortList = [
 ];
 const device_id = computed(() => currentOODItem.value.device_id);
 let device_id_real = computed(() => currentOODItem.value.device_id_real);
-let hasCBS = computed(() => currentOODItem.value.cbs_state === "finish");
+let hasSVC = computed(() => currentOODItem.value.svc_state === "finish");
 const hasIPFS = computed(
   () =>
     currentOODItem.value.ipfs_state === "finish" &&
