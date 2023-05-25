@@ -63,16 +63,15 @@ let customDialogIsShow = ref(true);
 const clientPassword = computed(() => store.getters.clientPassword);
 const isLocal = ref(true);
 
-const getLocal = (val)=>{
+const getLocal = (val) => {
   isLocal.value = val;
-}
+};
 
 // if (clientPassword.value) {
 //   customDialogIsShow.value = false;
 // } else {
 //   customDialogIsShow.value = true;
 // }
-
 store.commit("upload/setOrderId", orderId);
 // if (deviceData.device_type == 'foggie_max' || deviceData.device_type == 'foggie' || deviceData.device_type == '') {
 //   const orderId = readonly(deviceData.device_id)
@@ -81,7 +80,7 @@ store.commit("upload/setOrderId", orderId);
 //   const orderId = readonly(deviceData.order_id)
 //   store.commit('upload/setOrderId', orderId)
 // }
-store.commit("upload/setDeviceType", "3");
+store.commit("upload/setDeviceType", 3);
 const state = ref(0);
 const createdTime = ref("");
 watch(

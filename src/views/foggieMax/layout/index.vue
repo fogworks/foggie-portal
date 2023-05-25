@@ -127,17 +127,13 @@ export default {
         .then(async ({ result }) => {
           if (haveNet.value) {
             if (
-              result.cbs_state === "finish" &&
-              result.ipfs_state === "finish" &&
+              result.svc_state === "finish" &&
               result.cyfs_state === "finish"
             ) {
               hasReady.value = true;
             }
           } else {
-            if (
-              result.cbs_state === "finish" &&
-              result.ipfs_state === "finish"
-            ) {
+            if (result.svc_state === "finish") {
               hasReady.value = true;
             }
           }

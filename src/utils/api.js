@@ -517,6 +517,15 @@ export const deploy_cyfs = (data, target) => {
     target,
   });
 };
+export const activate_sev = (target) => {
+  return request({
+    url: ` /v1/service/activate_sev`,
+    method: "POST",
+    target,
+  });
+};
+
+
 export const get_service_info = (target) => {
   return request({
     url: `/v1/get_service_info`,
@@ -691,4 +700,13 @@ export const get_vood_token = (params) => {
     params,
   });
 };
+export const get_vood_refresh_token = (params) => {
+  let url = `${apiUrl}/api/accounts/get_vood_refresh_token`;
+  return request({
+    url: url,
+    method: "get",
+    params,
+  });
+};
+
 

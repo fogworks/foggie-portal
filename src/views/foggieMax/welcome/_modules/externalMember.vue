@@ -68,10 +68,9 @@ import {
   inject,
 } from "vue";
 import {
-  deploy_cbs,
-  deploy_ipfs,
   deploy_cyfs,
   get_service_info,
+  activate_sev,
   reset_vood,
 } from "@/utils/api";
 import NextButton from "@/components/nextButton";
@@ -88,8 +87,6 @@ const goHome = inject("goHome");
 const requestTarget = inject("requestTarget");
 const { hasExternalNetwork } = toRefs(props);
 const rate = ref(0);
-const loading = ref(false);
-const finish = ref(false);
 const timeCallback = (max) => {
   return () => {
     if (rate.value >= Number(max)) {
@@ -130,47 +127,18 @@ const resetMethod = async () => {
     rest();
   });
 };
-let cbsTimer = "";
-let ipfsTimer = "";
+let svcTimer = "";
 let cyfsTimer = "";
-const installCBS = async (isFinish) => {
+const installSVC = async (isFinish) => {
   try {
-    await deploy_cbs(requestTarget);
-    cbsTimer = setInterval(
-      timeCallback(hasExternalNetwork.value ? 33 : 50),
-      hasExternalNetwork.value ? 1000 : 500
-    );
-    let cbsFinish = await getInstallStatus("cbs");
-    if (cbsFinish) {
-      clearInterval(cbsTimer);
-      rate.value = hasExternalNetwork.value ? 33 : 50;
-      return true;
-    } else {
-      // fail
-      if (count.value > 3) {
-        return false;
-      }
-      let reset = await resetMethod();
-      if (reset) installCBS();
-    }
-  } catch {
-    count.value++;
-    if (count.value > 3) {
-      return false;
-    }
-    installCBS();
-  }
-};
-const installIPFS = async (isFinish) => {
-  try {
-    await deploy_ipfs(requestTarget);
-    ipfsTimer = setInterval(
+    await activate_sev(requestTarget);
+    svcTimer = setInterval(
       timeCallback(hasExternalNetwork.value ? 66 : 99),
       hasExternalNetwork.value ? 1000 : 500
     );
-    let ipfsFinish = await getInstallStatus("ipfs");
-    if (ipfsFinish) {
-      clearInterval(ipfsTimer);
+    let svcFinish = await getInstallStatus("svc");
+    if (svcFinish) {
+      clearInterval(cbsTimer);
       rate.value = hasExternalNetwork.value ? 66 : 100;
       return true;
     } else {
@@ -179,12 +147,14 @@ const installIPFS = async (isFinish) => {
         return false;
       }
       let reset = await resetMethod();
-      if (reset) installIPFS();
+      if (reset) installSVC();
     }
   } catch {
     count.value++;
-    if (count.value > 3) return false;
-    installIPFS();
+    if (count.value > 3) {
+      return false;
+    }
+    installSVC();
   }
 };
 const installCYFS = async (isFinish) => {
@@ -238,8 +208,7 @@ const isInstall = ref(false);
 const getNeedResetBool = (result) => {
   if (hasExternalNetwork.value) {
     if (
-      result.cbs_state !== "pending_init" ||
-      result.ipfs_state !== "pending_init" ||
+      result.svc_state !== "pending_init" ||
       result.cyfs_state !== "pending_init"
     ) {
       return true;
@@ -247,10 +216,7 @@ const getNeedResetBool = (result) => {
       return false;
     }
   } else {
-    if (
-      result.cbs_state !== "pending_init" ||
-      result.ipfs_state !== "pending_init"
-    ) {
+    if (result.svc_state !== "pending_init") {
       return true;
     } else {
       return false;
@@ -270,24 +236,16 @@ const gotoDeploy = async (item, type) => {
         let reset = await resetMethod();
         if (reset) {
           status.value = "Initializing";
-
-          let cbs = await installCBS();
-          if (cbs) {
-            let ipfs = await installIPFS();
-            if (ipfs && hasExternalNetwork.value) {
-              await installCYFS();
-            }
+          let svc = await installSVC();
+          if (svc && hasExternalNetwork.value) {
+            await installCYFS();
           }
         }
       } else {
         status.value = "Initializing";
-
-        let cbs = await installCBS();
-        if (cbs) {
-          let ipfs = await installIPFS();
-          if (ipfs && hasExternalNetwork.value) {
-            await installCYFS();
-          }
+        let svc = await installSVC();
+        if (svc && hasExternalNetwork.value) {
+          await installCYFS();
         }
       }
     })
@@ -323,24 +281,12 @@ const getInstallStatus = (type) => {
     const getStatus = () => {
       get_service_info(requestTarget)
         .then(({ result }) => {
-          if (type === "cbs") {
-            if (result.cbs_state === "finish") {
+          if (type === "svc") {
+            if (result.svc_state === "finish") {
               resolve(true);
             } else {
               if (count.value > 3) return false;
-              if (result.cbs_state === "failed") {
-                count.value++;
-              }
-              setTimeout(() => {
-                getStatus(type);
-              }, 5000);
-            }
-          } else if (type === "ipfs") {
-            if (result.ipfs_state === "finish") {
-              resolve(true);
-            } else {
-              if (count.value > 3) return false;
-              if (result.ipfs_state === "failed") {
+              if (result.svc_state === "failed") {
                 count.value++;
               }
               setTimeout(() => {
@@ -380,8 +326,7 @@ const getInitialState = () => {
               getStatus();
             }, 5000);
           } else if (
-            result.cbs_state == "pending_init" &&
-            result.ipfs_state == "pending_init" &&
+            result.svc_state == "pending_init" &&
             (hasExternalNetwork.value
               ? result.cyfs_state == "pending_init"
               : true)
@@ -400,8 +345,7 @@ const getInitialState = () => {
 watch(count, (val) => {
   if (val > 3) {
     isInstall.value = false;
-    clearInterval(cbsTimer);
-    clearInterval(ipfsTimer);
+    clearInterval(svcTimer);
     clearInterval(cyfsTimer);
     rate.value = 0;
     status.value = "Installation failed";
