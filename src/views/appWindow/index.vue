@@ -68,7 +68,7 @@ import { useStore } from "vuex";
 import FoggieMax from "@/views/foggieMax/layout";
 import FoggieClient from "@/views/Alltemplate/Alltemplate";
 import DeviceList from "./deviceList";
-import { search_foggie } from "@/utils/api";
+import { search_foggie, get_vood_token } from "@/utils/api";
 import { sync_device } from "@/api/order/orderList";
 import useOrderList from "@/views/portal/_modules/hooks/useOrderList";
 import { useRoute } from "vue-router";
@@ -93,6 +93,7 @@ const scrollIntoView = (data) => {
   )[0];
   app.scrollTo(0, target?.offsetTop);
 };
+
 const clickItem = (data) => {
   if (!data.is_active && data.device_type !== "space") {
     proxy.$notify({
@@ -142,12 +143,12 @@ const syncDevice = async (data) => {
     data.device_type == ""
   ) {
     if (data.device_type == "foggie_max") {
-      deviceType = "2";
+      deviceType = 2;
     } else {
-      deviceType = "1";
+      deviceType = 1;
     }
   } else {
-    deviceType = "3";
+    deviceType = 3;
   }
   let d = {
     email: email.value,

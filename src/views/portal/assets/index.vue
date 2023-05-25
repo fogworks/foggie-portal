@@ -121,6 +121,7 @@ import {
   watchEffect,
   toRefs,
   inject,
+  nextTick,
 } from "vue";
 import NftDialog from "./nftDialog";
 import Rewards from "./rewards";
@@ -208,9 +209,10 @@ export default {
     const closeNoBoxShow = ref(false);
     const { passwordIsExist, loadUserLoginStatus } = usePrivateKey();
     const openWithdraw = async () => {
-      await loadUserLoginStatus();
-      if (passwordIsExist.value) {
-        WithdrawVisible = true;
+      if (!passwordIsExist.value) {
+        await loadUserLoginStatus();
+      } else {
+        WithdrawVisible.value = true;
       }
     };
     function openNoVoodDialog() {
@@ -286,6 +288,7 @@ export default {
       search();
     });
     onMounted(() => {
+      loadUserLoginStatus();
       // getUserAssets();
       adminCategoriesListInit();
     });

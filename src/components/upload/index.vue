@@ -98,6 +98,7 @@ export default {
     const deviceType = computed(() => store.getters.deviceType);
 
     const uploadFileList = computed(() => store.state.upload.uploadFileList);
+    const tokenMap = computed(() => store.getters.tokenMap);
 
     const options = ref({
       simultaneousUploads: 5,
@@ -162,6 +163,9 @@ export default {
       }
 
       file.orderId = orderId.value;
+      if (deviceType.value == 1 || deviceType.value == 2) {
+        file.foggieToken = tokenMap.value[orderId.value] || "";
+      }
 
       list.unshift(file);
       store.commit("upload/setFileList", list);

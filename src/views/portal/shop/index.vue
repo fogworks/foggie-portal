@@ -141,8 +141,9 @@ const { passwordIsExist, loadUserLoginStatus } = usePrivateKey();
 
 const handleActive = async (val = "") => {
   if (val == "storage") {
-    await loadUserLoginStatus();
-    if (passwordIsExist.value) {
+    if (!passwordIsExist.value) {
+      loadUserLoginStatus();
+    } else {
       isShop.value = !isShop.value;
       active.value = val;
     }
@@ -164,7 +165,10 @@ const getUserAssets = () => {
     }
   });
 };
-onMounted(getUserAssets);
+onMounted(() => {
+  loadUserLoginStatus();
+  getUserAssets();
+});
 </script>
 
 <style lang="scss" scoped>

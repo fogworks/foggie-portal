@@ -9,5 +9,6 @@ const getters = {
   clientPassword: state => state.clientGlobal.clientPassword,  // 
   uploadFileList: state => state.upload.uploadFileList,
   hasReady: state => state.global.hasReady,
+  tokenMap: state => state.token.tokenMap,
 }
 export default getters

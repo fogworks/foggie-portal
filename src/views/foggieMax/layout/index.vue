@@ -1,26 +1,32 @@
 <template>
   <div class="container" v-loading="loading">
-    <Access
-      v-if="!accessible"
-      v-model:accessible="accessible"
-      @accessCallback="accessCallback"
-    ></Access>
-    <template v-else>
-      <Welcome v-if="!hasReady" :haveNet="haveNet"></Welcome>
-      <div v-else>
-        <div class="top-title">
-          <span @click="isInSetup = false">
-            {{ deviceData.device_name }}
-          </span>
-          <svg-icon icon-class="setup" class="setup" @click="toSet"></svg-icon>
+    <template v-if="hasToken">
+      <Access
+        v-if="!accessible"
+        v-model:accessible="accessible"
+        @accessCallback="accessCallback"
+      ></Access>
+      <template v-else>
+        <Welcome v-if="!hasReady" :haveNet="haveNet"></Welcome>
+        <div v-else>
+          <div class="top-title">
+            <span @click="isInSetup = false">
+              {{ deviceData.device_name }}
+            </span>
+            <svg-icon
+              icon-class="setup"
+              class="setup"
+              @click="toSet"
+            ></svg-icon>
+          </div>
+          <MaxHome
+            v-if="!isInSetup"
+            :haveNet="haveNet"
+            :deviceData="deviceData"
+          ></MaxHome>
+          <Setting v-else></Setting>
         </div>
-        <MaxHome
-          v-if="!isInSetup"
-          :haveNet="haveNet"
-          :deviceData="deviceData"
-        ></MaxHome>
-        <Setting v-else></Setting>
-      </div>
+      </template>
     </template>
   </div>
 </template>
@@ -32,17 +38,8 @@ import Welcome from "../welcome";
 import Setting from "../setting";
 import { useStore } from "vuex";
 import { sync_device } from "@/api/order/orderList";
-import { get_service_info, detected_net } from "@/utils/api.js";
-import {
-  ref,
-  onMounted,
-  reactive,
-  watch,
-  provide,
-  toRefs,
-  inject,
-  readonly,
-} from "vue";
+import { get_service_info, detected_net, get_vood_token } from "@/utils/api.js";
+import { ref, onMounted, reactive, provide, onActivated } from "vue";
 export default {
   name: "FoggieMax",
   components: {
@@ -59,8 +56,9 @@ export default {
   },
 
   setup(props) {
+    const hasToken = ref(false);
     const deviceData = reactive(props.deviceData);
-
+    const store = useStore();
     provide("deviceData", deviceData);
     provide("requestTarget", deviceData);
 
@@ -101,7 +99,23 @@ export default {
       //   currentOODItem.value.data = oodData.data[0];
       // }
     };
-    onMounted(() => {
+    const getVoodToken = (data) => {
+      get_vood_token({ vood_id: data.device_id }).then((res) => {
+        store.dispatch("token/setTokenMap", {
+          id: data.device_id,
+          token: res.data.token_type + " " + res.data.access_token,
+        });
+        setTimeout(() => {
+          hasToken.value = true;
+        });
+      });
+    };
+    onActivated(() => {
+      getVoodToken(deviceData);
+    });
+    onMounted(async () => {
+      await getVoodToken(deviceData);
+
       initFoggieDate();
     });
     const toSet = () => {
@@ -156,6 +170,7 @@ export default {
       deviceData,
       isInSetup,
       hasReady,
+      hasToken,
       toSet,
       accessCallback,
     };

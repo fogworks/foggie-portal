@@ -497,6 +497,7 @@ export default {
       form.append("fileType", smallFile.fileType);
       form.append("fileSize", smallFile.size);
       form.append("orderId", smallFile.orderId);
+      form.append("foggieToken", smallFile.foggieToken);
 
       fileUpload(form, abortController.value, UploadProgress)
         .then(async (res) => {
@@ -536,6 +537,7 @@ export default {
           peerId: peerId,
           email: email.value,
           deviceType: +file.value.deviceType,
+          foggieToken: file.value.foggieToken,
         };
 
         uploadMultipart(params)
@@ -834,6 +836,7 @@ export default {
             email: email.value,
             md5: fileMd5.value,
             deviceType: +file.value.deviceType,
+            foggieToken: file.value.foggieToken,
           };
 
           fileComplete(params)

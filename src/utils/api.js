@@ -682,3 +682,13 @@ export const search_object = (data) => {
     data,
   });
 };
+
+export const get_vood_token = (params) => {
+  let url = `${apiUrl}/api/accounts/get_vood_token`;
+  return request({
+    url: url,
+    method: "get",
+    params,
+  });
+};
+

@@ -159,10 +159,7 @@ const submit = () => {
             //   "access_token",
             //   result.token_type + " " + result.token
             // );
-            store.dispatch("token/setTokenMap", {
-              id: deviceData.device_id,
-              token: result.token_type + " " + result.token,
-            });
+
             // setTokenMap(
             //   deviceData.device_id,
             //   result.token_type + " " + result.token
