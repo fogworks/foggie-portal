@@ -22,25 +22,6 @@
         Installation failed. You can try again or contact customer service for
         assistance
       </div>
-      <!-- <CircleProgress :rate="rate"></CircleProgress> -->
-      <!-- <el-progress
-        class="install-progress"
-        color="#29abff"
-        :width="200"
-        :stroke-width="15"
-        type="circle"
-        :percentage="rate"
-      >
-        <template #default="{ percentage }">
-          <span class="percentage-value">{{ percentage }}%</span>
-          <span class="percentage-label">CBS</span>
-        </template>
-      </el-progress>
-      <el-progress
-        class="install-progress total-progress"
-        :stroke-width="26"
-        :percentage="totalRate"
-      /> -->
       <div class="foot-btn">
         <NextButton v-if="rate === 100" @click="next">Go</NextButton>
         <NextButton v-else-if="count > 3" @click="startInstall"
@@ -52,7 +33,6 @@
           >Start Installation</NextButton
         >
       </div>
-      <!-- <el-button @click="next">Next</el-button> -->
     </div>
   </div>
 </template>
@@ -75,7 +55,6 @@ import {
 } from "@/utils/api";
 import NextButton from "@/components/nextButton";
 import { createDID } from "@/utils/did.js";
-// import CircleProgress from "@/components/circleProgress";
 const emit = defineEmits(["next", "update:preShow"]);
 const props = defineProps({
   hasExternalNetwork: {

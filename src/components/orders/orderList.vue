@@ -407,7 +407,7 @@
             <el-tooltip
               class="box-item"
               effect="dark"
-              content="Yellow files in the list need to be re-uploaded"
+              content="Red files in the list need to be re-uploaded"
               placement="top"
             >
               <svg-icon
@@ -435,7 +435,7 @@
             <el-tooltip
               class="box-item"
               effect="dark"
-              content="Yellow files in the list need to be re-uploaded"
+              content="Red files in the list need to be re-uploaded"
               placement="top"
             >
               <svg-icon
@@ -649,9 +649,7 @@ function openUpload(item) {
       position: "bottom-left",
     });
   } else {
-    store.commit("upload/setUploadOptions", deviceData.value);
-
-    // $state.commit("upload/openUpload", item.id);
+    $state.commit("upload/setUploadOptions", deviceData);
   }
 }
 function openMyFiles(item) {

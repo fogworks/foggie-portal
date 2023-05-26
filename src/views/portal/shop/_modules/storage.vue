@@ -397,7 +397,7 @@ function returnBG(index) {
     return `bg${index % 20}`;
   }
 }
-
+const maxRetry = ref(0);
 async function submit() {
   let flag = await blurPrestoreDMC();
   if (flag) {
@@ -425,7 +425,7 @@ async function submit() {
     // }
 
     buyOrder(params)
-      .then((res) => {
+      .then(async (res) => {
         if (res.code == 200) {
           state.formLine.prestoreDMC = "";
           dialogIsShow.value = false;
@@ -438,19 +438,7 @@ async function submit() {
           emit("getAssets");
           filterOrder();
         } else if (res.code == 20003 || res.code == 20007) {
-          ElMessageBox.confirm(
-            "Failed to pay the bill, do you want to try again!",
-            "Warning",
-            {
-              confirmButtonText: "OK",
-              cancelButtonText: "Cancel",
-              type: "warning",
-            }
-          )
-            .then(async () => {
-              order_sync(res.data);
-            })
-            .catch(() => {});
+          order_sync(res.data);
         } else {
           //  ElMessage({
           //   message: res.msg,
@@ -467,17 +455,34 @@ async function submit() {
       });
   }
 }
-const maxRetry = ref(0);
 const order_sync = async (transactionId) => {
   maxRetry.value++;
-  if (maxRetry.value > 5) {
+  // if (maxRetry.value > 3) {
+  //   // maxRetry.value = 0;
+  //   ElMessage({
+  //     message: `Failed to pay, please pay again`,
+  //     type: "error",
+  //     grouping: true,
+  //   });
+  //   loading.value = false;
+  //   return false;
+  // }
+  if (maxRetry.value > 3) {
     maxRetry.value = 0;
-    ElMessage({
-      message: `Failed to pay, please pay again`,
-      type: "error",
-      grouping: true,
-    });
     loading.value = false;
+    ElMessageBox.confirm(
+      "Sync order information failed, Please try again!",
+      "Warning",
+      {
+        confirmButtonText: "OK",
+        cancelButtonText: "Cancel",
+        type: "warning",
+      }
+    )
+      .then(async () => {
+        order_sync(transactionId);
+      })
+      .catch(() => {});
     return false;
   }
   orderSync({
@@ -497,7 +502,9 @@ const order_sync = async (transactionId) => {
       });
       emit("getAssets");
     } else {
-      order_sync(transactionId);
+      setTimeout(() => {
+        order_sync(transactionId);
+      }, 1000);
     }
   });
 };

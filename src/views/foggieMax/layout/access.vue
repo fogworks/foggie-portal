@@ -88,7 +88,7 @@ const getAccessPass = () => {
 getAccessPass();
 const validatePass = (rule, value, callback) => {
   if (value === "") {
-    callback(new Error("Please input the password"));
+    callback(new Error("Please input the Pin code"));
   } else {
     if (form.confirmPassword !== "") {
       if (!formRef.value) return;
@@ -99,7 +99,7 @@ const validatePass = (rule, value, callback) => {
 };
 const validatePass2 = (rule, value, callback) => {
   if (value === "") {
-    callback(new Error("Please input the password again"));
+    callback(new Error("Please input the Pin code again"));
   } else if (value !== form.password) {
     callback(new Error("Two inputs don't match!"));
   } else {
@@ -112,7 +112,7 @@ const rules = {
     {
       min: 6,
       max: 6,
-      message: "Password is 6 digits",
+      message: "Pin code is 6 digits",
       trigger: "blur",
     },
   ],
@@ -125,7 +125,7 @@ const rules = {
     {
       min: 6,
       max: 6,
-      message: "Password is 6 digits",
+      message: "Pin code is 6 digits",
       trigger: "blur",
     },
   ],
