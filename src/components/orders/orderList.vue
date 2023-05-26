@@ -640,7 +640,9 @@ function openUpload(item) {
   let endTime =
     new Date(orderList.value[0].created_time).getTime() + 1000 * 60 * 3;
   let time = ((+endTime - +nowTime) / 1000).toFixed(0);
-  console.log(new Date(), new Date(orderList.value[0].created_time));
+  if (time > 4 * 60) {
+    time = time - 60 * 60;
+  }
   if (time > 0) {
     let content = "Upload files after " + getSecondTime(+time);
     ElNotification({

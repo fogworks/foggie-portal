@@ -116,7 +116,7 @@ const installSVC = async (isFinish) => {
     await activate_sev(requestTarget);
     svcTimer = setInterval(
       timeCallback(hasExternalNetwork.value ? 66 : 99),
-      hasExternalNetwork.value ? 500 : 300
+      hasExternalNetwork.value ? 1000 : 600
     );
     let svcFinish = await getInstallStatus("svc");
     if (svcFinish) {
