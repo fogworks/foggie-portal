@@ -16,7 +16,7 @@
           v-show="active === index"
           :is="item.com"
           @next="next"
-          :hasExternalNetwork="false"
+          :hasExternalNetwork="haveNet"
           v-model:preShow="preShow"
         ></component>
       </main>

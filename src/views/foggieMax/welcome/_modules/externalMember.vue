@@ -237,6 +237,7 @@ const gotoDeploy = async (item, type) => {
   isInstall.vale = true;
   count.value = 0;
   emit("update:preShow", false);
+  // await installCYFS();
 
   get_service_info(requestTarget)
     .then(async ({ result }) => {
@@ -363,16 +364,9 @@ watch(count, (val) => {
 
 const startInstall = async () => {
   gotoDeploy();
-  // const timer = setInterval(timeCallback, 1000);
-  // const res = await getInstallStatus();
 };
 const next = async () => {
-  // let res = await getInstallStatus();
-  // gotoDeploy("", "ipfs");
-  // gotoDeploy("", "cyfs");
-  // emit("next");
   goHome();
-  // window.location.href = "http://154.37.16.163:9000/#/access";
 };
 </script>
 
