@@ -785,6 +785,10 @@ const challengeMiner = (item) => {
 };
 function refresh() {
   loadOrderList();
+  if (timeLineShow.value) {
+    timeLineRef.value.loadMerkleList();
+    timeLineRef.value.loadChallengeList();
+  }
 }
 const dmcType = ref("");
 const dmcShow = ref(false);
