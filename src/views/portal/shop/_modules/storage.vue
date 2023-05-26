@@ -372,7 +372,7 @@ function computeTotalPrices(item) {
 }
 
 function loadCurReferenceRate() {
-  getCurReferenceRate().then((res) => {
+  return getCurReferenceRate().then((res) => {
     if (res.code == 200) {
       curReferenceRate.value = res.data;
     }
@@ -402,6 +402,11 @@ async function submit() {
   let flag = await blurPrestoreDMC();
   if (flag) {
     loading.value = true;
+    await loadCurReferenceRate();
+    console.log(
+      curReferenceRate.value,
+      "curReferenceRate.valuecurReferenceRate.value"
+    );
     let params = {
       chainId: ChainId.value, //chainId
       email: email.value,
@@ -457,16 +462,6 @@ async function submit() {
 }
 const order_sync = async (transactionId) => {
   maxRetry.value++;
-  // if (maxRetry.value > 3) {
-  //   // maxRetry.value = 0;
-  //   ElMessage({
-  //     message: `Failed to pay, please pay again`,
-  //     type: "error",
-  //     grouping: true,
-  //   });
-  //   loading.value = false;
-  //   return false;
-  // }
   if (maxRetry.value > 3) {
     maxRetry.value = 0;
     loading.value = false;
@@ -502,9 +497,7 @@ const order_sync = async (transactionId) => {
       });
       emit("getAssets");
     } else {
-      setTimeout(() => {
-        order_sync(transactionId);
-      }, 1000);
+      order_sync(transactionId);
     }
   });
 };

@@ -665,11 +665,14 @@ function handlerOver() {
     orderId: orderId.value,
   }).then((res) => {
     console.log(res);
-    ElNotification({
-      type: "success",
-      message: `Operation successful`,
-      position: "bottom-left",
-    });
+    if (res.code == 200) {
+      refresh();
+      ElNotification({
+        type: "success",
+        message: `Operation successful`,
+        position: "bottom-left",
+      });
+    }
   });
 }
 const uploadFileList = computed(() => $state.getters.uploadFileList);
@@ -773,6 +776,7 @@ const challengeMiner = (item) => {
             message: `Successfully initiated the challenge`,
             position: "bottom-left",
           });
+          refresh();
           if (timeLineShow.value) {
             setTimeout(() => {
               timeLineRef.value.loadChallengeList();
