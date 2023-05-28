@@ -224,8 +224,10 @@ export const getActivationVood = (data, target) => {
   return request({
     path: path,
     url: `${baseUrl}/proxy/http`,
-    method: "GET",
+    method: "POST",
+    type: 'GET',
     target,
+    data: {},
   });
 };
 
@@ -263,8 +265,10 @@ export const voodInfoCheck = (vpsId, target) => {
   return request({
     path: `/v1/service/check_cyfs`,
     url: `${baseUrl}/proxy/http`,
-    method: "GET",
-    target
+    method: "POST",
+    type: "GET",
+    target,
+    data: {},
   });
 };
 
@@ -510,6 +514,7 @@ export const deploy_cbs = (target) => {
     url: `${baseUrl}/proxy/http`,
     method: "POST",
     target,
+    data: {},
   });
 };
 export const deploy_ipfs = (target) => {
@@ -518,6 +523,7 @@ export const deploy_ipfs = (target) => {
     url: `${baseUrl}/proxy/http`,
     method: "POST",
     target,
+    data: {},
   });
 };
 export const deploy_cyfs = (data, target) => {
@@ -535,6 +541,7 @@ export const activate_sev = (target) => {
     url: `${baseUrl}/proxy/http`,
     method: "POST",
     target,
+    data: {},
   });
 };
 
@@ -543,8 +550,10 @@ export const get_service_info = (target) => {
   return request({
     path: `/v1/get_service_info`,
     url: `${baseUrl}/proxy/http`,
-    method: "get",
+    method: "POST",
     target, //{ip,device_id}
+    type: "GET",
+    data: {},
   });
 };
 
@@ -570,6 +579,7 @@ export const unbind_foggie = (target) => {
     url: `${baseUrl}/proxy/http`,
     method: "POST",
     target,
+    data: {},
   });
 };
 
@@ -602,8 +612,10 @@ export const check_access_pass = (target) => {
   return request({
     path: `/v1/account/check_access_pass`,
     url: `${baseUrl}/proxy/http`,
-    method: "GET",
+    method: "POST",
     target,
+    type: "GET",
+    data: {},
   });
 };
 export const access_pass = (data, target) => {
@@ -648,16 +660,32 @@ export const reset_vood = (target) => {
     url: `${baseUrl}/proxy/http`,
     method: "POST",
     target,
+    data: {},
   });
 };
 export const detected_net = (target) => {
   return request({
     path: `/v1/detected_net`,
     url: `${baseUrl}/proxy/http`,
-    method: "GET",
+    method: "POST",
     target,
+    type: 'GET',
+    data: {
+      param: "",
+    },
   });
 };
+
+// export const detected_net = (target) => {
+//   return request({
+//     url: `/v1/detected_net`,
+//     method: "GET",
+//     target,
+//   });
+// };
+
+
+
 
 //getIP
 export const getIP = () => {
