@@ -96,8 +96,11 @@ service.interceptors.request.use(
         config.headers["Content-Type"] = "multipart/form-data";
         config.headers["Content-Md5"] = config.MD5;
       }
-      if (config.url.indexOf("/v1") > -1) {
+      if (config.url.indexOf("/proxy/http") > -1) {
         let token = getTokenMap(config.target?.device_id);
+        console.log(config.target.rpc, 'config.target.rpc');
+        config.headers["ip"] = config.target.dedicatedip
+        config.headers["port"] = config.target.rpc.split(':')[1] || ''
         config.headers["Authorization"] = token || "";
       }
     }

@@ -220,9 +220,10 @@ export const oodMonitor = (item) => {
 };
 
 export const getActivationVood = (data, target) => {
-  let url = `/v1/get_service_info`;
+  let path = `/v1/get_service_info`;
   return request({
-    url: url,
+    path: path,
+    url: `${baseUrl}/proxy/http`,
     method: "GET",
     target,
   });
@@ -260,7 +261,8 @@ export const IPFSSync = (ood_id, data) => {
 
 export const voodInfoCheck = (vpsId, target) => {
   return request({
-    url: `/v1/service/check_cyfs`,
+    path: `/v1/service/check_cyfs`,
+    url: `${baseUrl}/proxy/http`,
     method: "GET",
     target
   });
@@ -504,21 +506,24 @@ export const withdrawGoogle = (data) => {
 
 export const deploy_cbs = (target) => {
   return request({
-    url: `/v1/service/deploy_cbs`,
+    path: `/v1/service/deploy_cbs`,
+    url: `${baseUrl}/proxy/http`,
     method: "POST",
     target,
   });
 };
 export const deploy_ipfs = (target) => {
   return request({
-    url: `/v1/service/deploy_ipfs`,
+    path: `/v1/service/deploy_ipfs`,
+    url: `${baseUrl}/proxy/http`,
     method: "POST",
     target,
   });
 };
 export const deploy_cyfs = (data, target) => {
   return request({
-    url: `/v1/service/deploy_cyfs`,
+    path: `/v1/service/deploy_cyfs`,
+    url: `${baseUrl}/proxy/http`,
     method: "POST",
     data,
     target,
@@ -526,7 +531,8 @@ export const deploy_cyfs = (data, target) => {
 };
 export const activate_sev = (target) => {
   return request({
-    url: ` /v1/service/activate_sev`,
+    path: `/v1/service/activate_sev`,
+    url: `${baseUrl}/proxy/http`,
     method: "POST",
     target,
   });
@@ -535,7 +541,8 @@ export const activate_sev = (target) => {
 
 export const get_service_info = (target) => {
   return request({
-    url: `/v1/get_service_info`,
+    path: `/v1/get_service_info`,
+    url: `${baseUrl}/proxy/http`,
     method: "get",
     target, //{ip,device_id}
   });
@@ -550,7 +557,8 @@ export const get_foggie_dmc = (data) => {
 };
 export const bind_foggie = (data, target) => {
   return request({
-    url: `/v1/account/bind_foggie`,
+    path: `/v1/account/bind_foggie`,
+    url: `${baseUrl}/proxy/http`,
     method: "POST",
     data,
     target,
@@ -558,7 +566,8 @@ export const bind_foggie = (data, target) => {
 };
 export const unbind_foggie = (target) => {
   return request({
-    url: `/v1/account/unbind_foggie`,
+    path: `/v1/account/unbind_foggie`,
+    url: `${baseUrl}/proxy/http`,
     method: "POST",
     target,
   });
@@ -573,7 +582,8 @@ export const search_foggie = (data) => {
 };
 export const checkAccount = (data, target = {}) => {
   return request({
-    url: "/v1/chain/get_account",
+    path: "/v1/chain/get_account",
+    url: `${baseUrl}/proxy/http`,
     method: "POST",
     data,
     target,
@@ -581,7 +591,8 @@ export const checkAccount = (data, target = {}) => {
 };
 export const modify_access_password = (data, target) => {
   return request({
-    url: `/v1/account/modify_access_password`,
+    path: `/v1/account/modify_access_password`,
+    url: `${baseUrl}/proxy/http`,
     method: "POST",
     data,
     target,
@@ -589,14 +600,16 @@ export const modify_access_password = (data, target) => {
 };
 export const check_access_pass = (target) => {
   return request({
-    url: `/v1/account/check_access_pass`,
+    path: `/v1/account/check_access_pass`,
+    url: `${baseUrl}/proxy/http`,
     method: "GET",
     target,
   });
 };
 export const access_pass = (data, target) => {
   return request({
-    url: `/v1/account/access_pass`,
+    path: `/v1/account/access_pass`,
+    url: `${baseUrl}/proxy/http`,
     method: "POST",
     data,
     target,
@@ -604,7 +617,8 @@ export const access_pass = (data, target) => {
 };
 export const access_pass_login = (data, target) => {
   return request({
-    url: `/v1/account/access_pass_login`,
+    path: `/v1/account/access_pass_login`,
+    url: `${baseUrl}/proxy/http`,
     method: "POST",
     data,
     target,
@@ -613,6 +627,7 @@ export const access_pass_login = (data, target) => {
 export const op_ipfs = (data, target) => {
   return request({
     url: `/v1/service/op_ipfs`,
+    url: `${baseUrl}/proxy/http`,
     method: "POST",
     data,
     target,
@@ -620,7 +635,8 @@ export const op_ipfs = (data, target) => {
 };
 export const op_cyfs = (data, target) => {
   return request({
-    url: `/v1/service/op_cyfs`,
+    path: `/v1/service/op_cyfs`,
+    url: `${baseUrl}/proxy/http`,
     method: "POST",
     data,
     target,
@@ -628,14 +644,16 @@ export const op_cyfs = (data, target) => {
 };
 export const reset_vood = (target) => {
   return request({
-    url: `/v1/service/reset_vood`,
+    path: `/v1/service/reset_vood`,
+    url: `${baseUrl}/proxy/http`,
     method: "POST",
     target,
   });
 };
 export const detected_net = (target) => {
   return request({
-    url: `/v1/detected_net`,
+    path: `/v1/detected_net`,
+    url: `${baseUrl}/proxy/http`,
     method: "GET",
     target,
   });

@@ -53,8 +53,11 @@
           <span>
             {{ item.device_type ? "Name:" : "IP:" }}
           </span>
-          <span class="top-value-span">
-            {{ item.device_name || item.dedicatedip }}
+          <span
+            class="top-value-span"
+            :title="item.device_type ? item.device_name : item.dedicatedip"
+          >
+            {{ item.device_type ? item.device_name : item.dedicatedip }}
           </span>
         </div>
         <div v-else>
