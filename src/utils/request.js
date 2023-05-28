@@ -103,6 +103,7 @@ service.interceptors.request.use(
         config.headers["ip"] = config.target.dedicatedip
         config.headers["port"] = config.target.rpc.split(':')[1] || ''
         config.headers["Authorization"] = token || "";
+        config.data["body"] = JSON.parse(JSON.stringify(config.data));
         config.data["ip"] = config.target.dedicatedip
         config.data["port"] = config.target.rpc.split(':')[1] || ''
         config.data["Authorization"] = token || "";
