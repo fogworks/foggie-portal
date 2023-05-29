@@ -291,7 +291,6 @@ const email = computed(() => store.getters.userInfo?.email);
 const deviceType = computed(() => store.getters.deviceType);
 const order_Id = computed(() => store.getters.orderId);
 
-
 const rowState = ({ row }) => {
   let style = {};
   if (!row.is_local) {
@@ -393,7 +392,7 @@ function countDownRun(timestamp) {
       position: "bottom-left",
     });
   } else {
-    store.commit("upload/setUploadOptions", deviceData);
+    store.commit("upload/setUploadOptions", deviceData.value);
     // store.commit("upload/openUpload", orderId.value);
   }
 }

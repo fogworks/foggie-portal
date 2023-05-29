@@ -653,7 +653,7 @@ function openUpload(item) {
       position: "bottom-left",
     });
   } else {
-    $state.commit("upload/setUploadOptions", deviceData);
+    $state.commit("upload/setUploadOptions", deviceData.value);
   }
 }
 function openMyFiles(item) {
