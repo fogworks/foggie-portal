@@ -601,7 +601,7 @@ const fileLoad = async (file) => {
             blobFileArray.push(params);
             ArrayProgress.value.push(0);
           }
-      
+
           ISCIDING.value = false;
           isUploading.value = true;
           multipartUpload(file);
@@ -628,8 +628,8 @@ const fileLoad = async (file) => {
   }
 };
 const multipartUpload = (file) => {
-  let retrNum = 0;
-  let retrNumber = 0;
+  let retrNum = 0; // 第一条线 重试次数
+  let retrNumber = 0;  //  第二条线重试次数
   if (abortController.value) {
     abortController.value = null;
   }
@@ -1012,11 +1012,7 @@ const initStatus = (file) => {
 watch(
   () => status,
   (newVal, oldVal) => {
-    if (
-      oldStatus &&
-      newStatus === "uploading" &&
-      oldStatus !== "uploading"
-    ) {
+    if (oldStatus && newStatus === "uploading" && oldStatus !== "uploading") {
       tid.value = setTimeout(() => {
         progressingClass.value = "uploader-file-progressing";
       }, 200);
