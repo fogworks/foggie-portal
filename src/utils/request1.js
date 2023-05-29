@@ -8,7 +8,7 @@ const service = axios.create({
   timeout: 5000000,
 });
 
-let loadingInstance = null;
+// let loadingInstance = null;
 
 const blackList = [
   "/file/upload",
@@ -20,10 +20,10 @@ const blackList = [
 service.interceptors.request.use(
   (config) => {
     if (!blackList.some((item) => config.url.indexOf(item) > -1)) {
-      loadingInstance = ElLoading.service({
-        fullscreen: true,
-        background: "rgba(0, 0, 0, 0.4)",
-      });
+      // loadingInstance = ElLoading.service({
+      //   fullscreen: true,
+      //   background: "rgba(0, 0, 0, 0.4)",
+      // });
     }
 
     config.headers.Authorization = getToken() || "";
@@ -63,12 +63,12 @@ service.interceptors.response.use(
 
     // }
 
-    loadingInstance ? loadingInstance.close() : "";
+    // loadingInstance ? loadingInstance.close() : "";
 
     return _response;
   },
   (error) => {
-    loadingInstance ? loadingInstance.close() : "";
+    // loadingInstance ? loadingInstance.close() : "";
     ElNotification({
       type: 'error',
       message: error?.response?.data.msg || error.msg || error.message || 'network error',

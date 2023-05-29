@@ -31,15 +31,15 @@
       </uploader>
 
       <template v-for="(uploadList, key) in uploadFileList" :key="key" style="height: 100%">
-        <fileList @fileShare="fileShare" @fileDetail="fileDetail" :orderID="key" :ref="`fileListRef_${key}`"
-          v-model:uploadLists="uploadFileList[key]" v-show="key == orderId">
+        <fileList @fileShare="fileShare" @fileDetail="fileDetail" :orderID="key" ref="fileListRef" v-model:uploadLists="uploadFileList[key]"
+          v-show="key == orderId">
         </fileList>
       </template>
     </div>
   </div>
 
-  <el-drawer v-model="allFileListDrawer" title="To be completed File list" direction="rtl" size="50%">
-    <div class="uploader-list" style="height: 100%;">
+  <el-drawer v-model="allFileListDrawer" @click.stop="" title="To be completed File list" direction="rtl" size="50%">
+    <div class="uploader-list">
       <ul>
         <li>
           <div class="uploader-file-info head-info">
@@ -49,13 +49,13 @@
             <div class="uploader-file-actions">Operate</div>
           </div>
         </li>
-        <TobeCompleted v-for="(curFile, index) in allFileList" :key="curFile.id" :curFile="curFile" :orderID="orderId"></TobeCompleted>
+        <TobeCompleted v-for="(curFile, index) in allFileList" :key="key" :curFile="curFile"></TobeCompleted>
       </ul>
     </div>
   </el-drawer>
 </template>
 
-<script setup>
+<script>
 import {
   ref,
   reactive,
@@ -64,134 +64,159 @@ import {
   readonly,
   provide,
   computed,
-  getCurrentInstance
 } from "vue";
 import fileList from "../upload/fileList.vue";
-// import uploader from "vue-simple-uploader";
+import uploader from "vue-simple-uploader";
 import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
 import TobeCompleted from "@/components/upload/TobeCompleted.vue";
 import { APIClient } from "@/pb/node_grpc_web_pb";
-const _this = getCurrentInstance()
-const currentPath = ref("");
-const fileListRef = ref()
-const allFileListDrawer = ref(false)
+
+export default {
+  name: "DashBoard",
+  components: { fileList, TobeCompleted },
+
+  setup(props, { emit }) {
+    const currentPath = ref("");
+    const fileListRef = ref()
+    const allFileListDrawer = ref(false)
 
 
-let uploadIsShow = computed(() => store.getters.uploadIsShow);
-const FILE_SIZE = readonly(1024 * 1024 * 1024 * 2);
-const store = useStore();
-const orderId = computed(() => store.getters.orderId);
 
-const deviceType = computed(() => store.getters.deviceType);
+    let uploadIsShow = computed(() => store.getters.uploadIsShow);
+    const FILE_SIZE = readonly(1024 * 1024 * 1024 * 2);
+    const store = useStore();
+    const orderId = computed(() => store.getters.orderId);
 
-const uploadFileList = computed(() => store.state.upload.uploadFileList);
-const allFileList = computed(() => {
-  let fileListArray = _this.refs[`fileListRef_${orderId.value}`] || []
-  let executeLsit = fileListArray.filter(item => item.orderID == orderId.value)[0]?.curFileList || []
-  let list = []
-  for (const item of store.state.upload.uploadFileList[orderId.value] || []) {
-    if (!executeLsit.some(element => element.id == item.id)) {
-      list.push(item)
+    const deviceType = computed(() => store.getters.deviceType);
 
-    }
-  }
-  return list
-})
+    const uploadFileList = computed(() => store.state.upload.uploadFileList);
+    const allFileList = computed(() => {
 
-const tokenMap = computed(() => store.getters.tokenMap);
+      let list = []
+      for (const item of store.state.upload.uploadFileList[orderId.value] || []) {
+        console.log(item);
+        list.push(item)
+      }
+      return list
+    })
 
-const options = ref({
-  simultaneousUploads: 5,
+    const tokenMap = computed(() => store.getters.tokenMap);
 
-  chunkSize: 1024 * 1024 * 5,
-  forceChunkSize: true,
-  allowDuplicateUploads: true,
-});
-// const client = new APIClient('http://154.31.34.194:9007')
-// const client = new APIClient("http://218.2.96.99:8007");
-// window.client = client
-// provide("client", readonly(client));
+    const options = ref({
+      simultaneousUploads: 5,
 
-
-const fileStatusText = ref({
-  success: () => "Upload Success",
-  error: () => "Upload Error",
-  uploading: () => "Uploading...",
-  paused: () => "Paused...",
-  waiting: () => "Waiting...",
-  md5: () => "Calculating file hash value...",
-  CID: () => "Calculate CID...",
-});
-
-const onFileAdded = (file) => {
-  if (file.size === 0) return;
-  if (file.size > FILE_SIZE) {
-    ElMessage({
-      message:
-        "The maximum upload size of a single file should not exceed 2GB.",
-      type: "warning",
-      duration: 3000,
+      chunkSize: 1024 * 1024 * 5,
+      forceChunkSize: true,
+      allowDuplicateUploads: true,
     });
-    return;
-  }
+    // const client = new APIClient('http://154.31.34.194:9007')
+    // const client = new APIClient("http://218.2.96.99:8007");
+    // window.client = client
+    // provide("client", readonly(client));
 
-  let directory = file.file.webkitRelativePath;
-  let directoryPath = directory.substr(0, directory.lastIndexOf("/") + 1);
-  let target = "";
-  file.paused = false;
-  file.rootPath = currentPath.value;
-  file.deviceType = deviceType.value;
-  file.urlPath = target;
+    const alertTitle = ref("");
+    const fileStatusText = ref({
+      success: () => "Upload Success",
+      error: () => "Upload Error",
+      uploading: () => "Uploading...",
+      paused: () => "Paused...",
+      waiting: () => "Waiting...",
+      md5: () => "Calculating file hash value...",
+      CID: () => "Calculate CID...",
+    });
+    const fileList = ref([]);
 
-  file.urlPrefix = directoryPath
-    ? currentPath.value + directoryPath
-    : currentPath.value || "/";
-  file.urlFileName = directoryPath
-    ? currentPath.value + directoryPath + file.name
-    : currentPath.value + file.name;
+    const onFileAdded = (file) => {
+      if (file.size === 0) return;
+      if (file.size > FILE_SIZE) {
+        ElMessage({
+          message:
+            "The maximum upload size of a single file should not exceed 2GB.",
+          type: "warning",
+          duration: 3000,
+        });
+        return;
+      }
 
-  let list = store.state.upload.uploadFileList[orderId.value] ?? [];
-  if (
-    list.some(
-      (item) =>
-        item.uniqueIdentifier == file.uniqueIdentifier &&
-        item.urlPrefix == file.urlPrefix
-    )
-  ) {
-    return;
-  }
+      let directory = file.file.webkitRelativePath;
+      let directoryPath = directory.substr(0, directory.lastIndexOf("/") + 1);
+      let target = "";
+      file.paused = false;
+      file.rootPath = currentPath.value;
+      file.deviceType = deviceType.value;
+      file.urlPath = target;
 
-  file.orderId = orderId.value;
-  if (deviceType.value == 1 || deviceType.value == 2) {
-    file.foggieToken = tokenMap.value[orderId.value] || "";
-  }
+      file.urlPrefix = directoryPath
+        ? currentPath.value + directoryPath
+        : currentPath.value || "/";
+      file.urlFileName = directoryPath
+        ? currentPath.value + directoryPath + file.name
+        : currentPath.value + file.name;
 
-  list.unshift(file);
-  store.commit("upload/setFileList", list);
+      let list = store.state.upload.uploadFileList[orderId.value] ?? [];
+      if (
+        list.some(
+          (item) =>
+            item.uniqueIdentifier == file.uniqueIdentifier &&
+            item.urlPrefix == file.urlPrefix
+        )
+      ) {
+        return;
+      }
+
+      file.orderId = orderId.value;
+      if (deviceType.value == 1 || deviceType.value == 2) {
+        file.foggieToken = tokenMap.value[orderId.value] || "";
+      }
+
+      list.unshift(file);
+      store.commit("upload/setFileList", list);
+    };
+    const onFileProgress = (rootFile, file, chunk) => { };
+    const onFilesAdded = (files, fileList) => { };
+    const onFileSuccess = () => { };
+    const fileShare = (item) => {
+      emit("fileShare", item);
+    };
+    const fileDetail = (file) => {
+      // window.localStorage.setItem(
+      //   "voodItem",
+      //   JSON.stringify(currentOODItem.value.data)
+      // );
+      // emit("closeUploadBox");
+    };
+
+    const closeUploadBox = () => {
+      store.commit("upload/closeUpload");
+    };
+    onMounted(() => { 
+
+      console.log(fileListRef.value,'111111');
+
+    });
+
+    return {
+      FILE_SIZE,
+      alertTitle,
+      fileStatusText,
+      fileList,
+      options,
+      uploadFileList,
+      orderId,
+      fileListRef,
+      allFileListDrawer,
+      uploadIsShow,
+      onFileAdded,
+      onFileProgress,
+      onFilesAdded,
+      onFileSuccess,
+      fileShare,
+      fileDetail,
+      closeUploadBox,
+    };
+  },
 };
-const onFileProgress = (rootFile, file, chunk) => { };
-const onFilesAdded = (files, fileList) => { };
-const onFileSuccess = () => { };
-const fileShare = (item) => {
-  emit("fileShare", item);
-};
-const fileDetail = (file) => {
-  // window.localStorage.setItem(
-  //   "voodItem",
-  //   JSON.stringify(currentOODItem.value.data)
-  // );
-  // emit("closeUploadBox");
-};
-
-const closeUploadBox = () => {
-  store.commit("upload/closeUpload");
-};
-onMounted(() => {
-
-});
-
-
 </script>
 
 <style lang="scss" scoped>

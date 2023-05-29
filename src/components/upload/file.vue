@@ -1,34 +1,12 @@
 <template>
   <div class="uploader-file" :status="status">
-    <slot
-      :file="file"
-      :list="list"
-      :status="status"
-      :paused="paused"
-      :error="error"
-      :response="response"
-      :average-speed="averageSpeed"
-      :formated-average-speed="formatedAverageSpeed"
-      :current-speed="currentSpeed"
-      :is-complete="isComplete"
-      :is-uploading="isUploading"
-      :size="size"
-      :formated-size="formatedSize"
-      :uploaded-size="uploadedSize"
-      :progress="progress"
-      :progress-style="progressStyle"
-      :progressing-class="progressingClass"
-      :time-remaining="timeRemaining"
-      :formated-time-remaining="formatedTimeRemaining"
-      :type="type"
-      :extension="extension"
-      :file-category="fileCategory"
-    >
-      <div
-        class="uploader-file-progress"
-        :class="progressingClass"
-        :style="progressStyle"
-      />
+    <slot :file="file" :list="list" :status="status" :paused="paused" :error="error" :response="response"
+      :average-speed="averageSpeed" :formated-average-speed="formatedAverageSpeed" :current-speed="currentSpeed"
+      :is-complete="isComplete" :is-uploading="isUploading" :size="size" :formated-size="formatedSize"
+      :uploaded-size="uploadedSize" :progress="progress" :progress-style="progressStyle"
+      :progressing-class="progressingClass" :time-remaining="timeRemaining"
+      :formated-time-remaining="formatedTimeRemaining" :type="type" :extension="extension" :file-category="fileCategory">
+      <div class="uploader-file-progress" :class="progressingClass" :style="progressStyle" />
       <div class="uploader-file-info">
         <div class="uploader-file-name" :title="file.name">
           <img class="iconfont-uploadType" :src="fileIcon" />
@@ -51,27 +29,13 @@
           </span>
         </div>
         <div class="uploader-file-actions" v-if="status !== 'success'">
-          <span
-            class="uploader-file-pause"
-            v-show="isBigFile"
-            @click="pause()"
-          />
-          <span
-            class="uploader-file-resume"
-            v-show="!ISCIDING"
-            @click="resume()"
-          />️
+          <span class="uploader-file-pause" v-show="isBigFile" @click="pause()" />
+          <span class="uploader-file-resume" v-show="!ISCIDING" @click="resume()" />️
           <span class="uploader-file-retry" @click="retry()" />
           <span class="uploader-file-remove" @click="remove()" />
         </div>
-        <div
-          class="uploader-file-actions"
-          v-if="status === 'success'"
-          @click="fileShare"
-        >
-          <div
-            style="color: #3f2dec; text-decoration: underline; cursor: pointer"
-          >
+        <div class="uploader-file-actions" v-if="status === 'success'" @click="fileShare">
+          <div style="color: #3f2dec; text-decoration: underline; cursor: pointer">
             Share
           </div>
         </div>
@@ -109,7 +73,7 @@ import {
   fileComplete,
   SaveFile,
 } from "@/api/upload";
-
+import { ElMessage } from 'element-plus'
 const COMPONENT_NAME = "uploader-file";
 const CHUNK_SIZE = 1024 * 1024 * 5;
 const FILE_SIZE = 10 * 1024 * 1024;
@@ -353,6 +317,9 @@ export default {
       return parsedTimeRemaining;
     });
 
+
+
+
     const resume = () => {
       if (!isFirst.value) {
         let number = 0;
@@ -366,6 +333,11 @@ export default {
           }
         }
         if (number >= MAX_UPLOAD_NUM.value) {
+          ElMessage({
+            message: `Maximum allowed to upload ${MAX_UPLOAD_NUM.value} files simultaneously`,
+            type: 'warning',
+          })
+
           return;
         }
       }
@@ -433,7 +405,7 @@ export default {
         fileSize: file.value.size,
         deviceType: +file.value.deviceType,
       };
-      SaveFile(params).then((res) => {});
+      SaveFile(params).then((res) => { });
     }
 
     const toPath = () => {
@@ -447,13 +419,28 @@ export default {
     function getFileMd5(file) {
       return new Promise((resolve, reject) => {
         let fileReader = new FileReader();
+        let spark = new SparkMD5.ArrayBuffer();
+        let blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
 
+        let curChunks = 1
+        loadNext()
+
+        function loadNext() {
+          fileReader.readAsArrayBuffer(blobSlice.call(file.file, file.chunks[curChunks - 1].startByte, file.chunks[curChunks - 1].endByte));
+          curChunks++
+        }
         fileReader.onload = function (event) {
-          let fileMd5 = SparkMD5.ArrayBuffer.hash(event.target.result);
-          resolve(fileMd5);
-        };
+          // let fileMd5 = SparkMD5.ArrayBuffer.hash(event.target.result);
+          spark.append(event.target.result);
+          if (curChunks - 1 == file.chunks.length) {
+            let fileMd5 = spark.end()
+            spark.destroy()
+            resolve(fileMd5);
+          } else {
+            loadNext()
 
-        fileReader.readAsArrayBuffer(file);
+          }
+        }
       });
     }
 
@@ -484,7 +471,7 @@ export default {
       } else {
         name = smallFile.name;
       }
-      fileMd5.value = await getFileMd5(smallFile.file);
+      fileMd5.value = await getFileMd5(smallFile);
 
       form.append("file", smallFile.file, name);
       form.append("fileCategory", 1);
@@ -526,7 +513,7 @@ export default {
         isUploading.value = true;
         multipartUpload(file);
       } else {
-        fileMd5.value = await getFileMd5(file.value.file);
+        fileMd5.value = await getFileMd5(file.value);
         let params = {
           fileName: encodeURIComponent(file.value.urlFileName),
           fileType: file.value.fileType,
@@ -652,10 +639,7 @@ export default {
       let fileReader = new FileReader();
       async function loadNext() {
         let start = currentChunk.value * CHUNK_SIZE;
-        let end =
-          start + CHUNK_SIZE >= file.value.size
-            ? file.value.size
-            : start + CHUNK_SIZE;
+        let end = start + CHUNK_SIZE >= file.value.size ? file.value.size : start + CHUNK_SIZE;
 
         fileReader.readAsArrayBuffer(
           blobSlice.call(file.value.file, start, end)
@@ -719,7 +703,7 @@ export default {
                   }
                 }
               })
-              .catch((error) => {});
+              .catch((error) => { });
           } else {
             resolve();
           }
@@ -785,28 +769,26 @@ export default {
 
       function retryUpload(request = [], errorUploadArray) {
         return new Promise((resolve, reject) => {
-          axios
-            .all(request)
-            .then(
-              axios.spread((...res) => {
-                if (res.every((element) => element.code == 200)) {
-                  res.forEach((element, index) => {
-                    multipartFileArray.value.push({
-                      etag: element.data,
-                      partNumber: Number(errorUploadArray[index]) + 1,
-                    });
-                    blobFileArray.value[errorUploadArray[index]][1] = true;
+          axios.all(request).then(
+            axios.spread((...res) => {
+              if (res.every((element) => element.code == 200)) {
+                res.forEach((element, index) => {
+                  multipartFileArray.value.push({
+                    etag: element.data,
+                    partNumber: Number(errorUploadArray[index]) + 1,
                   });
-                  resolve(true);
+                  blobFileArray.value[errorUploadArray[index]][1] = true;
+                });
+                resolve(true);
+              } else {
+                if (abortController.value.signal.aborted) {
+                  return "Cancel request";
                 } else {
-                  if (abortController.value.signal.aborted) {
-                    return "Cancel request";
-                  } else {
-                    resolve(false);
-                  }
+                  resolve(false);
                 }
-              })
-            )
+              }
+            })
+          )
             .catch((error) => {
               if (abortController.value.signal.aborted) {
                 return "Cancel request";
@@ -900,7 +882,7 @@ export default {
             averageSpeed.value =
               Number(
                 (NUMBER.value - lastNUMBER.value) /
-                  (100 * ArrayProgress.value.length * time)
+                (100 * ArrayProgress.value.length * time)
               ) * file.value.size;
           }
           lastTime.value = curTime;
@@ -974,7 +956,12 @@ export default {
       }
     };
     const retry = () => {
-      // resume()
+      file.value.error = false;
+      error.value = false;
+      isComplete.value = true;
+      isUploading.value = false;
+      paused.value = true
+      resume()
       // file.value.retry();
       // actionCheck();
     };
@@ -982,7 +969,7 @@ export default {
       let res = message;
       try {
         res = JSON.parse(message);
-      } catch (e) {}
+      } catch (e) { }
       response.value = res;
     };
     const fileEventsHandler = (event, args) => {
@@ -1178,12 +1165,10 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    171deg,
-    #8388fe 0%,
-    #519ff4 42%,
-    #b783c9 100%
-  ) !important;
+  background: linear-gradient(171deg,
+      #8388fe 0%,
+      #519ff4 42%,
+      #b783c9 100%) !important;
   transform: translateX(-100%);
   overflow: hidden;
 }
@@ -1311,7 +1296,7 @@ export default {
   width: 10%;
 }
 
-.uploader-file-actions > span {
+.uploader-file-actions>span {
   display: none;
   float: left;
   width: 16px;
@@ -1323,7 +1308,7 @@ export default {
   background-position: 0 0;
 }
 
-.uploader-file-actions > span:hover {
+.uploader-file-actions>span:hover {
   background-position-x: -21px;
 }
 

@@ -11,20 +11,14 @@
         </div>
       </li>
       <li v-for="file in curFileList" :key="file.id">
-        <upFile
-          :file="file"
-          :list="true"
-          :curFileList="curFileList"
-          :MAX_UPLOAD_NUM="4"
-          @chanStatus="chanStatus"
-          @getStatus="getStatus"
-          @uploadComplete="uploadComplete"
-          @getProgress="getProgress"
-          @remove="remove"
-          @fileShare="fileShare"
-          @fileDetail="fileDetail"
-        />
+        <upFile :file="file" :list="true" :curFileList="curFileList" :MAX_UPLOAD_NUM="MAX_UPLOAD_NUM"
+          @chanStatus="chanStatus" @getStatus="getStatus" @uploadComplete="uploadComplete" @getProgress="getProgress"
+          @remove="remove" @fileShare="fileShare" @fileDetail="fileDetail" />
       </li>
+
+
+
+
     </ul>
   </div>
 </template>
@@ -32,6 +26,7 @@
 <script setup>
 import upFile from "./file.vue";
 import { useStore } from "vuex";
+
 import {
   ref,
   watch,
@@ -71,9 +66,7 @@ watch(
     if (newVal.length >= oldLength) {
       if (newVal.length >= MAX_UPLOAD_NUM) {
         if (curFileList.value.length == 0) {
-          let startInde =
-            newVal.length -
-            (MAX_UPLOAD_NUM > newVal.length ? newVal.length : MAX_UPLOAD_NUM);
+          let startInde = newVal.length - (MAX_UPLOAD_NUM > newVal.length ? newVal.length : MAX_UPLOAD_NUM);
           let endInde = newVal.length + 1;
           curFileList.value = newVal.slice(startInde, endInde);
         } else {
@@ -94,10 +87,7 @@ watch(
             }
             if (pushNumber <= 0) return;
 
-            let startInde =
-              newVal.length - curFileList.value.length > MAX_UPLOAD_NUM
-                ? newVal.length - curFileList.value.length - MAX_UPLOAD_NUM
-                : 0;
+            let startInde = newVal.length - curFileList.value.length > MAX_UPLOAD_NUM ? newVal.length - curFileList.value.length - MAX_UPLOAD_NUM : 0;
             let endInde = newVal.length - curFileList.value.length;
             for (const item of newVal.slice(startInde, endInde).reverse()) {
               if (
@@ -117,8 +107,25 @@ watch(
       if (newVal.length == curFileList.value.length) {
         return;
       } else {
-        let index = newVal.length - curFileList.value.length - 1;
-        curFileList.value.unshift(newVal[index]);
+        if (timer.value) clearTimeout(timer.value), (timer.value = null);
+        timer.value = setTimeout(() => {
+          let pushNumber = JSON.parse(JSON.stringify(MAX_UPLOAD_NUM));
+          for (const item of curFileList.value) {
+            if (!item.completed) {
+              if (pushNumber <= 0) {
+                return;
+              } else {
+                if (item.error || item.paused) {
+                } else {
+                  pushNumber--;
+                }
+              }
+            }
+          }
+          if (pushNumber <= 0) return;
+          let index = newVal.length - curFileList.value.length - 1;
+          curFileList.value.unshift(newVal[index]);
+        }, 100);
       }
     }
   },
@@ -152,6 +159,11 @@ const fileShare = (file) => {
 const fileDetail = (file) => {
   emits("fileDetail", file);
 };
+
+defineExpose({
+  curFileList,
+  orderID: props.orderID
+})
 </script>
 
 <style>
@@ -167,7 +179,7 @@ const fileDetail = (file) => {
   margin-right: 20px;
 }
 
-.uploader-list > ul {
+.uploader-list>ul {
   list-style: none;
   margin: 0;
   padding: 0;
