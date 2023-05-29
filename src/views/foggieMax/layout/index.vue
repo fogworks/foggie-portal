@@ -107,6 +107,7 @@ export default {
         });
         setTimeout(() => {
           hasToken.value = true;
+          initFoggieDate();
         });
       });
     };
@@ -115,8 +116,6 @@ export default {
     });
     onMounted(async () => {
       await getVoodToken(deviceData);
-
-      initFoggieDate();
     });
     const toSet = () => {
       isInSetup.value = !isInSetup.value;

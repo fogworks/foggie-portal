@@ -550,7 +550,7 @@ import {
 import AssetsRecords from "./assetsRecords";
 import { getfilesize, transferUTCTime } from "@/utils/util.js";
 const $state = useStore();
-const emits = defineEmits(["setState"]);
+const emits = defineEmits(["setState", "setTime"]);
 // const router = useRouter();
 const uploadIsShow = computed(() => $state.getters.uploadIsShow);
 const timeLineShow = ref(false);

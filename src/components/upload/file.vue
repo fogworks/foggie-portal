@@ -147,7 +147,7 @@ export default {
     const store = useStore();
 
     const { file, list, MAX_UPLOAD_NUM, curFileList } = toRefs(props);
-    const client = inject("client");
+    // const client = inject("client");
     const isFirst = ref(true);
     const response = ref(null);
     const paused = ref(false);
@@ -439,7 +439,7 @@ export default {
     const toPath = () => {
       emit("fileDetail", file.value);
     };
-    const _actionCheck = () => {
+    const actionCheck = () => {
       paused.value = file.value.paused;
       error.value = file.value.error;
       isUploading.value = file.value.isUploading();
@@ -514,11 +514,11 @@ export default {
             file.value.completed = true;
             emit("uploadComplete", "Upload Success");
           } else {
-            _fileError();
+            fileError();
           }
         })
         .catch(function () {
-          _fileError();
+          fileError();
         });
     };
     const fileLoad = async (file) => {
@@ -539,7 +539,7 @@ export default {
           deviceType: +file.value.deviceType,
           foggieToken: file.value.foggieToken,
         };
-
+        console.log(file.value, "file.valuefile.value");
         uploadMultipart(params)
           .then((res) => {
             if (res.code == 200) {
@@ -628,12 +628,12 @@ export default {
                 emit("chanStatus", data);
                 emit("getStatus", "Upload Success");
               } else {
-                _fileError();
+                fileError();
               }
             }
           })
           .catch((error) => {
-            _fileError();
+            fileError();
           });
       }
     };
@@ -714,7 +714,7 @@ export default {
                     if (isPass) {
                       resolve();
                     } else {
-                      _fileError();
+                      fileError();
                     }
                   }
                 }
@@ -862,11 +862,11 @@ export default {
                 emit("getStatus", "Upload Success");
                 emit("uploadComplete", "Upload Success");
               } else {
-                _fileError();
+                fileError();
               }
             })
             .catch((error) => {
-              _fileError();
+              fileError();
             });
         }
         emit("getProgress", progress.value);
@@ -976,7 +976,7 @@ export default {
     const retry = () => {
       // resume()
       // file.value.retry();
-      // _actionCheck();
+      // actionCheck();
     };
     const processResponse = (message) => {
       let res = message;
@@ -998,28 +998,28 @@ export default {
         // this[`_${event}`].apply(this, args);
       }
     };
-    const _fileProgress = () => {
+    const fileProgress = () => {
       progress.value = file.value.progress();
       averageSpeed.value = file.value.averageSpeed;
       currentSpeed.value = file.value.currentSpeed;
       timeRemaining.value = file.value.timeRemaining();
       uploadedSize.value = file.value.sizeUploaded();
-      _actionCheck();
+      actionCheck();
     };
-    const _fileSuccess = (rootFile, file, message) => {
+    const fileSuccess = (rootFile, file, message) => {
       if (rootFile) {
         processResponse(message);
       }
-      _fileProgress();
+      fileProgress();
       error.value = false;
       isComplete.value = true;
       isUploading.value = false;
     };
-    const _fileComplete = () => {
-      _fileSuccess();
+    const fileComplete = () => {
+      fileSuccess();
     };
-    const _fileError = () => {
-      _fileProgress();
+    const fileError = () => {
+      fileProgress();
       let data = {
         id: file.value.id,
         error: true,
@@ -1076,7 +1076,7 @@ export default {
     return {
       isFirst,
       response,
-      client,
+      // client,
       paused,
       error,
       averageSpeed,
@@ -1124,7 +1124,7 @@ export default {
       initFile,
       fileShare,
       toPath,
-      _actionCheck,
+      actionCheck,
       pause,
       smallLoad,
       fileLoad,
@@ -1134,10 +1134,10 @@ export default {
       retry,
       processResponse,
       fileEventsHandler,
-      _fileProgress,
-      _fileSuccess,
-      _fileComplete,
-      _fileError,
+      fileProgress,
+      fileSuccess,
+      fileComplete,
+      fileError,
       initStatus,
       resume,
     };

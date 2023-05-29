@@ -955,9 +955,9 @@ const upload = () => {
       }
       &:hover {
         color: $light_blue;
-        .refresh-icon {
-          transform: rotate(90deg);
-        }
+        //   .refresh-icon {
+        //     transform: rotate(90deg);
+        //   }
         .el-icon--right {
           transform: translateY(2px);
         }

@@ -1,5 +1,7 @@
 <template>
-  <router-view v-if="canShow" />
+  <div style="height: 100%">
+    <router-view v-if="canShow" />
+  </div>
 </template>
 
 <script setup>
