@@ -82,7 +82,7 @@ export default {
       // }
       loading.value = true;
       detected_net(deviceData).then((res) => {
-        if (res.result.detected_net) {
+        if (res.result && res.result.detected_net) {
           haveNet.value = true;
         } else {
           haveNet.value = false;

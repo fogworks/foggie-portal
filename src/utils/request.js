@@ -226,7 +226,12 @@ service.interceptors.response.use(
       return Promise.reject(new Error(res.message || "Error"));
     } else if (response.status === 200) {
       if (response.config.url.indexOf('proxy/http') > -1) {
-        return res.data.data
+        if (res.data && res.data.data) {
+          return res.data.data;
+        } else {
+          return res.data;
+        }
+        
       } else {
         return res;
       }
