@@ -621,7 +621,9 @@ export const check_access_pass = (target) => {
     method: "POST",
     target,
     type: "GET",
-    data: {},
+    data: {
+      param: "",
+    },
   });
 };
 export const access_pass = (data, target) => {
@@ -682,13 +684,7 @@ export const detected_net = (target) => {
   });
 };
 
-// export const detected_net = (target) => {
-//   return request({
-//     url: `/v1/detected_net`,
-//     method: "GET",
-//     target,
-//   });
-// };
+
 
 
 

@@ -74,12 +74,13 @@ export default {
     const hasReady = ref(false);
     const isInSetup = ref(false);
     const initFoggieDate = async () => {
-      // if (!deviceData.device_type) {
-      //   accessible.value = true;
-      //   hasReady.value = true;
-      //   haveNet.value = true;
-      //   return;
-      // }
+      if (!deviceData.device_type) {
+        accessible.value = true;
+        haveNet.value = true;
+
+        // hasReady.value = true;
+        // return;
+      }
       loading.value = true;
       detected_net(deviceData).then((res) => {
         if (res.result && res.result.detected_net) {
@@ -99,17 +100,16 @@ export default {
       //   currentOODItem.value.data = oodData.data[0];
       // }
     };
-    const getVoodToken = (data) => {
-      get_vood_token({ vood_id: data.device_id }).then((res) => {
+    const getVoodToken = async (data) => {
+      let res = await get_vood_token({ vood_id: data.device_id });
+      if (res) {
         store.dispatch("token/setTokenMap", {
           id: data.device_id,
           token: res.data.token_type + " " + res.data.access_token,
         });
-        setTimeout(() => {
-          hasToken.value = true;
-          initFoggieDate();
-        });
-      });
+        hasToken.value = true;
+        initFoggieDate();
+      }
     };
     onActivated(() => {
       getVoodToken(deviceData);
@@ -207,7 +207,7 @@ export default {
     text-align: left;
 
     span {
-      background: linear-gradient(to right, #3913b8 0%, #75e0e6 100%);
+      background: linear-gradient(to right, #3913b8 0%, #15a2aa 100%);
       background-clip: text;
       text-fill-color: transparent;
       -webkit-background-clip: text;

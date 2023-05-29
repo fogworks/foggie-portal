@@ -10,10 +10,10 @@ import router from "@/router";
 //   removeToken,
 //   removeAccessToken,
 // } from "@/utils/auth";
-import { refreshToken } from "@/utils/api";
-import { getTokenMap } from "@/utils/tokenMap";
+import { refreshToken, get_vood_refresh_token } from "@/utils/api";
+import { getTokenMap, getTokenTotalMap } from "@/utils/tokenMap";
 import Qs from "qs";
-import { getToken, setToken, removeToken } from "./auth";
+import { getToken, setToken, removeToken, } from "./auth";
 import { ElNotification } from 'element-plus'
 // import { el } from "element-plus/es/locale";
 // import { hmac } from "./util.js";
@@ -99,13 +99,15 @@ service.interceptors.request.use(
       }
       if (config.url.indexOf("/proxy/http") > -1) {
         let token = getTokenMap(config.target?.device_id);
-        console.log(config.target.rpc, 'config.target.rpc');
         config.headers["ip"] = config.target.dedicatedip
         config.headers["port"] = config.target.rpc.split(':')[1] || ''
         config.headers["Authorization"] = token || "";
+        config.headers["port"] = 9094;
+
+
         config.data["body"] = JSON.stringify(config.data);
-        config.data["ip"] = config.target.dedicatedip
-        config.data["port"] = config.target.rpc.split(':')[1] || ''
+        config.data["ip"] = config.target.dedicatedip;
+        config.data["port"] = config.target.rpc.split(':')[1] || '';
         config.data["Authorization"] = token || "";
         config.data["type"] = config.type || "POST";
         config.data["path"] = config.path || "";
@@ -168,11 +170,11 @@ service.interceptors.response.use(
         // });
         return;
       } else if (code === 420) {
-        store.dispatch("global/setUserInfo", {});
-        store.dispatch("global/setHasReady", false);
-        window.localStorage.removeItem("tokenMap");
-        removeToken();
-        router.push("/user");
+        // store.dispatch("global/setUserInfo", {});
+        // store.dispatch("global/setHasReady", false);
+        // window.localStorage.removeItem("tokenMap");
+        // removeToken();
+        // router.push("/user");
         let res = await refreshToken();
 
         if (res && res.data && res.data.access_token) {
@@ -187,9 +189,22 @@ service.interceptors.response.use(
           store.dispatch("token/login", userInfo);
           store.dispatch("global/setUserInfo", res.data);
           window.localStorage.setItem("last_refresh_token", token);
-          //   setToken(token);
+          Object.keys(getTokenTotalMap()).forEach(id => {
+            get_vood_refresh_token().then(res => {
+              store.dispatch("token/setTokenMap", {
+                id,
+                token: res.data.token_type + " " + res.data.access_token,
+              });
+            })
+          })
+          // setToken(token);
           return service(response.config);
         } else {
+          store.dispatch("global/setUserInfo", {});
+          store.dispatch("global/setHasReady", false);
+          window.localStorage.removeItem("tokenMap");
+          removeToken();
+          router.push("/user");
           return;
         }
       } else {
@@ -226,25 +241,27 @@ service.interceptors.response.use(
       return Promise.reject(new Error(res.message || "Error"));
     } else if (response.status === 200) {
       if (response.config.url.indexOf('proxy/http') > -1) {
-        if (res.data && res.data.data) {
-          if (res.data.data.code == 200) {
-            return res.data.data;
+        if (res.data.code == 200) {
+          if (res.data && res.data.data) {
+            if (res.data.data.code == 200) {
+              return res.data.data;
+            } else {
+              ElNotification({
+                type: 'error',
+                message: res.data.data.message || 'error',
+                position: 'bottom-left'
+              })
+              return Promise.reject(new Error(res.data.data.message || "Error"));
+            }
           } else {
-            ElNotification({
-              type: 'error',
-              message: res.data.data.message || 'error',
-              position: 'bottom-left'
-            })
-            return Promise.reject(new Error(res.data.data.message || "Error"));
+            return res.data;
           }
         } else {
-          return res.data;
+          return Promise.reject(new Error(res.data.msg || "Error"));
         }
-
       } else {
         return res;
       }
-
     }
   },
   (error) => {
