@@ -150,7 +150,7 @@ const fileIconArr = ref({
   file: require("@/assets/fileType/folder.svg"),
 });
 const upload_id = ref("");
-const blobFileArray = ref([]);
+const blobFileArray = [];
 const multipartFileArray = ref([]);
 const errorUploadArray = ref([]);
 const isBigFile = ref(true);
@@ -587,34 +587,22 @@ const fileLoad = async (file) => {
         if (res.code == 200) {
           upload_id.value = res.data.uploadId;
           ISCIDING.value = true;
-
-
-          let chunks = Math.ceil(file.value.size / CHUNK_SIZE);
-          let currentChunk1 = 0;
-
-          loadNext();
-          fileReader.onload = (e) => {
-            spark.append(e.target.result);
-            let start = currentChunk1 * CHUNK_SIZE;
-            let end = start + CHUNK_SIZE >= file.value.size ? file.value.size : start + CHUNK_SIZE;
-            // let blob = blobSlice.call(file.value.file, start, end);
-            currentChunk1++;
-
+          for (const item of file.value.chunks) {
             let params = {
-              partId: currentChunk1,
-              start: start,
-              end: end,
+              partId: item.item + 1,
+              start: item.startByte,
+              end: item.endByte,
+              complete:false,
             }
+            blobFileArray.push(params);
+          }
+          ArrayProgress.value.push(0);
+          ISCIDING.value = false;
+          isUploading.value = true;
+          multipartUpload(file);
 
 
-            blobFileArray.value.push([params, false]);
-            ArrayProgress.value.push(0);
-            ISCIDING.value = false;
-            isUploading.value = true;
-            multipartUpload(file);
 
-
-          };
 
 
 
