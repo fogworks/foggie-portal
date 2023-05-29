@@ -77,9 +77,9 @@ export default {
       if (!deviceData.device_type) {
         accessible.value = true;
         haveNet.value = true;
-
+        getServiceInfo();
         // hasReady.value = true;
-        // return;
+        return;
       }
       loading.value = true;
       detected_net(deviceData).then((res) => {
