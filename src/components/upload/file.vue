@@ -660,6 +660,9 @@ export default {
             for (const item of blobFileArray.value) {
               if (!item[1]) {
                 if (request.length >= simultaneousUploads) break;
+                if (file.value.foggieToken) {
+                  item[0].append("foggieToken", file.value.foggieToken);
+                }
                 request.push(item);
                 curUploadIndex.push(item[0].get("partId") - 1);
               }
@@ -715,6 +718,9 @@ export default {
         let request = [];
         for (const INDEX of errorUploadArray) {
           let item = blobFileArray.value[INDEX];
+          if (file.value.foggieToken) {
+            item[0].append("foggieToken", file.value.foggieToken);
+          }
           if (isSecond) {
             request.push(
               fileUpload(item[0], abortController.value, UploadProgress)

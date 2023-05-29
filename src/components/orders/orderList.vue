@@ -407,7 +407,7 @@
             <el-tooltip
               class="box-item"
               effect="dark"
-              content="Yellow files in the list need to be re-uploaded"
+              content="Red files in the list need to be re-uploaded"
               placement="top"
             >
               <svg-icon
@@ -435,7 +435,7 @@
             <el-tooltip
               class="box-item"
               effect="dark"
-              content="Yellow files in the list need to be re-uploaded"
+              content="Red files in the list need to be re-uploaded"
               placement="top"
             >
               <svg-icon
@@ -642,7 +642,9 @@ function openUpload(item) {
   let endTime =
     new Date(orderList.value[0].created_time).getTime() + 1000 * 60 * 3;
   let time = ((+endTime - +nowTime) / 1000).toFixed(0);
-  console.log(new Date(), new Date(orderList.value[0].created_time));
+  if (time > 4 * 60) {
+    time = time - 60 * 60;
+  }
   if (time > 0) {
     let content = "Upload files after " + getSecondTime(+time);
     ElNotification({
@@ -651,9 +653,7 @@ function openUpload(item) {
       position: "bottom-left",
     });
   } else {
-    store.commit("upload/setUploadOptions", deviceData.value);
-
-    // $state.commit("upload/openUpload", item.id);
+    $state.commit("upload/setUploadOptions", deviceData);
   }
 }
 function openMyFiles(item) {
@@ -667,11 +667,14 @@ function handlerOver() {
     orderId: orderId.value,
   }).then((res) => {
     console.log(res);
-    ElNotification({
-      type: "success",
-      message: `Operation successful`,
-      position: "bottom-left",
-    });
+    if (res.code == 200) {
+      refresh();
+      ElNotification({
+        type: "success",
+        message: `Operation successful`,
+        position: "bottom-left",
+      });
+    }
   });
 }
 const uploadFileList = computed(() => $state.getters.uploadFileList);
@@ -775,6 +778,7 @@ const challengeMiner = (item) => {
             message: `Successfully initiated the challenge`,
             position: "bottom-left",
           });
+          refresh();
           if (timeLineShow.value) {
             setTimeout(() => {
               timeLineRef.value.loadChallengeList();
@@ -787,6 +791,10 @@ const challengeMiner = (item) => {
 };
 function refresh() {
   loadOrderList();
+  if (timeLineShow.value) {
+    timeLineRef.value.loadMerkleList();
+    timeLineRef.value.loadChallengeList();
+  }
 }
 const dmcType = ref("");
 const dmcShow = ref(false);

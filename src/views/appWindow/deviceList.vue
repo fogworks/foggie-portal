@@ -53,8 +53,11 @@
           <span>
             {{ item.device_type ? "Name:" : "IP:" }}
           </span>
-          <span class="top-value-span">
-            {{ item.device_name || item.dedicatedip }}
+          <span
+            class="top-value-span"
+            :title="item.device_type ? item.device_name : item.dedicatedip"
+          >
+            {{ item.device_type ? item.device_name : item.dedicatedip }}
           </span>
         </div>
         <div v-else>
@@ -134,6 +137,7 @@ import {
 import { useStore } from "vuex";
 import { Search } from "@element-plus/icons-vue";
 import { handleTimeStamp, getfilesize } from "@/utils/util";
+import useOrderList from "@/views/portal/_modules/hooks/useOrderList";
 const store = useStore();
 const props = defineProps({
   totalActiveDevice: {
@@ -154,29 +158,29 @@ const clickItem = (data) => {
 const cancelItem = (data) => {
   emit("cancelItem", data);
 };
-const keyWord = ref("");
+// const keyWord = ref("");
 const deviceList = computed(() => store.getters["global/deviceList"]);
 
-const copyLink = (text) => {
-  var input = document.createElement("input");
-  input.value = text;
-  document.body.appendChild(input);
-  input.select();
-  document.execCommand("Copy");
-  document.body.removeChild(input);
-  // let str = `Copying  ${type} successful!`;
-  // this.$message.success(str);
-  proxy.$notify({
-    message: "Copy succeeded",
-    type: "success",
-    position: "bottom-left",
-  });
-};
-const handleID = (str) => {
-  return (
-    str.substring(0, 5) + "..." + str.substring(str.length - 5, str.length)
-  );
-};
+// const copyLink = (text) => {
+//   var input = document.createElement("input");
+//   input.value = text;
+//   document.body.appendChild(input);
+//   input.select();
+//   document.execCommand("Copy");
+//   document.body.removeChild(input);
+//   // let str = `Copying  ${type} successful!`;
+//   // this.$message.success(str);
+//   proxy.$notify({
+//     message: "Copy succeeded",
+//     type: "success",
+//     position: "bottom-left",
+//   });
+// };
+// const handleID = (str) => {
+//   return (
+//     str.substring(0, 5) + "..." + str.substring(str.length - 5, str.length)
+//   );
+// };
 const isActive = (id) => {
   if (
     totalActiveDevice.value.data.find(
@@ -190,27 +194,29 @@ const isActive = (id) => {
     return false;
   }
 };
-const handleProgress = (item) => {
-  if (!item.device_type) {
-    let created = new Date(item.created_at).getTime() / 1000;
-    let now = new Date().getTime() / 1000 - created;
-    let end = +item.expire - created;
-    return +(now / end).toFixed(2) > 100
-      ? 100
-      : +(now / end).toFixed(2)
-      ? +(now / end).toFixed(2)
-      : 0;
-  } else {
-    let created = +item.created_at;
-    let now = new Date().getTime() - created;
-    let end = new Date(item.expire).getTime() - created;
-    return +(now / end).toFixed(2) > 100
-      ? 100
-      : +(now / end).toFixed(2)
-      ? +(now / end).toFixed(2)
-      : 0;
-  }
-};
+const { keyWord, loading, handleProgress, copyLink, handleID, search } =
+  useOrderList();
+// const handleProgress = (item) => {
+//   if (!item.device_type) {
+//     let created = new Date(item.created_at).getTime() / 1000;
+//     let now = new Date().getTime() / 1000 - created;
+//     let end = +item.expire - created;
+//     return +(now / end).toFixed(2) > 100
+//       ? 100
+//       : +(now / end).toFixed(2)
+//       ? +(now / end).toFixed(2)
+//       : 0;
+//   } else {
+//     let created = +item.created_at;
+//     let now = new Date().getTime() - created;
+//     let end = new Date(item.expire).getTime() - created;
+//     return +(now / end).toFixed(2) > 100
+//       ? 100
+//       : +(now / end).toFixed(2)
+//       ? +(now / end).toFixed(2)
+//       : 0;
+//   }
+// };
 const list = computed(() => {
   if (!keyWord.value) {
     return deviceList.value;

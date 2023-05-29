@@ -382,6 +382,9 @@ function countDownRun(timestamp) {
   let nowTime = new Date().getTime();
   let endTime = new Date(createdTime.value).getTime() + 1000 * 60 * 3;
   let time = ((+endTime - +nowTime) / 1000).toFixed(0);
+  if (time > 4 * 60) {
+    time = time - 60 * 60;
+  }
   if (time > 0) {
     let content = "Upload files after " + getSecondTime(+time);
     proxy.$notify({
@@ -390,7 +393,7 @@ function countDownRun(timestamp) {
       position: "bottom-left",
     });
   } else {
-    store.commit("upload/setUploadOptions", deviceData.value);
+    store.commit("upload/setUploadOptions", deviceData);
     // store.commit("upload/openUpload", orderId.value);
   }
 }

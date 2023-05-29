@@ -15,6 +15,7 @@ import { getTokenMap } from "@/utils/tokenMap";
 import Qs from "qs";
 import { getToken, setToken, removeToken } from "./auth";
 import { ElNotification } from 'element-plus'
+// import { el } from "element-plus/es/locale";
 // import { hmac } from "./util.js";
 
 const service = axios.create({
@@ -96,9 +97,19 @@ service.interceptors.request.use(
         config.headers["Content-Type"] = "multipart/form-data";
         config.headers["Content-Md5"] = config.MD5;
       }
-      if (config.url.indexOf("/v1") > -1) {
+      if (config.url.indexOf("/proxy/http") > -1) {
         let token = getTokenMap(config.target?.device_id);
+        console.log(config.target.rpc, 'config.target.rpc');
+        config.headers["ip"] = config.target.dedicatedip
+        config.headers["port"] = config.target.rpc.split(':')[1] || ''
         config.headers["Authorization"] = token || "";
+        config.data["body"] = JSON.stringify(config.data);
+        config.data["ip"] = config.target.dedicatedip
+        config.data["port"] = config.target.rpc.split(':')[1] || ''
+        config.data["Authorization"] = token || "";
+        config.data["type"] = config.type || "POST";
+        config.data["path"] = config.path || "";
+        config.data["port"] = 9094;
       }
     }
     return config;
@@ -214,11 +225,21 @@ service.interceptors.response.use(
       //   });
       return Promise.reject(new Error(res.message || "Error"));
     } else if (response.status === 200) {
-      return res;
+      if (response.config.url.indexOf('proxy/http') > -1) {
+        if (res.data && res.data.data) {
+          return res.data.data;
+        } else {
+          return res.data;
+        }
+        
+      } else {
+        return res;
+      }
+      
     }
   },
   (error) => {
-    if (!error.config.url.indexOf("ping")) {
+    if (!(error.config && error.config.url.indexOf("ping"))) {
       //   Message({
       //     message: error.message,
       //     type: "error",

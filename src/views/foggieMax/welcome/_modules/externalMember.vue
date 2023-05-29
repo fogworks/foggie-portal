@@ -22,25 +22,6 @@
         Installation failed. You can try again or contact customer service for
         assistance
       </div>
-      <!-- <CircleProgress :rate="rate"></CircleProgress> -->
-      <!-- <el-progress
-        class="install-progress"
-        color="#29abff"
-        :width="200"
-        :stroke-width="15"
-        type="circle"
-        :percentage="rate"
-      >
-        <template #default="{ percentage }">
-          <span class="percentage-value">{{ percentage }}%</span>
-          <span class="percentage-label">CBS</span>
-        </template>
-      </el-progress>
-      <el-progress
-        class="install-progress total-progress"
-        :stroke-width="26"
-        :percentage="totalRate"
-      /> -->
       <div class="foot-btn">
         <NextButton v-if="rate === 100" @click="next">Go</NextButton>
         <NextButton v-else-if="count > 3" @click="startInstall"
@@ -52,7 +33,6 @@
           >Start Installation</NextButton
         >
       </div>
-      <!-- <el-button @click="next">Next</el-button> -->
     </div>
   </div>
 </template>
@@ -75,7 +55,6 @@ import {
 } from "@/utils/api";
 import NextButton from "@/components/nextButton";
 import { createDID } from "@/utils/did.js";
-// import CircleProgress from "@/components/circleProgress";
 const emit = defineEmits(["next", "update:preShow"]);
 const props = defineProps({
   hasExternalNetwork: {
@@ -137,7 +116,7 @@ const installSVC = async (isFinish) => {
     await activate_sev(requestTarget);
     svcTimer = setInterval(
       timeCallback(hasExternalNetwork.value ? 66 : 99),
-      hasExternalNetwork.value ? 500 : 300
+      hasExternalNetwork.value ? 1000 : 600
     );
     let svcFinish = await getInstallStatus("svc");
     if (svcFinish) {
@@ -237,6 +216,7 @@ const gotoDeploy = async (item, type) => {
   isInstall.vale = true;
   count.value = 0;
   emit("update:preShow", false);
+  // await installCYFS();
 
   get_service_info(requestTarget)
     .then(async ({ result }) => {
@@ -363,16 +343,9 @@ watch(count, (val) => {
 
 const startInstall = async () => {
   gotoDeploy();
-  // const timer = setInterval(timeCallback, 1000);
-  // const res = await getInstallStatus();
 };
 const next = async () => {
-  // let res = await getInstallStatus();
-  // gotoDeploy("", "ipfs");
-  // gotoDeploy("", "cyfs");
-  // emit("next");
   goHome();
-  // window.location.href = "http://154.37.16.163:9000/#/access";
 };
 </script>
 

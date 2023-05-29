@@ -580,6 +580,8 @@ const handleImg = (type, ID, cid, key, isDir, ip, port, peerId) => {
     // imgHttpLink = `${location}/d/${ID}/${pubkey}?new_w=200`;
     // imgHttpLink = `${location}/object?pubkey=${pubkey}&new_w=${size}`;
     let token = store.getters.token;
+    // let token = tokenMap.value[deviceData.device_id];
+
     imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${ID}&peerId=${peerId}&type=foggie&token=${token}`;
 
     // foggie://peerid/spaceid/cid
@@ -718,6 +720,8 @@ const ipfsPin = (checked) => {
   let ip_address = deviceData.rpc.split(":")[0];
   let port = deviceData.rpc.split(":")[1];
   let peerId = deviceData.peer_id;
+  // let token = tokenMap.value[deviceData.device_id];
+
   let data = {
     ip_address,
     port,
@@ -741,6 +745,8 @@ const cyfsPin = () => {
   const item = pinData.item;
   let ip_address = deviceData.rpc.split(":")[0];
   let port = deviceData.rpc.split(":")[1];
+  // let token = tokenMap.value[deviceData.device_id];
+
   let data = {
     ip_address,
     port,
@@ -774,6 +780,8 @@ const downloadItem = (item) => {
   let Id = deviceData.foggie_id;
   let peerId = deviceData.peer_id;
   let token = store.getters.token;
+  // let token = tokenMap.value[deviceData.device_id];
+
   let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=foggie&token=${token}`;
 
   var oA = document.createElement("a");
@@ -786,6 +794,8 @@ const downloadItem = (item) => {
 const deleteItem = (item) => {
   tableLoading.value = true;
   let token = store.getters.token;
+  // let token = tokenMap.value[deviceData.device_id];
+
   file_delete(token, item, deviceData).then((res) => {
     if (res && res.data) {
       proxy.$notify({
@@ -842,7 +852,8 @@ const doSearch = async () => {
   } else {
     tableLoading.value = true;
     breadcrumbList.prefix = [];
-    let token = store.getters.token;
+    // let token = store.getters.token;
+    let token = tokenMap.value[deviceData.device_id];
     let type = "foggie";
     let data = await find_objects(
       email.value,

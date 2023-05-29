@@ -13,8 +13,9 @@ import installExtension, { VUEJS3_DEVTOOLS } from "electron-devtools-installer";
 const isDevelopment = process.env.NODE_ENV !== "production";
 const path = require("path");
 const cp = require("child_process");
+const os = require("os");
 const spawn1 = require("cross-spawn");
-
+const fs = require("fs");
 // let childSpawn;
 // const checkMacOS = () => process.platform === 'darwin';
 // console.log('++++++++checkMacOS', checkMacOS())
@@ -99,6 +100,7 @@ app.on("activate", () => {
 
 const express = require("express");
 const app1 = express();
+const checkMacOS = () => process.platform === "darwin";
 
 app.on("ready", async () => {
   if (isDevelopment && !process.env.IS_TEST) {
@@ -111,44 +113,69 @@ app.on("ready", async () => {
   }
   createWindow();
 
-  let childSpawn;
-  let childSpawn1;
-  // let childSpawn2;
-  const checkMacOS = () => process.platform === "darwin";
-  childSpawn = cp.exec(
-    `cd ${__dirname}/foggie-node && npm run serve`,
-    (err, stdout, stderr) => {
-      // dialog.showErrorBox("foggie-node", stderr);
-    }
-  );
+  if (false && checkMacOS()) {
+    let user_path = os.homedir();
+    let childSpawn;
+    let childSpawn1;
+    // let childSpawn2;
 
-  childSpawn1 = cp.exec(
-    `chmod +x ${__dirname}/foggie`,
-    (err, stdout, stderr) => {
-      // dialog.showErrorBox("chmod", stderr);
-    }
-  );
+    childSpawn = cp.exec(
+      `cd ${__dirname}/foggie-node && npm run serve`,
+      (err, stdout, stderr) => {
+        // dialog.showErrorBox("foggie-node", stderr);
+      }
+    );
 
-  if (checkMacOS()) {
-    let pathArr = __dirname.split('/').slice(0, 3);
-    let user_path  = pathArr.join('/');
-    const childProcess = cp.spawn(__dirname + "/mac-arm64/foggie-portal.app/Contents/Resources/app/foggie", ['node'], {
-      detached: true,
-      env: {PROXD_LOG: `${user_path}/Library/Logs/foggie.log`, PROX_CONFIG: `${user_path}/Library/Application Support/foggie/config.json`} 
+    childSpawn1 = cp.exec(
+      `chmod +x ${__dirname}/foggie`,
+      (err, stdout, stderr) => {
+        // dialog.showErrorBox("chmod", stderr);
+      }
+    );
+    // fs.chmod(`${__dirname}/foggie`, 1)
+    // fs.chmod(`${__dirname}/config.json`, 1)
+
+    fs.readFile(path.join(__dirname, "./config.json"), "utf8", (err, data) => {
+      // dialog.showErrorBox("data", data);
+      // dialog.showErrorBox("err", err);
+      if (err) throw err;
+      let list = JSON.parse(data);
+      let server = list.server;
+      let db = list.db;
+      if (server.repoPath.indexOf(user_path) !== 0) {
+        server.repoPath = user_path + server.repoPath;
+        db.path = user_path + db.path;
+      }
+
+      let newContent = JSON.stringify(list, null, 4);
+      fs.writeFile(path.join(__dirname, "./config.json"), newContent, "utf8", (err) => {
+        if (err) throw err;
+        console.log("success done");
+      });
     });
 
-    childProcess.stdout.on('data', (d)=>{
+    // const childProcess = cp.spawn(__dirname + "/mac-arm64/foggie-portal.app/Contents/Resources/app/foggie", ['node'], {
+    const childProcess = cp.spawn(__dirname + "/foggie", ["node"], {
+      detached: true,
+      env: {
+        PROX_LOG: `${user_path}/Library/Logs/foggie.log`,
+        // PROX_CONFIG: `${user_path}/Library/Application Support/foggie/config.json`
+        PROX_CONFIG: `${__dirname}/config.json`,
+      },
+    });
+
+    childProcess.stdout.on("data", (d) => {
       // dialog.showErrorBox("stdout", d.toString());
-    })
-  
-    childProcess.stderr.on('data', (d)=>{
+    });
+
+    childProcess.stderr.on("data", (d) => {
       // dialog.showErrorBox("stderr", d.toString());
-    })
+    });
 
     childProcess.unref();
-  
-    childProcess.on('exit', (code, signal) => {
-        // dialog.showErrorBox("exit", `code: ${code}, signal: ${signal}`);
+
+    childProcess.on("exit", (code, signal) => {
+      // dialog.showErrorBox("exit", `code: ${code}, signal: ${signal}`);
     });
   } else {
     // cp.spawn(path.join(__dirname, './winResources/xxx'));

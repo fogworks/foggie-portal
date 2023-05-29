@@ -291,6 +291,7 @@ module.exports = defineConfig({
       },
       "^/v1": {
         target: "http://154.37.16.163:9094",
+        // target: "http://154.37.17.172:9094",
         changeOrigin: true,
         secure: false,
       },
