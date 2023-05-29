@@ -420,6 +420,7 @@ function getFileMd5(file, type) {
   return new Promise((resolve, reject) => {
     let fileReader = new FileReader();
     let spark = new SparkMD5.ArrayBuffer();
+    ISCIDING.value = true;
     let blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
 
     let curChunks = 1
@@ -441,6 +442,8 @@ function getFileMd5(file, type) {
         if (curChunks - 1 == file.chunks.length) {
           let fileMd5 = spark.end()
           spark.destroy()
+          ISCIDING.value = false;
+          isUploading.value = true;
           resolve(fileMd5);
         } else {
           loadNext()
@@ -450,6 +453,8 @@ function getFileMd5(file, type) {
         spark.append(event.target.result);
         let fileMd5 = spark.end()
         spark.destroy()
+        ISCIDING.value = false;
+        isUploading.value = true;
         resolve(fileMd5);
       }
 
@@ -459,16 +464,17 @@ function getFileMd5(file, type) {
 }
 
 function initParams(params) {
-  new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     let fileReader = new FileReader();
     let blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
     let form = new FormData();
+    let spark = new SparkMD5.ArrayBuffer();
     form.append("deviceType", file.value.deviceType);
     form.append("fileCategory", "2");
     form.append("fileName", encodeURIComponent(file.value.urlFileName));
     form.append("email", email.value);
     form.append("uploadId", upload_id.value);
-    form.append("partId", params.currentChunk1);
+    form.append("partId", params.partId);
     form.append("fileSize", params.end - params.start);
     form.append("wholeFileSize", file.value.size);
     form.append("wholeMd5", fileMd5.value);
@@ -480,24 +486,22 @@ function initParams(params) {
     if (file.value.foggieToken) {
       form.append("foggieToken", file.value.foggieToken);
     }
+    form.append("file", blobSlice.call(file.value.file, params.start, params.end), file.value.urlFileName);
+    // let blob = blobSlice.call(file.value.file, params.start, params.end)
+    // form.append('ma5',SparkMD5.ArrayBuffer.hash(blob) )
+    // form.append("file", blob, file.value.urlFileName);
+    // resolve(form)
 
     fileReader.readAsArrayBuffer(blobSlice.call(file.value.file, params.start, params.end));
-    fileReader.onload = async (e) => {
-      spark.append(e.target.result);
-      form.append("md5", spark.end());
-      form.append("file", e.target.result, file.value.urlFileName);
+    fileReader.onload = async function (e) {
+      await spark.append(e.target.result);
+      await form.append("md5", spark.end());
       resolve(form)
       // let blob = blobSlice.call(file.value.file, params.start, params.end);
       // form.append("file", blob, file.value.urlFileName);
     }
 
   })
-
-
-
-
-
-
 
 }
 
@@ -586,28 +590,24 @@ const fileLoad = async (file) => {
       .then((res) => {
         if (res.code == 200) {
           upload_id.value = res.data.uploadId;
-          ISCIDING.value = true;
+
           for (const item of file.value.chunks) {
             let params = {
-              partId: item.item + 1,
+              partId: item.offset + 1,
               start: item.startByte,
               end: item.endByte,
-              complete:false,
+              complete: false,
             }
             blobFileArray.push(params);
+            ArrayProgress.value.push(0);
           }
-          ArrayProgress.value.push(0);
+      
           ISCIDING.value = false;
           isUploading.value = true;
           multipartUpload(file);
-
-
-
-
-
-
         } else {
           if (res.code == 30032) {
+            isUploading.value = false;
             completed.value = true;
             progress.value = 100;
             let data = {
@@ -634,52 +634,48 @@ const multipartUpload = (file) => {
     abortController.value = null;
   }
   abortController.value = new AbortController();
-  let blobSlice =
-    File.prototype.slice ||
-    File.prototype.mozSlice ||
-    File.prototype.webkitSlice;
+  let blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
   let chunks = Math.ceil(file.value.size / CHUNK_SIZE);
   let fileReader = new FileReader();
   async function loadNext() {
     let start = currentChunk.value * CHUNK_SIZE;
     let end = start + CHUNK_SIZE >= file.value.size ? file.value.size : start + CHUNK_SIZE;
 
-    fileReader.readAsArrayBuffer(
-      blobSlice.call(file.value.file, start, end)
-    );
+    fileReader.readAsArrayBuffer(blobSlice.call(file.value.file, start, end));
   }
 
   async function uploadChunk() {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       let isLast = false;
 
-      if (currentChunk.value + 1 == blobFileArray.value.length) {
+      if (currentChunk.value + 1 == blobFileArray.length) {
         isLast = true;
       }
 
       if ((currentChunk.value + 1) % simultaneousUploads == 0 || isLast) {
         let request = [];
         let curUploadIndex = [];
-        for (const item of blobFileArray.value) {
-          if (!item[1]) {
+        for (const item of blobFileArray) {
+          if (!item.complete) {
             if (request.length >= simultaneousUploads) break;
-
-            request.push(item);
-            curUploadIndex.push(item[0].get("partId") - 1);
+            let params = await initParams(item)
+            request.push(params);
+            curUploadIndex.push(item.partId - 1);
           }
         }
         request = request.map((item) => {
-          return fileUpload(item[0], abortController.value, UploadProgress);
+          return fileUpload(item, abortController.value, UploadProgress);
         });
 
         Promise.allSettled(request)
           .then(async (...res) => {
             let index = 0;
             let errorUploadArray = [];
+
             res[0].forEach((item, nindex) => {
               if (item.status == "fulfilled" && item.value?.code == 200) {
                 let blobFileArrayIndex = curUploadIndex[nindex];
-                blobFileArray.value[blobFileArrayIndex][1] = true;
+                blobFileArray[blobFileArrayIndex].complete = true;
                 multipartFileArray.value.push({
                   etag: item.value?.data,
                   partNumber: curUploadIndex[nindex] + 1,
@@ -718,18 +714,12 @@ const multipartUpload = (file) => {
     let isPass = false;
     let request = [];
     for (const INDEX of errorUploadArray) {
-      let item = blobFileArray.value[INDEX];
-      if (file.value.foggieToken) {
-        item[0].append("foggieToken", file.value.foggieToken);
-      }
+      let item = blobFileArray[INDEX];
+      let params = await initParams(item)
       if (isSecond) {
-        request.push(
-          fileUpload(item[0], abortController.value, UploadProgress)
-        );
+        request.push(fileUpload(params, abortController.value, UploadProgress));
       } else {
-        request.push(
-          fileUpload(item[0], abortController.value, UploadProgress)
-        );
+        request.push(fileUpload(params, abortController.value, UploadProgress));
       }
     }
 
@@ -778,7 +768,7 @@ const multipartUpload = (file) => {
                 etag: element.data,
                 partNumber: Number(errorUploadArray[index]) + 1,
               });
-              blobFileArray.value[errorUploadArray[index]][1] = true;
+              blobFileArray[errorUploadArray[index]].complete = true;
             });
             resolve(true);
           } else {
@@ -863,8 +853,9 @@ const UploadProgress = (progressEvent, part_number) => {
       return cur + next;
     }, 0);
 
-    let uploadProgress =
-      (NUMBER.value / (100 * ArrayProgress.value.length)).toFixed(2) * 100;
+
+    let uploadProgress = (NUMBER.value / (100 * ArrayProgress.value.length)).toFixed(2) * 100;
+    console.log(uploadProgress);
     progress.value = uploadProgress < 100 ? uploadProgress : 99;
 
     let curTime = new Date().getTime();
