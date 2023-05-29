@@ -44,7 +44,7 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import Uploader from "simple-uploader.js";
 import events from "./file-events";
 import { secondsToStr } from "./utils";
@@ -70,1066 +70,1008 @@ import {
 import {
   fileUpload,
   uploadMultipart,
-  fileComplete,
+  fileCompletes,
   SaveFile,
 } from "@/api/upload";
 import { ElMessage } from 'element-plus'
-const COMPONENT_NAME = "uploader-file";
 const CHUNK_SIZE = 1024 * 1024 * 5;
 const FILE_SIZE = 10 * 1024 * 1024;
 const simultaneousUploads = 4;
 const maxChunkRetries = 3;
 const peerId = "12D3KooWDj1NkJ1DrVvpbBhtJ3nLCNA9CKyg3eynpiUTKsVEDkgx";
-const token =
-  "58df9379402ab6c87a51be426290e0f752ba5be4fe45736674a05dc12e642c50";
+const token = "58df9379402ab6c87a51be426290e0f752ba5be4fe45736674a05dc12e642c50";
 
-export default {
-  name: COMPONENT_NAME,
-  props: {
-    file: {
-      type: Object,
-      default() {
-        return {};
-      },
-    },
-    list: {
-      type: Boolean,
-      default: false,
-    },
-    MAX_UPLOAD_NUM: {
-      type: Number,
-      default: 0,
-    },
-    curFileList: {
-      type: Array,
-      default() {
-        return [];
-      },
+const emits = defineEmits(['fileShare', 'fileDetail', 'chanStatus', 'uploadComplete', 'getStatus', 'getProgress', 'remove'])
+const props = defineProps({
+  file: {
+    type: Object,
+    default() {
+      return {};
     },
   },
-  setup(props, { emit }) {
-    const store = useStore();
+  list: {
+    type: Boolean,
+    default: false,
+  },
+  MAX_UPLOAD_NUM: {
+    type: Number,
+    default: 0,
+  },
+  curFileList: {
+    type: Array,
+    default() {
+      return [];
+    },
+  },
 
-    const { file, list, MAX_UPLOAD_NUM, curFileList } = toRefs(props);
-    // const client = inject("client");
-    const isFirst = ref(true);
-    const response = ref(null);
-    const paused = ref(false);
-    const error = ref(false);
-    const averageSpeed = ref(0);
-    const lastAverageSpeed = ref(0);
-    const currentSpeed = ref(0);
-    const isComplete = ref(false);
-    const isUploading = ref(false);
-    const size = ref(0);
-    const formatedSize = ref("");
-    const uploadedSize = ref(0);
-    const progress = ref(0);
-    const timeRemaining = ref(0);
-    const type = ref("");
-    const extension = ref("");
-    const progressingClass = ref("");
-    const completed = ref(file.value.completed);
-    const ISCIDING = ref(false);
-    const isPause = ref(false);
-    const currentChunk = ref(0);
-    const fileIconArr = ref({
-      image: require("@/assets/fileType/icon_img.svg"),
-      cmd: require("@/assets/fileType/icon_cmd.svg"),
-      css: require("@/assets/fileType/icon_css.svg"),
-      excel: require("@/assets/fileType/icon_excel.svg"),
-      html: require("@/assets/fileType/icon_html.svg"),
-      music: require("@/assets/fileType/icon_music.svg"),
-      other: require("@/assets/fileType/icon_other.svg"),
-      pdf: require("@/assets/fileType/icon_pdf.svg"),
-      ppt: require("@/assets/fileType/icon_ppt.svg"),
-      rar: require("@/assets/fileType/icon_rar.svg"),
-      txt: require("@/assets/fileType/icon_text.svg"),
-      video: require("@/assets/fileType/icon_video.svg"),
-      word: require("@/assets/fileType/icon_word.svg"),
-      file: require("@/assets/fileType/folder.svg"),
-    });
-    const upload_id = ref("");
-    const blobFileArray = ref([]);
-    const multipartFileArray = ref([]);
-    const errorUploadArray = ref([]);
-    const isBigFile = ref(true);
-    const timer = ref(null);
-    const abortController = ref(null);
-    const ArrayProgress = ref([]);
-    const NUMBER = ref(0);
-    const lastTime = ref(0);
-    const lastNUMBER = ref(0);
-    const NUMBER_timer = ref(null);
-    const aborted = ref(false);
-    const fileMd5 = ref(null);
+})
 
-    const header = new Header();
-    header.setId(file.value.orderId);
-    header.setPeerid(peerId);
-    header.setToken(token);
 
-    const username = computed(() => store.getters.userInfo?.dmc);
-    const email = computed(() => store.getters.userInfo?.email);
-    let fileIcon = computed(() => {
-      let fileName = file.value.name.toLowerCase();
-      if (
-        fileName.endsWith(".jpeg") ||
-        fileName.endsWith(".jpg") ||
-        fileName.endsWith(".png") ||
-        fileName.endsWith(".svg")
-      ) {
-        return fileIconArr.value.image;
-      } else if (
-        fileName.endsWith(".mp4") ||
-        fileName.endsWith(".avi") ||
-        fileName.endsWith(".mp4")
-      ) {
-        return fileIconArr.value.video;
-      } else if (fileName.endsWith(".doc") || fileName.endsWith(".docx")) {
-        return fileIconArr.value.word;
-      } else if (
-        fileName.endsWith(".zip") ||
-        fileName.endsWith(".rar") ||
-        fileName.endsWith(".gz") ||
-        fileName.endsWith(".tar")
-      ) {
-        return fileIconArr.value.rar;
-      } else if (fileName.endsWith(".cmd")) {
-        return fileIconArr.value.cmd;
-      } else if (fileName.endsWith(".css")) {
-        return fileIconArr.value.css;
-      } else if (fileName.endsWith(".mp3")) {
-        return fileIconArr.value.music;
-      } else if (fileName.endsWith(".xlsx") || fileName.endsWith(".xls")) {
-        return fileIconArr.value.excel;
-      } else if (fileName.endsWith(".pdf")) {
-        return fileIconArr.value.pdf;
-      } else if (fileName.endsWith(".ppt")) {
-        return fileIconArr.value.pdf;
-      } else if (
-        fileName.endsWith(".text") ||
-        fileName.endsWith(".txt") ||
-        fileName.endsWith(".md")
-      ) {
-        return fileIconArr.value.txt;
-      } else if (fileName.endsWith(".html")) {
-        return fileIconArr.value.html;
-      } else if (fileName.endsWith("/")) {
-        return fileIconArr.value.file;
-      } else {
-        return fileIconArr.value.other;
-      }
-    });
-    let fileCategory = computed(() => {
-      const isFolder = file.value.isFolder;
-      let type = isFolder ? "folder" : "unknown";
-      const categoryMap = file.value.uploader.opts.categoryMap;
-      const typeMap = categoryMap || {
-        image: ["gif", "jpg", "jpeg", "png", "bmp", "webp"],
-        video: ["mp4", "m3u8", "rmvb", "avi", "swf", "3gp", "mkv", "flv"],
-        audio: ["mp3", "wav", "wma", "ogg", "aac", "flac"],
-        document: [
-          "doc",
-          "txt",
-          "docx",
-          "pages",
-          "epub",
-          "pdf",
-          "numbers",
-          "csv",
-          "xls",
-          "xlsx",
-          "keynote",
-          "ppt",
-          "pptx",
-        ],
-      };
-      Object.keys(typeMap).forEach((_type) => {
-        const extensions = typeMap[_type];
-        if (extensions.indexOf(extension.value) > -1) {
-          type = _type;
-        }
-      });
-      return type;
-    });
 
-    let progressStyle = computed(() => {
-      let progress_val = Math.floor(progress.value);
-      const style = `translateX(${Math.floor(progress_val - 100) - 0.01}%)`;
-      return {
-        progress: `${progress_val}%`,
-        webkitTransform: style,
-        mozTransform: style,
-        msTransform: style,
-        transform: style,
-      };
-    });
-    let formatedAverageSpeed = computed(
-      () => `${Uploader.utils.formatSize(averageSpeed.value)} / s`
+const store = useStore();
+
+const { file, list, MAX_UPLOAD_NUM, curFileList } = toRefs(props);
+// const client = inject("client");
+const isFirst = ref(true);
+const response = ref(null);
+const paused = ref(false);
+const error = ref(false);
+const averageSpeed = ref(0);
+const lastAverageSpeed = ref(0);
+const currentSpeed = ref(0);
+const isComplete = ref(false);
+const isUploading = ref(false);
+const size = ref(0);
+const formatedSize = ref("");
+const uploadedSize = ref(0);
+const progress = ref(0);
+const timeRemaining = ref(0);
+const type = ref("");
+const extension = ref("");
+const progressingClass = ref("");
+const completed = ref(file.value.completed);
+const ISCIDING = ref(false);
+const isPause = ref(false);
+const currentChunk = ref(0);
+const fileIconArr = ref({
+  image: require("@/assets/fileType/icon_img.svg"),
+  cmd: require("@/assets/fileType/icon_cmd.svg"),
+  css: require("@/assets/fileType/icon_css.svg"),
+  excel: require("@/assets/fileType/icon_excel.svg"),
+  html: require("@/assets/fileType/icon_html.svg"),
+  music: require("@/assets/fileType/icon_music.svg"),
+  other: require("@/assets/fileType/icon_other.svg"),
+  pdf: require("@/assets/fileType/icon_pdf.svg"),
+  ppt: require("@/assets/fileType/icon_ppt.svg"),
+  rar: require("@/assets/fileType/icon_rar.svg"),
+  txt: require("@/assets/fileType/icon_text.svg"),
+  video: require("@/assets/fileType/icon_video.svg"),
+  word: require("@/assets/fileType/icon_word.svg"),
+  file: require("@/assets/fileType/folder.svg"),
+});
+const upload_id = ref("");
+const blobFileArray = ref([]);
+const multipartFileArray = ref([]);
+const errorUploadArray = ref([]);
+const isBigFile = ref(true);
+const timer = ref(null);
+const abortController = ref(null);
+const ArrayProgress = ref([]);
+const NUMBER = ref(0);
+const lastTime = ref(0);
+const lastNUMBER = ref(0);
+const NUMBER_timer = ref(null);
+const aborted = ref(false);
+const fileMd5 = ref(null);
+
+const header = new Header();
+header.setId(file.value.orderId);
+header.setPeerid(peerId);
+header.setToken(token);
+
+const username = computed(() => store.getters.userInfo?.dmc);
+const email = computed(() => store.getters.userInfo?.email);
+let fileIcon = computed(() => {
+  let fileName = file.value.name.toLowerCase();
+  if (
+    fileName.endsWith(".jpeg") ||
+    fileName.endsWith(".jpg") ||
+    fileName.endsWith(".png") ||
+    fileName.endsWith(".svg")
+  ) {
+    return fileIconArr.value.image;
+  } else if (
+    fileName.endsWith(".mp4") ||
+    fileName.endsWith(".avi") ||
+    fileName.endsWith(".mp4")
+  ) {
+    return fileIconArr.value.video;
+  } else if (fileName.endsWith(".doc") || fileName.endsWith(".docx")) {
+    return fileIconArr.value.word;
+  } else if (
+    fileName.endsWith(".zip") ||
+    fileName.endsWith(".rar") ||
+    fileName.endsWith(".gz") ||
+    fileName.endsWith(".tar")
+  ) {
+    return fileIconArr.value.rar;
+  } else if (fileName.endsWith(".cmd")) {
+    return fileIconArr.value.cmd;
+  } else if (fileName.endsWith(".css")) {
+    return fileIconArr.value.css;
+  } else if (fileName.endsWith(".mp3")) {
+    return fileIconArr.value.music;
+  } else if (fileName.endsWith(".xlsx") || fileName.endsWith(".xls")) {
+    return fileIconArr.value.excel;
+  } else if (fileName.endsWith(".pdf")) {
+    return fileIconArr.value.pdf;
+  } else if (fileName.endsWith(".ppt")) {
+    return fileIconArr.value.pdf;
+  } else if (
+    fileName.endsWith(".text") ||
+    fileName.endsWith(".txt") ||
+    fileName.endsWith(".md")
+  ) {
+    return fileIconArr.value.txt;
+  } else if (fileName.endsWith(".html")) {
+    return fileIconArr.value.html;
+  } else if (fileName.endsWith("/")) {
+    return fileIconArr.value.file;
+  } else {
+    return fileIconArr.value.other;
+  }
+});
+let fileCategory = computed(() => {
+  const isFolder = file.value.isFolder;
+  let type = isFolder ? "folder" : "unknown";
+  const categoryMap = file.value.uploader.opts.categoryMap;
+  const typeMap = categoryMap || {
+    image: ["gif", "jpg", "jpeg", "png", "bmp", "webp"],
+    video: ["mp4", "m3u8", "rmvb", "avi", "swf", "3gp", "mkv", "flv"],
+    audio: ["mp3", "wav", "wma", "ogg", "aac", "flac"],
+    document: [
+      "doc",
+      "txt",
+      "docx",
+      "pages",
+      "epub",
+      "pdf",
+      "numbers",
+      "csv",
+      "xls",
+      "xlsx",
+      "keynote",
+      "ppt",
+      "pptx",
+    ],
+  };
+  Object.keys(typeMap).forEach((_type) => {
+    const extensions = typeMap[_type];
+    if (extensions.indexOf(extension.value) > -1) {
+      type = _type;
+    }
+  });
+  return type;
+});
+
+let progressStyle = computed(() => {
+  let progress_val = Math.floor(progress.value);
+  const style = `translateX(${Math.floor(progress_val - 100) - 0.01}%)`;
+  return {
+    progress: `${progress_val}%`,
+    webkitTransform: style,
+    mozTransform: style,
+    msTransform: style,
+    transform: style,
+  };
+});
+let formatedAverageSpeed = computed(
+  () => `${Uploader.utils.formatSize(averageSpeed.value)} / s`
+);
+let status = computed(() => {
+  if (completed.value) {
+    return "success";
+  } else if (error.value) {
+    return "error";
+  } else if (isUploading.value) {
+    return "uploading";
+  } else if (paused.value) {
+    return "paused";
+  } else if (ISCIDING.value) {
+    return "md5";
+  } else {
+    return "waiting";
+  }
+});
+let statusText = computed(() => {
+  const fileStatusText = file.value.uploader.fileStatusText;
+  let txt = status.value;
+  if (typeof fileStatusText === "function") {
+    txt = fileStatusText(status.value, response.value);
+  } else {
+    txt = fileStatusText[status.value]();
+  }
+  if (ISCIDING.value && status.value == "paused") {
+    txt = fileStatusText["md5"]();
+  }
+
+  return txt || status.value;
+});
+let formatedTimeRemaining = computed(() => {
+  const file_val = file.value;
+  if (
+    timeRemaining.vlaue === Number.POSITIVE_INFINITY ||
+    timeRemaining.value === 0
+  ) {
+    return "";
+  }
+  let parsedTimeRemaining = secondsToStr(timeRemaining.value);
+  const parseTimeRemaining = file_val.uploader.opts.parseTimeRemaining;
+
+  if (parseTimeRemaining) {
+    parsedTimeRemaining = parseTimeRemaining(
+      timeRemaining.value,
+      parsedTimeRemaining
     );
-    let status = computed(() => {
-      if (completed.value) {
-        return "success";
-      } else if (error.value) {
-        return "error";
-      } else if (isUploading.value) {
-        return "uploading";
-      } else if (paused.value) {
-        return "paused";
-      } else if (ISCIDING.value) {
-        return "md5";
-      } else {
-        return "waiting";
-      }
-    });
-    let statusText = computed(() => {
-      const fileStatusText = file.value.uploader.fileStatusText;
-      let txt = status.value;
-      if (typeof fileStatusText === "function") {
-        txt = fileStatusText(status.value, response.value);
-      } else {
-        txt = fileStatusText[status.value]();
-      }
-      if (ISCIDING.value && status.value == "paused") {
-        txt = fileStatusText["md5"]();
-      }
-
-      return txt || status.value;
-    });
-    let formatedTimeRemaining = computed(() => {
-      const file_val = file.value;
-      if (
-        timeRemaining.vlaue === Number.POSITIVE_INFINITY ||
-        timeRemaining.value === 0
-      ) {
-        return "";
-      }
-      let parsedTimeRemaining = secondsToStr(timeRemaining.value);
-      const parseTimeRemaining = file_val.uploader.opts.parseTimeRemaining;
-
-      if (parseTimeRemaining) {
-        parsedTimeRemaining = parseTimeRemaining(
-          timeRemaining.value,
-          parsedTimeRemaining
-        );
-      }
-      return parsedTimeRemaining;
-    });
+  }
+  return parsedTimeRemaining;
+});
 
 
 
 
-    const resume = () => {
-      if (!isFirst.value) {
-        let number = 0;
-        for (const item of curFileList.value) {
-          if (item.id == file.value.id) continue;
-          if (!item.completed) {
-            if (item.error || item.paused) {
-            } else {
-              number++;
-            }
-          }
-        }
-        if (number >= MAX_UPLOAD_NUM.value) {
-          ElMessage({
-            message: `Maximum allowed to upload ${MAX_UPLOAD_NUM.value} files simultaneously`,
-            type: 'warning',
-          })
-
-          return;
-        }
-      }
-      isFirst.value = false;
-      if (timer.value) clearTimeout(timer.value), (timer.value = null);
-      timer.value = setTimeout(() => {
-        averageSpeed.value = 0;
-        if (NUMBER_timer.value)
-          clearInterval(NUMBER_timer.value), (NUMBER_timer.value = null);
-        isPause.value = false;
-        paused.value = false;
-        file.value.paused = false;
-        aborted.value = false;
-        if (file.value.size > FILE_SIZE) {
-          isUploading.value = false;
-          fileLoad(file);
+const resume = () => {
+  if (!isFirst.value) {
+    let number = 0;
+    for (const item of curFileList.value) {
+      if (item.id == file.value.id) continue;
+      if (!item.completed) {
+        if (item.error || item.paused) {
         } else {
-          isUploading.value = true;
-          isBigFile.value = false;
-          smallLoad(file.value);
+          number++;
         }
-      }, 600);
-    };
-
-    const initFile = () => {
-      resume();
-      paused.value = file.value["paused"];
-      error.value = file.value["error"];
-      averageSpeed.value = file.value["averageSpeed"];
-      currentSpeed.value = file.value["currentSpeed"];
-
-      isComplete.value = file.value["isComplete"]();
-      progress.value = file.value["progress"]();
-      timeRemaining.value = file.value["timeRemaining"]();
-      size.value = file.value["getSize"]();
-      formatedSize.value = file.value["getFormatSize"]();
-      uploadedSize.value = file.value["sizeUploaded"]();
-      type.value = file.value["getType"]();
-      extension.value = file.value["getExtension"]();
-
-      const _handlers = ref({});
-
-      const handlers = (_handlers.value = {});
-
-      const eventHandler = (event) => {
-        handlers[event] = (...args) => {
-          fileEventsHandler(event, args);
-        };
-        return handlers[event];
-      };
-      events.forEach((event) => {
-        file.value.uploader.on(event, eventHandler(event));
-      });
-    };
-    const fileShare = () => {
-      emit("fileShare", file.value);
-    };
-
-    function Save_File() {
-      let params = {
-        md5: fileMd5.value,
-        email: email.value,
-        orderId: file.value.orderId,
-        filePath: encodeURIComponent(file.value.urlFileName),
-        fileSize: file.value.size,
-        deviceType: +file.value.deviceType,
-      };
-      SaveFile(params).then((res) => { });
+      }
     }
+    if (number >= MAX_UPLOAD_NUM.value) {
+      ElMessage({
+        message: `Maximum allowed to upload ${MAX_UPLOAD_NUM.value} files simultaneously`,
+        type: 'warning',
+      })
 
-    const toPath = () => {
-      emit("fileDetail", file.value);
-    };
-    const actionCheck = () => {
-      paused.value = file.value.paused;
-      error.value = file.value.error;
-      isUploading.value = file.value.isUploading();
-    };
-    function getFileMd5(file) {
-      return new Promise((resolve, reject) => {
-        let fileReader = new FileReader();
-        let spark = new SparkMD5.ArrayBuffer();
-        let blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
-
-        let curChunks = 1
-        loadNext()
-
-        function loadNext() {
-          fileReader.readAsArrayBuffer(blobSlice.call(file.file, file.chunks[curChunks - 1].startByte, file.chunks[curChunks - 1].endByte));
-          curChunks++
-        }
-        fileReader.onload = function (event) {
-          // let fileMd5 = SparkMD5.ArrayBuffer.hash(event.target.result);
-          spark.append(event.target.result);
-          if (curChunks - 1 == file.chunks.length) {
-            let fileMd5 = spark.end()
-            spark.destroy()
-            resolve(fileMd5);
-          } else {
-            loadNext()
-
-          }
-        }
-      });
+      return;
     }
-
-    const pause = () => {
+  }
+  isFirst.value = false;
+  if (timer.value) clearTimeout(timer.value), (timer.value = null);
+  timer.value = setTimeout(() => {
+    averageSpeed.value = 0;
+    if (NUMBER_timer.value)
+      clearInterval(NUMBER_timer.value), (NUMBER_timer.value = null);
+    isPause.value = false;
+    paused.value = false;
+    file.value.paused = false;
+    aborted.value = false;
+    if (file.value.size > FILE_SIZE) {
       isUploading.value = false;
-      isPause.value = true;
-      paused.value = true;
-      aborted.value = false;
-      let data = {
-        id: file.value.id,
-        paused: true,
-        type: "paused",
-      };
-      emit("chanStatus", data);
-      if (abortController.value) {
-        abortController.value.abort("Cancel request");
-      }
+      fileLoad(file);
+    } else {
+      isUploading.value = true;
+      isBigFile.value = false;
+      smallLoad(file.value);
+    }
+  }, 600);
+};
 
-      file.value.cancel();
+const initFile = () => {
+  resume();
+  paused.value = file.value["paused"];
+  error.value = file.value["error"];
+  averageSpeed.value = file.value["averageSpeed"];
+  currentSpeed.value = file.value["currentSpeed"];
+
+  isComplete.value = file.value["isComplete"]();
+  progress.value = file.value["progress"]();
+  timeRemaining.value = file.value["timeRemaining"]();
+  size.value = file.value["getSize"]();
+  formatedSize.value = file.value["getFormatSize"]();
+  uploadedSize.value = file.value["sizeUploaded"]();
+  type.value = file.value["getType"]();
+  extension.value = file.value["getExtension"]();
+
+  const _handlers = ref({});
+
+  const handlers = (_handlers.value = {});
+
+  const eventHandler = (event) => {
+    handlers[event] = (...args) => {
+      fileEventsHandler(event, args);
     };
-    const smallLoad = async (smallFile) => {
-      abortController.value = new AbortController();
-      let form = new FormData();
-      let name = "";
+    return handlers[event];
+  };
+  events.forEach((event) => {
+    file.value.uploader.on(event, eventHandler(event));
+  });
+};
+const fileShare = () => {
+  emits("fileShare", file.value);
+};
 
-      if (smallFile.file.webkitRelativePath) {
-        name = smallFile.file.webkitRelativePath;
+function Save_File() {
+  let params = {
+    md5: fileMd5.value,
+    email: email.value,
+    orderId: file.value.orderId,
+    filePath: encodeURIComponent(file.value.urlFileName),
+    fileSize: file.value.size,
+    deviceType: +file.value.deviceType,
+  };
+  SaveFile(params).then((res) => { });
+}
+
+const toPath = () => {
+  emits("fileDetail", file.value);
+};
+const actionCheck = () => {
+  paused.value = file.value.paused;
+  error.value = file.value.error;
+  isUploading.value = file.value.isUploading();
+};
+function getFileMd5(file, type) {
+  return new Promise((resolve, reject) => {
+    let fileReader = new FileReader();
+    let spark = new SparkMD5.ArrayBuffer();
+    let blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
+
+    let curChunks = 1
+    loadNext()
+
+    function loadNext() {
+      if (type == 'big') {
+        fileReader.readAsArrayBuffer(blobSlice.call(file.file, file.chunks[curChunks - 1].startByte, file.chunks[curChunks - 1].endByte));
+        curChunks++
       } else {
-        name = smallFile.name;
+        fileReader.readAsArrayBuffer(blobSlice.call(file.file, 0, file.size));
       }
-      fileMd5.value = await getFileMd5(smallFile);
 
-      form.append("file", smallFile.file, name);
-      form.append("fileCategory", 1);
-      form.append("email", email.value);
-      form.append("deviceType", +smallFile.deviceType);
-      form.append("fileName", encodeURIComponent(name));
-      form.append("md5", fileMd5.value);
-      form.append("wholeMd5", fileMd5.value);
+    }
+    fileReader.onload = function (event) {
+      // big file
+      if (type == 'big') {
+        spark.append(event.target.result);
+        if (curChunks - 1 == file.chunks.length) {
+          let fileMd5 = spark.end()
+          spark.destroy()
+          resolve(fileMd5);
+        } else {
+          loadNext()
+        }
+      } else {
+        // small file
+        spark.append(event.target.result);
+        let fileMd5 = spark.end()
+        spark.destroy()
+        resolve(fileMd5);
+      }
 
-      form.append("fileType", smallFile.fileType);
-      form.append("fileSize", smallFile.size);
-      form.append("orderId", smallFile.orderId);
-      form.append("foggieToken", smallFile.foggieToken);
 
-      fileUpload(form, abortController.value, UploadProgress)
-        .then(async (res) => {
-          if (res.code == 200) {
-            await Save_File();
-            progress.value = 100;
+    }
+  });
+}
+
+function initParams(params) {
+  new Promise((resolve, reject) => {
+    let fileReader = new FileReader();
+    let blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
+    let form = new FormData();
+    form.append("deviceType", file.value.deviceType);
+    form.append("fileCategory", "2");
+    form.append("fileName", encodeURIComponent(file.value.urlFileName));
+    form.append("email", email.value);
+    form.append("uploadId", upload_id.value);
+    form.append("partId", params.currentChunk1);
+    form.append("fileSize", params.end - params.start);
+    form.append("wholeFileSize", file.value.size);
+    form.append("wholeMd5", fileMd5.value);
+    form.append("minOffset", params.start);
+    form.append("maxOffset", params.end);
+    form.append("peerId", peerId);
+    form.append("token", token);
+    form.append("orderId", file.value.orderId);
+    if (file.value.foggieToken) {
+      form.append("foggieToken", file.value.foggieToken);
+    }
+
+    fileReader.readAsArrayBuffer(blobSlice.call(file.value.file, params.start, params.end));
+    fileReader.onload = async (e) => {
+      spark.append(e.target.result);
+      form.append("md5", spark.end());
+      form.append("file", e.target.result, file.value.urlFileName);
+      resolve(form)
+      // let blob = blobSlice.call(file.value.file, params.start, params.end);
+      // form.append("file", blob, file.value.urlFileName);
+    }
+
+  })
+
+
+
+
+
+
+
+}
+
+const pause = () => {
+  isUploading.value = false;
+  isPause.value = true;
+  paused.value = true;
+  aborted.value = false;
+  let data = {
+    id: file.value.id,
+    paused: true,
+    type: "paused",
+  };
+  emits("chanStatus", data);
+  if (abortController.value) {
+    abortController.value.abort("Cancel request");
+  }
+  file.value.cancel();
+};
+const smallLoad = async (smallFile) => {
+  abortController.value = new AbortController();
+  let form = new FormData();
+  let name = "";
+
+  if (smallFile.file.webkitRelativePath) {
+    name = smallFile.file.webkitRelativePath;
+  } else {
+    name = smallFile.name;
+  }
+  fileMd5.value = await getFileMd5(smallFile, 'small');
+
+  form.append("file", smallFile.file, name);
+  form.append("fileCategory", 1);
+  form.append("email", email.value);
+  form.append("deviceType", +smallFile.deviceType);
+  form.append("fileName", encodeURIComponent(name));
+  form.append("md5", fileMd5.value);
+  form.append("wholeMd5", fileMd5.value);
+
+  form.append("fileType", smallFile.fileType);
+  form.append("fileSize", smallFile.size);
+  form.append("orderId", smallFile.orderId);
+  form.append("foggieToken", smallFile.foggieToken);
+
+  fileUpload(form, abortController.value, UploadProgress)
+    .then(async (res) => {
+      if (res.code == 200) {
+        await Save_File();
+        progress.value = 100;
+        completed.value = true;
+        let data = {
+          id: file.value.id,
+          completed: true,
+          type: "completed",
+        };
+        emits("chanStatus", data);
+        file.value.completed = true;
+        emits("uploadComplete", "Upload Success");
+      } else {
+        fileError();
+      }
+    })
+    .catch(function () {
+      fileError();
+    });
+};
+const fileLoad = async (file) => {
+  if (upload_id.value && upload_id.value != "") {
+    isUploading.value = true;
+    multipartUpload(file);
+  } else {
+    fileMd5.value = await getFileMd5(file.value, 'big');
+    let params = {
+      fileName: encodeURIComponent(file.value.urlFileName),
+      fileType: file.value.fileType,
+      md5: fileMd5.value,
+      fileSize: file.value.size,
+      orderId: file.value.orderId,
+      token: token,
+      peerId: peerId,
+      email: email.value,
+      deviceType: file.value.deviceType,
+      foggieToken: file.value.foggieToken,
+    };
+    uploadMultipart(params)
+      .then((res) => {
+        if (res.code == 200) {
+          upload_id.value = res.data.uploadId;
+          ISCIDING.value = true;
+
+
+          let chunks = Math.ceil(file.value.size / CHUNK_SIZE);
+          let currentChunk1 = 0;
+
+          loadNext();
+          fileReader.onload = (e) => {
+            spark.append(e.target.result);
+            let start = currentChunk1 * CHUNK_SIZE;
+            let end = start + CHUNK_SIZE >= file.value.size ? file.value.size : start + CHUNK_SIZE;
+            // let blob = blobSlice.call(file.value.file, start, end);
+            currentChunk1++;
+
+            let params = {
+              partId: currentChunk1,
+              start: start,
+              end: end,
+            }
+
+
+            blobFileArray.value.push([params, false]);
+            ArrayProgress.value.push(0);
+            ISCIDING.value = false;
+            isUploading.value = true;
+            multipartUpload(file);
+
+
+          };
+
+
+
+        } else {
+          if (res.code == 30032) {
             completed.value = true;
+            progress.value = 100;
             let data = {
               id: file.value.id,
               completed: true,
               type: "completed",
             };
-            emit("chanStatus", data);
-            file.value.completed = true;
-            emit("uploadComplete", "Upload Success");
+            emits("chanStatus", data);
+            emits("getStatus", "Upload Success");
           } else {
             fileError();
           }
-        })
-        .catch(function () {
-          fileError();
+        }
+      })
+      .catch((error) => {
+        fileError();
+      });
+  }
+};
+const multipartUpload = (file) => {
+  let retrNum = 0;
+  let retrNumber = 0;
+  if (abortController.value) {
+    abortController.value = null;
+  }
+  abortController.value = new AbortController();
+  let blobSlice =
+    File.prototype.slice ||
+    File.prototype.mozSlice ||
+    File.prototype.webkitSlice;
+  let chunks = Math.ceil(file.value.size / CHUNK_SIZE);
+  let fileReader = new FileReader();
+  async function loadNext() {
+    let start = currentChunk.value * CHUNK_SIZE;
+    let end = start + CHUNK_SIZE >= file.value.size ? file.value.size : start + CHUNK_SIZE;
+
+    fileReader.readAsArrayBuffer(
+      blobSlice.call(file.value.file, start, end)
+    );
+  }
+
+  async function uploadChunk() {
+    return new Promise((resolve, reject) => {
+      let isLast = false;
+
+      if (currentChunk.value + 1 == blobFileArray.value.length) {
+        isLast = true;
+      }
+
+      if ((currentChunk.value + 1) % simultaneousUploads == 0 || isLast) {
+        let request = [];
+        let curUploadIndex = [];
+        for (const item of blobFileArray.value) {
+          if (!item[1]) {
+            if (request.length >= simultaneousUploads) break;
+
+            request.push(item);
+            curUploadIndex.push(item[0].get("partId") - 1);
+          }
+        }
+        request = request.map((item) => {
+          return fileUpload(item[0], abortController.value, UploadProgress);
         });
-    };
-    const fileLoad = async (file) => {
-      if (upload_id.value && upload_id.value != "") {
-        isUploading.value = true;
-        multipartUpload(file);
-      } else {
-        fileMd5.value = await getFileMd5(file.value);
-        let params = {
-          fileName: encodeURIComponent(file.value.urlFileName),
-          fileType: file.value.fileType,
-          md5: fileMd5.value,
-          fileSize: file.value.size,
-          orderId: file.value.orderId,
-          token: token,
-          peerId: peerId,
-          email: email.value,
-          deviceType: +file.value.deviceType,
-          foggieToken: file.value.foggieToken,
-        };
-        console.log(file.value, "file.valuefile.value");
-        uploadMultipart(params)
-          .then((res) => {
-            if (res.code == 200) {
-              upload_id.value = res.data.uploadId;
-              ISCIDING.value = true;
-              let spark = new SparkMD5.ArrayBuffer();
-              let blobSlice =
-                File.prototype.slice ||
-                File.prototype.mozSlice ||
-                File.prototype.webkitSlice;
-              let chunks = Math.ceil(file.value.size / CHUNK_SIZE);
-              let currentChunk1 = 0;
-              let fileReader = new FileReader();
-              file.value.totalChunkCounts = chunks;
-              loadNext();
-              fileReader.onload = (e) => {
-                spark.append(e.target.result);
-                let start = currentChunk1 * CHUNK_SIZE;
-                let end =
-                  start + CHUNK_SIZE >= file.value.size
-                    ? file.value.size
-                    : start + CHUNK_SIZE;
-                let blob = blobSlice.call(file.value.file, start, end);
-                currentChunk1++;
-                let form = new FormData();
-                form.append("deviceType", file.value.deviceType);
 
-                form.append("fileCategory", "2");
-                form.append(
-                  "fileName",
-                  encodeURIComponent(file.value.urlFileName)
-                );
-                form.append("email", email.value);
-                form.append("uploadId", upload_id.value);
-                form.append("md5", spark.end());
-                form.append("partId", currentChunk1);
-                form.append("fileSize", end - start);
-                form.append("wholeFileSize", file.value.size);
-                form.append("wholeMd5", fileMd5.value);
-                form.append("minOffset", start);
-                form.append("maxOffset", end);
-                form.append("peerId", peerId);
-                form.append("token", token);
-                form.append("orderId", file.value.orderId);
-                form.append("file", blob, file.value.urlFileName);
-
-                if (currentChunk1 == chunks) {
-                  spark.destroy();
-                }
-                blobFileArray.value.push([form, false]);
-                ArrayProgress.value.push(0);
-                if (currentChunk1 < chunks) {
-                  loadNext();
-                } else {
-                  ISCIDING.value = false;
-                  isUploading.value = true;
-                  multipartUpload(file);
-                }
-              };
-              fileReader.onerror = () => {
-                file.value.cancel();
-              };
-
-              function loadNext() {
-                if (file.value && file.value.size) {
-                  let start = currentChunk1 * CHUNK_SIZE;
-                  let end =
-                    start + CHUNK_SIZE >= file.value.size
-                      ? file.value.size
-                      : start + CHUNK_SIZE;
-                  fileReader.readAsArrayBuffer(
-                    blobSlice.call(file.value.file, start, end)
-                  );
-                } else {
-                }
-              }
-            } else {
-              if (res.code == 30032) {
-                completed.value = true;
-                progress.value = 100;
-                let data = {
-                  id: file.value.id,
-                  completed: true,
-                  type: "completed",
-                };
-                emit("chanStatus", data);
-                emit("getStatus", "Upload Success");
+        Promise.allSettled(request)
+          .then(async (...res) => {
+            let index = 0;
+            let errorUploadArray = [];
+            res[0].forEach((item, nindex) => {
+              if (item.status == "fulfilled" && item.value?.code == 200) {
+                let blobFileArrayIndex = curUploadIndex[nindex];
+                blobFileArray.value[blobFileArrayIndex][1] = true;
+                multipartFileArray.value.push({
+                  etag: item.value?.data,
+                  partNumber: curUploadIndex[nindex] + 1,
+                });
+                index++;
               } else {
-                fileError();
+                errorUploadArray.push(curUploadIndex[nindex]);
+              }
+            });
+            if (index == request.length) {
+              resolve(res);
+            } else {
+              if (abortController.value.signal.aborted) return;
+              let isPass = await retrLoadNext(errorUploadArray);
+              if (typeof isPass === "string") {
+              } else {
+                if (isPass) {
+                  resolve();
+                } else {
+                  fileError();
+                }
               }
             }
           })
-          .catch((error) => {
-            fileError();
-          });
+          .catch((error) => { });
+      } else {
+        resolve();
       }
-    };
-    const multipartUpload = (file) => {
-      let retrNum = 0;
-      let retrNumber = 0;
-      if (abortController.value) {
-        abortController.value = null;
+    });
+  }
+  /**
+   * @param {Boolean} isSecond
+   *
+   *  */
+  async function retrLoadNext(errorUploadArray, isSecond = false) {
+    let isPass = false;
+    let request = [];
+    for (const INDEX of errorUploadArray) {
+      let item = blobFileArray.value[INDEX];
+      if (file.value.foggieToken) {
+        item[0].append("foggieToken", file.value.foggieToken);
       }
-      abortController.value = new AbortController();
-      let blobSlice =
-        File.prototype.slice ||
-        File.prototype.mozSlice ||
-        File.prototype.webkitSlice;
-      let chunks = Math.ceil(file.value.size / CHUNK_SIZE);
-      let fileReader = new FileReader();
-      async function loadNext() {
-        let start = currentChunk.value * CHUNK_SIZE;
-        let end = start + CHUNK_SIZE >= file.value.size ? file.value.size : start + CHUNK_SIZE;
-
-        fileReader.readAsArrayBuffer(
-          blobSlice.call(file.value.file, start, end)
+      if (isSecond) {
+        request.push(
+          fileUpload(item[0], abortController.value, UploadProgress)
+        );
+      } else {
+        request.push(
+          fileUpload(item[0], abortController.value, UploadProgress)
         );
       }
+    }
 
-      async function uploadChunk() {
-        return new Promise((resolve, reject) => {
-          let isLast = false;
-
-          if (currentChunk.value + 1 == blobFileArray.value.length) {
-            isLast = true;
-          }
-
-          if ((currentChunk.value + 1) % simultaneousUploads == 0 || isLast) {
-            let request = [];
-            let curUploadIndex = [];
-            for (const item of blobFileArray.value) {
-              if (!item[1]) {
-                if (request.length >= simultaneousUploads) break;
-                if (file.value.foggieToken) {
-                  item[0].append("foggieToken", file.value.foggieToken);
-                }
-                request.push(item);
-                curUploadIndex.push(item[0].get("partId") - 1);
-              }
-            }
-            request = request.map((item) => {
-              return fileUpload(item[0], abortController.value, UploadProgress);
-            });
-
-            Promise.allSettled(request)
-              .then(async (...res) => {
-                let index = 0;
-                let errorUploadArray = [];
-                res[0].forEach((item, nindex) => {
-                  if (item.status == "fulfilled" && item.value?.code == 200) {
-                    let blobFileArrayIndex = curUploadIndex[nindex];
-                    blobFileArray.value[blobFileArrayIndex][1] = true;
-                    multipartFileArray.value.push({
-                      etag: item.value?.data,
-                      partNumber: curUploadIndex[nindex] + 1,
-                    });
-                    index++;
-                  } else {
-                    errorUploadArray.push(curUploadIndex[nindex]);
-                  }
-                });
-                if (index == request.length) {
-                  resolve(res);
-                } else {
-                  if (abortController.value.signal.aborted) return;
-                  let isPass = await retrLoadNext(errorUploadArray);
-                  if (typeof isPass === "string") {
-                  } else {
-                    if (isPass) {
-                      resolve();
-                    } else {
-                      fileError();
-                    }
-                  }
-                }
-              })
-              .catch((error) => { });
+    isPass = await retryUpload(request, errorUploadArray);
+    if (typeof isPass === "string") {
+    } else {
+      if (isPass) {
+        return true;
+      } else {
+        if (isSecond) {
+          retrNumber += 1;
+          if (retrNumber >= maxChunkRetries) {
+            return false;
           } else {
-            resolve();
+            if (abortController.value.signal.aborted)
+              return "Cancel request";
+            await retrLoadNext(errorUploadArray, true);
           }
-        });
-      }
-      /**
-       * @param {Boolean} isSecond
-       *
-       *  */
-      async function retrLoadNext(errorUploadArray, isSecond = false) {
-        let isPass = false;
-        let request = [];
-        for (const INDEX of errorUploadArray) {
-          let item = blobFileArray.value[INDEX];
-          if (file.value.foggieToken) {
-            item[0].append("foggieToken", file.value.foggieToken);
-          }
-          if (isSecond) {
-            request.push(
-              fileUpload(item[0], abortController.value, UploadProgress)
-            );
-          } else {
-            request.push(
-              fileUpload(item[0], abortController.value, UploadProgress)
-            );
-          }
-        }
-
-        isPass = await retryUpload(request, errorUploadArray);
-        if (typeof isPass === "string") {
         } else {
-          if (isPass) {
-            return true;
-          } else {
-            if (isSecond) {
-              retrNumber += 1;
-              if (retrNumber >= maxChunkRetries) {
-                return false;
-              } else {
-                if (abortController.value.signal.aborted)
-                  return "Cancel request";
-                await retrLoadNext(errorUploadArray, true);
-              }
-            } else {
-              retrNum += 1;
-              if (retrNum >= maxChunkRetries) {
-                if (file.value.isGateway) {
-                  if (abortController.value.signal.aborted)
-                    return "Cancel request";
-                  await retrLoadNext(errorUploadArray, true);
-                } else {
-                  return false;
-                }
-              } else {
-                if (abortController.value.signal.aborted)
-                  return "Cancel request";
-                await retrLoadNext(errorUploadArray);
-              }
-            }
-          }
-        }
-      }
-
-      function retryUpload(request = [], errorUploadArray) {
-        return new Promise((resolve, reject) => {
-          axios.all(request).then(
-            axios.spread((...res) => {
-              if (res.every((element) => element.code == 200)) {
-                res.forEach((element, index) => {
-                  multipartFileArray.value.push({
-                    etag: element.data,
-                    partNumber: Number(errorUploadArray[index]) + 1,
-                  });
-                  blobFileArray.value[errorUploadArray[index]][1] = true;
-                });
-                resolve(true);
-              } else {
-                if (abortController.value.signal.aborted) {
-                  return "Cancel request";
-                } else {
-                  resolve(false);
-                }
-              }
-            })
-          )
-            .catch((error) => {
-              if (abortController.value.signal.aborted) {
+          retrNum += 1;
+          if (retrNum >= maxChunkRetries) {
+            if (file.value.isGateway) {
+              if (abortController.value.signal.aborted)
                 return "Cancel request";
-              } else {
-                resolve(false);
-              }
-            });
-        });
-      }
-
-      emit("getStatus", "Uploading...");
-      loadNext();
-      fileReader.onload = async (e) => {
-        await uploadChunk();
-        fileReader.abort();
-        currentChunk.value++;
-        if (currentChunk.value < chunks) {
-          if (!isPause.value) {
-            await loadNext();
+              await retrLoadNext(errorUploadArray, true);
+            } else {
+              return false;
+            }
+          } else {
+            if (abortController.value.signal.aborted)
+              return "Cancel request";
+            await retrLoadNext(errorUploadArray);
           }
-        } else {
-          if (NUMBER_timer.value)
-            clearInterval(NUMBER_timer.value), (NUMBER_timer.value = null);
+        }
+      }
+    }
+  }
 
-          let params = {
-            fileName: encodeURIComponent(file.value.urlFileName),
-            uploadId: upload_id.value,
-            parts: multipartFileArray.value,
-            orderId: file.value.orderId,
-            // token: token,
-            // peerId: peerId,
-            fileSize: file.value.size,
-            email: email.value,
-            md5: fileMd5.value,
-            deviceType: +file.value.deviceType,
-            foggieToken: file.value.foggieToken,
+  function retryUpload(request = [], errorUploadArray) {
+    return new Promise((resolve, reject) => {
+      axios.all(request).then(
+        axios.spread((...res) => {
+          if (res.every((element) => element.code == 200)) {
+            res.forEach((element, index) => {
+              multipartFileArray.value.push({
+                etag: element.data,
+                partNumber: Number(errorUploadArray[index]) + 1,
+              });
+              blobFileArray.value[errorUploadArray[index]][1] = true;
+            });
+            resolve(true);
+          } else {
+            if (abortController.value.signal.aborted) {
+              return "Cancel request";
+            } else {
+              resolve(false);
+            }
+          }
+        })
+      )
+        .catch((error) => {
+          if (abortController.value.signal.aborted) {
+            return "Cancel request";
+          } else {
+            resolve(false);
+          }
+        });
+    });
+  }
+
+  emits("getStatus", "Uploading...");
+  loadNext();
+  fileReader.onload = async (e) => {
+    await uploadChunk();
+    fileReader.abort();
+    currentChunk.value++;
+    if (currentChunk.value < chunks) {
+      if (!isPause.value) {
+        await loadNext();
+      }
+    } else {
+      if (NUMBER_timer.value) clearInterval(NUMBER_timer.value), (NUMBER_timer.value = null);
+
+      let params = {
+        fileName: encodeURIComponent(file.value.urlFileName),
+        uploadId: upload_id.value,
+        parts: multipartFileArray.value,
+        orderId: file.value.orderId,
+        fileSize: file.value.size,
+        email: email.value,
+        md5: fileMd5.value,
+        deviceType: +file.value.deviceType,
+        foggieToken: file.value.foggieToken,
+      };
+
+      fileCompletes(params).then(async (res) => {
+        if (res.code == 200) {
+          let data = {
+            id: file.value.id,
+            completed: true,
+            type: "completed",
           };
 
-          fileComplete(params)
-            .then(async (res) => {
-              if (res.code == 200) {
-                let data = {
-                  id: file.value.id,
-                  completed: true,
-                  type: "completed",
-                };
-
-                await Save_File();
-                emit("chanStatus", data);
-                file.value.completed = true;
-                progress.value = Math.ceil((chunks / chunks) * 100);
-                completed.value = true;
-                emit("getStatus", "Upload Success");
-                emit("uploadComplete", "Upload Success");
-              } else {
-                fileError();
-              }
-            })
-            .catch((error) => {
-              fileError();
-            });
-        }
-        emit("getProgress", progress.value);
-      };
-    };
-    const UploadProgress = (progressEvent, part_number) => {
-      if (part_number) {
-        let number = ArrayProgress.value[part_number - 1];
-        if (number < (progressEvent.loaded / progressEvent.total) * 100) {
-          ArrayProgress.value[part_number - 1] =
-            (progressEvent.loaded / progressEvent.total) * 100;
-        }
-
-        NUMBER.value = ArrayProgress.value.reduce((cur, next) => {
-          return cur + next;
-        }, 0);
-
-        let uploadProgress =
-          (NUMBER.value / (100 * ArrayProgress.value.length)).toFixed(2) * 100;
-        progress.value = uploadProgress < 100 ? uploadProgress : 99;
-
-        let curTime = new Date().getTime();
-        let time = (curTime - lastTime.value) / 1000;
-
-        if (time >= 0.5) {
-          if (lastTime.value == 0) {
-            averageSpeed.value =
-              Number(NUMBER.value / (100 * ArrayProgress.value.length)) *
-              file.value.size;
-          } else {
-            averageSpeed.value =
-              Number(
-                (NUMBER.value - lastNUMBER.value) /
-                (100 * ArrayProgress.value.length * time)
-              ) * file.value.size;
-          }
-          lastTime.value = curTime;
-          lastNUMBER.value = JSON.parse(JSON.stringify(NUMBER.value));
-        }
-
-        if (NUMBER_timer.value) {
-          clearInterval(NUMBER_timer.value);
-          NUMBER_timer.value = null;
-        }
-        NUMBER_timer.value = setInterval(() => {
-          averageSpeed.value = (Math.random() / 1000) * file.value.size;
-        }, 1000);
-      } else {
-        let uploadProgress =
-          (progressEvent.loaded / progressEvent.total).toFixed(2) * 100;
-        progress.value = uploadProgress < 100 ? uploadProgress : 99;
-        averageSpeed.value = progressEvent.loaded - lastAverageSpeed.value;
-        lastAverageSpeed.value = progressEvent.loaded;
-        if (NUMBER_timer.value) {
-          clearInterval(NUMBER_timer.value);
-          NUMBER_timer.value = null;
-        }
-        NUMBER_timer.value = setInterval(() => {
-          averageSpeed.value = (Math.random() / 100000) * file.value.size;
-        }, 1000);
-      }
-    };
-    const remove = () => {
-      if (file.value.size > FILE_SIZE && upload_id.value) {
-        if (abortController.value)
-          abortController.value.abort("Cancel request");
-        isPause.value = true;
-        paused.value = true;
-        aborted.value = false;
-        emit("remove", file.value.id);
-        file.value.cancel();
-
-        // const deletReq = new DeleteObjectReq();
-        // const DeleteRequest = new DeleteObjectRequest();
-        // const uploadID = new Upload();
-        // deletReq.setHeader(header);
-
-        // uploadID.setKey(encodeURIComponent(file.value.urlFileName));
-        // uploadID.setUploadid(upload_id.value);
-
-        // DeleteRequest.setCidsList([""]);
-        // DeleteRequest.setObjectType("multipart");
-        // DeleteRequest.setObjectsList([uploadID]);
-        // deletReq.setRequest(DeleteRequest);
-
-        // if (abortController.value)
-        //   abortController.value.abort("Cancel request");
-
-        // client.deleteObject(deletReq, {}, (error, res) => {
-        //   isPause.value = true;
-        //   paused.value = true;
-        //   aborted.value = false;
-        //   emit("remove", file.value.id);
-        //   file.value.cancel();
-        // });
-      } else {
-        if (abortController.value)
-          abortController.value.abort("Cancel request");
-        isPause.value = true;
-        paused.value = true;
-        aborted.value = false;
-
-        emit("remove", file.value.id);
-        file.value.cancel();
-      }
-    };
-    const retry = () => {
-      file.value.error = false;
-      error.value = false;
-      isComplete.value = true;
-      isUploading.value = false;
-      paused.value = true
-      resume()
-      // file.value.retry();
-      // actionCheck();
-    };
-    const processResponse = (message) => {
-      let res = message;
-      try {
-        res = JSON.parse(message);
-      } catch (e) { }
-      response.value = res;
-    };
-    const fileEventsHandler = (event, args) => {
-      const rootFile = args[0];
-      const file = args[1];
-
-      const target = list.value ? rootFile : file;
-      if (file.value === target) {
-        if (list.value && event === "fileSuccess") {
-          processResponse(args[2]);
-          return;
-        }
-        // this[`_${event}`].apply(this, args);
-      }
-    };
-    const fileProgress = () => {
-      progress.value = file.value.progress();
-      averageSpeed.value = file.value.averageSpeed;
-      currentSpeed.value = file.value.currentSpeed;
-      timeRemaining.value = file.value.timeRemaining();
-      uploadedSize.value = file.value.sizeUploaded();
-      actionCheck();
-    };
-    const fileSuccess = (rootFile, file, message) => {
-      if (rootFile) {
-        processResponse(message);
-      }
-      fileProgress();
-      error.value = false;
-      isComplete.value = true;
-      isUploading.value = false;
-    };
-    const fileComplete = () => {
-      fileSuccess();
-    };
-    const fileError = () => {
-      fileProgress();
-      let data = {
-        id: file.value.id,
-        error: true,
-        type: "error",
-      };
-      emit("chanStatus", data);
-      file.value.error = true;
-      error.value = true;
-      isComplete.value = false;
-      isUploading.value = false;
-    };
-    const initStatus = (file) => {
-      completed.value = file.value.completed;
-    };
-    watch(
-      () => status,
-      (newVal, oldVal) => {
-        if (
-          oldStatus &&
-          newStatus === "uploading" &&
-          oldStatus !== "uploading"
-        ) {
-          tid.value = setTimeout(() => {
-            progressingClass.value = "uploader-file-progressing";
-          }, 200);
+          await Save_File();
+          emits("chanStatus", data);
+          file.value.completed = true;
+          progress.value = Math.ceil((chunks / chunks) * 100);
+          completed.value = true;
+          emits("getStatus", "Upload Success");
+          emits("uploadComplete", "Upload Success");
         } else {
-          clearTimeout(tid.value);
-          progressingClass.value = "";
+          fileError();
         }
-      }
-    );
-    onMounted(() => {
-      initFile();
-    });
-    onUnmounted(() => {
-      let _handlers = ref({});
-
-      const handlers = (_handlers.value = {});
-
-      const eventHandler = (event) => {
-        handlers[event] = (...args) => {
-          fileEventsHandler(event, args);
-        };
-        return handlers[event];
-      };
-      events.forEach((event) => {
-        file.value.uploader.off(event, eventHandler(event));
-      });
-      _handlers = null;
-      if (timer.value) clearTimeout(timer.value), (timer.value = null);
-      if (NUMBER_timer.value)
-        clearInterval(NUMBER_timer.value), (NUMBER_timer.value = null);
-    });
-    return {
-      isFirst,
-      response,
-      // client,
-      paused,
-      error,
-      averageSpeed,
-      lastAverageSpeed,
-      currentSpeed,
-      isComplete,
-      isUploading,
-      size,
-      formatedSize,
-      uploadedSize,
-      progress,
-      timeRemaining,
-      type,
-      extension,
-      progressingClass,
-      completed,
-      ISCIDING,
-      isPause,
-      currentChunk,
-      fileIconArr,
-      upload_id,
-      blobFileArray,
-      multipartFileArray,
-      errorUploadArray,
-      isBigFile,
-      timer,
-      abortController,
-      ArrayProgress,
-      NUMBER,
-      lastTime,
-      lastNUMBER,
-      NUMBER_timer,
-      fileIcon,
-      fileCategory,
-      progressStyle,
-      formatedAverageSpeed,
-      status,
-      statusText,
-      formatedTimeRemaining,
-      file,
-      list,
-      MAX_UPLOAD_NUM,
-      curFileList,
-      aborted,
-      initFile,
-      fileShare,
-      toPath,
-      actionCheck,
-      pause,
-      smallLoad,
-      fileLoad,
-      multipartUpload,
-      UploadProgress,
-      remove,
-      retry,
-      processResponse,
-      fileEventsHandler,
-      fileProgress,
-      fileSuccess,
-      fileComplete,
-      fileError,
-      initStatus,
-      resume,
-    };
-  },
+      })
+        .catch((error) => {
+          fileError();
+        });
+    }
+    emits("getProgress", progress.value);
+  };
 };
+const UploadProgress = (progressEvent, part_number) => {
+  if (part_number) {
+    let number = ArrayProgress.value[part_number - 1];
+    if (number < (progressEvent.loaded / progressEvent.total) * 100) {
+      ArrayProgress.value[part_number - 1] =
+        (progressEvent.loaded / progressEvent.total) * 100;
+    }
+
+    NUMBER.value = ArrayProgress.value.reduce((cur, next) => {
+      return cur + next;
+    }, 0);
+
+    let uploadProgress =
+      (NUMBER.value / (100 * ArrayProgress.value.length)).toFixed(2) * 100;
+    progress.value = uploadProgress < 100 ? uploadProgress : 99;
+
+    let curTime = new Date().getTime();
+    let time = (curTime - lastTime.value) / 1000;
+
+    if (time >= 0.5) {
+      if (lastTime.value == 0) {
+        averageSpeed.value =
+          Number(NUMBER.value / (100 * ArrayProgress.value.length)) *
+          file.value.size;
+      } else {
+        averageSpeed.value =
+          Number(
+            (NUMBER.value - lastNUMBER.value) /
+            (100 * ArrayProgress.value.length * time)
+          ) * file.value.size;
+      }
+      lastTime.value = curTime;
+      lastNUMBER.value = JSON.parse(JSON.stringify(NUMBER.value));
+    }
+
+    if (NUMBER_timer.value) {
+      clearInterval(NUMBER_timer.value);
+      NUMBER_timer.value = null;
+    }
+    NUMBER_timer.value = setInterval(() => {
+      averageSpeed.value = (Math.random() / 1000) * file.value.size;
+    }, 1000);
+  } else {
+    let uploadProgress =
+      (progressEvent.loaded / progressEvent.total).toFixed(2) * 100;
+    progress.value = uploadProgress < 100 ? uploadProgress : 99;
+    averageSpeed.value = progressEvent.loaded - lastAverageSpeed.value;
+    lastAverageSpeed.value = progressEvent.loaded;
+    if (NUMBER_timer.value) {
+      clearInterval(NUMBER_timer.value);
+      NUMBER_timer.value = null;
+    }
+    NUMBER_timer.value = setInterval(() => {
+      averageSpeed.value = (Math.random() / 100000) * file.value.size;
+    }, 1000);
+  }
+};
+const remove = () => {
+  if (file.value.size > FILE_SIZE && upload_id.value) {
+    if (abortController.value)
+      abortController.value.abort("Cancel request");
+    isPause.value = true;
+    paused.value = true;
+    aborted.value = false;
+    emits("remove", file.value.id);
+    file.value.cancel();
+
+    // const deletReq = new DeleteObjectReq();
+    // const DeleteRequest = new DeleteObjectRequest();
+    // const uploadID = new Upload();
+    // deletReq.setHeader(header);
+
+    // uploadID.setKey(encodeURIComponent(file.value.urlFileName));
+    // uploadID.setUploadid(upload_id.value);
+
+    // DeleteRequest.setCidsList([""]);
+    // DeleteRequest.setObjectType("multipart");
+    // DeleteRequest.setObjectsList([uploadID]);
+    // deletReq.setRequest(DeleteRequest);
+
+    // if (abortController.value)
+    //   abortController.value.abort("Cancel request");
+
+    // client.deleteObject(deletReq, {}, (error, res) => {
+    //   isPause.value = true;
+    //   paused.value = true;
+    //   aborted.value = false;
+    //   emit("remove", file.value.id);
+    //   file.value.cancel();
+    // });
+  } else {
+    if (abortController.value)
+      abortController.value.abort("Cancel request");
+    isPause.value = true;
+    paused.value = true;
+    aborted.value = false;
+
+    emits("remove", file.value.id);
+    file.value.cancel();
+  }
+};
+const retry = () => {
+  file.value.error = false;
+  error.value = false;
+  isComplete.value = true;
+  isUploading.value = false;
+  paused.value = true
+  resume()
+  // file.value.retry();
+  // actionCheck();
+};
+const processResponse = (message) => {
+  let res = message;
+  try {
+    res = JSON.parse(message);
+  } catch (e) { }
+  response.value = res;
+};
+const fileEventsHandler = (event, args) => {
+  const rootFile = args[0];
+  const file = args[1];
+
+  const target = list.value ? rootFile : file;
+  if (file.value === target) {
+    if (list.value && event === "fileSuccess") {
+      processResponse(args[2]);
+      return;
+    }
+    // this[`_${event}`].apply(this, args);
+  }
+};
+const fileProgress = () => {
+  progress.value = file.value.progress();
+  averageSpeed.value = file.value.averageSpeed;
+  currentSpeed.value = file.value.currentSpeed;
+  timeRemaining.value = file.value.timeRemaining();
+  uploadedSize.value = file.value.sizeUploaded();
+  actionCheck();
+};
+const fileSuccess = (rootFile, file, message) => {
+  if (rootFile) {
+    processResponse(message);
+  }
+  fileProgress();
+  error.value = false;
+  isComplete.value = true;
+  isUploading.value = false;
+};
+const fileComplete = () => {
+  fileSuccess();
+};
+const fileError = () => {
+  fileProgress();
+  let data = {
+    id: file.value.id,
+    error: true,
+    type: "error",
+  };
+  emits("chanStatus", data);
+  file.value.error = true;
+  error.value = true;
+  isComplete.value = false;
+  isUploading.value = false;
+};
+const initStatus = (file) => {
+  completed.value = file.value.completed;
+};
+watch(
+  () => status,
+  (newVal, oldVal) => {
+    if (
+      oldStatus &&
+      newStatus === "uploading" &&
+      oldStatus !== "uploading"
+    ) {
+      tid.value = setTimeout(() => {
+        progressingClass.value = "uploader-file-progressing";
+      }, 200);
+    } else {
+      clearTimeout(tid.value);
+      progressingClass.value = "";
+    }
+  }
+);
+onMounted(() => {
+  initFile();
+});
+onUnmounted(() => {
+  let _handlers = ref({});
+
+  const handlers = (_handlers.value = {});
+
+  const eventHandler = (event) => {
+    handlers[event] = (...args) => {
+      fileEventsHandler(event, args);
+    };
+    return handlers[event];
+  };
+  events.forEach((event) => {
+    file.value.uploader.off(event, eventHandler(event));
+  });
+  _handlers = null;
+  if (timer.value) clearTimeout(timer.value), (timer.value = null);
+  if (NUMBER_timer.value)
+    clearInterval(NUMBER_timer.value), (NUMBER_timer.value = null);
+});
+
+
+
 </script>
 <style>
 .uploader-file {
