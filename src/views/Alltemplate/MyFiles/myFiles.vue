@@ -289,6 +289,8 @@ const emits = defineEmits(["currentPrefix", "getLocal"]);
 const chainId = computed(() => store.getters.ChainId);
 const email = computed(() => store.getters.userInfo?.email);
 const deviceType = computed(() => store.getters.deviceType);
+const order_Id = computed(() => store.getters.orderId);
+
 
 const rowState = ({ row }) => {
   let style = {};
@@ -303,7 +305,7 @@ const rowState = ({ row }) => {
 watch(
   () => store.getters.uploadIsShow,
   (newVal, oldVal) => {
-    if (!newVal) {
+    if (!newVal && order_Id.value == props.orderId) {
       tableData.data = [];
       tableData.pageNum = 1;
       loadFileList();

@@ -553,6 +553,8 @@ const $state = useStore();
 const emits = defineEmits(["setState"]);
 // const router = useRouter();
 const uploadIsShow = computed(() => $state.getters.uploadIsShow);
+const order_Id = computed(() => $state.getters.orderId);
+
 const timeLineShow = ref(false);
 
 const props = defineProps({
@@ -847,7 +849,7 @@ const cancelOrder = (item) => {
   });
 };
 watch(uploadIsShow, (newVal, oldVal) => {
-  if (!newVal) {
+  if (!newVal && order_Id.value == orderId.value) {
     refresh();
   }
 });

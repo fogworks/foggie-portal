@@ -2,17 +2,9 @@
   <div class="portal-main" id="portal-main">
     <div class="left-box">
       <div class="collapse" @click="changeCollapse">
-        <svg-icon
-          icon-class="collapse"
-          :class="[isCollapse ? 'isCollapse' : '']"
-        ></svg-icon>
+        <svg-icon icon-class="collapse" :class="[isCollapse ? 'isCollapse' : '']"></svg-icon>
       </div>
-      <el-menu
-        class="left-menu"
-        :collapse="isCollapse"
-        :default-active="defaultActive"
-        router
-      >
+      <el-menu class="left-menu" :collapse="isCollapse" :default-active="defaultActive" router>
         <el-menu-item index="user" class="user">
           <svg-icon icon-class="user"></svg-icon>
           <template #title v-if="userName">
@@ -32,12 +24,7 @@
         <el-menu-item disabled index="discover">
           <svg-icon icon-class="discover"></svg-icon>
           <template #title>
-            <el-tooltip
-              class="box-item"
-              effect="dark"
-              content="Coming Soon"
-              placement="right"
-            >
+            <el-tooltip class="box-item" effect="dark" content="Coming Soon" placement="right">
               Discover
             </el-tooltip>
           </template>
@@ -207,6 +194,7 @@ watchEffect(() => {
       }
 
       &.el-menu--collapse {
+
         // width: 200px;
         // min-height: 400px;
         .user {
@@ -249,7 +237,7 @@ watchEffect(() => {
     //   rgba(148, 187, 233, 1) 100%
     // );
 
-    > div {
+    >div {
       z-index: 1;
     }
 
