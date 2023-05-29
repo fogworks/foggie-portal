@@ -227,15 +227,24 @@ service.interceptors.response.use(
     } else if (response.status === 200) {
       if (response.config.url.indexOf('proxy/http') > -1) {
         if (res.data && res.data.data) {
-          return res.data.data;
+          if (res.data.data.code == 200) {
+            return res.data.data;
+          } else {
+            ElNotification({
+              type: 'error',
+              message: res.data.data.message || 'error',
+              position: 'bottom-left'
+            })
+            return Promise.reject(new Error(res.data.data.message || "Error"));
+          }
         } else {
           return res.data;
         }
-        
+
       } else {
         return res;
       }
-      
+
     }
   },
   (error) => {

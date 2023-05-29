@@ -668,6 +668,7 @@ function handlerOver() {
   }).then((res) => {
     console.log(res);
     if (res.code == 200) {
+      overShow.value = false;
       refresh();
       ElNotification({
         type: "success",
