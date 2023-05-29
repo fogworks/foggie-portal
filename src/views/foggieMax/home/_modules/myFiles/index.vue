@@ -895,7 +895,7 @@ watch(
 );
 defineExpose({ doSearch });
 const upload = () => {
-  store.commit("upload/setUploadOptions", deviceData.value);
+  store.commit("upload/setUploadOptions", deviceData);
   // store.commit("upload/openUpload", deviceData.device_id);
 };
 </script>
