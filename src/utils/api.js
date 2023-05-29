@@ -245,7 +245,7 @@ export const pIN = (data) => {
 
 //ipns publish list
 export const publishPin = (data) => {
-  let url = `/publish`;
+  let url = `${baseUrl}/publish`;
   return request({
     url: url,
     method: "POST",

@@ -579,8 +579,8 @@ const handleImg = (type, ID, cid, key, isDir, ip, port, peerId) => {
     type = "img";
     // imgHttpLink = `${location}/d/${ID}/${pubkey}?new_w=200`;
     // imgHttpLink = `${location}/object?pubkey=${pubkey}&new_w=${size}`;
-    let token = store.getters.token;
-    // let token = tokenMap.value[deviceData.device_id];
+    // let token = store.getters.token;
+    let token = tokenMap.value[deviceData.device_id];
 
     imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${ID}&peerId=${peerId}&type=foggie&token=${token}`;
 
@@ -649,28 +649,20 @@ const handleCommand = async (val) => {
 const shareRefContent = reactive({});
 const copyContent = ref("");
 const doShare = async (item) => {
-  let key = "";
+  let key = item.key;
   if (item) {
     ipfsPin(item);
   }
 
   const isFolder = item.type === "application/x-directory";
   if (key) {
-    // let user = window.sessionStorage.getItem("walletUser");
     let user = store.getters["global/userInfo"].dmc;
     let ood_id_cyfs = device_id_real ? device_id_real : device_id;
-    let _key = encodeURIComponent(key);
-    let data = await shareLink(device_id.value, _key);
-    let meta = data.meta;
-    let httpStr = `http://${deviceData.dedicatedip}/#/detailFog?pubkey=${meta.pubkey}&name=${item.key}&isFolder=${isFolder}`;
-    // httpStr = `foggie://${peerid}/${spaceid}/${cid}`;
-    let cyfsStr = item.file_id
-      ? `cyfs://o/${ood_id_cyfs.value}/${meta.file_id}`
-      : "";
-    let ipfsStr = item.cid ? `ipfs://${meta.cid}` : "";
+    let peer_id = deviceData.peer_id;
+    let httpStr = `foggie://${peer_id}/${orderId.value}/${item.cid}`;
+    let cyfsStr = item.file_id ? `cyfs://o/${ood_id_cyfs}/${item.file_id}` : "";
+    let ipfsStr = item.cid ? `ipfs://${item.cid}` : "";
 
-    // this.shareTitle = this.$t("vood.uploadShareTitle");
-    // this.shareContent = this.$t("vood.uploadShareContent");
     shareCopyContent = `${user} publish ${key} to Web3` + "\n";
     shareRefContent.user = `${user} publish ${key} to Web3`;
     let myQrcode = window.sessionStorage.getItem("myQrcode");
@@ -680,39 +672,22 @@ const doShare = async (item) => {
     shareCopyContent = shareCopyContent + httpStr + " \n";
     shareCopyContent = shareCopyContent + " " + " \n ";
     shareRefContent.httpStr = httpStr;
-    // if (
-    //   (currentOODItem.value.cbs_state === "finish" ||
-    //     currentOODItem.value.cbs_state === "upgrade_finish" ||
-    //     currentOODItem.value.ipfs_state === "finish") &&
-    //   currentOODItem.value.ipfs_service_state === "start" &&
-    //   meta.cid
-    // ) {
-    //   shareCopyContent = shareCopyContent + ipfsStr + " \n";
-    //   shareCopyContent = shareCopyContent + " " + " \n ";
-    //   shareRefContent.ipfsStr = ipfsStr;
-    //   shareRefContent.httpStr = shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
-    // }
+    shareCopyContent = shareCopyContent + ipfsStr + " \n";
+    shareCopyContent = shareCopyContent + " " + " \n ";
+    shareRefContent.ipfsStr = ipfsStr;
+    shareRefContent.httpStr = shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
 
-    // if (
-    //   (currentOODItem.value.cbs_state === "finish" ||
-    //     currentOODItem.value.cbs_state === "upgrade_finish" ||
-    //     currentOODItem.value.cyfs_state === "finish") &&
-    //   currentOODItem.value.cyfs_service_state === "start" &&
-    //   meta.file_id
-    // ) {
-    //   shareCopyContent = shareCopyContent + cyfsStr + " \n";
-    //   shareCopyContent = shareCopyContent + " " + " \n ";
-    //   shareRefContent.cyfsStr = cyfsStr;
-    //   shareRefContent.httpStr = shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
-    // }
+    shareCopyContent = shareCopyContent + cyfsStr + " \n";
+    shareCopyContent = shareCopyContent + " " + " \n ";
+    shareRefContent.cyfsStr = cyfsStr;
+    shareRefContent.httpStr = shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
+
     shareCopyContent = shareCopyContent + shareStr + " \n";
     shareRefContent.shareStr = shareStr;
     copyContent.value = shareCopyContent;
     // shareRefContent.value=shareCopyContent
     showShareDialog.value = true;
     // this.shareBoxShow = true;
-  } else {
-    // this.closeRewardBox();
   }
 };
 const ipfsPin = (checked) => {
@@ -720,12 +695,12 @@ const ipfsPin = (checked) => {
   let ip_address = deviceData.rpc.split(":")[0];
   let port = deviceData.rpc.split(":")[1];
   let peerId = deviceData.peer_id;
-  // let token = tokenMap.value[deviceData.device_id];
+  let token = tokenMap.value[deviceData.device_id];
 
   let data = {
     ip_address,
     port,
-    token: "11111",
+    token,
     // peerId: deviceData.value.peer_id,
     peerId,
     Id: deviceData.foggie_id,
@@ -745,12 +720,12 @@ const cyfsPin = () => {
   const item = pinData.item;
   let ip_address = deviceData.rpc.split(":")[0];
   let port = deviceData.rpc.split(":")[1];
-  // let token = tokenMap.value[deviceData.device_id];
+  let token = tokenMap.value[deviceData.device_id];
 
   let data = {
     ip_address,
     port,
-    token: "11111",
+    token,
     peerId: deviceData.peer_id,
     Id: deviceData.foggie_id,
     exp: 3 * 24 * 3600,
@@ -779,8 +754,8 @@ const downloadItem = (item) => {
   // let Id = item.id;
   let Id = deviceData.foggie_id;
   let peerId = deviceData.peer_id;
-  let token = store.getters.token;
-  // let token = tokenMap.value[deviceData.device_id];
+  // let token = store.getters.token;
+  let token = tokenMap.value[deviceData.device_id];
 
   let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=foggie&token=${token}`;
 
@@ -793,8 +768,8 @@ const downloadItem = (item) => {
 };
 const deleteItem = (item) => {
   tableLoading.value = true;
-  let token = store.getters.token;
-  // let token = tokenMap.value[deviceData.device_id];
+  // let token = store.getters.token;
+  let token = tokenMap.value[deviceData.device_id];
 
   file_delete(token, item, deviceData).then((res) => {
     if (res && res.data) {
@@ -859,7 +834,7 @@ const doSearch = async () => {
       email.value,
       type,
       token,
-      deviceData.value,
+      deviceData,
       keyWord.value
     );
     tableData.data = [];
@@ -881,7 +856,7 @@ const setPrefix = (item, isTop = false) => {
   emits("currentPrefix", breadcrumbList.prefix);
 };
 watch(breadcrumbList, (val) => {
-  getFileList("", val.prefix);
+  // getFileList("", val.prefix);
 });
 watch(
   () => currentOODItem,

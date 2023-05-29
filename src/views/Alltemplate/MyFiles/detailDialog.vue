@@ -134,6 +134,9 @@ export default {
       emit("update:visible", false);
     };
     const copyContent = ref("");
+    const tokenMap = computed(() => store.getters.tokenMap);
+
+    let token = tokenMap.value[deviceData.device_id];
 
     const ipfsPin = (item) => {
       let ip_address = deviceData.rpc.split(":")[0];
@@ -141,7 +144,7 @@ export default {
       let data = {
         ip_address,
         port,
-        token: "11111",
+        token,
         peerId: deviceData.peer_id,
         // peerId: "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA",
         Id: deviceData.foggie_id,
