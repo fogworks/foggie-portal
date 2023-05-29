@@ -227,7 +227,9 @@ export const getActivationVood = (data, target) => {
     method: "POST",
     type: 'GET',
     target,
-    data: {},
+    data: {
+      param: "",
+    },
   });
 };
 
@@ -268,7 +270,9 @@ export const voodInfoCheck = (vpsId, target) => {
     method: "POST",
     type: "GET",
     target,
-    data: {},
+    data: {
+      param: "",
+    },
   });
 };
 
@@ -553,7 +557,9 @@ export const get_service_info = (target) => {
     method: "POST",
     target, //{ip,device_id}
     type: "GET",
-    data: {},
+    data: {
+      param: "",
+    },
   });
 };
 
