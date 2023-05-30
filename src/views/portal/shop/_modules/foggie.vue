@@ -4,7 +4,7 @@
     <iframe
       id="iframeRef"
       ref="iframeRef"
-      src="http://localhost:8090/#/order"
+      src="http://154.31.41.124:9876/#/order"
       frameborder="no"
       border="0"
       class="flexItem"
