@@ -1,12 +1,34 @@
 <template>
   <div class="uploader-file" :status="status">
-    <slot :file="file" :list="list" :status="status" :paused="paused" :error="error" :response="response"
-      :average-speed="averageSpeed" :formated-average-speed="formatedAverageSpeed" :current-speed="currentSpeed"
-      :is-complete="isComplete" :is-uploading="isUploading" :size="size" :formated-size="formatedSize"
-      :uploaded-size="uploadedSize" :progress="progress" :progress-style="progressStyle"
-      :progressing-class="progressingClass" :time-remaining="timeRemaining"
-      :formated-time-remaining="formatedTimeRemaining" :type="type" :extension="extension" :file-category="fileCategory">
-      <div class="uploader-file-progress" :class="progressingClass" :style="progressStyle" />
+    <slot
+      :file="file"
+      :list="list"
+      :status="status"
+      :paused="paused"
+      :error="error"
+      :response="response"
+      :average-speed="averageSpeed"
+      :formated-average-speed="formatedAverageSpeed"
+      :current-speed="currentSpeed"
+      :is-complete="isComplete"
+      :is-uploading="isUploading"
+      :size="size"
+      :formated-size="formatedSize"
+      :uploaded-size="uploadedSize"
+      :progress="progress"
+      :progress-style="progressStyle"
+      :progressing-class="progressingClass"
+      :time-remaining="timeRemaining"
+      :formated-time-remaining="formatedTimeRemaining"
+      :type="type"
+      :extension="extension"
+      :file-category="fileCategory"
+    >
+      <div
+        class="uploader-file-progress"
+        :class="progressingClass"
+        :style="progressStyle"
+      />
       <div class="uploader-file-info">
         <div class="uploader-file-name" :title="file.name">
           <img class="iconfont-uploadType" :src="fileIcon" />
@@ -29,13 +51,27 @@
           </span>
         </div>
         <div class="uploader-file-actions" v-if="status !== 'success'">
-          <span class="uploader-file-pause" v-show="isBigFile" @click="pause()" />
-          <span class="uploader-file-resume" v-show="!ISCIDING" @click="resume()" />️
+          <span
+            class="uploader-file-pause"
+            v-show="isBigFile"
+            @click="pause()"
+          />
+          <span
+            class="uploader-file-resume"
+            v-show="!ISCIDING"
+            @click="resume()"
+          />️
           <span class="uploader-file-retry" @click="retry()" />
           <span class="uploader-file-remove" @click="remove()" />
         </div>
-        <div class="uploader-file-actions" v-if="status === 'success'" @click="fileShare">
-          <div style="color: #3f2dec; text-decoration: underline; cursor: pointer">
+        <div
+          class="uploader-file-actions"
+          v-if="status === 'success'"
+          @click="fileShare"
+        >
+          <div
+            style="color: #3f2dec; text-decoration: underline; cursor: pointer"
+          >
             Share
           </div>
         </div>
@@ -73,15 +109,24 @@ import {
   fileCompletes,
   SaveFile,
 } from "@/api/upload";
-import { ElMessage } from 'element-plus'
+import { ElMessage } from "element-plus";
 const CHUNK_SIZE = 1024 * 1024 * 5;
 const FILE_SIZE = 10 * 1024 * 1024;
 const simultaneousUploads = 4;
 const maxChunkRetries = 3;
 const peerId = "12D3KooWDj1NkJ1DrVvpbBhtJ3nLCNA9CKyg3eynpiUTKsVEDkgx";
-const token = "58df9379402ab6c87a51be426290e0f752ba5be4fe45736674a05dc12e642c50";
+const token =
+  "58df9379402ab6c87a51be426290e0f752ba5be4fe45736674a05dc12e642c50";
 
-const emits = defineEmits(['fileShare', 'fileDetail', 'chanStatus', 'uploadComplete', 'getStatus', 'getProgress', 'remove'])
+const emits = defineEmits([
+  "fileShare",
+  "fileDetail",
+  "chanStatus",
+  "uploadComplete",
+  "getStatus",
+  "getProgress",
+  "remove",
+]);
 const props = defineProps({
   file: {
     type: Object,
@@ -103,10 +148,7 @@ const props = defineProps({
       return [];
     },
   },
-
-})
-
-
+});
 
 const store = useStore();
 
@@ -317,9 +359,6 @@ let formatedTimeRemaining = computed(() => {
   return parsedTimeRemaining;
 });
 
-
-
-
 const resume = () => {
   if (!isFirst.value) {
     let number = 0;
@@ -335,8 +374,8 @@ const resume = () => {
     if (number >= MAX_UPLOAD_NUM.value) {
       ElMessage({
         message: `Maximum allowed to upload ${MAX_UPLOAD_NUM.value} files simultaneously`,
-        type: 'warning',
-      })
+        type: "warning",
+      });
 
       return;
     }
@@ -405,7 +444,7 @@ function Save_File() {
     fileSize: file.value.size,
     deviceType: +file.value.deviceType,
   };
-  SaveFile(params).then((res) => { });
+  SaveFile(params).then((res) => {});
 }
 
 const toPath = () => {
@@ -421,52 +460,61 @@ function getFileMd5(file, type) {
     let fileReader = new FileReader();
     let spark = new SparkMD5.ArrayBuffer();
     ISCIDING.value = true;
-    let blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
+    let blobSlice =
+      File.prototype.slice ||
+      File.prototype.mozSlice ||
+      File.prototype.webkitSlice;
 
-    let curChunks = 1
-    loadNext()
+    let curChunks = 1;
+    loadNext();
 
     function loadNext() {
-      if (type == 'big') {
-        fileReader.readAsArrayBuffer(blobSlice.call(file.file, file.chunks[curChunks - 1].startByte, file.chunks[curChunks - 1].endByte));
-        curChunks++
+      if (type == "big") {
+        fileReader.readAsArrayBuffer(
+          blobSlice.call(
+            file.file,
+            file.chunks[curChunks - 1].startByte,
+            file.chunks[curChunks - 1].endByte
+          )
+        );
+        curChunks++;
       } else {
         fileReader.readAsArrayBuffer(blobSlice.call(file.file, 0, file.size));
       }
-
     }
     fileReader.onload = function (event) {
       // big file
-      if (type == 'big') {
+      if (type == "big") {
         spark.append(event.target.result);
         if (curChunks - 1 == file.chunks.length) {
-          let fileMd5 = spark.end()
-          spark.destroy()
+          let fileMd5 = spark.end();
+          spark.destroy();
           ISCIDING.value = false;
           isUploading.value = true;
           resolve(fileMd5);
         } else {
-          loadNext()
+          loadNext();
         }
       } else {
         // small file
         spark.append(event.target.result);
-        let fileMd5 = spark.end()
-        spark.destroy()
+        let fileMd5 = spark.end();
+        spark.destroy();
         ISCIDING.value = false;
         isUploading.value = true;
         resolve(fileMd5);
       }
-
-
-    }
+    };
   });
 }
 
 function initParams(params) {
   return new Promise((resolve, reject) => {
     let fileReader = new FileReader();
-    let blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
+    let blobSlice =
+      File.prototype.slice ||
+      File.prototype.mozSlice ||
+      File.prototype.webkitSlice;
     let form = new FormData();
     let spark = new SparkMD5.ArrayBuffer();
     form.append("deviceType", file.value.deviceType);
@@ -486,23 +534,27 @@ function initParams(params) {
     if (file.value.foggieToken) {
       form.append("foggieToken", file.value.foggieToken);
     }
-    form.append("file", blobSlice.call(file.value.file, params.start, params.end), file.value.urlFileName);
+    form.append(
+      "file",
+      blobSlice.call(file.value.file, params.start, params.end),
+      file.value.urlFileName
+    );
     // let blob = blobSlice.call(file.value.file, params.start, params.end)
     // form.append('ma5',SparkMD5.ArrayBuffer.hash(blob) )
     // form.append("file", blob, file.value.urlFileName);
     // resolve(form)
 
-    fileReader.readAsArrayBuffer(blobSlice.call(file.value.file, params.start, params.end));
+    fileReader.readAsArrayBuffer(
+      blobSlice.call(file.value.file, params.start, params.end)
+    );
     fileReader.onload = async function (e) {
       await spark.append(e.target.result);
       await form.append("md5", spark.end());
-      resolve(form)
+      resolve(form);
       // let blob = blobSlice.call(file.value.file, params.start, params.end);
       // form.append("file", blob, file.value.urlFileName);
-    }
-
-  })
-
+    };
+  });
 }
 
 const pause = () => {
@@ -531,7 +583,7 @@ const smallLoad = async (smallFile) => {
   } else {
     name = smallFile.name;
   }
-  fileMd5.value = await getFileMd5(smallFile, 'small');
+  fileMd5.value = await getFileMd5(smallFile, "small");
 
   form.append("file", smallFile.file, name);
   form.append("fileCategory", 1);
@@ -573,7 +625,7 @@ const fileLoad = async (file) => {
     isUploading.value = true;
     multipartUpload(file);
   } else {
-    fileMd5.value = await getFileMd5(file.value, 'big');
+    fileMd5.value = await getFileMd5(file.value, "big");
     let params = {
       fileName: encodeURIComponent(file.value.urlFileName),
       fileType: file.value.fileType,
@@ -596,10 +648,9 @@ const fileLoad = async (file) => {
               partId: item.offset + 1,
               start: item.startByte,
               end: item.endByte,
-              complete: false,  // 当前分片是否已经上传过
-              uploading:false,   // 当前分片是否正在上传中  true 上传中  false 没有再上传
-              
-            }
+              complete: false, // 当前分片是否已经上传过
+              uploading: false, // 当前分片是否正在上传中  true 上传中  false 没有再上传
+            };
             blobFileArray.push(params);
             ArrayProgress.value.push(0);
           }
@@ -631,17 +682,23 @@ const fileLoad = async (file) => {
 };
 const multipartUpload = (file) => {
   let retrNum = 0; // 第一条线 重试次数
-  let retrNumber = 0;  //  第二条线重试次数
+  let retrNumber = 0; //  第二条线重试次数
   if (abortController.value) {
     abortController.value = null;
   }
   abortController.value = new AbortController();
-  let blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
+  let blobSlice =
+    File.prototype.slice ||
+    File.prototype.mozSlice ||
+    File.prototype.webkitSlice;
   let chunks = Math.ceil(file.value.size / CHUNK_SIZE);
   let fileReader = new FileReader();
   async function loadNext() {
     let start = currentChunk.value * CHUNK_SIZE;
-    let end = start + CHUNK_SIZE >= file.value.size ? file.value.size : start + CHUNK_SIZE;
+    let end =
+      start + CHUNK_SIZE >= file.value.size
+        ? file.value.size
+        : start + CHUNK_SIZE;
 
     fileReader.readAsArrayBuffer(blobSlice.call(file.value.file, start, end));
   }
@@ -660,7 +717,7 @@ const multipartUpload = (file) => {
         for (const item of blobFileArray) {
           if (!item.complete) {
             if (request.length >= simultaneousUploads) break;
-            let params = await initParams(item)
+            let params = await initParams(item);
             request.push(params);
             curUploadIndex.push(item.partId - 1);
           }
@@ -702,7 +759,7 @@ const multipartUpload = (file) => {
               }
             }
           })
-          .catch((error) => { });
+          .catch((error) => {});
       } else {
         resolve();
       }
@@ -717,7 +774,7 @@ const multipartUpload = (file) => {
     let request = [];
     for (const INDEX of errorUploadArray) {
       let item = blobFileArray[INDEX];
-      let params = await initParams(item)
+      let params = await initParams(item);
       if (isSecond) {
         request.push(fileUpload(params, abortController.value, UploadProgress));
       } else {
@@ -737,23 +794,20 @@ const multipartUpload = (file) => {
           if (retrNumber >= maxChunkRetries) {
             return false;
           } else {
-            if (abortController.value.signal.aborted)
-              return "Cancel request";
+            if (abortController.value.signal.aborted) return "Cancel request";
             await retrLoadNext(errorUploadArray, true);
           }
         } else {
           retrNum += 1;
           if (retrNum >= maxChunkRetries) {
             if (file.value.isGateway) {
-              if (abortController.value.signal.aborted)
-                return "Cancel request";
+              if (abortController.value.signal.aborted) return "Cancel request";
               await retrLoadNext(errorUploadArray, true);
             } else {
               return false;
             }
           } else {
-            if (abortController.value.signal.aborted)
-              return "Cancel request";
+            if (abortController.value.signal.aborted) return "Cancel request";
             await retrLoadNext(errorUploadArray);
           }
         }
@@ -763,26 +817,28 @@ const multipartUpload = (file) => {
 
   function retryUpload(request = [], errorUploadArray) {
     return new Promise((resolve, reject) => {
-      axios.all(request).then(
-        axios.spread((...res) => {
-          if (res.every((element) => element.code == 200)) {
-            res.forEach((element, index) => {
-              multipartFileArray.value.push({
-                etag: element.data,
-                partNumber: Number(errorUploadArray[index]) + 1,
+      axios
+        .all(request)
+        .then(
+          axios.spread((...res) => {
+            if (res.every((element) => element.code == 200)) {
+              res.forEach((element, index) => {
+                multipartFileArray.value.push({
+                  etag: element.data,
+                  partNumber: Number(errorUploadArray[index]) + 1,
+                });
+                blobFileArray[errorUploadArray[index]].complete = true;
               });
-              blobFileArray[errorUploadArray[index]].complete = true;
-            });
-            resolve(true);
-          } else {
-            if (abortController.value.signal.aborted) {
-              return "Cancel request";
+              resolve(true);
             } else {
-              resolve(false);
+              if (abortController.value.signal.aborted) {
+                return "Cancel request";
+              } else {
+                resolve(false);
+              }
             }
-          }
-        })
-      )
+          })
+        )
         .catch((error) => {
           if (abortController.value.signal.aborted) {
             return "Cancel request";
@@ -804,7 +860,8 @@ const multipartUpload = (file) => {
         await loadNext();
       }
     } else {
-      if (NUMBER_timer.value) clearInterval(NUMBER_timer.value), (NUMBER_timer.value = null);
+      if (NUMBER_timer.value)
+        clearInterval(NUMBER_timer.value), (NUMBER_timer.value = null);
 
       let params = {
         fileName: encodeURIComponent(file.value.urlFileName),
@@ -818,25 +875,26 @@ const multipartUpload = (file) => {
         foggieToken: file.value.foggieToken,
       };
 
-      fileCompletes(params).then(async (res) => {
-        if (res.code == 200) {
-          let data = {
-            id: file.value.id,
-            completed: true,
-            type: "completed",
-          };
+      fileCompletes(params)
+        .then(async (res) => {
+          if (res.code == 200) {
+            let data = {
+              id: file.value.id,
+              completed: true,
+              type: "completed",
+            };
 
-          await Save_File();
-          emits("chanStatus", data);
-          file.value.completed = true;
-          progress.value = Math.ceil((chunks / chunks) * 100);
-          completed.value = true;
-          emits("getStatus", "Upload Success");
-          emits("uploadComplete", "Upload Success");
-        } else {
-          fileError();
-        }
-      })
+            await Save_File();
+            emits("chanStatus", data);
+            file.value.completed = true;
+            progress.value = Math.ceil((chunks / chunks) * 100);
+            completed.value = true;
+            emits("getStatus", "Upload Success");
+            emits("uploadComplete", "Upload Success");
+          } else {
+            fileError();
+          }
+        })
         .catch((error) => {
           fileError();
         });
@@ -856,8 +914,8 @@ const UploadProgress = (progressEvent, part_number) => {
       return cur + next;
     }, 0);
 
-
-    let uploadProgress = (NUMBER.value / (100 * ArrayProgress.value.length)).toFixed(2) * 100;
+    let uploadProgress =
+      (NUMBER.value / (100 * ArrayProgress.value.length)).toFixed(2) * 100;
     console.log(uploadProgress);
     progress.value = uploadProgress < 100 ? uploadProgress : 99;
 
@@ -873,7 +931,7 @@ const UploadProgress = (progressEvent, part_number) => {
         averageSpeed.value =
           Number(
             (NUMBER.value - lastNUMBER.value) /
-            (100 * ArrayProgress.value.length * time)
+              (100 * ArrayProgress.value.length * time)
           ) * file.value.size;
       }
       lastTime.value = curTime;
@@ -904,8 +962,7 @@ const UploadProgress = (progressEvent, part_number) => {
 };
 const remove = () => {
   if (file.value.size > FILE_SIZE && upload_id.value) {
-    if (abortController.value)
-      abortController.value.abort("Cancel request");
+    if (abortController.value) abortController.value.abort("Cancel request");
     isPause.value = true;
     paused.value = true;
     aborted.value = false;
@@ -936,8 +993,7 @@ const remove = () => {
     //   file.value.cancel();
     // });
   } else {
-    if (abortController.value)
-      abortController.value.abort("Cancel request");
+    if (abortController.value) abortController.value.abort("Cancel request");
     isPause.value = true;
     paused.value = true;
     aborted.value = false;
@@ -951,15 +1007,14 @@ const retry = () => {
   error.value = false;
   isComplete.value = true;
   isUploading.value = false;
-  paused.value = true
-  resume()
-
+  paused.value = true;
+  resume();
 };
 const processResponse = (message) => {
   let res = message;
   try {
     res = JSON.parse(message);
-  } catch (e) { }
+  } catch (e) {}
   response.value = res;
 };
 const fileEventsHandler = (event, args) => {
@@ -1044,9 +1099,6 @@ onUnmounted(() => {
   if (NUMBER_timer.value)
     clearInterval(NUMBER_timer.value), (NUMBER_timer.value = null);
 });
-
-
-
 </script>
 <style>
 .uploader-file {
@@ -1082,10 +1134,12 @@ onUnmounted(() => {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: linear-gradient(171deg,
-      #8388fe 0%,
-      #519ff4 42%,
-      #b783c9 100%) !important;
+  background: linear-gradient(
+    171deg,
+    #8388fe 0%,
+    #519ff4 42%,
+    #b783c9 100%
+  ) !important;
   transform: translateX(-100%);
   overflow: hidden;
 }
@@ -1213,7 +1267,7 @@ onUnmounted(() => {
   width: 10%;
 }
 
-.uploader-file-actions>span {
+.uploader-file-actions > span {
   display: none;
   float: left;
   width: 16px;
@@ -1225,7 +1279,7 @@ onUnmounted(() => {
   background-position: 0 0;
 }
 
-.uploader-file-actions>span:hover {
+.uploader-file-actions > span:hover {
   background-position-x: -21px;
 }
 
