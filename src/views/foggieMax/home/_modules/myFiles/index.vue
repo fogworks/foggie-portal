@@ -179,10 +179,7 @@
                     :disabled="
                       !(
                         !scope.row.isDir &&
-                        (currentOODItem.cbs_state === 'finish' ||
-                          currentOODItem.cbs_state === 'upgrade_finish' ||
-                          currentOODItem.ipfs_state === 'finish') &&
-                        currentOODItem.ipfs_service_state === 'start'
+                        currentOODItem.svc_state === 'finish'
                       )
                     "
                     >IPFS PIN</el-dropdown-item
@@ -192,9 +189,8 @@
                     :disabled="
                       !(
                         !scope.row.isDir &&
-                        (currentOODItem.cbs_state === 'finish' ||
-                          currentOODItem.cbs_state === 'upgrade_finish' ||
-                          currentOODItem.cyfs_state === 'finish') &&
+                        
+                          currentOODItem.cyfs_state === 'finish'&&
                         currentOODItem.cyfs_service_state === 'start'
                       )
                     "
@@ -621,12 +617,12 @@ const handleCommand = async (val) => {
       ipfsDialogShow.value = true;
 
       pinData.item = item;
-      ipfsPin(item);
+      // ipfsPin(item);
       break;
     case "cyfs":
       cyfsDialogShow.value = true;
       pinData.item = item;
-      cyfsPin(item);
+      // cyfsPin(item);
       break;
     case "download":
       downloadItem(item);

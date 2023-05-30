@@ -100,18 +100,18 @@ service.interceptors.request.use(
       if (config.url.indexOf("/proxy/http") > -1) {
         let token = getTokenMap(config.target?.device_id);
         config.headers["ip"] = config.target.dedicatedip
-        config.headers["port"] = config.target.rpc.split(':')[1] || ''
+        // config.headers["port"] = config.target.rpc.split(':')[1] || ''
         config.headers["Authorization"] = token || "";
-        config.headers["port"] = 9094;
+        config.headers["port"] = config.port;
 
 
         config.data["body"] = JSON.stringify(config.data);
         config.data["ip"] = config.target.dedicatedip;
-        config.data["port"] = config.target.rpc.split(':')[1] || '';
+        // config.data["port"] = config.target.rpc.split(':')[1] || '';
         config.data["Authorization"] = token || "";
         config.data["type"] = config.type || "POST";
         config.data["path"] = config.path || "";
-        config.data["port"] = 9094;
+        config.data["port"] = config.port;
       }
     }
     return config;
