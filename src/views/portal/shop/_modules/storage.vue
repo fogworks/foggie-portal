@@ -57,7 +57,11 @@
           >
         </div>
         <div class="homeBoxHeader-right clearfix">
-          <el-button type="primary" style="border-radius: 30px" round
+          <el-button
+            type="primary"
+            @click="reset"
+            style="border-radius: 30px"
+            round
             >Reset</el-button
           >
         </div>
@@ -507,6 +511,10 @@ function loadChainId() {
       store.commit("clientGlobal/SAVE_ChainId", res.data);
     }
   });
+}
+function reset() {
+  formLine.quantity = 1;
+  formLine.week = 24;
 }
 onMounted(() => {
   loadCurReferenceRate();
