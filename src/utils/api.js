@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 import setting from "@/setting";
 
-const { apiUrl, baseUrl } = setting;
+const { apiUrl, baseUrl, portNum } = setting;
 
 
 
@@ -226,6 +226,7 @@ export const getActivationVood = (data, target) => {
     url: `${baseUrl}/proxy/http`,
     method: "POST",
     type: 'GET',
+    port: portNum,
     target,
     data: {
       param: "",
@@ -269,6 +270,7 @@ export const voodInfoCheck = (vpsId, target) => {
     url: `${baseUrl}/proxy/http`,
     method: "POST",
     type: "GET",
+    port: portNum,
     target,
     data: {
       param: "",
@@ -517,6 +519,7 @@ export const deploy_cbs = (target) => {
     path: `/v1/service/deploy_cbs`,
     url: `${baseUrl}/proxy/http`,
     method: "POST",
+    port: portNum,
     target,
     data: {},
   });
@@ -526,6 +529,7 @@ export const deploy_ipfs = (target) => {
     path: `/v1/service/deploy_ipfs`,
     url: `${baseUrl}/proxy/http`,
     method: "POST",
+    port: portNum,
     target,
     data: {},
   });
@@ -535,6 +539,7 @@ export const deploy_cyfs = (data, target) => {
     path: `/v1/service/deploy_cyfs`,
     url: `${baseUrl}/proxy/http`,
     method: "POST",
+    port: portNum,
     data,
     target,
   });
@@ -544,6 +549,7 @@ export const activate_sev = (target) => {
     path: `/v1/service/activate_sev`,
     url: `${baseUrl}/proxy/http`,
     method: "POST",
+    port: portNum,
     target,
     data: {},
   });
@@ -557,6 +563,7 @@ export const get_service_info = (target) => {
     method: "POST",
     target, //{ip,device_id}
     type: "GET",
+    port: portNum,
     data: {
       param: "",
     },
@@ -575,6 +582,7 @@ export const bind_foggie = (data, target) => {
     path: `/v1/account/bind_foggie`,
     url: `${baseUrl}/proxy/http`,
     method: "POST",
+    port: portNum,
     data,
     target,
   });
@@ -584,6 +592,7 @@ export const unbind_foggie = (target) => {
     path: `/v1/account/unbind_foggie`,
     url: `${baseUrl}/proxy/http`,
     method: "POST",
+    port: portNum,
     target,
     data: {},
   });
@@ -601,6 +610,7 @@ export const checkAccount = (data, target = {}) => {
     path: "/v1/chain/get_account",
     url: `${baseUrl}/proxy/http`,
     method: "POST",
+    port: portNum,
     data,
     target,
   });
@@ -610,6 +620,7 @@ export const modify_access_password = (data, target) => {
     path: `/v1/account/modify_access_password`,
     url: `${baseUrl}/proxy/http`,
     method: "POST",
+    port: portNum,
     data,
     target,
   });
@@ -621,6 +632,7 @@ export const check_access_pass = (target) => {
     method: "POST",
     target,
     type: "GET",
+    port: portNum,
     data: {
       param: "",
     },
@@ -631,6 +643,7 @@ export const access_pass = (data, target) => {
     path: `/v1/account/access_pass`,
     url: `${baseUrl}/proxy/http`,
     method: "POST",
+    port: portNum,
     data,
     target,
   });
@@ -640,6 +653,7 @@ export const access_pass_login = (data, target) => {
     path: `/v1/account/access_pass_login`,
     url: `${baseUrl}/proxy/http`,
     method: "POST",
+    port: portNum,
     data,
     target,
   });
@@ -649,6 +663,7 @@ export const op_ipfs = (data, target) => {
     url: `/v1/service/op_ipfs`,
     url: `${baseUrl}/proxy/http`,
     method: "POST",
+    port: portNum,
     data,
     target,
   });
@@ -658,6 +673,7 @@ export const op_cyfs = (data, target) => {
     path: `/v1/service/op_cyfs`,
     url: `${baseUrl}/proxy/http`,
     method: "POST",
+    port: portNum,
     data,
     target,
   });
@@ -667,6 +683,7 @@ export const reset_vood = (target) => {
     path: `/v1/service/reset_vood`,
     url: `${baseUrl}/proxy/http`,
     method: "POST",
+    port: portNum,
     target,
     data: {},
   });
@@ -676,6 +693,7 @@ export const detected_net = (target) => {
     path: `/v1/detected_net`,
     url: `${baseUrl}/proxy/http`,
     method: "POST",
+    port: portNum,
     target,
     type: 'GET',
     data: {

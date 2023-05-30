@@ -14,10 +14,7 @@
           v-if="
             type === 'ipfs' &&
             currentFileItem.pubkey &&
-            (currentOODItems.cbs_state === 'finish' ||
-              currentOODItems.cbs_state === 'upgrade_finish' ||
-              currentOODItems.ipfs_state === 'finish') &&
-            currentOODItem.ipfs_service_state === 'start'
+            currentOODItems.svc_state === 'finish'
           "
         >
           <el-checkbox v-model="checked" label="IPFS PIN" size="large" />
