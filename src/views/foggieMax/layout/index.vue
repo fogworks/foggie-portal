@@ -7,8 +7,8 @@
         @accessCallback="accessCallback"
       ></Access>
       <template v-else>
-        <Welcome v-if="!hasReady" :haveNet="haveNet"></Welcome>
-        <div v-else>
+        <Welcome v-if="hasReady == 1" :haveNet="haveNet"></Welcome>
+        <div v-else-if="hasReady == 2">
           <div class="top-title">
             <span @click="isInSetup = false">
               {{ deviceData.device_name }}
@@ -71,15 +71,16 @@ export default {
     });
 
     const haveNet = ref(false);
-    const hasReady = ref(false);
+    const hasReady = ref(0); //1false  2true
     const isInSetup = ref(false);
     const initFoggieDate = async () => {
-      // if (!deviceData.device_type) {
-      //   accessible.value = true;
-      //   hasReady.value = true;
-      //   haveNet.value = true;
-      //   return;
-      // }
+      if (!deviceData.device_type) {
+        accessible.value = true;
+        haveNet.value = true;
+        getServiceInfo();
+        // hasReady.value = 2;
+        return;
+      }
       loading.value = true;
       detected_net(deviceData).then((res) => {
         if (res.result && res.result.detected_net) {
@@ -99,17 +100,16 @@ export default {
       //   currentOODItem.value.data = oodData.data[0];
       // }
     };
-    const getVoodToken = (data) => {
-      get_vood_token({ vood_id: data.device_id }).then((res) => {
+    const getVoodToken = async (data) => {
+      let res = await get_vood_token({ vood_id: data.device_id });
+      if (res) {
         store.dispatch("token/setTokenMap", {
           id: data.device_id,
           token: res.data.token_type + " " + res.data.access_token,
         });
-        setTimeout(() => {
-          hasToken.value = true;
-          initFoggieDate();
-        });
-      });
+        hasToken.value = true;
+        initFoggieDate();
+      }
     };
     onActivated(() => {
       getVoodToken(deviceData);
@@ -129,11 +129,15 @@ export default {
               result.svc_state === "finish" &&
               result.cyfs_state === "finish"
             ) {
-              hasReady.value = true;
+              hasReady.value = 2;
+            } else {
+              hasReady.value = 1;
             }
           } else {
             if (result.svc_state === "finish") {
-              hasReady.value = true;
+              hasReady.value = 2;
+            } else {
+              hasReady.value = 1;
             }
           }
           accessible.value = true;
@@ -147,11 +151,11 @@ export default {
       getServiceInfo();
     };
     const reset = () => {
-      hasReady.value = false;
+      hasReady.value = 1;
       isInSetup.value = false;
     };
     const goHome = () => {
-      hasReady.value = true;
+      hasReady.value = 2;
       isInSetup.value = false;
     };
     provide("reset", reset);
@@ -207,7 +211,7 @@ export default {
     text-align: left;
 
     span {
-      background: linear-gradient(to right, #3913b8 0%, #75e0e6 100%);
+      background: linear-gradient(to right, #3913b8 0%, #15a2aa 100%);
       background-clip: text;
       text-fill-color: transparent;
       -webkit-background-clip: text;

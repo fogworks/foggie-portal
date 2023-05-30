@@ -146,27 +146,23 @@ export default {
           is_pin: false,
           new_path: item.key,
         };
-        await pIN(data);
+        // await pIN(data);
       }
       const isFolder = item.type === "application/x-directory";
       if (key) {
-        let user = window.sessionStorage.getItem("walletUser");
+        let user = store.getters["global/userInfo"].dmc;
         let ood_id_cyfs = device_id_real ? device_id_real : device_id;
         let _key = encodeURIComponent(key);
-        let data = await shareLink(device_id, _key);
-        let meta = data.meta;
-        let foggieStr = `http://${deviceData.dedicatedip}/#/detailFog?pubkey=${meta.pubkey}&name=${item.key}&isFolder=${isFolder}`;
-        // let foggieStr = `foggie://${peer_id}/${orderId}/${item.cid}`;
+        let peer_id = deviceData.peer_id;
+        let foggieStr = `foggie://${peer_id}/${orderId}/${item.cid}`;
         let httpStr = `http://${deviceData.rpc.split(':')[0]}/fog/${deviceData.foggie_id}/${item.cid}`;
+        let cyfsStr = item.file_id
+          ? `cyfs://o/${ood_id_cyfs}/${item.file_id}`
+          : "";
+        let ipfsStr = item.cid ? `ipfs://${item.cid}` : "";
 
-        let cyfsStr = `cyfs://o/${ood_id_cyfs}/${meta.file_id}`;
-        let ipfsStr = `ipfs://${meta.cid}`;
-
-        // this.shareTitle = this.$t("vood.uploadShareTitle");
-        // this.shareContent = this.$t("vood.uploadShareContent");
         let shareCopyContent = `${user} publish ${key} to Web3` + "\n";
         shareRefContent.user = `${user} publish ${key} to Web3`;
-
         let myQrcode = window.sessionStorage.getItem("myQrcode");
         let code = `http://foggie.fogworks.io/?pcode=${myQrcode}`;
         let shareStr = `The Web3 content I publish with Foggie is my digital asset and cannot be tampered with or deleted without my permission. It can also help us earn $DMC crypto rewards. Let's Web3-to-Earn together! Use my invite link ${code} to adopt a Foggie so we can all earn $DMC and grow Web3 together.Thanks!`;
@@ -176,41 +172,14 @@ export default {
         shareRefContent.foggieStr = foggieStr;
         shareRefContent.httpStr = httpStr;
 
-        // if (
-        //   (currentOODItem.value.data.cbs_state === "finish" ||
-        //     currentOODItem.value.data.cbs_state === "upgrade_finish" ||
-        //     currentOODItem.value.data.ipfs_state === "finish") &&
-        //   currentOODItem.value.data.ipfs_service_state === "start" &&
-        //   meta.cid
-        // ) {
-        //   shareCopyContent = shareCopyContent + ipfsStr + " \n";
-        //   shareCopyContent = shareCopyContent + " " + " \n ";
-        //   shareRefContent.ipfsStr = ipfsStr;
-        //   shareRefContent.httpStr =
-        //     shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
-        // }
-
-        // if (
-        //   (currentOODItem.value.data.cbs_state === "finish" ||
-        //     currentOODItem.value.data.cbs_state === "upgrade_finish" ||
-        //     currentOODItem.value.data.cyfs_state === "finish") &&
-        //   currentOODItem.value.data.cyfs_service_state === "start" &&
-        //   meta.file_id
-        // ) {
-        //   shareCopyContent = shareCopyContent + cyfsStr + " \n";
-        //   shareCopyContent = shareCopyContent + " " + " \n ";
-        //   shareRefContent.cyfsStr = cyfsStr;
-        //   shareRefContent.httpStr =
-        //     shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
-        // }
-
         shareCopyContent = shareCopyContent + shareStr + " \n";
         shareRefContent.shareStr = shareStr;
-        showShareDialog.value = true;
         copyContent.value = shareCopyContent;
-      } else {
-      }
-    };
+        // shareRefContent.value=shareCopyContent
+        showShareDialog.value = true;
+        // this.shareBoxShow = true;
+      } 
+    }
     const downloadItem = () => {
       // let ID = device_id.value;
       // let pubkey = item.pubkey;

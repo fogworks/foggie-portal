@@ -224,17 +224,17 @@ export default {
         ? sessionStorage.getItem("walletUser")
         : "";
 
-      lastweekReward(owner_id).then((rr) => {
-        lastWeekOptions.xAxis.data = rr?.map((el) => el.day);
-        lastWeekOptions.series[0].data = rr?.map((el) => el.score);
-        // if (rr && rr.length > 0) {
-        //   let num = 0;
-        //   for (let i = 0; i < rr.length; i++) {
-        //     num += rr[i].score;
-        //   }
-        //   lastweekCount.value = num;
-        // }
-      });
+      // lastweekReward(owner_id).then((rr) => {
+      //   lastWeekOptions.xAxis.data = rr?.map((el) => el.day);
+      //   lastWeekOptions.series[0].data = rr?.map((el) => el.score);
+      //   // if (rr && rr.length > 0) {
+      //   //   let num = 0;
+      //   //   for (let i = 0; i < rr.length; i++) {
+      //   //     num += rr[i].score;
+      //   //   }
+      //   //   lastweekCount.value = num;
+      //   // }
+      // });
     };
     const initYesterdayScore = async () => {
       let account = sessionStorage.getItem("walletUser")

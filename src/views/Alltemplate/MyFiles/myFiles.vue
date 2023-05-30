@@ -265,7 +265,6 @@ import {
   find_objects,
   publishPin,
 } from "@/utils/api.js";
-import moment from "moment";
 import _ from "lodash";
 
 // import MyEcharts from "@/components/echarts/myEcharts";
@@ -423,13 +422,6 @@ const fileListsInfinite = _.debounce(() => {
   }
 }, 300);
 
-function challengeMiner(params) {
-  InitiateChallenge(params).then((res) => {
-    if (res.code == 200) {
-    }
-  });
-}
-
 const activeSort = ref("1");
 let breadcrumbList = reactive({
   prefix: [],
@@ -502,7 +494,7 @@ const initFileData = async (data) => {
     tableData.data.push(item);
   }
 
-  for (let j = 0; j < data.content?.length; j++) {
+  for (let j = 0; j < data?.content?.length; j++) {
     let date = transferTime(data.content[j].lastModified);
     let isDir = false;
     const type = data.content[j].key.substring(
@@ -588,72 +580,6 @@ const initFileData = async (data) => {
   // tableData.data = tableData.data.concat(res.data.list);
   tableSort({ prop: "date", order: 1, key: 1 });
 };
-const sortChange = ({ column, prop, order }) => {
-  // console.log(
-  //   { column, prop, order },
-  //   "{ column, prop, order }{ column, prop, order }{ column, prop, order }"
-  // );
-};
-const getCidShare = async (ood_id, cid) => {
-  if (ood_id && cid) {
-    let data = await CidShare(ood_id, cid);
-    if (data && data.bucket) {
-      let chartData =
-        data && data.bucket && data.bucket["date_histogram_share.ts"];
-      let xdata = [];
-      let ydata = [];
-      for (let i = 0; i < chartData.length; i++) {
-        let item = {
-          key_as_string: transferTime(chartData[i].key_as_string),
-          value: chartData[i].doc_count,
-        };
-        xdata.push(item.key_as_string.split(" ")[0]);
-        ydata.push(item.value);
-      }
-      initMyOption(xdata, ydata);
-    }
-    // test
-    // initMyOption(
-    //   ["1", "2", "3", "4", "5", "6", "7"],
-    //   [7, 6, 5, 4, 3, 2, 1],
-    //   cid
-    // );
-  }
-};
-const initMyOption = (xdata, ydata, cid) => {
-  let options = {
-    color: "#29abff",
-    grid: {
-      top: 2,
-      left: 2,
-      right: 2,
-      bottom: 2,
-    },
-    yAxis: {
-      show: false,
-      type: "value",
-    },
-    xAxis: {
-      type: "category",
-      data: xdata,
-      show: false,
-    },
-    series: [
-      {
-        data: ydata,
-        type: "bar",
-      },
-    ],
-  };
-
-  for (let i = 0; i < tableData.data.length; i++) {
-    if (tableData.data[i].cid === cid) {
-      tableData.data[i].share = options;
-      break;
-    }
-  }
-};
-
 const handleImg = (item, type, isDir) => {
   // size = size || 20;
   // let location = window.location.origin;
@@ -898,7 +824,9 @@ const getFileList = function (scroll, prefix) {
         initFileData(res);
       }
     })
-    .finally(() => (tableLoading.value = false));
+    .catch(() => {
+      tableLoading.value = false;
+    });
 };
 const doSearch = async () => {
   if (keyWord.value === "") {
@@ -935,9 +863,9 @@ const setPrefix = (item, isTop = false) => {
   }
   emits("currentPrefix", breadcrumbList.prefix);
 };
-watch(breadcrumbList, (val) => {
-  // getFileList("", val.prefix);
-});
+// watch(breadcrumbList, (val) => {
+//   // getFileList("", val.prefix);
+// });
 watch(
   () => currentOODItem,
   () => {

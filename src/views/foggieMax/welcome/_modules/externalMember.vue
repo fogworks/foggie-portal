@@ -199,13 +199,21 @@ const getNeedResetBool = (result) => {
       result.svc_state !== "pending_init" ||
       result.cyfs_state !== "pending_init"
     ) {
-      return true;
+      if (result.svc_state == "" && result.cyfs_state == "") {
+        return false;
+      } else {
+        return true;
+      }
     } else {
       return false;
     }
   } else {
     if (result.svc_state !== "pending_init") {
-      return true;
+      if (result.svc_state == "") {
+        return false;
+      } else {
+        return true;
+      }
     } else {
       return false;
     }

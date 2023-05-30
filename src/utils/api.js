@@ -227,7 +227,9 @@ export const getActivationVood = (data, target) => {
     method: "POST",
     type: 'GET',
     target,
-    data: {},
+    data: {
+      param: "",
+    },
   });
 };
 
@@ -243,7 +245,7 @@ export const pIN = (data) => {
 
 //ipns publish list
 export const publishPin = (data) => {
-  let url = `/publish`;
+  let url = `${baseUrl}/publish`;
   return request({
     url: url,
     method: "POST",
@@ -268,7 +270,9 @@ export const voodInfoCheck = (vpsId, target) => {
     method: "POST",
     type: "GET",
     target,
-    data: {},
+    data: {
+      param: "",
+    },
   });
 };
 
@@ -553,7 +557,9 @@ export const get_service_info = (target) => {
     method: "POST",
     target, //{ip,device_id}
     type: "GET",
-    data: {},
+    data: {
+      param: "",
+    },
   });
 };
 
@@ -615,7 +621,9 @@ export const check_access_pass = (target) => {
     method: "POST",
     target,
     type: "GET",
-    data: {},
+    data: {
+      param: "",
+    },
   });
 };
 export const access_pass = (data, target) => {
@@ -676,13 +684,7 @@ export const detected_net = (target) => {
   });
 };
 
-// export const detected_net = (target) => {
-//   return request({
-//     url: `/v1/detected_net`,
-//     method: "GET",
-//     target,
-//   });
-// };
+
 
 
 

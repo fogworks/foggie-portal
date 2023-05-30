@@ -15,3 +15,8 @@ export const getTokenMap = (id) => {
     let tokenObj = tokenMap ? JSON.parse(tokenMap) : {}
     return tokenObj[id] ? tokenObj[id] : ''
 }
+export const getTokenTotalMap = () => {
+    let tokenMap = window.localStorage.getItem("tokenMap")
+    let tokenObj = tokenMap ? JSON.parse(tokenMap) : {}
+    return tokenObj
+}
