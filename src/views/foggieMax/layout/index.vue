@@ -7,8 +7,8 @@
         @accessCallback="accessCallback"
       ></Access>
       <template v-else>
-        <Welcome v-if="!hasReady" :haveNet="haveNet"></Welcome>
-        <div v-else>
+        <Welcome v-if="hasReady == 1" :haveNet="haveNet"></Welcome>
+        <div v-else-if="hasReady == 2">
           <div class="top-title">
             <span @click="isInSetup = false">
               {{ deviceData.device_name }}
@@ -71,14 +71,14 @@ export default {
     });
 
     const haveNet = ref(false);
-    const hasReady = ref(false);
+    const hasReady = ref(0); //1false  2true
     const isInSetup = ref(false);
     const initFoggieDate = async () => {
       if (!deviceData.device_type) {
         accessible.value = true;
         haveNet.value = true;
         getServiceInfo();
-        // hasReady.value = true;
+        // hasReady.value = 2;
         return;
       }
       loading.value = true;
@@ -129,11 +129,15 @@ export default {
               result.svc_state === "finish" &&
               result.cyfs_state === "finish"
             ) {
-              hasReady.value = true;
+              hasReady.value = 2;
+            } else {
+              hasReady.value = 1;
             }
           } else {
             if (result.svc_state === "finish") {
-              hasReady.value = true;
+              hasReady.value = 2;
+            } else {
+              hasReady.value = 1;
             }
           }
           accessible.value = true;
@@ -147,11 +151,11 @@ export default {
       getServiceInfo();
     };
     const reset = () => {
-      hasReady.value = false;
+      hasReady.value = 1;
       isInSetup.value = false;
     };
     const goHome = () => {
-      hasReady.value = true;
+      hasReady.value = 2;
       isInSetup.value = false;
     };
     provide("reset", reset);
