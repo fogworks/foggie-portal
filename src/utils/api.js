@@ -212,7 +212,7 @@ export const oodFileSearch = (key) => {
 };
 
 export const oodMonitor = (item) => {
-  let url = `/metrics/Info?size=${item.size}&field_value=${item.field_value}&miner_ids=${item.miner_ids}&metrics_type=${item.metrics_type}&by_date=${item.date}`;
+  let url = `https://devlop.fogworks.io/metrics/Info?size=${item.size}&field_value=${item.field_value}&miner_ids=${item.miner_ids}&metrics_type=${item.metrics_type}&by_date=${item.date}`;
   return request({
     url: url,
     method: "GET",
@@ -302,7 +302,7 @@ export const orderRecharge = (data) => {
 };
 export const OwnerBills = (account) => {
   if (account && account !== null) {
-    let url = `/x/bills?owner_id=${account}`;
+    let url = `https://devlop.fogworks.io/x/bills?owner_id=${account}`;
     return request({
       url: url,
       method: "GET",
@@ -311,7 +311,7 @@ export const OwnerBills = (account) => {
 };
 
 export const dmcSwap = () => {
-  let url = `/x/swapmarket`;
+  let url = `https://devlop.fogworks.io/x/swapmarket`;
   return request({
     url: url,
     method: "GET",
@@ -377,7 +377,7 @@ export const fileShare = (ood_id, data) => {
 export const awardTaskList = (ood_id) => {
   if (ood_id && ood_id !== null) {
     return request({
-      url: `/x/tasklist?ood_id=${ood_id}`,
+      url: `12D3KooWC2mwaY7P1u9bvqE2JEvPRKdjUjQdVL7nie18Kdvjvgrf/x/tasklist?ood_id=${ood_id}`,
       method: "GET",
     });
   }
@@ -404,9 +404,9 @@ export const ydaReward = (owner_id, type) => {
   if (owner_id && owner_id !== null) {
     let url = "";
     if (type === "account") {
-      url = `/x/tda_reward?owner_id=${owner_id}&source=all`;
+      url = `https://devlop.fogworks.io/x/tda_reward?owner_id=${owner_id}&source=all`;
     } else {
-      url = `/x/tda_reward?ood_id=${owner_id}&source=all`;
+      url = `https://devlop.fogworks.io/x/tda_reward?ood_id=${owner_id}&source=all`;
     }
     // `/x/yda_reward?owner_id=${owner_id}`,
     return request({
