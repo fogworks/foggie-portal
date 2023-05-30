@@ -4,7 +4,7 @@
     <iframe
       id="iframeRef"
       ref="iframeRef"
-      src="http://154.31.41.124:9876/#/order"
+      src="http://154.31.41.124:9876/"
       frameborder="no"
       border="0"
       class="flexItem"
