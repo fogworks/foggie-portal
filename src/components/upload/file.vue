@@ -596,7 +596,9 @@ const fileLoad = async (file) => {
               partId: item.offset + 1,
               start: item.startByte,
               end: item.endByte,
-              complete: false,
+              complete: false,  // 当前分片是否已经上传过
+              uploading:false,   // 当前分片是否正在上传中  true 上传中  false 没有再上传
+              
             }
             blobFileArray.push(params);
             ArrayProgress.value.push(0);
@@ -724,6 +726,7 @@ const multipartUpload = (file) => {
     }
 
     isPass = await retryUpload(request, errorUploadArray);
+
     if (typeof isPass === "string") {
     } else {
       if (isPass) {
@@ -950,8 +953,7 @@ const retry = () => {
   isUploading.value = false;
   paused.value = true
   resume()
-  // file.value.retry();
-  // actionCheck();
+
 };
 const processResponse = (message) => {
   let res = message;
@@ -1027,9 +1029,7 @@ onMounted(() => {
 });
 onUnmounted(() => {
   let _handlers = ref({});
-
   const handlers = (_handlers.value = {});
-
   const eventHandler = (event) => {
     handlers[event] = (...args) => {
       fileEventsHandler(event, args);
