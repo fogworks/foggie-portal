@@ -1,34 +1,12 @@
 <template>
   <div class="uploader-file" :status="status">
-    <slot
-      :file="file"
-      :list="list"
-      :status="status"
-      :paused="paused"
-      :error="error"
-      :response="response"
-      :average-speed="averageSpeed"
-      :formated-average-speed="formatedAverageSpeed"
-      :current-speed="currentSpeed"
-      :is-complete="isComplete"
-      :is-uploading="isUploading"
-      :size="size"
-      :formated-size="formatedSize"
-      :uploaded-size="uploadedSize"
-      :progress="progress"
-      :progress-style="progressStyle"
-      :progressing-class="progressingClass"
-      :time-remaining="timeRemaining"
-      :formated-time-remaining="formatedTimeRemaining"
-      :type="type"
-      :extension="extension"
-      :file-category="fileCategory"
-    >
-      <div
-        class="uploader-file-progress"
-        :class="progressingClass"
-        :style="progressStyle"
-      />
+    <slot :file="file" :list="list" :status="status" :paused="paused" :error="error" :response="response"
+      :average-speed="averageSpeed" :formated-average-speed="formatedAverageSpeed" :current-speed="currentSpeed"
+      :is-complete="isComplete" :is-uploading="isUploading" :size="size" :formated-size="formatedSize"
+      :uploaded-size="uploadedSize" :progress="progress" :progress-style="progressStyle"
+      :progressing-class="progressingClass" :time-remaining="timeRemaining"
+      :formated-time-remaining="formatedTimeRemaining" :type="type" :extension="extension" :file-category="fileCategory">
+      <div class="uploader-file-progress" :class="progressingClass" :style="progressStyle" />
       <div class="uploader-file-info">
         <div class="uploader-file-name" :title="file.name">
           <img class="iconfont-uploadType" :src="fileIcon" />
@@ -51,27 +29,13 @@
           </span>
         </div>
         <div class="uploader-file-actions" v-if="status !== 'success'">
-          <span
-            class="uploader-file-pause"
-            v-show="isBigFile"
-            @click="pause()"
-          />
-          <span
-            class="uploader-file-resume"
-            v-show="!ISCIDING"
-            @click="resume()"
-          />️
+          <span class="uploader-file-pause" v-show="isBigFile" @click="pause()" />
+          <span class="uploader-file-resume" v-show="!ISCIDING" @click="resume()" />️
           <span class="uploader-file-retry" @click="retry()" />
           <span class="uploader-file-remove" @click="remove()" />
         </div>
-        <div
-          class="uploader-file-actions"
-          v-if="status === 'success'"
-          @click="fileShare"
-        >
-          <div
-            style="color: #3f2dec; text-decoration: underline; cursor: pointer"
-          >
+        <div class="uploader-file-actions" v-if="status === 'success'" @click="fileShare">
+          <div style="color: #3f2dec; text-decoration: underline; cursor: pointer">
             Share
           </div>
         </div>
@@ -444,7 +408,7 @@ function Save_File() {
     fileSize: file.value.size,
     deviceType: +file.value.deviceType,
   };
-  SaveFile(params).then((res) => {});
+  SaveFile(params).then((res) => { });
 }
 
 const toPath = () => {
@@ -534,19 +498,13 @@ function initParams(params) {
     if (file.value.foggieToken) {
       form.append("foggieToken", file.value.foggieToken);
     }
-    form.append(
-      "file",
-      blobSlice.call(file.value.file, params.start, params.end),
-      file.value.urlFileName
-    );
+    form.append( "file", blobSlice.call(file.value.file, params.start, params.end), file.value.urlFileName);
     // let blob = blobSlice.call(file.value.file, params.start, params.end)
     // form.append('ma5',SparkMD5.ArrayBuffer.hash(blob) )
     // form.append("file", blob, file.value.urlFileName);
     // resolve(form)
 
-    fileReader.readAsArrayBuffer(
-      blobSlice.call(file.value.file, params.start, params.end)
-    );
+    fileReader.readAsArrayBuffer(blobSlice.call(file.value.file, params.start, params.end));
     fileReader.onload = async function (e) {
       await spark.append(e.target.result);
       await form.append("md5", spark.end());
@@ -759,7 +717,7 @@ const multipartUpload = (file) => {
               }
             }
           })
-          .catch((error) => {});
+          .catch((error) => { });
       } else {
         resolve();
       }
@@ -924,14 +882,12 @@ const UploadProgress = (progressEvent, part_number) => {
 
     if (time >= 0.5) {
       if (lastTime.value == 0) {
-        averageSpeed.value =
-          Number(NUMBER.value / (100 * ArrayProgress.value.length)) *
-          file.value.size;
+        averageSpeed.value = Number(NUMBER.value / (100 * ArrayProgress.value.length)) * file.value.size;
       } else {
         averageSpeed.value =
           Number(
             (NUMBER.value - lastNUMBER.value) /
-              (100 * ArrayProgress.value.length * time)
+            (100 * ArrayProgress.value.length * time)
           ) * file.value.size;
       }
       lastTime.value = curTime;
@@ -1014,7 +970,7 @@ const processResponse = (message) => {
   let res = message;
   try {
     res = JSON.parse(message);
-  } catch (e) {}
+  } catch (e) { }
   response.value = res;
 };
 const fileEventsHandler = (event, args) => {
@@ -1134,12 +1090,10 @@ onUnmounted(() => {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    171deg,
-    #8388fe 0%,
-    #519ff4 42%,
-    #b783c9 100%
-  ) !important;
+  background: linear-gradient(171deg,
+      #8388fe 0%,
+      #519ff4 42%,
+      #b783c9 100%) !important;
   transform: translateX(-100%);
   overflow: hidden;
 }
@@ -1267,7 +1221,7 @@ onUnmounted(() => {
   width: 10%;
 }
 
-.uploader-file-actions > span {
+.uploader-file-actions>span {
   display: none;
   float: left;
   width: 16px;
@@ -1279,7 +1233,7 @@ onUnmounted(() => {
   background-position: 0 0;
 }
 
-.uploader-file-actions > span:hover {
+.uploader-file-actions>span:hover {
   background-position-x: -21px;
 }
 
