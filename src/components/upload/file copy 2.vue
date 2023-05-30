@@ -138,7 +138,7 @@ const progressingClass = ref("");
 const completed = ref(file.value.completed);
 const ISCIDING = ref(false);
 const isPause = ref(false);
-
+const currentChunk = ref(0);
 const fileIconArr = ref({
   image: require("@/assets/fileType/icon_img.svg"),
   cmd: require("@/assets/fileType/icon_cmd.svg"),
@@ -158,8 +158,7 @@ const fileIconArr = ref({
 const upload_id = ref("");
 const blobFileArray = [];
 const multipartFileArray = ref([]);
-const curUploadList = ref([])  // 当前正在上传的 分片的数组
-let uploadSucceedNumber = 0    //当前上传分片 成功的个数
+const errorUploadArray = ref([]);
 const isBigFile = ref(true);
 const timer = ref(null);
 const abortController = ref(null);
@@ -473,11 +472,8 @@ function getFileMd5(file, type) {
   });
 }
 
-/**
- * @param fileResult  文件切片后 onload 回调中的 e.target.result
- *  */
-function initParams(params, fileResult) {
-  return new Promise(async (resolve, reject) => {
+function initParams(params) {
+  return new Promise((resolve, reject) => {
     let fileReader = new FileReader();
     let blobSlice =
       File.prototype.slice ||
@@ -503,10 +499,19 @@ function initParams(params, fileResult) {
       form.append("foggieToken", file.value.foggieToken);
     }
     form.append("file", blobSlice.call(file.value.file, params.start, params.end), file.value.urlFileName);
+    // let blob = blobSlice.call(file.value.file, params.start, params.end)
+    // form.append('ma5',SparkMD5.ArrayBuffer.hash(blob) )
+    // form.append("file", blob, file.value.urlFileName);
+    // resolve(form)
 
-    await spark.append(fileResult)
-    await form.append("md5", spark.end())
-    resolve(form);
+    fileReader.readAsArrayBuffer(blobSlice.call(file.value.file, params.start, params.end));
+    fileReader.onload = async function (e) {
+      await spark.append(e.target.result);
+      await form.append("md5", spark.end());
+      resolve(form);
+      // let blob = blobSlice.call(file.value.file, params.start, params.end);
+      // form.append("file", blob, file.value.urlFileName);
+    };
   });
 }
 
@@ -520,12 +525,6 @@ const pause = () => {
     paused: true,
     type: "paused",
   };
-  for (const item of curUploadNumber.vlaue || []) {
-    blobFileArray[item.partId - 1].uploading = false
-    blobFileArray[item.partId - 1].complete = false
-  }
-
-
   emits("chanStatus", data);
   if (abortController.value) {
     abortController.value.abort("Cancel request");
@@ -640,58 +639,175 @@ const fileLoad = async (file) => {
   }
 };
 const multipartUpload = (file) => {
-
+  let retrNum = 0; // 第一条线 重试次数
+  let retrNumber = 0; //  第二条线重试次数
   if (abortController.value) {
     abortController.value = null;
   }
   abortController.value = new AbortController();
   let blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
+  let chunks = Math.ceil(file.value.size / CHUNK_SIZE);
   let fileReader = new FileReader();
+  async function loadNext() {
+    let start = currentChunk.value * CHUNK_SIZE;
+    let end =  start + CHUNK_SIZE >= file.value.size ? file.value.size : start + CHUNK_SIZE;
 
-
-  for (const item of blobFileArray) {
-    // 当前分片没有上传过 并且 没有在上传  并且 当前上传个数要小于 simultaneousUploads
-    if (!item.complete && !item.uploading && curUploadNumber.vlaue.length < simultaneousUploads) {
-      loadNext(item.start, item.end)
-      item.uploading = true
-      curUploadNumber.vlaue.push({
-        partId: item.partId,
-        start: item.startByte,
-        end: item.endByte,
-      })
-    }
-  }
-
-  async function loadNext(start, end) {
     fileReader.readAsArrayBuffer(blobSlice.call(file.value.file, start, end));
   }
 
+  async function uploadChunk(result) {
+    return new Promise(async (resolve, reject) => {
+      let isLast = false;
+
+      if (currentChunk.value + 1 == blobFileArray.length) {
+        isLast = true;
+      }
+
+      if ((currentChunk.value + 1) % simultaneousUploads == 0 || isLast) {
+        let request = [];
+        let curUploadIndex = [];
+        for (const item of blobFileArray) {
+          if (!item.complete) {
+            if (request.length >= simultaneousUploads) break;
+            let params = await initParams(item);
+            request.push(params);
+            curUploadIndex.push(item.partId - 1);
+          }
+        }
+        request = request.map((item) => {
+          return fileUpload(item, abortController.value, UploadProgress);
+        });
+
+        Promise.allSettled(request)
+          .then(async (...res) => {
+            let index = 0;
+            let errorUploadArray = [];
+
+            res[0].forEach((item, nindex) => {
+              if (item.status == "fulfilled" && item.value?.code == 200) {
+                let blobFileArrayIndex = curUploadIndex[nindex];
+                blobFileArray[blobFileArrayIndex].complete = true;
+                multipartFileArray.value.push({
+                  etag: item.value?.data,
+                  partNumber: curUploadIndex[nindex] + 1,
+                });
+                index++;
+              } else {
+                errorUploadArray.push(curUploadIndex[nindex]);
+              }
+            });
+            if (index == request.length) {
+              resolve(res);
+            } else {
+              if (abortController.value.signal.aborted) return;
+              let isPass = await retrLoadNext(errorUploadArray);
+              if (typeof isPass === "string") {
+              } else {
+                if (isPass) {
+                  resolve();
+                } else {
+                  fileError();
+                }
+              }
+            }
+          })
+          .catch((error) => { });
+      } else {
+        resolve();
+      }
+    });
+  }
+  /**
+   * @param {Boolean} isSecond
+   *
+   *  */
+  async function retrLoadNext(errorUploadArray, isSecond = false) {
+    let isPass = false;
+    let request = [];
+    for (const INDEX of errorUploadArray) {
+      let item = blobFileArray[INDEX];
+      let params = await initParams(item);
+      if (isSecond) {
+        request.push(fileUpload(params, abortController.value, UploadProgress));
+      } else {
+        request.push(fileUpload(params, abortController.value, UploadProgress));
+      }
+    }
+
+    isPass = await retryUpload(request, errorUploadArray);
+
+    if (typeof isPass === "string") {
+    } else {
+      if (isPass) {
+        return true;
+      } else {
+        if (isSecond) {
+          retrNumber += 1;
+          if (retrNumber >= maxChunkRetries) {
+            return false;
+          } else {
+            if (abortController.value.signal.aborted) return "Cancel request";
+            await retrLoadNext(errorUploadArray, true);
+          }
+        } else {
+          retrNum += 1;
+          if (retrNum >= maxChunkRetries) {
+            if (file.value.isGateway) {
+              if (abortController.value.signal.aborted) return "Cancel request";
+              await retrLoadNext(errorUploadArray, true);
+            } else {
+              return false;
+            }
+          } else {
+            if (abortController.value.signal.aborted) return "Cancel request";
+            await retrLoadNext(errorUploadArray);
+          }
+        }
+      }
+    }
+  }
+
+  function retryUpload(request = [], errorUploadArray) {
+    return new Promise((resolve, reject) => {
+      axios
+        .all(request)
+        .then(
+          axios.spread((...res) => {
+            if (res.every((element) => element.code == 200)) {
+              res.forEach((element, index) => {
+                multipartFileArray.value.push({
+                  etag: element.data,
+                  partNumber: Number(errorUploadArray[index]) + 1,
+                });
+                blobFileArray[errorUploadArray[index]].complete = true;
+              });
+              resolve(true);
+            } else {
+              if (abortController.value.signal.aborted) {
+                return "Cancel request";
+              } else {
+                resolve(false);
+              }
+            }
+          })
+        )
+        .catch((error) => {
+          if (abortController.value.signal.aborted) {
+            return "Cancel request";
+          } else {
+            resolve(false);
+          }
+        });
+    });
+  }
 
   emits("getStatus", "Uploading...");
-
-
-
-
+  loadNext();
   fileReader.onload = async (event) => {
     await uploadChunk(event.target.result,);
     fileReader.abort();
-
-    // for (const item of blobFileArray) {
-    //   // 当前分片没有上传过 并且 没有在上传  并且 当前上传个数要小于 simultaneousUploads
-    //   if (!item.complete && !item.uploading && curUploadNumber.vlaue.length < simultaneousUploads) {
-    //     loadNext(item.start, item.end)
-    //     item.uploading = true
-    //     curUploadNumber.vlaue.push({
-    //       partId: item.partId,
-    //       start: item.startByte,
-    //       end: item.endByte,
-    //     })
-    //   }
-    // }
-
-
-
-    if (curUploadNumber.vlaue.length < simultaneousUploads) {
+    currentChunk.value++;
+    if (currentChunk.value < chunks) {
       if (!isPause.value) {
         await loadNext();
       }
@@ -738,171 +854,6 @@ const multipartUpload = (file) => {
     emits("getProgress", progress.value);
   };
 };
-
-const BigUploadFile = (params, fileResult) => {
-  return new Promise(async (resolve, reject) => {
-    let retrNum = 0; // 第一条线 重试次数
-    let retrNumber = 0; //  第二条线重试次数
-
-
-    let fileUploadParams = await initParams(params, fileResult);
-
-
-
-
-    fileUpload(fileUploadParams, abortController.value, UploadProgress).then(res => {
-      if (res.code == 200) {
-
-        multipartFileArray.value.push({
-          etag: item.value?.data,
-          partNumber: curUploadIndex[nindex] + 1,
-        });
-
-      } else {
-
-      }
-
-    }).catch(error => {
-
-    })
-
-
-    async function uploadChunk(result) {
-      return new Promise(async (resolve, reject) => {
-
-
-
-        Promise.allSettled(request)
-          .then(async (...res) => {
-            let index = 0;
-            let errorUploadArray = [];
-
-            res[0].forEach((item, nindex) => {
-              if (item.status == "fulfilled" && item.value?.code == 200) {
-                let blobFileArrayIndex = curUploadIndex[nindex];
-                blobFileArray[blobFileArrayIndex].complete = true;
-                multipartFileArray.value.push({
-                  etag: item.value?.data,
-                  partNumber: curUploadIndex[nindex] + 1,
-                });
-                index++;
-              } else {
-                errorUploadArray.push(curUploadIndex[nindex]);
-              }
-            });
-            if (index == request.length) {
-              resolve(res);
-            } else {
-              if (abortController.value.signal.aborted) return;
-              let isPass = await retrLoadNext(errorUploadArray);
-              if (typeof isPass === "string") {
-              } else {
-                if (isPass) {
-                  resolve();
-                } else {
-                  fileError();
-                }
-              }
-            }
-          })
-          .catch((error) => { });
-
-      });
-    }
-    /**
-     * @param {Boolean} isSecond
-     *
-     *  */
-    async function retrLoadNext(errorUploadArray, isSecond = false) {
-      let isPass = false;
-      let request = [];
-      for (const INDEX of errorUploadArray) {
-        let item = blobFileArray[INDEX];
-        let params = await initParams(item);
-        if (isSecond) {
-          request.push(fileUpload(params, abortController.value, UploadProgress));
-        } else {
-          request.push(fileUpload(params, abortController.value, UploadProgress));
-        }
-      }
-
-      isPass = await retryUpload(request, errorUploadArray);
-
-      if (typeof isPass === "string") {
-      } else {
-        if (isPass) {
-          return true;
-        } else {
-          if (isSecond) {
-            retrNumber += 1;
-            if (retrNumber >= maxChunkRetries) {
-              return false;
-            } else {
-              if (abortController.value.signal.aborted) return "Cancel request";
-              await retrLoadNext(errorUploadArray, true);
-            }
-          } else {
-            retrNum += 1;
-            if (retrNum >= maxChunkRetries) {
-              if (file.value.isGateway) {
-                if (abortController.value.signal.aborted) return "Cancel request";
-                await retrLoadNext(errorUploadArray, true);
-              } else {
-                return false;
-              }
-            } else {
-              if (abortController.value.signal.aborted) return "Cancel request";
-              await retrLoadNext(errorUploadArray);
-            }
-          }
-        }
-      }
-    }
-
-    function retryUpload(request = [], errorUploadArray) {
-      return new Promise((resolve, reject) => {
-        axios.all(request).then(axios.spread((...res) => {
-          if (res.every((element) => element.code == 200)) {
-            res.forEach((element, index) => {
-              multipartFileArray.value.push({
-                etag: element.data,
-                partNumber: Number(errorUploadArray[index]) + 1,
-              });
-              blobFileArray[errorUploadArray[index]].complete = true;
-            });
-            resolve(true);
-          } else {
-            if (abortController.value.signal.aborted) {
-              return "Cancel request";
-            } else {
-              resolve(false);
-            }
-          }
-        })
-        )
-          .catch((error) => {
-            if (abortController.value.signal.aborted) {
-              return "Cancel request";
-            } else {
-              resolve(false);
-            }
-          });
-      });
-    }
-
-
-
-
-
-
-
-  })
-
-
-
-
-}
-
 const UploadProgress = (progressEvent, part_number) => {
   if (part_number) {
     let number = ArrayProgress.value[part_number - 1];
