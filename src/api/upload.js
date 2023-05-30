@@ -35,7 +35,7 @@ export function uploadMultipart(data) {
   });
 }
 
-export function fileCompleteAPI(data) {
+export function fileCompletes(data) {
   return request({
     url: baseUrl + "/file/complete",
     method: "post",
