@@ -11,45 +11,76 @@
           them with tools before uploading
         </div>
         <!-- <div class="my_top_uploadText">The OOD you have chosen is: 456</div> -->
-        <div class=" today-right">
+        <div class="today-right">
           <div class="color-box">
-            <el-button @click="allFileListDrawer = true">
-              File List
-            </el-button>
+            <el-button @click="allFileListDrawer = true"> File List </el-button>
           </div>
         </div>
       </div>
-      <uploader style="position: relative" ref="uploader" class="uploader-app" :multiple="true" :options="options"
-        :auto-start="false" :file-status-text="fileStatusText" @files-added="onFilesAdded" @file-added="onFileAdded">
+      <uploader
+        style="position: relative"
+        ref="uploader"
+        class="uploader-app"
+        :multiple="true"
+        :options="options"
+        :auto-start="false"
+        :file-status-text="fileStatusText"
+        @files-added="onFilesAdded"
+        @file-added="onFileAdded"
+      >
         <uploader-unsupport />
         <uploader-drop>
-          <uploader-btn class="uploader-btn" :single="true">Select File</uploader-btn>
+          <uploader-btn class="uploader-btn" :single="true"
+            >Select File</uploader-btn
+          >
           <!-- <uploader-btn class="uploader-btn" :directory="true" :single="true"
             >Select a folder</uploader-btn
           > -->
         </uploader-drop>
       </uploader>
 
-      <template v-for="(uploadList, key) in uploadFileList" :key="key" style="height: 100%">
-        <fileList @fileShare="fileShare" @fileDetail="fileDetail" :orderID="key" :ref="`fileListRef_${key}`"
-          v-model:uploadLists="uploadFileList[key]" v-show="key == orderId">
+      <template
+        v-for="(uploadList, key) in uploadFileList"
+        :key="key"
+        style="height: 100%"
+      >
+        <fileList
+          @fileShare="fileShare"
+          @fileDetail="fileDetail"
+          :orderID="key"
+          :ref="`fileListRef_${key}`"
+          v-model:uploadLists="uploadFileList[key]"
+          v-show="key == orderId"
+        >
         </fileList>
       </template>
     </div>
   </div>
 
-  <el-drawer v-model="allFileListDrawer" title="To be completed File list" direction="rtl" size="50%">
-    <div class="uploader-list" style="height: 100%;">
+  <el-drawer
+    v-model="allFileListDrawer"
+    title="To be completed File list"
+    direction="rtl"
+    size="50%"
+  >
+    <div class="uploader-list" style="height: 100%">
       <ul>
         <li>
           <div class="uploader-file-info head-info">
-            <div class="uploader-file-name" style="width: 30%;">File Name</div>
-            <div class="uploader-file-prefix" style="width: 35%;">Upload Path</div>
-            <div class="uploader-file-size" style="width: 25%;">File Size</div>
+            <div class="uploader-file-name" style="width: 30%">File Name</div>
+            <div class="uploader-file-prefix" style="width: 35%">
+              Upload Path
+            </div>
+            <div class="uploader-file-size" style="width: 25%">File Size</div>
             <div class="uploader-file-actions">Operate</div>
           </div>
         </li>
-        <TobeCompleted v-for="(curFile, index) in allFileList" :key="curFile.id" :curFile="curFile" :orderID="orderId"></TobeCompleted>
+        <TobeCompleted
+          v-for="(curFile, index) in allFileList"
+          :key="curFile.id"
+          :curFile="curFile"
+          :orderID="orderId"
+        ></TobeCompleted>
       </ul>
     </div>
   </el-drawer>
@@ -64,7 +95,7 @@ import {
   readonly,
   provide,
   computed,
-  getCurrentInstance
+  getCurrentInstance,
 } from "vue";
 import fileList from "../upload/fileList.vue";
 // import uploader from "vue-simple-uploader";
@@ -72,11 +103,10 @@ import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
 import TobeCompleted from "@/components/upload/TobeCompleted.vue";
 import { APIClient } from "@/pb/node_grpc_web_pb";
-const _this = getCurrentInstance()
+const _this = getCurrentInstance();
 const currentPath = ref("");
-const fileListRef = ref()
-const allFileListDrawer = ref(false)
-
+const fileListRef = ref();
+const allFileListDrawer = ref(false);
 
 let uploadIsShow = computed(() => store.getters.uploadIsShow);
 const FILE_SIZE = readonly(1024 * 1024 * 1024 * 2);
@@ -87,17 +117,18 @@ const deviceType = computed(() => store.getters.deviceType);
 
 const uploadFileList = computed(() => store.state.upload.uploadFileList);
 const allFileList = computed(() => {
-  let fileListArray = _this.refs[`fileListRef_${orderId.value}`] || []
-  let executeLsit = fileListArray.filter(item => item.orderID == orderId.value)[0]?.curFileList || []
-  let list = []
+  let fileListArray = _this.refs[`fileListRef_${orderId.value}`] || [];
+  let executeLsit =
+    fileListArray.filter((item) => item.orderID == orderId.value)[0]
+      ?.curFileList || [];
+  let list = [];
   for (const item of store.state.upload.uploadFileList[orderId.value] || []) {
-    if (!executeLsit.some(element => element.id == item.id)) {
-      list.push(item)
-
+    if (!executeLsit.some((element) => element.id == item.id)) {
+      list.push(item);
     }
   }
-  return list
-})
+  return list;
+});
 
 const tokenMap = computed(() => store.getters.tokenMap);
 
@@ -112,7 +143,6 @@ const options = ref({
 // const client = new APIClient("http://218.2.96.99:8007");
 // window.client = client
 // provide("client", readonly(client));
-
 
 const fileStatusText = ref({
   success: () => "Upload Success",
@@ -170,9 +200,9 @@ const onFileAdded = (file) => {
   list.unshift(file);
   store.commit("upload/setFileList", list);
 };
-const onFileProgress = (rootFile, file, chunk) => { };
-const onFilesAdded = (files, fileList) => { };
-const onFileSuccess = () => { };
+const onFileProgress = (rootFile, file, chunk) => {};
+const onFilesAdded = (files, fileList) => {};
+const onFileSuccess = () => {};
 const fileShare = (item) => {
   emit("fileShare", item);
 };
@@ -187,11 +217,7 @@ const fileDetail = (file) => {
 const closeUploadBox = () => {
   store.commit("upload/closeUpload");
 };
-onMounted(() => {
-
-});
-
-
+onMounted(() => {});
 </script>
 
 <style lang="scss" scoped>
@@ -275,9 +301,11 @@ onMounted(() => {
         height: 36px;
         -webkit-box-pack: center;
         place-content: center;
-        background: linear-gradient(1turn,
-            rgba(99, 106, 150, 0.4),
-            rgba(182, 186, 214, 0.5));
+        background: linear-gradient(
+          1turn,
+          rgba(99, 106, 150, 0.4),
+          rgba(182, 186, 214, 0.5)
+        );
         box-sizing: border-box;
         box-shadow: 0 20px 40px rgb(0 0 0 / 15%),
           inset 0 0 0 0.5px hsl(0deg 0% 100% / 30%);
@@ -312,11 +340,10 @@ onMounted(() => {
 
     :deep {
       .uploader-list {
-
         .head-info {
           font-size: 18px;
 
-          >div {
+          > div {
             color: #000;
           }
         }
@@ -340,7 +367,8 @@ onMounted(() => {
     border-radius: 16px;
     text-align: center;
 
-    .drop-title {}
+    .drop-title {
+    }
   }
 
   .uploader-btn {
@@ -379,7 +407,7 @@ onMounted(() => {
     border-color: #494646;
   }
 
-  .el-table--enable-row-hover .el-table__body tr:hover>td.el-table__cell {
+  .el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
     background-color: #4b525c;
     background-color: #4b525c;
     background: #f8f8f8;
@@ -389,11 +417,15 @@ onMounted(() => {
     color: #000;
   }
 
-  .el-table--enable-row-hover .el-table__body tr:hover>td.el-table__cell .cell {
+  .el-table--enable-row-hover
+    .el-table__body
+    tr:hover
+    > td.el-table__cell
+    .cell {
     color: #000;
   }
 
-  .el-table th.el-table__cell>.cell,
+  .el-table th.el-table__cell > .cell,
   .el-table__body-wrapper .cell {
     color: #03040a;
     color: #fff;
@@ -524,23 +556,19 @@ onMounted(() => {
   line-height: 50px;
 }
 
-.my_top_uploadText>label {
+.my_top_uploadText > label {
   font-size: 16px;
   position: absolute;
   left: 0;
   color: #fff;
 }
 
-.my_top_uploadText>label .el-checkbox__input {
+.my_top_uploadText > label .el-checkbox__input {
   padding: 0;
   position: relative;
   display: inline-block;
   width: 16px;
 }
-
-
-
-
 
 .today-right {
   cursor: pointer;
@@ -575,11 +603,10 @@ onMounted(() => {
 
 .el-drawer {
   .uploader-list {
-
     .head-info {
       font-size: 18px;
 
-      &>div {
+      & > div {
         color: #000;
       }
     }

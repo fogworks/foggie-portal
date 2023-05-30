@@ -122,58 +122,47 @@ export default {
           new_path: item.name,
         };
         if (item.isIPFS) {
-          await pIN(data);
+          // await pIN(data);
         }
       }
+
       if (key) {
-        let user = window.sessionStorage.getItem("walletUser");
-        let ood_id = currentOODItem.value.data.device_id;
-        let deceive_id_real = currentOODItem.value.data.device_id_real
-          ? currentOODItem.value.data.device_id_real
-          : currentOODItem.value.data.device_id;
-        let _key = encodeURIComponent(key);
-        let data = await shareLink(ood_id, _key);
-        let meta = data.meta;
+        let user = store.getters["global/userInfo"].dmc;
+        let ood_id_cyfs = device_id_real ? device_id_real : device_id;
+        let peer_id = deviceData.value.peer_id;
+        let httpStr = `foggie://${peer_id}/${orderId.value}/${item.cid}`;
+        let cyfsStr = item.file_id
+          ? `cyfs://o/${ood_id_cyfs}/${item.file_id}`
+          : "";
+        let ipfsStr = item.cid ? `ipfs://${item.cid}` : "";
 
-        let httpStr = `${location.origin}/fog/${meta.pubkey}`;
-        let cyfsStr = `cyfs://o/${deceive_id_real}/${meta.file_id}`;
-        let ipfsStr = `ipfs://${meta.cid}`;
-
-        let shareTitle = "GO TO Share";
-        let shareContent =
-          "The more people visit your files, the more DMC you get, share it with more friends! Share information copied to clipboard!";
-        let shareCopyContent = `${user} publish ${key} to Web3` + "\n";
+        shareCopyContent = `${user} publish ${key} to Web3` + "\n";
         shareRefContent.user = `${user} publish ${key} to Web3`;
-
         let myQrcode = window.sessionStorage.getItem("myQrcode");
         let code = `http://foggie.fogworks.io/?pcode=${myQrcode}`;
-        let shareStr = `"The Web3 content I publish with Foggie is my digital asset and cannot be tampered with or deleted without my permission. It can also help us earn $DMC crypto rewards. Let's Web3-to-Earn together! Use my invite link ${code} to adopt a Foggie so we can all earn $DMC and grow Web3 together.Thanks!"`;
+        let shareStr = `The Web3 content I publish with Foggie is my digital asset and cannot be tampered with or deleted without my permission. It can also help us earn $DMC crypto rewards. Let's Web3-to-Earn together! Use my invite link ${code} to adopt a Foggie so we can all earn $DMC and grow Web3 together.Thanks!`;
         shareCopyContent = shareCopyContent + " " + " \n ";
         shareCopyContent = shareCopyContent + httpStr + " \n";
         shareCopyContent = shareCopyContent + " " + " \n ";
         shareRefContent.httpStr = httpStr;
+        shareCopyContent = shareCopyContent + ipfsStr + " \n";
+        shareCopyContent = shareCopyContent + " " + " \n ";
+        shareRefContent.ipfsStr = ipfsStr;
+        shareRefContent.httpStr =
+          shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
 
-        //  TODO
-        if (item.isIPFS && meta.cid) {
-          shareCopyContent = shareCopyContent + ipfsStr + " \n";
-          shareCopyContent = shareCopyContent + " " + " \n ";
-          shareRefContent.ipfsStr = ipfsStr;
-          shareRefContent.httpStr =
-            shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
-        }
-        // TODO
-        if (item.isCYFS && meta.file_id) {
-          shareCopyContent = shareCopyContent + cyfsStr + " \n";
-          shareCopyContent = shareCopyContent + " " + " \n ";
-          shareRefContent.cyfsStr = cyfsStr;
-          shareRefContent.httpStr =
-            shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
-        }
+        shareCopyContent = shareCopyContent + cyfsStr + " \n";
+        shareCopyContent = shareCopyContent + " " + " \n ";
+        shareRefContent.cyfsStr = cyfsStr;
+        shareRefContent.httpStr =
+          shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
 
         shareCopyContent = shareCopyContent + shareStr + " \n";
-        copyContent.value = shareCopyContent;
         shareRefContent.shareStr = shareStr;
+        copyContent.value = shareCopyContent;
+        // shareRefContent.value=shareCopyContent
         showShareDialog.value = true;
+        // this.shareBoxShow = true;
       }
     };
     return {
