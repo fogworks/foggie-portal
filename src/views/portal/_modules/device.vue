@@ -59,24 +59,6 @@
             @click.stop="copyLink(item.device_id)"
           ></svg-icon>
         </div>
-        <!-- <div
-          class="item"
-          style="height: unset"
-          v-if="item.device_type == 'space'"
-        >
-          <span
-            style="
-              white-space: normal;
-              text-overflow: unset;
-              word-break: break-all;
-            "
-            class="value-span value-span2"
-            >{{ getfilesize(item.used_space) || 0 }}/{{
-              getfilesize(item.total_space) || 0
-            }}</span
-          >
-          Space
-        </div> -->
         <template v-if="!item.device_type || item.device_type === 'space'">
           <div>
             Due

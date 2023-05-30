@@ -2,9 +2,16 @@
   <div class="light-box">
     <div class="card-box">
       <div class="flex justify-between">
-        <div class="flex items-center">
-          <img class="title-img" src="@/assets/assets-title.png" alt="" />
-          <div class="title">Assets</div>
+        <div
+          class="flex items-center"
+          style="width: 100%; justify-content: space-between"
+        >
+          <div class="flex items-center">
+            <img class="title-img" src="@/assets/assets-title.png" alt="" />
+            <span class="title">Assets</span>
+          </div>
+
+          <div>add</div>
         </div>
         <!-- <a
           class="flex items-center records"
@@ -109,6 +116,10 @@
         :nft-link="nftLink"
       ></NftDialog>
       <ReNew ref="reNewRef"></ReNew>
+      <AddPoolDialog
+        v-if="PoolDialogVisible"
+        v-model:visible="PoolDialogVisible"
+      ></AddPoolDialog>
     </div>
   </div>
 </template>
@@ -118,6 +129,7 @@ import { ref, reactive, onMounted, watchEffect, toRefs, inject } from "vue";
 import NftDialog from "./nftDialog";
 import ReNew from "./reNew";
 import Rewards from "./rewards";
+import AddPoolDialog from "./addPoolDialog";
 import AssetsRecords from "@/components/orders/assetsRecords";
 import BigNumber from "bignumber.js";
 import MyEcharts from "@/components/echarts/myEcharts";
@@ -140,6 +152,7 @@ export default {
     RippleInk,
     NftDialog,
     ReNew,
+    AddPoolDialog,
   },
   props: {
     currentOODItem: {
@@ -159,6 +172,7 @@ export default {
     const rewardsVisible = ref(false);
     const WithdrawVisible = ref(false);
     const NftDialogVisible = ref(false);
+    const PoolDialogVisible = ref(false);
     const lastweekCount = ref(0);
     const reNewRef = ref(null);
     const lastWeekOptions = reactive({
@@ -404,6 +418,7 @@ export default {
       nftLink,
       deviceData,
       reNewRef,
+      PoolDialogVisible,
       adminCategoriesListInit,
       getDMC,
       initYesterdayScore,

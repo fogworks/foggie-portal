@@ -63,6 +63,7 @@ import {
   provide,
   nextTick,
   getCurrentInstance,
+  watch,
 } from "vue";
 import { useStore } from "vuex";
 import FoggieMax from "@/views/foggieMax/layout";
@@ -228,6 +229,10 @@ const init = () => {
     }
   }
 };
+watch(email, (val) => {
+  deviceData.data = {};
+  totalActiveDevice.data = [];
+});
 onActivated(async () => {
   init();
 });

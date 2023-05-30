@@ -169,11 +169,11 @@ const submit = () => {
             // router.push("/home");
           })
           .catch((err) => {
-            proxy.$notify({
-              type: "error",
-              message: err.message,
-              position: "bottom-left",
-            });
+            // proxy.$notify({
+            //   type: "error",
+            //   message: err.message,
+            //   position: "bottom-left",
+            // });
           })
           .finally(() => {
             btnLoading.value = false;
