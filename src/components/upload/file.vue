@@ -754,9 +754,11 @@ const BigUploadFile = (params, fileResult) => {
       if (res.code == 200) {
 
         multipartFileArray.value.push({
-          etag: item.value?.data,
-          partNumber: curUploadIndex[nindex] + 1,
+          etag: res.data,
+          partNumber: params.partId,
         });
+        // params.
+
 
       } else {
 
