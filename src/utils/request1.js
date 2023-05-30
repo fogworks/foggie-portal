@@ -69,8 +69,9 @@ service.interceptors.response.use(
   },
   (error) => {
     // loadingInstance ? loadingInstance.close() : "";
+    console.log(error);
     let duration = 4500
-    if (error?.response.data.code == 30004 || error.code == 30004) {
+    if (error?.response?.data?.code == 30004 || error?.code == 30004) {
       duration = 0
     }
     ElNotification({
