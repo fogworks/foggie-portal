@@ -13,6 +13,9 @@
             <span @click="isInSetup = false">
               {{ deviceData.device_name }}
             </span>
+            <span @click="isInSetup = false">
+              IP:{{ deviceData.dedicatedip }}
+            </span>
             <svg-icon
               icon-class="setup"
               class="setup"
