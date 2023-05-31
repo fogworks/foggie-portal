@@ -832,7 +832,6 @@ function fileCompletes() {
           completed: true,
           type: "completed",
         };
-        debugger
         await Save_File();
         emits("chanStatus", data);
         file.value.completed = true;
