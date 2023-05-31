@@ -35,7 +35,7 @@ export function uploadMultipart(data) {
   });
 }
 
-export function fileCompletes(data) {
+export function fileCompletesApi(data) {
   return request({
     url: baseUrl + "/file/complete",
     method: "post",
@@ -46,6 +46,14 @@ export function fileCompletes(data) {
 export function SaveFile(data) {
   return request({
     url: baseUrl + "/file/save",
+    method: "post",
+    data,
+  });
+}
+
+export function isCanUpload_Api(data) {
+  return request({
+    url: baseUrl + "/file/upload_valid",
     method: "post",
     data,
   });

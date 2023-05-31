@@ -136,9 +136,9 @@ const tokenMap = computed(() => store.getters.tokenMap);
 const options = ref({
   simultaneousUploads: 5,
 
-  chunkSize: 1024 * 1024 * 5,
-  forceChunkSize: true,
-  allowDuplicateUploads: true,
+  chunkSize: 1024 * 1024 * 5, // 分片大小
+  forceChunkSize: true, // 每块分片大小是否 一定要小于 chunkSize
+  allowDuplicateUploads: true, // 是否可以 重复上传
 });
 // const client = new APIClient('http://154.31.34.194:9007')
 // const client = new APIClient("http://218.2.96.99:8007");
