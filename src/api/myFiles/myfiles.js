@@ -11,6 +11,14 @@ export function GetFileList(data) {
   });
 }
 
+export function GetFileListAll(data) {
+  return request({
+    url: baseUrl + "/file/list_all",
+    method: "post",
+    data,
+  });
+}
+
 export function InitiateChallenge(data) {
   return request({
     url: baseUrl + "/order/req_challenge",

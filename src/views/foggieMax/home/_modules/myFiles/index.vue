@@ -75,7 +75,7 @@
         <el-input
           class="search-input"
           v-model="keyWord"
-          placeholder="Name Or ID"
+          placeholder="Name"
           @keyup.enter.native="doSearch"
         >
           <template #prefix>
@@ -442,7 +442,7 @@ const initFileData = async (data) => {
     );
     // let _url = require(`@/svg-icons/logo-dog-black.svg`);
     let cid = data.content[j].cid;
-    let file_id = data.content[j].file_id;
+    let file_id = data.content[j].fileId;
 
     let name = decodeURIComponent(data.content[j].key);
     if (data.prefix) {
@@ -711,6 +711,7 @@ const deleteItem = (item) => {
         position: "bottom-left",
       });
       tableLoading.value = false;
+      
       doSearch();
     } else {
       tableLoading.value = false;
