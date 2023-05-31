@@ -804,10 +804,10 @@ const order_Id = computed(() => store.getters.orderId);
 watch(
   () => store.getters.uploadIsShow,
   (newVal, oldVal) => {
-    if (!newVal && order_Id.value == props.orderId) {
+    if (!newVal && order_Id.value == deviceData.device_id) {
       tableData.data = [];
       tableData.pageNum = 1;
-      getFileList();
+      getFileList("", breadcrumbList.prefix);
     }
   }
 );
