@@ -90,8 +90,8 @@
         v-loading="tableLoading"
         :data="tableData.data"
         style="width: 100%"
+        max-height="1000"
         ref="fileTable"
-        @sort-change="sortChange"
       >
         <el-table-column
           label="Name"
@@ -189,8 +189,7 @@
                     :disabled="
                       !(
                         !scope.row.isDir &&
-                        
-                          currentOODItem.cyfs_state === 'finish'&&
+                        currentOODItem.cyfs_state === 'finish' &&
                         currentOODItem.cyfs_service_state === 'start'
                       )
                     "
@@ -285,6 +284,7 @@ import { useStore } from "vuex";
 const { proxy } = getCurrentInstance();
 const emits = defineEmits(["toggleToUpload", "currentPrefix"]);
 const keyWord = ref("");
+const pageNum = ref(1);
 const tableLoading = ref(false);
 const showShareDialog = ref(false);
 const detailShow = ref(false);
@@ -493,71 +493,7 @@ const initFileData = async (data) => {
     });
   }
 };
-const sortChange = ({ column, prop, order }) => {
-  // console.log(
-  //   { column, prop, order },
-  //   "{ column, prop, order }{ column, prop, order }{ column, prop, order }"
-  // );
-};
-const getCidShare = async (ood_id, cid) => {
-  if (ood_id && cid) {
-    let data = await CidShare(ood_id, cid);
-    if (data && data.bucket) {
-      let chartData =
-        data && data.bucket && data.bucket["date_histogram_share.ts"];
-      let xdata = [];
-      let ydata = [];
-      for (let i = 0; i < chartData.length; i++) {
-        let item = {
-          key_as_string: transferTime(chartData[i].key_as_string),
-          value: chartData[i].doc_count,
-        };
-        xdata.push(item.key_as_string.split(" ")[0]);
-        ydata.push(item.value);
-      }
-      initMyOption(xdata, ydata);
-    }
-    // test
-    // initMyOption(
-    //   ["1", "2", "3", "4", "5", "6", "7"],
-    //   [7, 6, 5, 4, 3, 2, 1],
-    //   cid
-    // );
-  }
-};
-const initMyOption = (xdata, ydata, cid) => {
-  let options = {
-    color: "#29abff",
-    grid: {
-      top: 2,
-      left: 2,
-      right: 2,
-      bottom: 2,
-    },
-    yAxis: {
-      show: false,
-      type: "value",
-    },
-    xAxis: {
-      type: "category",
-      data: xdata,
-      show: false,
-    },
-    series: [
-      {
-        data: ydata,
-        type: "bar",
-      },
-    ],
-  };
 
-  for (let i = 0; i < tableData.data.length; i++) {
-    if (tableData.data[i].cid === cid) {
-      tableData.data[i].share = options;
-      break;
-    }
-  }
-};
 const theme = computed(() => store.getters.theme);
 const handleImg = (type, ID, cid, key, isDir, ip, port, peerId) => {
   let imgHttpLink = "";
@@ -817,8 +753,8 @@ const toDetail = (item) => {
 };
 const doSearch = async () => {
   if (tableLoading.value) return false;
+  tableData.data = [];
   if (keyWord.value === "") {
-    tableData.data = [];
     getFileList("", breadcrumbList.prefix);
   } else {
     tableLoading.value = true;
@@ -833,7 +769,6 @@ const doSearch = async () => {
       deviceData,
       keyWord.value
     );
-    tableData.data = [];
     initFileData(data);
   }
 };
@@ -862,6 +797,18 @@ watch(
   {
     // immediate: true,
     deep: true,
+  }
+);
+const order_Id = computed(() => store.getters.orderId);
+
+watch(
+  () => store.getters.uploadIsShow,
+  (newVal, oldVal) => {
+    if (!newVal && order_Id.value == props.orderId) {
+      tableData.data = [];
+      tableData.pageNum = 1;
+      getFileList();
+    }
   }
 );
 defineExpose({ doSearch });
@@ -979,6 +926,7 @@ const upload = () => {
   }
   .table-box {
     min-height: 430px;
+    // max-height: 100px;
     margin-bottom: 40px;
     background: var(--card-bg);
     font-size: 16px;
@@ -1003,9 +951,11 @@ const upload = () => {
       }
       --el-table-row-hover-bg-color: transparent;
       .el-table__row {
-        &:hover {
-          background: var(--card-bg);
-        }
+        content-visibility: auto;
+        contain-intrinsic-size: 55.2px;
+        // &:hover {
+        //   background: var(--card-bg);
+        // }
       }
       .el-table__cell {
         color: var(--text-color);

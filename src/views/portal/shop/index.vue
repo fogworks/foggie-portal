@@ -26,7 +26,7 @@
           </div>
           <div>
             <svg-icon icon-class="yes" size="20"></svg-icon>
-            80/130 GB High PerformanceSSD
+            80/130 GB High Performance SSD
           </div>
         </div>
       </div>
@@ -142,7 +142,11 @@ const { passwordIsExist, loadUserLoginStatus } = usePrivateKey();
 const handleActive = async (val = "") => {
   if (val == "storage") {
     if (!passwordIsExist.value) {
-      loadUserLoginStatus();
+      let bool = await loadUserLoginStatus();
+      if (bool) {
+        isShop.value = !isShop.value;
+        active.value = val;
+      }
     } else {
       isShop.value = !isShop.value;
       active.value = val;
@@ -166,7 +170,6 @@ const getUserAssets = () => {
   });
 };
 onMounted(() => {
-  loadUserLoginStatus();
   getUserAssets();
 });
 </script>

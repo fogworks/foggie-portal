@@ -267,7 +267,11 @@ const state = reactive({
 });
 const { formLine, selectionOption, filterOrderList, orderDetail } =
   toRefs(state);
-
+watch(dialogIsShow, (val) => {
+  if (!val) {
+    state.formLine.prestoreDMC = "";
+  }
+});
 watch(curReferenceRate, (newVal) => {
   state.selectionOption["2"].min = Math.round(newVal * 1000 * 0.8) / 1000;
   state.selectionOption["2"].max = Math.round(newVal * 1000 * 1.2) / 1000;

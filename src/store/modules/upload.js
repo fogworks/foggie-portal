@@ -3,6 +3,8 @@ const state = {
   orderId: '',
   deviceType: '', //1 foggie 2 foggieMax 3 client
   uploadFileList: {},
+  peerId: '',
+  deviceData: {}
 };
 const mutations = {
   setFileList(state, data) {
@@ -21,7 +23,14 @@ const mutations = {
   setDeviceType(state, DeviceType) {
     state.deviceType = DeviceType;
   },
+  setPeerId(state, peerId) {
+    state.peerId = peerId;
+  },
+  setDeviceData(state, data) {
+    state.deviceData = data
+  },
   setUploadOptions(state, data) {
+    state.deviceData = data
     if (data.device_type == "foggie_max" ||
       data.device_type == "foggie" ||
       data.device_type == "") {
@@ -38,6 +47,7 @@ const mutations = {
       state.orderId = data.space_order_id
       state.deviceType = 3
     }
+    state.peerId = data.peer_id
     state.uploadIsShow = true;
   }
 };

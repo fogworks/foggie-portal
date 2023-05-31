@@ -1,7 +1,7 @@
 import request from "@/utils/request";
 import setting from "@/setting";
 
-const { apiUrl, baseUrl, portNum } = setting;
+const { apiUrl, baseUrl, portNum, centerPoolUrl } = setting;
 
 
 
@@ -702,6 +702,47 @@ export const detected_net = (target) => {
   });
 };
 
+export const minerRegister = (data, target) => {
+  return request({
+    path: `/v1/miner/register`,
+    url: `${baseUrl}/proxy/http`,
+    method: "POST",
+    port: portNum,
+    target,
+    type: 'POST',
+    data,
+  });
+};
+export const get_miner = (target) => {
+  return request({
+    path: `/v1/miner/get_miner`,
+    url: `${baseUrl}/proxy/http`,
+    method: "POST",
+    port: portNum,
+    target,
+    type: 'GET',
+    data: {
+      param: ''
+    },
+  });
+};
+export const check_join_mp = (target) => {
+  return request({
+    path: `/v1/miner/check_join_mp`,
+    url: `${baseUrl}/proxy/http`,
+    method: "POST",
+    port: portNum,
+    target,
+    type: 'GET',
+    data: {
+      param: ''
+    },
+  });
+};
+
+
+
+
 
 
 
@@ -781,5 +822,14 @@ export const get_vood_refresh_token = (params) => {
     params,
   });
 };
+export const get_miner_reward = (data, pageSize = 10, pageNumber = 1) => {
+  let url = `${centerPoolUrl}/api/v1/minerManage/get_miner_reward?pageSize=${pageSize}&pageNumber=${pageNumber}`;
+  return request({
+    url: url,
+    method: "post",
+    data,
+  });
+};
+
 
 

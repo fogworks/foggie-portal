@@ -24,30 +24,30 @@
       </div> -->
       <el-form
         @submit.native.prevent
-        label-position="right"
-        label-width="150px"
+        label-position="top"
+        label-width="200px"
         :model="poolForm"
         :rules="poolrules"
         ref="poolFormRef"
       >
-        <el-form-item label="Space Size" prop="spaceSize">
+        <el-form-item label="Space Size (G)" prop="space">
           <el-input-number
             class="number-input"
             style="width: 100%"
             :controls="false"
             :precision="0"
             :min="1"
-            v-model="poolForm.spaceSize"
+            v-model="poolForm.space"
             autocomplete="off"
           ></el-input-number>
         </el-form-item>
-        <el-form-item label="Pin" prop="isPin">
-          <el-checkbox v-model="poolForm.isPin" size="large" />
+        <el-form-item class="isPin" label="Pin" prop="is_pin">
+          <el-checkbox v-model="poolForm.is_pin" size="large" />
         </el-form-item>
         <el-form-item
-          v-if="poolForm.isPin"
+          v-if="poolForm.is_pin"
           label="Pin cache size (G)"
-          prop="pinCacheSize"
+          prop="pin_size"
         >
           <el-input-number
             class="number-input"
@@ -55,35 +55,35 @@
             :controls="false"
             :precision="0"
             :min="1"
-            v-model="poolForm.pinCacheSize"
+            v-model="poolForm.pin_size"
             autocomplete="off"
           ></el-input-number>
         </el-form-item>
-        <el-form-item label="Service period" prop="weeks">
+        <el-form-item label="Service period (weeks)" prop="expire_on_week">
           <el-input-number
             class="number-input"
             style="width: 100%"
             :controls="false"
             :precision="0"
             :min="1"
-            v-model="poolForm.weeks"
+            v-model="poolForm.expire_on_week"
             autocomplete="off"
           ></el-input-number>
         </el-form-item>
-        <el-form-item label="Pledged currency" prop="pledged">
+        <!-- <el-form-item label="stake_asset currency" prop="stake_asset">
           <el-input-number
             class="number-input"
             style="width: 100%"
             :controls="false"
             :precision="4"
             :min="0"
-            v-model="poolForm.pledged"
+            v-model="poolForm.stake_asset"
             autocomplete="off"
           ></el-input-number>
-        </el-form-item>
-        <el-form-item label="DMC Account" prop="receiver">
+        </el-form-item> -->
+        <el-form-item label="DMC Account" prop="dmc_account">
           <el-input
-            v-model.trim="poolForm.receiver"
+            v-model.trim="poolForm.dmc_account"
             placeholder="Please enter your username in the DMC wallet"
           ></el-input>
         </el-form-item>
@@ -91,7 +91,7 @@
       <div slot="footer" class="dialog-footer">
         <el-button @click="beforeClose">Cancel</el-button>
         <div class="color-box">
-          <el-button @click="handleSync">
+          <el-button @click="handleRegister" :loading="btnLoading">
             <RippleInk></RippleInk>
             Confirm</el-button
           >
@@ -113,7 +113,7 @@ import {
   inject,
 } from "vue";
 import RippleInk from "@/components/rippleInk";
-import { IPFSSync } from "@/utils/api";
+import { minerRegister } from "@/utils/api";
 import { check_account } from "@/api/common.js";
 
 const { proxy } = getCurrentInstance();
@@ -123,22 +123,24 @@ const props = defineProps({
     default: false,
   },
 });
+const emits = defineEmits(["update:visible"]);
 const { visible } = toRefs(props);
+const btnLoading = ref(false);
 const poolForm = reactive({
-  spaceSize: 1,
-  isPin: false,
-  pinCacheSize: 1,
-  weeks: 24,
-  pledged: 0,
-  receiver: "",
+  space: 1,
+  is_pin: false,
+  pin_size: 1,
+  expire_on_week: 24,
+  stake_asset: "",
+  dmc_account: "",
 });
 
-const validateReceiver = (rule, value, cb) => {
+const validateDmcAccount = (rule, value, cb) => {
   if (!value) {
     cb(new Error("Please enter the account address to withdraw"));
   } else {
     let postdata = {
-      username: poolForm.receiver,
+      username: poolForm.dmc_account,
     };
     check_account(postdata).then(
       (res) => {
@@ -163,57 +165,69 @@ const validateReceiver = (rule, value, cb) => {
   }
 };
 const poolrules = {
-  spaceSize: [
+  space: [
     {
       required: true,
-      message: "Please enter IPFS CID To Pin!",
+      message: "Please enter the space to add to the mining pool!",
       trigger: "blur",
     },
   ],
-  pinCacheSize: [
+  pin_size: [
     {
       required: true,
-      message: "Please enter Custom Name For Pin!",
+      message: "Please enter the pin cache size!",
       trigger: "blur",
     },
   ],
-  receiver: [{ validator: validateReceiver, trigger: "blur" }],
+  expire_on_week: [
+    {
+      required: true,
+      message: "Please enter the Service period!",
+      trigger: "blur",
+    },
+  ],
+  dmc_account: [
+    { required: true, validator: validateDmcAccount, trigger: "blur" },
+  ],
 };
 const deviceData = inject("deviceData");
 const poolFormRef = ref(null);
-const device_id = deviceData.device_id;
 
-const handleSync = () => {
+const handleRegister = () => {
   poolFormRef.value.validate((valid) => {
     if (valid) {
       let data = {
-        key: poolForm.cid,
-        path: poolForm.name,
+        ...poolForm,
+        space: String(poolForm.space),
+        pin_size: String(poolForm.pin_size),
       };
-      IPFSSync(device_id, data)
+      btnLoading.value = true;
+      minerRegister(data, deviceData)
         .then((res) => {
           if (res) {
             proxy.$notify({
               type: "success",
-              message: "Pin by CID In operation!",
+              message: "Successfully joined the central mining pool!",
               position: "bottom-left",
             });
             beforeClose();
           }
         })
         .catch(() => {
-          proxy.$notify({
-            type: "error",
-            message: "error submit!!",
-            position: "bottom-left",
-          });
+          // proxy.$notify({
+          //   type: "error",
+          //   message: "error submit!!",
+          //   position: "bottom-left",
+          // });
+        })
+        .finally(() => {
+          btnLoading.value = false;
         });
     } else {
       return false;
     }
   });
 };
-const emits = defineEmits(["update:visible"]);
 const beforeClose = () => {
   emits("update:visible", false);
 };
@@ -267,6 +281,12 @@ const beforeClose = () => {
   }
   .el-form {
     margin-top: 10px;
+    .isPin {
+      display: flex;
+      .el-form-item__label {
+        margin: 0;
+      }
+    }
     .el-form-item {
       align-items: center;
     }

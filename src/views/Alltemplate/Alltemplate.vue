@@ -81,6 +81,8 @@ store.commit("upload/setOrderId", orderId);
 //   store.commit('upload/setOrderId', orderId)
 // }
 store.commit("upload/setDeviceType", 3);
+store.commit("upload/setPeerId", deviceData.value.peer_id);
+store.commit("upload/setDeviceData", deviceData.value);
 const state = ref(0);
 const createdTime = ref("");
 watch(
