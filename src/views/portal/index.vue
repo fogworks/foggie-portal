@@ -75,7 +75,7 @@ import { useStore } from "vuex";
 import { useRoute } from "vue-router";
 import { getUserLoginStatus } from "@/api/common";
 import { getChain_id } from "@/api/common.js";
-import { publishPin, user } from "@/utils/api";
+import { publishPin, user, find_objects } from "@/utils/api";
 import { fileQuery } from "@/api/myFiles/myfiles";
 import { ElNotification } from "element-plus";
 const store = useStore();
@@ -90,6 +90,7 @@ const defaultActive = ref(route.path.slice(1, route.path.length));
 const userName = computed(() => store.getters.userInfo?.email || "Login");
 const email = computed(() => store.getters.userInfo?.email);
 const hasReady = computed(() => store.getters.hasReady);
+const tokenMap = computed(() => store.getters.tokenMap);
 const shareRefContent = reactive({});
 const copyContent = ref("");
 const showShareDialog = ref(false);
@@ -147,11 +148,43 @@ const getCid = (item) => {
       });
   });
 };
+const foggieGetCid = async (item) => {
+  return new Promise(async (resolve, reject) => {
+    // let token = store.getters.token;
+    const reg = /^[\u4e00-\u9fa5]/;
+    let name;
+    if (reg.test(item.name)) {
+      name = encodeURIComponent(item.name);
+    } else {
+      name = item.name;
+    }
+    let token = tokenMap.value[item.deviceData.device_id];
+    let type = "foggie";
+    let data = await find_objects(
+      email.value,
+      type,
+      token,
+      item.deviceData,
+      name
+    );
+    if (data) {
+      resolve(data.content[0]?.cid);
+    } else {
+      ElNotification({
+        type: "error",
+        message: "Failed to obtain file information",
+        position: "bottom-left",
+      });
+      reject(false);
+    }
+  });
+};
 const doShare = async (item) => {
   let id = item.id;
   const isFolder = item.fileType === "application/x-directory";
   item.isDir = isFolder;
-  let cid = await getCid(item);
+  const fetchMethod = item.deviceType == 3 ? getCid : foggieGetCid;
+  let cid = await fetchMethod(item);
   item.cid = cid;
   if (item && item.deviceType != 3) {
     await ipfsPin(item);
@@ -188,12 +221,11 @@ const doShare = async (item) => {
     // this.shareBoxShow = true;
   }
 };
-const tokenMap = computed(() => store.getters.tokenMap);
 const ipfsPin = (item) => {
-  let ip_address = item.rpc.split(":")[0];
-  let port = item.rpc.split(":")[1];
-  let peerId = item.peer_id;
-  let token = tokenMap.value[item.device_id];
+  let ip_address = item.deviceData.rpc.split(":")[0];
+  let port = item.deviceData.rpc.split(":")[1];
+  let peerId = item.deviceData.peer_id;
+  let token = tokenMap.value[item.deviceData.device_id];
 
   let data = {
     ip_address,
@@ -201,11 +233,11 @@ const ipfsPin = (item) => {
     token,
     // peerId: deviceData.value.peer_id,
     peerId,
-    Id: item.foggie_id,
+    Id: item.deviceData.foggie_id,
     exp: 3 * 24 * 3600,
     stype: "ipfs",
     pin: true,
-    key: item.pubkey,
+    key: item.cid,
     isDir: item.isDir,
   };
   publishPin(data).then((res) => {
@@ -214,7 +246,6 @@ const ipfsPin = (item) => {
   });
 };
 function fileShare(item) {
-  console.log(item);
   doShare(item);
 }
 function loadUserLoginStatus() {
