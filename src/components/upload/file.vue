@@ -1,12 +1,34 @@
 <template>
   <div class="uploader-file" :status="status">
-    <slot :file="file" :list="list" :status="status" :paused="paused" :error="error" :response="response"
-      :average-speed="averageSpeed" :formated-average-speed="formatedAverageSpeed" :current-speed="currentSpeed"
-      :is-complete="isComplete" :is-uploading="isUploading" :size="size" :formated-size="formatedSize"
-      :uploaded-size="uploadedSize" :progress="progress" :progress-style="progressStyle"
-      :progressing-class="progressingClass" :time-remaining="timeRemaining"
-      :formated-time-remaining="formatedTimeRemaining" :type="type" :extension="extension" :file-category="fileCategory">
-      <div class="uploader-file-progress" :class="progressingClass" :style="progressStyle" />
+    <slot
+      :file="file"
+      :list="list"
+      :status="status"
+      :paused="paused"
+      :error="error"
+      :response="response"
+      :average-speed="averageSpeed"
+      :formated-average-speed="formatedAverageSpeed"
+      :current-speed="currentSpeed"
+      :is-complete="isComplete"
+      :is-uploading="isUploading"
+      :size="size"
+      :formated-size="formatedSize"
+      :uploaded-size="uploadedSize"
+      :progress="progress"
+      :progress-style="progressStyle"
+      :progressing-class="progressingClass"
+      :time-remaining="timeRemaining"
+      :formated-time-remaining="formatedTimeRemaining"
+      :type="type"
+      :extension="extension"
+      :file-category="fileCategory"
+    >
+      <div
+        class="uploader-file-progress"
+        :class="progressingClass"
+        :style="progressStyle"
+      />
       <div class="uploader-file-info">
         <div class="uploader-file-name" :title="file.name">
           <img class="iconfont-uploadType" :src="fileIcon" />
@@ -29,13 +51,27 @@
           </span>
         </div>
         <div class="uploader-file-actions" v-if="status !== 'success'">
-          <span class="uploader-file-pause" v-show="isBigFile" @click="pause()" />
-          <span class="uploader-file-resume" v-show="!ISCIDING" @click="resume()" />️
+          <span
+            class="uploader-file-pause"
+            v-show="isBigFile"
+            @click="pause()"
+          />
+          <span
+            class="uploader-file-resume"
+            v-show="!ISCIDING"
+            @click="resume()"
+          />️
           <span class="uploader-file-retry" @click="retry()" />
           <span class="uploader-file-remove" @click="remove()" />
         </div>
-        <div class="uploader-file-actions" v-if="status === 'success'" @click="fileShare">
-          <div style="color: #3f2dec; text-decoration: underline; cursor: pointer">
+        <div
+          class="uploader-file-actions"
+          v-if="status === 'success'"
+          @click="fileShare"
+        >
+          <div
+            style="color: #3f2dec; text-decoration: underline; cursor: pointer"
+          >
             Share
           </div>
         </div>
@@ -159,8 +195,8 @@ const fileIconArr = ref({
 const upload_id = ref("");
 const blobFileArray = [];
 const multipartFileArray = ref([]);
-const curUploadList = ref([])  // 当前正在上传的 分片的数组
-let uploadSucceedNumber = ref(0)   //当前上传分片 成功的个数
+const curUploadList = ref([]); // 当前正在上传的 分片的数组
+let uploadSucceedNumber = ref(0); //当前上传分片 成功的个数
 const isBigFile = ref(true);
 const timer = ref(null);
 const abortController = ref(null);
@@ -410,7 +446,7 @@ function Save_File() {
     fileSize: file.value.size,
     deviceType: +file.value.deviceType,
   };
-  SaveFile(params).then((res) => { });
+  SaveFile(params).then((res) => {});
 }
 
 const toPath = () => {
@@ -478,7 +514,6 @@ function getFileMd5(file, type) {
  * @param fileResult  文件切片后 onload 回调中的 e.target.result
  *  */
 async function initParams(params, fileResult) {
-
   let blobSlice =
     File.prototype.slice ||
     File.prototype.mozSlice ||
@@ -502,13 +537,16 @@ async function initParams(params, fileResult) {
   if (file.value.foggieToken) {
     form.append("foggieToken", file.value.foggieToken);
   }
-  form.append("file", blobSlice.call(file.value.file, params.start, params.end), file.value.urlFileName);
+  form.append(
+    "file",
+    blobSlice.call(file.value.file, params.start, params.end),
+    file.value.urlFileName
+  );
 
-  await spark.append(fileResult)
-  await form.append("md5", spark.end())
+  await spark.append(fileResult);
+  await form.append("md5", spark.end());
 
-  return form
-
+  return form;
 }
 
 const pause = () => {
@@ -522,11 +560,10 @@ const pause = () => {
     type: "paused",
   };
   for (const item of curUploadList.value || []) {
-    blobFileArray[item.partId - 1].uploading = false
-    blobFileArray[item.partId - 1].complete = false
+    blobFileArray[item.partId - 1].uploading = false;
+    blobFileArray[item.partId - 1].complete = false;
   }
-  curUploadList.value = []
-
+  curUploadList.value = [];
 
   emits("chanStatus", data);
   if (abortController.value) {
@@ -603,131 +640,141 @@ const fileLoad = async (file) => {
       deviceType: file.value.deviceType,
       foggieToken: file.value.foggieToken,
     };
-    uploadMultipart(params).then((res) => {
-      if (res.code == 200) {
-        upload_id.value = res.data.uploadId;
+    uploadMultipart(params)
+      .then((res) => {
+        if (res.code == 200) {
+          upload_id.value = res.data.uploadId;
 
-        for (const item of file.value.chunks) {
-          let params = {
-            partId: item.offset + 1,
-            start: item.startByte,
-            end: item.endByte,
-            complete: false, // 当前分片是否已经上传过(上传成功)
-            uploading: false, // 当前分片是否正在上传中  true 上传中  false 没有再上传
-          };
-          blobFileArray.push(params);
-          ArrayProgress.value.push(0);
-        }
+          for (const item of file.value.chunks) {
+            let params = {
+              partId: item.offset + 1,
+              start: item.startByte,
+              end: item.endByte,
+              complete: false, // 当前分片是否已经上传过(上传成功)
+              uploading: false, // 当前分片是否正在上传中  true 上传中  false 没有再上传
+            };
+            blobFileArray.push(params);
+            ArrayProgress.value.push(0);
+          }
 
-        ISCIDING.value = false;
-        isUploading.value = true;
-        multipartUpload(file);
-
-      } else {
-        if (res.code == 30032) {
-          isUploading.value = false;
-          completed.value = true;
-          progress.value = 100;
-          let data = {
-            id: file.value.id,
-            completed: true,
-            type: "completed",
-          };
-          emits("chanStatus", data);
-          emits("getStatus", "Upload Success");
+          ISCIDING.value = false;
+          isUploading.value = true;
+          multipartUpload(file);
         } else {
-          fileError();
+          if (res.code == 30032) {
+            isUploading.value = false;
+            completed.value = true;
+            progress.value = 100;
+            let data = {
+              id: file.value.id,
+              completed: true,
+              type: "completed",
+            };
+            emits("chanStatus", data);
+            emits("getStatus", "Upload Success");
+          } else {
+            fileError();
+          }
         }
-      }
-    })
+      })
       .catch((error) => {
         fileError();
       });
   }
 };
 const multipartUpload = () => {
-  let blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
+  let blobSlice =
+    File.prototype.slice ||
+    File.prototype.mozSlice ||
+    File.prototype.webkitSlice;
   for (const item of blobFileArray) {
     // 当前分片没有上传过 并且 没有在上传  并且 当前上传个数要小于 simultaneousUploads
-    if (!item.complete && !item.uploading && curUploadList.value.length < simultaneousUploads) {
+    if (
+      !item.complete &&
+      !item.uploading &&
+      curUploadList.value.length < simultaneousUploads
+    ) {
       if (isPause.value || abortController.value.signal.aborted) {
-        break
+        break;
       }
-      item.uploading = true
+      item.uploading = true;
       curUploadList.value.push({
         partId: item.partId,
         start: item.startByte,
         end: item.endByte,
-      })
-      loadNext(item)
+      });
+      loadNext(item);
     }
   }
 
-
   function loadNext(item) {
     let fileReader = new FileReader();
-    fileReader.readAsArrayBuffer(blobSlice.call(file.value.file, item.start, item.end));
+    fileReader.readAsArrayBuffer(
+      blobSlice.call(file.value.file, item.start, item.end)
+    );
     fileReader.onload = (event) => {
       BigUploadFile(item, event.target.result);
-    }
+    };
   }
 
   emits("getStatus", "Uploading...");
 
   if (uploadSucceedNumber.value == blobFileArray.length) {
-    if (blobFileArray.every(item => item.complete == true)) {
-      console.log('上传完了');
-      fileCompletes()
+    if (blobFileArray.every((item) => item.complete == true)) {
+      console.log("上传完了");
+      fileCompletes();
     }
   }
-
 };
 
-
-
 const BigUploadFile = async (params, fileResult) => {
-
   let retrNum = 0; // 第一条线 重试次数
   let retrNumber = 0; //  第二条线重试次数
 
   let fileUploadParams = await initParams(params, fileResult);
-  fileUpload(fileUploadParams, abortController.value, UploadProgress).then(async res => {
-    if (res.code == 200) {
-      multipartFileArray.value.push({
-        etag: res.data,
-        partNumber: params.partId,
-      });
-      blobFileArray[params.partId - 1].uploading = false  // 上传成功 当前分片上传状态为 未上传
-      blobFileArray[params.partId - 1].complete = true // 上传成功 当前分片上传成功状态为 true  上传成功 
-      curUploadList.value = curUploadList.value.filter(item => item.partId != params.partId)   // 上传成功 正在上传的分片的数组去除当前分片
-      uploadSucceedNumber.value++  // 当前分片上传成功数 加一
-      multipartUpload()
-
-    } else {
-      if (abortController.value.signal.aborted) return;
-      let isPass = await retrLoadNext(params.partId, false, fileUploadParams);
-      if (typeof isPass === "string") {
-        // 取消上传了
+  fileUpload(fileUploadParams, abortController.value, UploadProgress)
+    .then(async (res) => {
+      if (res.code == 200) {
+        multipartFileArray.value.push({
+          etag: res.data,
+          partNumber: params.partId,
+        });
+        blobFileArray[params.partId - 1].uploading = false; // 上传成功 当前分片上传状态为 未上传
+        blobFileArray[params.partId - 1].complete = true; // 上传成功 当前分片上传成功状态为 true  上传成功
+        curUploadList.value = curUploadList.value.filter(
+          (item) => item.partId != params.partId
+        ); // 上传成功 正在上传的分片的数组去除当前分片
+        uploadSucceedNumber.value++; // 当前分片上传成功数 加一
+        multipartUpload();
       } else {
-        if (isPass) {
-          multipartUpload()
+        if (abortController.value.signal.aborted) return;
+        let isPass = await retrLoadNext(params.partId, false, fileUploadParams);
+        if (typeof isPass === "string") {
+          // 取消上传了
         } else {
-          fileError();
+          if (isPass) {
+            multipartUpload();
+          } else {
+            fileError();
+          }
         }
       }
-    }
-
-  }).catch(error => {
-    if (error.message != 'canceled') {
-      fileError();
-    }
-  })
+    })
+    .catch((error) => {
+      if (error.message != "canceled") {
+        fileError();
+      }
+    });
 
   /**
    * @param {Boolean} isSecond  是否使用第二条线路
    *
    *  */
-  async function retrLoadNext(errorUploadPartId, isSecond = false, fileUploadParams) {
+  async function retrLoadNext(
+    errorUploadPartId,
+    isSecond = false,
+    fileUploadParams
+  ) {
     let isPass = false; // 是否成功
 
     isPass = await retryUpload(errorUploadPartId, isSecond, fileUploadParams);
@@ -765,41 +812,38 @@ const BigUploadFile = async (params, fileResult) => {
 
   function retryUpload(errorUploadPartId, isSecond, fileUploadParams) {
     return new Promise((resolve, reject) => {
-
-      fileUpload(fileUploadParams, abortController.value, UploadProgress).then(async res => {
-        if (res.code == 200) {
-          multipartFileArray.value.push({
-            etag: res.data,
-            partNumber: errorUploadPartId,
-          });
-          blobFileArray[errorUploadPartId - 1].uploading = false  // 上传成功 当前分片上传状态为 未上传
-          blobFileArray[errorUploadPartId - 1].complete = true // 上传成功 当前分片上传成功状态为 true  上传成功 
-          curUploadList.value = curUploadList.value.filter(item => item.partId != params.partId)   // 上传成功 正在上传的分片的数组去除当前分片
-          uploadSucceedNumber.value++   // 当前分片上传成功数 加一
-          resolve(true);
-        } else {
+      fileUpload(fileUploadParams, abortController.value, UploadProgress)
+        .then(async (res) => {
+          if (res.code == 200) {
+            multipartFileArray.value.push({
+              etag: res.data,
+              partNumber: errorUploadPartId,
+            });
+            blobFileArray[errorUploadPartId - 1].uploading = false; // 上传成功 当前分片上传状态为 未上传
+            blobFileArray[errorUploadPartId - 1].complete = true; // 上传成功 当前分片上传成功状态为 true  上传成功
+            curUploadList.value = curUploadList.value.filter(
+              (item) => item.partId != params.partId
+            ); // 上传成功 正在上传的分片的数组去除当前分片
+            uploadSucceedNumber.value++; // 当前分片上传成功数 加一
+            resolve(true);
+          } else {
+            if (abortController.value.signal.aborted) {
+              return "Cancel request";
+            } else {
+              resolve(false);
+            }
+          }
+        })
+        .catch((error) => {
           if (abortController.value.signal.aborted) {
             return "Cancel request";
           } else {
             resolve(false);
           }
-        }
-
-      }).catch(error => {
-        if (abortController.value.signal.aborted) {
-          return "Cancel request";
-        } else {
-          resolve(false);
-        }
-      })
+        });
     });
   }
-
-
-
-
-
-}
+};
 /* 提交文件 */
 function fileCompletes() {
   if (NUMBER_timer.value)
@@ -807,11 +851,11 @@ function fileCompletes() {
 
   let sortMultipartFileArray = multipartFileArray.value.toSorted((a, b) => {
     if (a.partNumber > b.partNumber) {
-      return 1
+      return 1;
     } else {
-      return -1
+      return -1;
     }
-  })
+  });
   let params = {
     fileName: encodeURIComponent(file.value.urlFileName),
     uploadId: upload_id.value,
@@ -832,7 +876,9 @@ function fileCompletes() {
           completed: true,
           type: "completed",
         };
-        await Save_File();
+        if (file.value.deviceType == "3") {
+          await Save_File();
+        }
         emits("chanStatus", data);
         file.value.completed = true;
         progress.value = 100;
@@ -840,7 +886,7 @@ function fileCompletes() {
         emits("getStatus", "Upload Success");
         emits("uploadComplete", "Upload Success");
       } else {
-        console.log('error');
+        console.log("error");
         fileError();
       }
     })
@@ -848,7 +894,6 @@ function fileCompletes() {
       console.log(error);
       fileError();
     });
-
 }
 
 const UploadProgress = (progressEvent, part_number) => {
@@ -872,12 +917,14 @@ const UploadProgress = (progressEvent, part_number) => {
 
     if (time >= 0.5) {
       if (lastTime.value == 0) {
-        averageSpeed.value = Number(NUMBER.value / (100 * ArrayProgress.value.length)) * file.value.size;
+        averageSpeed.value =
+          Number(NUMBER.value / (100 * ArrayProgress.value.length)) *
+          file.value.size;
       } else {
         averageSpeed.value =
           Number(
             (NUMBER.value - lastNUMBER.value) /
-            (100 * ArrayProgress.value.length * time)
+              (100 * ArrayProgress.value.length * time)
           ) * file.value.size;
       }
       lastTime.value = curTime;
@@ -906,7 +953,6 @@ const UploadProgress = (progressEvent, part_number) => {
     }, 1000);
   }
 };
-
 
 const remove = () => {
   if (file.value.size > FILE_SIZE && upload_id.value) {
@@ -962,7 +1008,7 @@ const processResponse = (message) => {
   let res = message;
   try {
     res = JSON.parse(message);
-  } catch (e) { }
+  } catch (e) {}
   response.value = res;
 };
 const fileEventsHandler = (event, args) => {
@@ -1085,10 +1131,12 @@ onUnmounted(() => {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: linear-gradient(171deg,
-      #8388fe 0%,
-      #519ff4 42%,
-      #b783c9 100%) !important;
+  background: linear-gradient(
+    171deg,
+    #8388fe 0%,
+    #519ff4 42%,
+    #b783c9 100%
+  ) !important;
   transform: translateX(-100%);
   overflow: hidden;
 }
@@ -1216,7 +1264,7 @@ onUnmounted(() => {
   width: 10%;
 }
 
-.uploader-file-actions>span {
+.uploader-file-actions > span {
   display: none;
   float: left;
   width: 16px;
@@ -1228,7 +1276,7 @@ onUnmounted(() => {
   background-position: 0 0;
 }
 
-.uploader-file-actions>span:hover {
+.uploader-file-actions > span:hover {
   background-position-x: -21px;
 }
 

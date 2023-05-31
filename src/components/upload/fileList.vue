@@ -11,14 +11,20 @@
         </div>
       </li>
       <li v-for="file in curFileList" :key="file.id">
-        <upFile :file="file" :list="true" :curFileList="curFileList" :MAX_UPLOAD_NUM="MAX_UPLOAD_NUM"
-          @chanStatus="chanStatus" @getStatus="getStatus" @uploadComplete="uploadComplete" @getProgress="getProgress"
-          @remove="remove" @fileShare="fileShare" @fileDetail="fileDetail" />
+        <upFile
+          :file="file"
+          :list="true"
+          :curFileList="curFileList"
+          :MAX_UPLOAD_NUM="MAX_UPLOAD_NUM"
+          @chanStatus="chanStatus"
+          @getStatus="getStatus"
+          @uploadComplete="uploadComplete"
+          @getProgress="getProgress"
+          @remove="remove"
+          @fileShare="fileShare"
+          @fileDetail="fileDetail"
+        />
       </li>
-
-
-
-
     </ul>
   </div>
 </template>
@@ -66,7 +72,9 @@ watch(
     if (newVal.length >= oldLength) {
       if (newVal.length >= MAX_UPLOAD_NUM) {
         if (curFileList.value.length == 0) {
-          let startInde = newVal.length - (MAX_UPLOAD_NUM > newVal.length ? newVal.length : MAX_UPLOAD_NUM);
+          let startInde =
+            newVal.length -
+            (MAX_UPLOAD_NUM > newVal.length ? newVal.length : MAX_UPLOAD_NUM);
           let endInde = newVal.length + 1;
           curFileList.value = newVal.slice(startInde, endInde);
         } else {
@@ -87,7 +95,10 @@ watch(
             }
             if (pushNumber <= 0) return;
 
-            let startInde = newVal.length - curFileList.value.length > MAX_UPLOAD_NUM ? newVal.length - curFileList.value.length - MAX_UPLOAD_NUM : 0;
+            let startInde =
+              newVal.length - curFileList.value.length > MAX_UPLOAD_NUM
+                ? newVal.length - curFileList.value.length - MAX_UPLOAD_NUM
+                : 0;
             let endInde = newVal.length - curFileList.value.length;
             for (const item of newVal.slice(startInde, endInde).reverse()) {
               if (
@@ -162,8 +173,8 @@ const fileDetail = (file) => {
 
 defineExpose({
   curFileList,
-  orderID: props.orderID
-})
+  orderID: props.orderID,
+});
 </script>
 
 <style>
@@ -179,7 +190,7 @@ defineExpose({
   margin-right: 20px;
 }
 
-.uploader-list>ul {
+.uploader-list > ul {
   list-style: none;
   margin: 0;
   padding: 0;
