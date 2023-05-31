@@ -13,7 +13,15 @@
           {{ file.name }}
         </div>
         <div class="uploader-file-prefix">
-          <a href="javascript:;" @click="toPath">{{ file.urlPrefix }} </a>
+
+          <el-tooltip placement="top">
+            <template #content>
+             <div>{{file.urlPrefix }}</div>
+            </template>
+            <a href="javascript:;" @click="toPath">{{ file.urlPrefix }} </a>
+          </el-tooltip>
+
+
         </div>
         <div class="uploader-file-size">{{ formatedSize }}</div>
         <div class="uploader-file-status">
@@ -1244,8 +1252,12 @@ onUnmounted(() => {
 
 .uploader-file-prefix {
   width: 30%;
-  color: #5d9cff;
+  /* color: #5d9cff; */
+  color: aliceblue;
   text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .uploader-file-meta {

@@ -148,7 +148,7 @@ const onFileAdded = (file) => {
   let target = "";
   file.urlPath = target;
   // file.urlPrefix = directoryPath ? currentPath.value + directoryPath : currentPath.value || "/";
-  file.urlPrefix =  file.file.path.substr(0, directory.lastIndexOf(`\\`) + 1); 
+  file.urlPrefix =  file.file.path.substr(0, file.file.path.lastIndexOf("\\")); 
 
   file.urlFileName = directoryPath ? currentPath.value + directoryPath + file.name : currentPath.value + file.name;
 
@@ -184,7 +184,8 @@ const fileDetail = (file) => {
 const closeUploadBox = () => {
   store.commit("upload/closeUpload");
 };
-onMounted(() => { });
+onMounted(() => { 
+});
 </script>
 
 <style lang="scss" scoped>
