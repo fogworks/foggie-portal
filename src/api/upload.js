@@ -50,3 +50,11 @@ export function SaveFile(data) {
     data,
   });
 }
+
+export function isCanUpload_Api(data) {
+  return request({
+    url: baseUrl + "/file/upload_valid",
+    method: "post",
+    data,
+  });
+}

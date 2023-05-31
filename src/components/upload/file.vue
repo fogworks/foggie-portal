@@ -1,34 +1,12 @@
 <template>
   <div class="uploader-file" :status="status">
-    <slot
-      :file="file"
-      :list="list"
-      :status="status"
-      :paused="paused"
-      :error="error"
-      :response="response"
-      :average-speed="averageSpeed"
-      :formated-average-speed="formatedAverageSpeed"
-      :current-speed="currentSpeed"
-      :is-complete="isComplete"
-      :is-uploading="isUploading"
-      :size="size"
-      :formated-size="formatedSize"
-      :uploaded-size="uploadedSize"
-      :progress="progress"
-      :progress-style="progressStyle"
-      :progressing-class="progressingClass"
-      :time-remaining="timeRemaining"
-      :formated-time-remaining="formatedTimeRemaining"
-      :type="type"
-      :extension="extension"
-      :file-category="fileCategory"
-    >
-      <div
-        class="uploader-file-progress"
-        :class="progressingClass"
-        :style="progressStyle"
-      />
+    <slot :file="file" :list="list" :status="status" :paused="paused" :error="error" :response="response"
+      :average-speed="averageSpeed" :formated-average-speed="formatedAverageSpeed" :current-speed="currentSpeed"
+      :is-complete="isComplete" :is-uploading="isUploading" :size="size" :formated-size="formatedSize"
+      :uploaded-size="uploadedSize" :progress="progress" :progress-style="progressStyle"
+      :progressing-class="progressingClass" :time-remaining="timeRemaining"
+      :formated-time-remaining="formatedTimeRemaining" :type="type" :extension="extension" :file-category="fileCategory">
+      <div class="uploader-file-progress" :class="progressingClass" :style="progressStyle" />
       <div class="uploader-file-info">
         <div class="uploader-file-name" :title="file.name">
           <img class="iconfont-uploadType" :src="fileIcon" />
@@ -51,27 +29,13 @@
           </span>
         </div>
         <div class="uploader-file-actions" v-if="status !== 'success'">
-          <span
-            class="uploader-file-pause"
-            v-show="isBigFile"
-            @click="pause()"
-          />
-          <span
-            class="uploader-file-resume"
-            v-show="!ISCIDING"
-            @click="resume()"
-          />️
+          <span class="uploader-file-pause" v-show="isBigFile" @click="pause()" />
+          <span class="uploader-file-resume" v-show="!ISCIDING" @click="resume()" />️
           <span class="uploader-file-retry" @click="retry()" />
           <span class="uploader-file-remove" @click="remove()" />
         </div>
-        <div
-          class="uploader-file-actions"
-          v-if="status === 'success'"
-          @click="fileShare"
-        >
-          <div
-            style="color: #3f2dec; text-decoration: underline; cursor: pointer"
-          >
+        <div class="uploader-file-actions" v-if="status === 'success'" @click="fileShare">
+          <div style="color: #3f2dec; text-decoration: underline; cursor: pointer">
             Share
           </div>
         </div>
@@ -108,6 +72,7 @@ import {
   uploadMultipart,
   fileCompletesApi,
   SaveFile,
+  isCanUpload_Api
 } from "@/api/upload";
 import { ElMessage } from "element-plus";
 
@@ -361,7 +326,7 @@ let formatedTimeRemaining = computed(() => {
   return parsedTimeRemaining;
 });
 
-const resume = () => {
+const resume = async () => {
   if (!isFirst.value) {
     let number = 0;
     for (const item of curFileList.value) {
@@ -378,10 +343,29 @@ const resume = () => {
         message: `Maximum allowed to upload ${MAX_UPLOAD_NUM.value} files simultaneously`,
         type: "warning",
       });
-
       return;
     }
   }
+
+  if (isFirst.value) {
+    let params = {
+      orderId: file.value.orderId,
+      deviceType: file.value.deviceType,
+      fileName: encodeURIComponent(file.value.urlFileName),
+      email: email.value
+    }
+    let res = await isCanUpload_Api(params)
+    if (res.code == 200 && res.data) {
+      // 可以上传
+    } else {
+      fileError()
+      return
+    }
+
+
+  }
+
+
   isFirst.value = false;
   if (timer.value) clearTimeout(timer.value), (timer.value = null);
   timer.value = setTimeout(() => {
@@ -402,6 +386,7 @@ const resume = () => {
     }
   }, 600);
 };
+
 
 const initFile = () => {
   resume();
@@ -444,9 +429,9 @@ function Save_File() {
     orderId: file.value.orderId,
     filePath: encodeURIComponent(file.value.urlFileName),
     fileSize: file.value.size,
-    deviceType: +file.value.deviceType,
+    deviceType: file.value.deviceType,
   };
-  SaveFile(params).then((res) => {});
+  SaveFile(params).then((res) => { });
 }
 
 const toPath = () => {
@@ -924,7 +909,7 @@ const UploadProgress = (progressEvent, part_number) => {
         averageSpeed.value =
           Number(
             (NUMBER.value - lastNUMBER.value) /
-              (100 * ArrayProgress.value.length * time)
+            (100 * ArrayProgress.value.length * time)
           ) * file.value.size;
       }
       lastTime.value = curTime;
@@ -1008,7 +993,7 @@ const processResponse = (message) => {
   let res = message;
   try {
     res = JSON.parse(message);
-  } catch (e) {}
+  } catch (e) { }
   response.value = res;
 };
 const fileEventsHandler = (event, args) => {
@@ -1131,12 +1116,10 @@ onUnmounted(() => {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    171deg,
-    #8388fe 0%,
-    #519ff4 42%,
-    #b783c9 100%
-  ) !important;
+  background: linear-gradient(171deg,
+      #8388fe 0%,
+      #519ff4 42%,
+      #b783c9 100%) !important;
   transform: translateX(-100%);
   overflow: hidden;
 }
@@ -1264,7 +1247,7 @@ onUnmounted(() => {
   width: 10%;
 }
 
-.uploader-file-actions > span {
+.uploader-file-actions>span {
   display: none;
   float: left;
   width: 16px;
@@ -1276,7 +1259,7 @@ onUnmounted(() => {
   background-position: 0 0;
 }
 
-.uploader-file-actions > span:hover {
+.uploader-file-actions>span:hover {
   background-position-x: -21px;
 }
 
