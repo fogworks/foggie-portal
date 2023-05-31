@@ -2,9 +2,17 @@
   <div class="portal-main" id="portal-main">
     <div class="left-box">
       <div class="collapse" @click="changeCollapse">
-        <svg-icon icon-class="collapse" :class="[isCollapse ? 'isCollapse' : '']"></svg-icon>
+        <svg-icon
+          icon-class="collapse"
+          :class="[isCollapse ? 'isCollapse' : '']"
+        ></svg-icon>
       </div>
-      <el-menu class="left-menu" :collapse="isCollapse" :default-active="defaultActive" router>
+      <el-menu
+        class="left-menu"
+        :collapse="isCollapse"
+        :default-active="defaultActive"
+        router
+      >
         <el-menu-item index="user" class="user">
           <svg-icon icon-class="user"></svg-icon>
           <template #title v-if="userName">
@@ -24,7 +32,12 @@
         <el-menu-item disabled index="discover">
           <svg-icon icon-class="discover"></svg-icon>
           <template #title>
-            <el-tooltip class="box-item" effect="dark" content="Coming Soon" placement="right">
+            <el-tooltip
+              class="box-item"
+              effect="dark"
+              content="Coming Soon"
+              placement="right"
+            >
               Discover
             </el-tooltip>
           </template>
@@ -36,7 +49,7 @@
       </el-menu>
     </div>
     <teleport to="body">
-      <upload v-show="uploadIsShow"></upload>
+      <upload @fileShare="fileShare" v-show="uploadIsShow"></upload>
     </teleport>
     <div class="main" id="main">
       <router-view v-slot="{ Component }">
@@ -46,20 +59,28 @@
         </keep-alive>
       </router-view>
     </div>
+    <ShareDialog
+      :shareRefContent="shareRefContent"
+      :copyContent="copyContent"
+      v-model:visible="showShareDialog"
+    ></ShareDialog>
   </div>
 </template>
 
 <script setup>
 import upload from "@/components/upload";
-import { ref, computed, watchEffect } from "vue";
+import ShareDialog from "@/views/foggieMax/home/_modules/myFiles/shareDialog";
+import { ref, reactive, computed, watch, watchEffect } from "vue";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
 import { getUserLoginStatus } from "@/api/common";
 import { getChain_id } from "@/api/common.js";
+import { publishPin, user } from "@/utils/api";
+import { fileQuery } from "@/api/myFiles/myfiles";
+import { ElNotification } from "element-plus";
 const store = useStore();
 
 let uploadIsShow = computed(() => store.getters.uploadIsShow);
-let ChainId = computed(() => store.getters.ChainId);
 const route = useRoute();
 
 const isCollapse = ref(false);
@@ -69,6 +90,10 @@ const defaultActive = ref(route.path.slice(1, route.path.length));
 const userName = computed(() => store.getters.userInfo?.email || "Login");
 const email = computed(() => store.getters.userInfo?.email);
 const hasReady = computed(() => store.getters.hasReady);
+const shareRefContent = reactive({});
+const copyContent = ref("");
+const showShareDialog = ref(false);
+let shareCopyContent = "";
 
 const changeCollapse = () => {
   isCollapse.value = !isCollapse.value;
@@ -81,6 +106,117 @@ const getChainId = () => {
   });
 };
 getChainId();
+const getCid = (item) => {
+  return new Promise((resolve, reject) => {
+    let orderId =
+      item.deviceType == 3
+        ? item.deviceData.space_order_id
+        : item.deviceData.order_id;
+    const reg = /^[\u4e00-\u9fa5]/;
+    let name;
+    if (reg.test(item.name)) {
+      name = encodeURIComponent(item.name);
+    } else {
+      name = item.name;
+    }
+    fileQuery({
+      email: email.value,
+      orderId,
+      deviceType: +item.deviceType,
+      key: name,
+    })
+      .then((res) => {
+        if (res.data[0]?.cid) {
+          resolve(res.data[0]?.cid);
+        } else {
+          ElNotification({
+            type: "error",
+            message: "Failed to obtain file information",
+            position: "bottom-left",
+          });
+          reject(false);
+        }
+      })
+      .catch(() => {
+        ElNotification({
+          type: "error",
+          message: "Failed to obtain file information",
+          position: "bottom-left",
+        });
+        reject(false);
+      });
+  });
+};
+const doShare = async (item) => {
+  let id = item.id;
+  const isFolder = item.fileType === "application/x-directory";
+  item.isDir = isFolder;
+  let cid = await getCid(item);
+  item.cid = cid;
+  if (item && item.deviceType != 3) {
+    await ipfsPin(item);
+  }
+
+  if (id) {
+    let orderId =
+      item.deviceType == 3
+        ? item.deviceData.space_order_id
+        : item.deviceData.order_id;
+    let peer_id = item.deviceData.peer_id;
+    let httpStr = `foggie://${peer_id}/${orderId}/${item.cid}`;
+    let ipfsStr = item.cid ? `ipfs://${item.cid}` : "";
+
+    let myQrcode = window.sessionStorage.getItem("myQrcode");
+    let code = `http://foggie.fogworks.io/?pcode=${myQrcode}`;
+    let shareStr = `The Web3 content I publish with Foggie is my digital asset and cannot be tampered with or deleted without my permission. It can also help us earn $DMC crypto rewards. Let's Web3-to-Earn together! Use my invite link ${code} to adopt a Foggie so we can all earn $DMC and grow Web3 together.Thanks!`;
+    shareCopyContent = shareCopyContent + " " + " \n ";
+    shareCopyContent = shareCopyContent + httpStr + " \n";
+    shareCopyContent = shareCopyContent + " " + " \n ";
+    shareRefContent.httpStr = httpStr;
+    if (item.deviceType != 3) {
+      shareCopyContent = shareCopyContent + ipfsStr + " \n";
+      shareCopyContent = shareCopyContent + " " + " \n ";
+      shareRefContent.ipfsStr = ipfsStr;
+      shareRefContent.httpStr = shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
+    }
+
+    shareCopyContent = shareCopyContent + shareStr + " \n";
+    shareRefContent.shareStr = shareStr;
+    copyContent.value = shareCopyContent;
+    // shareRefContent.value=shareCopyContent
+    showShareDialog.value = true;
+    // this.shareBoxShow = true;
+  }
+};
+const tokenMap = computed(() => store.getters.tokenMap);
+const ipfsPin = (item) => {
+  let ip_address = item.rpc.split(":")[0];
+  let port = item.rpc.split(":")[1];
+  let peerId = item.peer_id;
+  let token = tokenMap.value[item.device_id];
+
+  let data = {
+    ip_address,
+    port,
+    token,
+    // peerId: deviceData.value.peer_id,
+    peerId,
+    Id: item.foggie_id,
+    exp: 3 * 24 * 3600,
+    stype: "ipfs",
+    pin: true,
+    key: item.pubkey,
+    isDir: item.isDir,
+  };
+  publishPin(data).then((res) => {
+    if (res) {
+    }
+  });
+};
+function fileShare(item) {
+  console.log(item);
+  doShare(item);
+}
 function loadUserLoginStatus() {
   let params = {
     email: email.value,
@@ -96,6 +232,22 @@ function loadUserLoginStatus() {
 watchEffect(() => {
   loadUserLoginStatus();
 });
+watch(
+  email,
+  async (val) => {
+    if (val) {
+      let res = await user();
+      if (res.data) {
+        window.sessionStorage.setItem("walletUser", res.data.dmc);
+        window.sessionStorage.setItem("myQrcode", res.data.referral_code);
+      }
+    }
+  },
+  {
+    immediate: true,
+    deep: true,
+  }
+);
 </script>
 
 <style lang="scss" scoped>
@@ -194,7 +346,6 @@ watchEffect(() => {
       }
 
       &.el-menu--collapse {
-
         // width: 200px;
         // min-height: 400px;
         .user {
@@ -237,7 +388,7 @@ watchEffect(() => {
     //   rgba(148, 187, 233, 1) 100%
     // );
 
-    >div {
+    > div {
       z-index: 1;
     }
 

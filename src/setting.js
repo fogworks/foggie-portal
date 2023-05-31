@@ -4,5 +4,6 @@ module.exports = {
   baseUrl: "http://127.0.0.1:3000",
   hostpath: "",
   apiUrl: "https://devlop.fogworks.io",
+  centerPoolUrl: "http://218.2.96.99:9092",
   portNum: "9094",
 };

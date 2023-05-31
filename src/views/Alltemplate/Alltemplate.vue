@@ -8,6 +8,12 @@
       :userInfo="userInfo"
     ></login>
     <template v-else>
+      <div class="top-title">
+        <!-- <span>
+          {{ deviceData.peer_id }}
+        </span> -->
+        <span> RPC:{{ deviceData.rpc }} </span>
+      </div>
       <orderList
         @setState="setState"
         @setTime="setTime"
@@ -81,6 +87,8 @@ store.commit("upload/setOrderId", orderId);
 //   store.commit('upload/setOrderId', orderId)
 // }
 store.commit("upload/setDeviceType", 3);
+store.commit("upload/setPeerId", deviceData.value.peer_id);
+store.commit("upload/setDeviceData", deviceData.value);
 const state = ref(0);
 const createdTime = ref("");
 watch(
@@ -130,7 +138,24 @@ onMounted(() => {
   margin: 0 auto;
   // position: relative;
 }
+.top-title {
+  display: flex;
+  justify-content: space-between;
+  // margin: 20px 0;
+  height: 60px;
+  font-size: 30px;
+  text-align: left;
+  font-weight: 700;
+  text-align: left;
 
+  span {
+    background: linear-gradient(to right, #3913b8 0%, #15a2aa 100%);
+    background-clip: text;
+    text-fill-color: transparent;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
 .Alltemplate_boxs::-webkit-scrollbar {
   display: none;
   /* Chrome Safari */

@@ -14,20 +14,24 @@ export default function usePrivateKey() {
     const userId = computed(() => store.getters.userInfo?.id || "")
     const passwordIsExist = ref(false)
     function loadUserLoginStatus() {
-        let params = {
-            email: email.value
-            // username: props.userInfo.dmc,
-        };
+        return new Promise((resolve, reject) => {
+            let params = {
+                email: email.value
+                // username: props.userInfo.dmc,
+            };
+            getUserLoginStatus(params).then((res) => {
+                if (res.code == 10001) {
+                    passwordIsExist.value = false;
+                    reject(false)
+                } else if (res.code == 10002) {
+                    passwordIsExist.value = true;
+                    resolve(true)
+                } else if (res.code == 10007) {
+                    importPrivateKey();
+                }
+            });
+        })
 
-        getUserLoginStatus(params).then((res) => {
-            if (res.code == 10001) {
-                passwordIsExist.value = false;
-            } else if (res.code == 10002) {
-                passwordIsExist.value = true;
-            } else if (res.code == 10007) {
-                importPrivateKey();
-            }
-        });
     }
     async function importPrivateKey() {
         ElMessageBox.prompt("Please enter the private key", "Tip", {
@@ -50,6 +54,11 @@ export default function usePrivateKey() {
                                         email: email.value,
                                     }).then((res) => {
                                         if (res.code == 200) {
+                                            ElNotification({
+                                                type: "success",
+                                                message: "Successfully imported private key",
+                                                position: "bottom-left",
+                                            });
                                             passwordIsExist.value = true;
                                             // store.commit('global/SAVE_USERNAME', res.data)
                                             done();
@@ -67,6 +76,11 @@ export default function usePrivateKey() {
                                                 email: email.value,
                                             }).then((res) => {
                                                 if (res.code == 200) {
+                                                    ElNotification({
+                                                        type: "success",
+                                                        message: "Successfully imported private key",
+                                                        position: "bottom-left",
+                                                    });
                                                     passwordIsExist.value = true;
                                                     // store.commit('global/SAVE_USERNAME', res.data)
                                                     done();

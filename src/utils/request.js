@@ -257,6 +257,11 @@ service.interceptors.response.use(
             return res.data;
           }
         } else {
+          ElNotification({
+            type: 'error',
+            message: res.data.msg || 'error',
+            position: 'bottom-left'
+          })
           return Promise.reject(new Error(res.data.msg || "Error"));
         }
       } else {

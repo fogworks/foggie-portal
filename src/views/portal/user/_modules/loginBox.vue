@@ -292,6 +292,7 @@ export default {
       if (res.data) {
         window.sessionStorage.setItem("walletUser", res.data.dmc);
         store.dispatch("global/setUserInfo", res.data);
+        window.sessionStorage.setItem("myQrcode", res.data.referral_code);
       }
     },
     closeLogin() {

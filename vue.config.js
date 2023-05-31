@@ -79,6 +79,11 @@ module.exports = defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      "/api/v1": {
+        target: "http://218.2.96.99:9010",
+        changeOrigin: true,
+        secure: false,
+      },
       "/v2/payments": {
         // target: 'https://connect.squareupsandbox.com',//http://10.8.90.252:7000//http://10.8.90.145:8001，http://154.31.0.29:8001
         // target: 'http://154.31.0.29:8001',

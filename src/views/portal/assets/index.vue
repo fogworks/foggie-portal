@@ -204,13 +204,13 @@ export default {
     const walletUser = ref("");
     const walletType = ref("");
     const myQrcode = ref("");
-    const currentDmc = ref(0.0);
     const noOrderShow = ref(false);
     const closeNoBoxShow = ref(false);
     const { passwordIsExist, loadUserLoginStatus } = usePrivateKey();
     const openWithdraw = async () => {
       if (!passwordIsExist.value) {
-        await loadUserLoginStatus();
+        let bool = await loadUserLoginStatus();
+        if (bool) WithdrawVisible.value = true;
       } else {
         WithdrawVisible.value = true;
       }
@@ -229,19 +229,6 @@ export default {
             walletType.value = res.data.wallet_type;
           } else {
             window.sessionStorage.removeItem("walletUser");
-            // this.$confirm(
-            //   this.$t("vood.needwalletUser"),
-            //   this.$t("vood.Notice"),
-            //   {
-            //     confirmButtonText: this.$t("vood.CLICK_LOGIN"),
-            //     cancelButtonText: this.$t("index.cancel"),
-            //     type: "warning",
-            //   }
-            // )
-            //   .then(() => {
-            //     that.openVood();
-            //   })
-            //   .catch(() => {});
           }
           const lead_mark = document.getElementById("lead_mark");
           if (lead_mark && res.data && !res.data.vood_next) {
@@ -252,30 +239,6 @@ export default {
         }
       });
     }
-    // async function initAccountMoney() {
-    //   let DMCUser = window.sessionStorage.getItem("walletUser") || "";
-    //   let user_info = await user();
-    //   if (user_info && user_info.data && user_info.data.dmc) {
-    //     DMCUser = user_info.data.dmc;
-    //   }
-    //   if (DMCUser) {
-    //     let data = await getAssets(DMCUser);
-    //     if (data && data.amount) {
-    //       currentDmc.value = Number(data.amount).toFixed(4);
-    //       // let item = {
-    //       //   key: "dmcAssets",
-    //       //   value: currentDmc.value,
-    //       // };
-    //       withDrawMoney.value = currentDmc.value;
-    //       // this.$emit("handleCollectTopData", item.key, item.value);
-    //       // this.$emit("handleCollectTopData", "nft_link", nft_link);
-    //       window.sessionStorage.setItem("myAssets", data.amount);
-    //     }
-    //     if (data?.nft_link) {
-    //       nftLink.value = data.nft_link;
-    //     }
-    //   }
-    // }
     const reload = () => {
       setTimeout(() => {
         adminCategoriesListInit();
@@ -288,7 +251,7 @@ export default {
       search();
     });
     onMounted(() => {
-      loadUserLoginStatus();
+      // loadUserLoginStatus();
       // getUserAssets();
       adminCategoriesListInit();
     });

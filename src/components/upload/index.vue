@@ -74,6 +74,7 @@ import { ElMessage } from "element-plus";
 import TobeCompleted from "@/components/upload/TobeCompleted.vue";
 import { APIClient } from "@/pb/node_grpc_web_pb";
 const _this = getCurrentInstance();
+const emit = defineEmits(["fileShare"]);
 const currentPath = ref("");
 const fileListRef = ref();
 const allFileListDrawer = ref(false);
@@ -82,7 +83,7 @@ let uploadIsShow = computed(() => store.getters.uploadIsShow);
 const FILE_SIZE = readonly(1024 * 1024 * 1024 * 2);
 const store = useStore();
 const orderId = computed(() => store.getters.orderId);
-
+const deviceData = computed(() => store.getters.deviceData);
 const deviceType = computed(() => store.getters.deviceType);
 
 const uploadFileList = computed(() => store.state.upload.uploadFileList);
@@ -161,6 +162,7 @@ const onFileAdded = (file) => {
   if (deviceType.value == 1 || deviceType.value == 2) {
     file.foggieToken = tokenMap.value[orderId.value] || "";
   }
+  file.deviceData = deviceData.value;
 
   list.unshift(file);
   store.commit("upload/setFileList", list);

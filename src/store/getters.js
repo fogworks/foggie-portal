@@ -1,6 +1,7 @@
 const getters = {
   uploadIsShow: state => state.upload.uploadIsShow,
   orderId: state => state.upload.orderId,
+  deviceData: state => state.upload.deviceData,
   deviceType: state => state.upload.deviceType,
   theme: state => state.global.theme,
   userInfo: state => state.global.userInfo,

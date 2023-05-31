@@ -18,3 +18,11 @@ export function InitiateChallenge(data) {
     data,
   });
 }
+export function fileQuery(data) {
+  return request({
+    url: baseUrl + "/file/query",
+    method: "post",
+    data,
+  });
+}
+
