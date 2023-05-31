@@ -72,7 +72,7 @@ import {
   uploadMultipart,
   fileCompletesApi,
   SaveFile,
-  isCanUpload_Api
+  isCanUpload_Api,
 } from "@/api/upload";
 import { ElMessage } from "element-plus";
 
@@ -352,19 +352,16 @@ const resume = async () => {
       orderId: file.value.orderId,
       deviceType: file.value.deviceType,
       fileName: encodeURIComponent(file.value.urlFileName),
-      email: email.value
-    }
-    let res = await isCanUpload_Api(params)
+      email: email.value,
+    };
+    let res = await isCanUpload_Api(params);
     if (res.code == 200 && res.data) {
       // 可以上传
     } else {
-      fileError()
-      return
+      fileError();
+      return;
     }
-
-
   }
-
 
   isFirst.value = false;
   if (timer.value) clearTimeout(timer.value), (timer.value = null);
@@ -386,7 +383,6 @@ const resume = async () => {
     }
   }, 600);
 };
-
 
 const initFile = () => {
   resume();
@@ -424,7 +420,7 @@ const fileShare = () => {
 
 async function Save_File() {
   if (file.value.deviceType != "3") {
-    return
+    return;
   }
   let params = {
     md5: fileMd5.value,
@@ -434,9 +430,12 @@ async function Save_File() {
     fileSize: file.value.size,
     deviceType: file.value.deviceType,
   };
-  await SaveFile(params).then((res) => {
-    console.log(789);
-  });
+  let isSucceed = await SaveFile(params)
+  if (isSucceed.code == 200) {
+    return true
+  } else {
+    return false
+  }
 }
 
 const toPath = () => {
@@ -590,7 +589,11 @@ const smallLoad = async (smallFile) => {
     .then(async (res) => {
       if (res.code == 200) {
         console.log(123);
-        await Save_File();
+        let succeed = await Save_File();
+        if (!succeed) {
+          fileError();
+          return
+        }
         console.log(456);
         progress.value = 100;
         completed.value = true;
@@ -869,8 +872,12 @@ function fileCompletes() {
           type: "completed",
         };
         console.log(123);
-        await Save_File();
-        console.log(456);
+        let succeed = await Save_File();
+        if (!succeed) {
+          fileError();
+          return
+        }
+
 
         emits("chanStatus", data);
         file.value.completed = true;
