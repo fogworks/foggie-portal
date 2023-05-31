@@ -420,7 +420,7 @@ const fileShare = () => {
 
 async function Save_File() {
   if (file.value.deviceType != "3") {
-    return;
+    return true
   }
   let params = {
     md5: fileMd5.value,

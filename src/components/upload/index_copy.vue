@@ -125,6 +125,7 @@ const fileStatusText = ref({
 });
 
 const onFileAdded = (file) => {
+  debugger
   if (file.size === 0) return;
   if (file.size > FILE_SIZE) {
     ElMessage({
@@ -136,21 +137,16 @@ const onFileAdded = (file) => {
     return;
   }
 
-
-  file.paused = false;
-  file.deviceType = deviceType.value;
-
-
-  file.rootPath = currentPath.value;
   let directory = file.file.webkitRelativePath;
   let directoryPath = directory.substr(0, directory.lastIndexOf("/") + 1);
   let target = "";
+  file.paused = false;
+  file.rootPath = currentPath.value;
+  file.deviceType = deviceType.value;
+
   file.urlPath = target;
-  // file.urlPrefix = directoryPath ? currentPath.value + directoryPath : currentPath.value || "/";
-  file.urlPrefix =  file.file.path.substr(0, directory.lastIndexOf(`\\`) + 1); 
-
+  file.urlPrefix = directoryPath ? currentPath.value + directoryPath : currentPath.value || "/";
   file.urlFileName = directoryPath ? currentPath.value + directoryPath + file.name : currentPath.value + file.name;
-
 
   let list = store.state.upload.uploadFileList[orderId.value] ?? [];
   if (list.some((item) => item.uniqueIdentifier == file.uniqueIdentifier)) {
