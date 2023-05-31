@@ -118,9 +118,7 @@ const deviceType = computed(() => store.getters.deviceType);
 const uploadFileList = computed(() => store.state.upload.uploadFileList);
 const allFileList = computed(() => {
   let fileListArray = _this.refs[`fileListRef_${orderId.value}`] || [];
-  let executeLsit =
-    fileListArray.filter((item) => item.orderID == orderId.value)[0]
-      ?.curFileList || [];
+  let executeLsit = fileListArray.filter((item) => item.orderID == orderId.value)[0]?.curFileList || [];
   let list = [];
   for (const item of store.state.upload.uploadFileList[orderId.value] || []) {
     if (!executeLsit.some((element) => element.id == item.id)) {
@@ -133,11 +131,11 @@ const allFileList = computed(() => {
 const tokenMap = computed(() => store.getters.tokenMap);
 
 const options = ref({
-  simultaneousUploads: 5,
+  simultaneousUploads: 5,  
 
-  chunkSize: 1024 * 1024 * 5,
-  forceChunkSize: true,
-  allowDuplicateUploads: true,
+  chunkSize: 1024 * 1024 * 5,   // 分片大小
+  forceChunkSize: true,   // 每块分片大小是否 一定要小于 chunkSize
+  allowDuplicateUploads: true,  // 是否可以 重复上传
 });
 // const client = new APIClient('http://154.31.34.194:9007')
 // const client = new APIClient("http://218.2.96.99:8007");
@@ -182,13 +180,7 @@ const onFileAdded = (file) => {
     : currentPath.value + file.name;
 
   let list = store.state.upload.uploadFileList[orderId.value] ?? [];
-  if (
-    list.some(
-      (item) =>
-        item.uniqueIdentifier == file.uniqueIdentifier &&
-        item.urlPrefix == file.urlPrefix
-    )
-  ) {
+  if (list.some((item) => item.uniqueIdentifier == file.uniqueIdentifier &&item.urlPrefix == file.urlPrefix)) {
     return;
   }
 
@@ -200,7 +192,10 @@ const onFileAdded = (file) => {
   list.unshift(file);
   store.commit("upload/setFileList", list);
 };
-const onFileProgress = (rootFile, file, chunk) => {};
+const onFileProgress = (rootFile, file, chunk) => {
+
+  
+};
 const onFilesAdded = (files, fileList) => {};
 const onFileSuccess = () => {};
 const fileShare = (item) => {
