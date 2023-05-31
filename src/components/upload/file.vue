@@ -422,7 +422,10 @@ const fileShare = () => {
   emits("fileShare", file.value);
 };
 
-function Save_File() {
+async function Save_File() {
+  if (file.value.deviceType != "3") {
+    return
+  }
   let params = {
     md5: fileMd5.value,
     email: email.value,
@@ -431,7 +434,9 @@ function Save_File() {
     fileSize: file.value.size,
     deviceType: file.value.deviceType,
   };
-  SaveFile(params).then((res) => { });
+  await SaveFile(params).then((res) => {
+    console.log(789);
+  });
 }
 
 const toPath = () => {
@@ -584,7 +589,9 @@ const smallLoad = async (smallFile) => {
   fileUpload(form, abortController.value, UploadProgress)
     .then(async (res) => {
       if (res.code == 200) {
+        console.log(123);
         await Save_File();
+        console.log(456);
         progress.value = 100;
         completed.value = true;
         let data = {
@@ -861,9 +868,10 @@ function fileCompletes() {
           completed: true,
           type: "completed",
         };
-        if (file.value.deviceType == "3") {
-          await Save_File();
-        }
+        console.log(123);
+        await Save_File();
+        console.log(456);
+
         emits("chanStatus", data);
         file.value.completed = true;
         progress.value = 100;
