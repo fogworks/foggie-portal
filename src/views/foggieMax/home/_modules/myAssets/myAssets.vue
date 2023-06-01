@@ -114,6 +114,7 @@
       <AddPoolDialog
         v-if="PoolDialogVisible"
         v-model:visible="PoolDialogVisible"
+        :expire="deviceData.expire"
       ></AddPoolDialog>
     </div>
   </div>

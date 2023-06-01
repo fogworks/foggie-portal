@@ -10,10 +10,10 @@
       :before-close="beforeClose"
     >
       <div class="pin_tips">
-        Give a Content Identifier (CID), also known as a hash, and an optional
+        <!-- Give a Content Identifier (CID), also known as a hash, and an optional
         name to pin. Foggie will then add the CID to the queue and start
         searching for your content. Once your content has been found, it will be
-        pinned.
+        pinned. -->
       </div>
       <!-- <div class="pin_tips">
         Please note: The IPFS network is big, and it might take quite some time
@@ -38,11 +38,16 @@
             :precision="0"
             :min="1"
             v-model="poolForm.space"
+            @change="spaceChange"
             autocomplete="off"
           ></el-input-number>
         </el-form-item>
         <el-form-item class="isPin" label="Pin" prop="is_pin">
-          <el-checkbox v-model="poolForm.is_pin" size="large" />
+          <el-checkbox
+            @change="isPinChange"
+            v-model="poolForm.is_pin"
+            size="large"
+          />
         </el-form-item>
         <el-form-item
           v-if="poolForm.is_pin"
@@ -55,6 +60,7 @@
             :controls="false"
             :precision="0"
             :min="1"
+            :max="poolForm.space"
             v-model="poolForm.pin_size"
             autocomplete="off"
           ></el-input-number>
@@ -122,9 +128,13 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  expire: {
+    type: String,
+    default: "",
+  },
 });
 const emits = defineEmits(["update:visible"]);
-const { visible } = toRefs(props);
+const { visible, expire } = toRefs(props);
 const btnLoading = ref(false);
 const poolForm = reactive({
   space: 1,
@@ -164,6 +174,15 @@ const validateDmcAccount = (rule, value, cb) => {
     );
   }
 };
+const validateWeeks = (rule, value, cb) => {
+  const oneWeekTimeStamp = 60 * 60 * 24 * 7;
+  const nowTimeStamp = (new Date().getTime() / 1000).toFixed(0);
+  if (+expire.value - nowTimeStamp >= oneWeekTimeStamp * value) {
+    cb();
+  } else {
+    cb(new Error(`You have less than ${value} weeks left`));
+  }
+};
 const poolrules = {
   space: [
     {
@@ -185,6 +204,7 @@ const poolrules = {
       message: "Please enter the Service period!",
       trigger: "blur",
     },
+    { validator: validateWeeks, trigger: "blur" },
   ],
   dmc_account: [
     { required: true, validator: validateDmcAccount, trigger: "blur" },
@@ -192,7 +212,14 @@ const poolrules = {
 };
 const deviceData = inject("deviceData");
 const poolFormRef = ref(null);
-
+const spaceChange = (data) => {
+  poolForm.pin_size = data;
+};
+const isPinChange = (data) => {
+  if (!data) {
+    poolForm.pin_size = 0;
+  }
+};
 const handleRegister = () => {
   poolFormRef.value.validate((valid) => {
     if (valid) {
@@ -280,7 +307,7 @@ const beforeClose = () => {
     color: #000;
   }
   .el-form {
-    margin-top: 10px;
+    margin-top: 40px;
     .isPin {
       display: flex;
       .el-form-item__label {

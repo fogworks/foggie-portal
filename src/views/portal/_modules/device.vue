@@ -313,7 +313,7 @@ onMounted(async () => {
       left: 0;
       width: 100%;
       height: 100%;
-      background: url("~@/assets/logo-dog.svg") no-repeat;
+      background: url("../../../assets/logo-dog.svg") no-repeat;
       background-size: 140px;
       background-position: center;
       opacity: 0.2;
@@ -332,7 +332,7 @@ onMounted(async () => {
   }
   .space {
     &::before {
-      background: url("~@/assets/storage.svg") no-repeat;
+      background: url("../../../assets/storage.svg") no-repeat;
       background-size: 140px;
       background-position: center;
       opacity: 0.3;

@@ -137,25 +137,6 @@ const collect = (row) => {
       btnLoading.value = false;
     });
 };
-const checkDisabled = (row) => {
-  //false is extractable
-  if (row.state == 1 && row.challenge[0].state == 1) {
-    return false;
-  }
-  if (row.state == 1 && row.challenge[0].state == 6) {
-    return false;
-  }
-  if (row.state == 1 && row.challenge[0].state == 4) {
-    return false;
-  }
-  if (row.state == 4 && row.challenge[0].state == 7) {
-    return false;
-  }
-  if (row.state == 1 && row.challenge[0].state == 3) {
-    return true;
-  }
-  return true;
-};
 watch(
   email,
   (data) => {

@@ -82,6 +82,7 @@
     <div style="height: 100%">
       <el-table
         class="table-box"
+        row-key="key"
         :data="tableData.data"
         :header-cell-style="setNameCell"
         style="width: 100%; margin-top: 10px; height: 1000px"
@@ -1052,7 +1053,7 @@ const doSearch = async () => {
       })
         .then((res) => {
           if (res.data[0]?.cid) {
-            initLocalData(res)
+            initLocalData(res);
           } else {
             ElNotification({
               type: "error",

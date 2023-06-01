@@ -87,6 +87,7 @@
     <div>
       <el-table
         class="table-box"
+        row-key="key"
         v-loading="tableLoading"
         :data="tableData.data"
         style="width: 100%"
@@ -266,20 +267,16 @@ import {
 } from "vue";
 import {
   oodFileList,
-  CidShare,
   find_objects,
-  shareLink,
   publishPin,
   file_delete,
 } from "@/utils/api.js";
-import MyEcharts from "@/components/echarts/myEcharts";
 import ShareDialog from "./shareDialog";
 import PinDialog from "./pinDialog";
 import PinTaskList from "./pinTaskList";
 import PinFormDialog from "./pinFormDialog";
 import DetailDialog from "./detailDialog";
 import { getfilesize, transferTime } from "@/utils/util.js";
-import router from "@/router";
 import { useStore } from "vuex";
 const { proxy } = getCurrentInstance();
 const emits = defineEmits(["toggleToUpload", "currentPrefix"]);
@@ -711,7 +708,7 @@ const deleteItem = (item) => {
         position: "bottom-left",
       });
       tableLoading.value = false;
-      
+
       doSearch();
     } else {
       tableLoading.value = false;
