@@ -151,7 +151,7 @@ const foggieGetCid = async (item) => {
       type,
       token,
       item.deviceData,
-      name:encodeURIComponent(item.name)
+      encodeURIComponent(item.name)
     );
     if (data) {
       resolve(data.contents[0]?.cid);
