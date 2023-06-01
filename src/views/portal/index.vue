@@ -113,18 +113,12 @@ const getCid = (item) => {
       item.deviceType == 3
         ? item.deviceData.space_order_id
         : item.deviceData.order_id;
-    const reg = /^[\u4e00-\u9fa5]/;
-    let name;
-    if (reg.test(item.name)) {
-      name = encodeURIComponent(item.name);
-    } else {
-      name = item.name;
-    }
+
     fileQuery({
       email: email.value,
       orderId,
       deviceType: +item.deviceType,
-      key: name,
+      key: encodeURIComponent(item.name),
     })
       .then((res) => {
         if (res.data[0]?.cid) {
@@ -150,14 +144,6 @@ const getCid = (item) => {
 };
 const foggieGetCid = async (item) => {
   return new Promise(async (resolve, reject) => {
-    // let token = store.getters.token;
-    const reg = /^[\u4e00-\u9fa5]/;
-    let name;
-    if (reg.test(item.name)) {
-      name = encodeURIComponent(item.name);
-    } else {
-      name = item.name;
-    }
     let token = tokenMap.value[item.deviceData.device_id];
     let type = "foggie";
     let data = await find_objects(
@@ -165,7 +151,7 @@ const foggieGetCid = async (item) => {
       type,
       token,
       item.deviceData,
-      name
+      name:encodeURIComponent(item.name)
     );
     if (data) {
       resolve(data.content[0]?.cid);
