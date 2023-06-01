@@ -16,6 +16,7 @@ const cp = require("child_process");
 const os = require("os");
 const spawn1 = require("cross-spawn");
 const fs = require("fs");
+const { initDownload } = require('./download.js')
 // let childSpawn;
 // const checkMacOS = () => process.platform === 'darwin';
 // console.log('++++++++checkMacOS', checkMacOS())
@@ -77,6 +78,7 @@ async function createWindow() {
     // Load the index.html when not in development
     win.loadURL("app://./index.html");
   }
+  initDownload(win);
 }
 
 // Quit when all windows are closed.

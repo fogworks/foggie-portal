@@ -306,6 +306,7 @@ const chainId = computed(() => store.getters.ChainId);
 const email = computed(() => store.getters.userInfo?.email);
 const deviceType = computed(() => store.getters.deviceType);
 const order_Id = computed(() => store.getters.orderId);
+const { ipcRenderer } = window.require('electron')
 
 const rowState = ({ row }) => {
   let style = {};
@@ -775,14 +776,23 @@ const downloadItem = (item) => {
   // let Id = orderId.value;
   let Id = deviceData.value.foggie_id;
   let peerId = deviceData.value.peer_id;
-  let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
+  let downloadUrl = `http://127.0.0.1:3000/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
 
-  var oA = document.createElement("a");
-  oA.download = item.name;
-  oA.href = downloadUrl;
-  document.body.appendChild(oA);
-  oA.click();
-  oA.remove();
+
+  console.log('-------------------ipcrenderer----download')
+
+  ipcRenderer.send('download', {
+    downloadPath: downloadUrl, // 下载链接（以下载vue文件为例）
+    fileName: item.name, // 下载文件名，需要包含后缀名
+  })
+
+
+  // var oA = document.createElement("a");
+  // oA.download = item.name;
+  // oA.href = downloadUrl;
+  // document.body.appendChild(oA);
+  // oA.click();
+  // oA.remove();
 };
 
 const copyLink = (text) => {
@@ -829,7 +839,7 @@ const getReomteData = () => {
   oodFileList(email.value, type, token, deviceData.value, list_prefix)
     .then((res) => {
       if (res && res.content) {
-        initRemoteData(res.data);
+        initRemoteData(res);
       }
     })
     .catch(() => {
@@ -1111,7 +1121,7 @@ const switchReceiveStatus = () => {
     try {
       if (fileSource.value) {
         console.log("------------remote");
-        ElMessageBox.confirm("Are you sure to get remote data?", "Warning", {
+        ElMessageBox.confirm("Are you sure to get local data?", "Warning", {
           confirmButtonText: "OK",
           cancelButtonText: "Cancel",
         })
@@ -1125,7 +1135,7 @@ const switchReceiveStatus = () => {
           });
       } else {
         console.log("------------local");
-        ElMessageBox.confirm("Are you sure to get local data?", "Warning", {
+        ElMessageBox.confirm("Are you sure to get remote data?", "Warning", {
           confirmButtonText: "OK",
           cancelButtonText: "Cancel",
         })
