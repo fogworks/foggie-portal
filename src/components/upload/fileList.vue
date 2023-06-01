@@ -135,7 +135,10 @@ watch(
           }
           if (pushNumber <= 0) return;
           let index = newVal.length - curFileList.value.length - 1;
-          curFileList.value.unshift(newVal[index]);
+          if (index > -1) {
+            curFileList.value.unshift(newVal[index]);
+          }
+          
         }, 100);
       }
     }

@@ -711,6 +711,15 @@ const deleteItem = (item) => {
         position: "bottom-left",
       });
       tableLoading.value = false;
+      let arr = []
+      if (store.getters.uploadFileList && deviceData.device_id) {
+        arr = store.getters.uploadFileList[deviceData.device_id];
+        if (arr && arr.length > 0) {
+          store.getters.uploadFileList[deviceData.device_id] = arr.filter((val)=> {
+            return val.urlFileName !== item.key;
+          })
+        }  
+      }
       
       doSearch();
     } else {
