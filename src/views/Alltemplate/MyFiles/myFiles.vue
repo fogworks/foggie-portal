@@ -776,7 +776,9 @@ const downloadItem = (item) => {
   // let Id = orderId.value;
   let Id = deviceData.value.foggie_id;
   let peerId = deviceData.value.peer_id;
-  let downloadUrl = `http://127.0.0.1:3000/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
+  const { baseUrl } = setting;
+  let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
+  // downloadUrl = 'foggie://12D3KooWC2mwaY7P1u9bvqE2JEvPRKdjUjQdVL7nie18Kdvjvgrf/2142/QmX3bmf4Mbs2nfTYVF5CJw3CGR9eogfGaCUcRWbd9R4WHs'
 
 
   console.log('-------------------ipcrenderer----download')
