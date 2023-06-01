@@ -124,22 +124,14 @@ export const oodFileList = (email, type, token, deviceData, prefix) => {
   });
 };
 
-export const find_objects = (email, type, token, deviceData, prefix) => {
+export const find_objects = (email, type, token, deviceData, key) => {
   let url = `${baseUrl}/find_objects`,
-    key_marker = "",
-    delimiter = "/",
-    max_keys = "50",
-    start_after = "",
-    continuation_token = "",
-    version_id_marker = "";
+    cid = "",
+    fileId = "";
   let data = {
-    prefix,
-    delimiter,
-    max_keys,
-    start_after,
-    continuation_token,
-    version_id_marker,
-    key_marker,
+    key,
+    cid,
+    fileId,
     deviceData,
     token,
     email,

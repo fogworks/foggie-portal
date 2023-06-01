@@ -5,6 +5,16 @@
         <div class="flex items-center">
           <svg-icon icon-class="my-files" class="title-img"></svg-icon>
           <div class="title">Files</div>
+          <el-switch
+            class="file-source"
+            v-model="fileSource"
+            size="large"
+            active-text="Remote Files"
+            :active-value="remote"
+            inactive-text="Local Files"
+            :inactive-value="local"
+            :before-change="switchReceiveStatus"
+          />
         </div>
       </el-breadcrumb-item>
       <el-breadcrumb-item
@@ -60,7 +70,7 @@
         <el-input
           class="search-input"
           v-model="keyWord"
-          placeholder="Name Or ID"
+          placeholder="Name"
           @keyup.enter.native="doSearch"
         >
           <template #prefix>
@@ -108,7 +118,7 @@
                 </template> -->
                 <!-- <img v-else :src="row.imgUrl" alt="" /> -->
               </div>
-
+              <!-- 
               <el-tooltip
                 class="box-item"
                 effect="dark"
@@ -118,7 +128,7 @@
                 <div v-if="!row.is_local">
                   {{ row.name }}
                 </div>
-              </el-tooltip>
+              </el-tooltip> -->
 
               <el-tooltip
                 class="box-item"
@@ -126,11 +136,11 @@
                 content="Not Persisted"
                 placement="top-start"
               >
-                <div v-if="!row.isPersistent && row.is_local">
+                <div v-if="!row.isPersistent">
                   <i class="i-ersistent">*</i> {{ row.name }}
                 </div>
               </el-tooltip>
-              <div v-if="row.isPersistent && row.is_local">
+              <div v-if="row.isPersistent">
                 {{ row.name }}
               </div>
             </div>
@@ -257,8 +267,14 @@ import {
   computed,
   onMounted,
 } from "vue";
+import { ElMessageBox, ElNotification } from "element-plus";
 import DetailDialog from "./detailDialog";
-import { GetFileList, InitiateChallenge } from "@/api/myFiles/myfiles";
+import {
+  GetFileList,
+  GetFileListAll,
+  InitiateChallenge,
+  fileQuery,
+} from "@/api/myFiles/myfiles";
 import {
   oodFileList,
   CidShare,
@@ -283,6 +299,7 @@ const route = useRoute();
 const { proxy } = getCurrentInstance();
 const emits = defineEmits(["currentPrefix", "getLocal"]);
 
+const fileSource = ref(false);
 // const orderId = computed(() => store.getters.orderId);
 
 const chainId = computed(() => store.getters.ChainId);
@@ -294,7 +311,7 @@ const rowState = ({ row }) => {
   let style = {};
   if (!row.is_local) {
     style = {
-      backgroundColor: "#e17f7f",
+      // backgroundColor: "#e17f7f",
     };
   }
   return style;
@@ -306,7 +323,7 @@ watch(
     if (!newVal && order_Id.value == props.orderId) {
       tableData.data = [];
       tableData.pageNum = 1;
-      loadFileList();
+      getFileList();
     }
   }
 );
@@ -399,24 +416,11 @@ function openUpload() {
   countDownRun();
 }
 
-const loadFileList = async () => {
-  let token = "";
-  let type = "space";
-  let data = await oodFileList(
-    email.value,
-    type,
-    token,
-    deviceData.value,
-    breadcrumbList.prefix.join("/")
-  );
-  initFileData(data);
-};
-
 /* */
 const fileListsInfinite = _.debounce(() => {
   if (tableData.total > tableData.data.length) {
     tableData.pageNum += 1;
-    loadFileList();
+    getFileList();
   } else {
     return;
   }
@@ -436,7 +440,7 @@ const tableSort = ({ prop = "", order = 2, key = "" }) => {
 };
 const refresh = () => {
   tableData.data = [];
-  loadFileList();
+  getFileList();
   tableSort({ prop: "create_time", order: 1, key: 1 });
 };
 
@@ -508,7 +512,7 @@ const initFileData = async (data) => {
     let { imgHttpLink: url_large } = handleImg(data.content[j], type, isDir);
     // let _url = require(`@/svg-icons/logo-dog-black.svg`);
     let cid = data.content[j].cid;
-    let file_id = data.content[j].file_id;
+    let file_id = data.content[j].fileId;
 
     let is_local = false;
     for (let k = 0; k < localFiles.length; k++) {
@@ -810,45 +814,261 @@ const toDetail = (item) => {
     // router.push("/detail");
   }
 };
-const getFileList = function (scroll, prefix) {
-  let list_prefix = "";
-  if (prefix?.length) {
-    list_prefix = prefix.join("/");
+const getFileList = function () {
+  if (fileSource.value) {
+    getReomteData();
+  } else {
+    getLocalData();
   }
+};
+const getReomteData = () => {
+  let list_prefix = "";
   tableLoading.value = true;
   let token = "";
   let type = "space";
   oodFileList(email.value, type, token, deviceData.value, list_prefix)
     .then((res) => {
       if (res && res.content) {
-        initFileData(res);
+        initRemoteData(res.data);
       }
     })
     .catch(() => {
       tableLoading.value = false;
     });
 };
+
+const getLocalData = () => {
+  let params = {
+    email: email.value,
+    orderId: orderId.value,
+    deviceType: deviceType.value,
+  };
+  GetFileListAll(params).then((res) => {
+    initLocalData(res);
+  });
+};
+const initRemoteData = (data) => {
+  if (!data) {
+    return;
+  }
+  if (data.err) {
+    proxy.$notify({
+      type: "warning",
+      message: "Failed to fetch data, please try again later",
+      position: "bottom-left",
+    });
+  }
+
+  tableData.data = [];
+  for (let i = 0; i < data.commonPrefixes?.length; i++) {
+    let item = {
+      isDir: true,
+      name: decodeURIComponent(data.commonPrefixes[i]),
+      key: data.commonPrefixes[i],
+      idList: [
+        {
+          name: "IPFS",
+          code: "",
+        },
+        {
+          name: "CYFS",
+          code: "",
+        },
+      ],
+      date: "-",
+      size: "",
+      status: "-",
+      type: "application/x-directory",
+      file_id: "",
+      pubkey: "",
+      cid: "",
+      imgUrl: "",
+      imgUrlLarge: "",
+      share: {},
+      isSystemImg: false,
+      canShare: false,
+    };
+    tableData.data.push(item);
+  }
+
+  for (let j = 0; j < data?.content?.length; j++) {
+    let date = transferTime(data.content[j].lastModified);
+    let isDir = false;
+    const type = data.content[j].key.substring(
+      data.content[j].key.lastIndexOf(".") + 1
+    );
+    let { imgHttpLink: url, isSystemImg } = handleImg(
+      data.content[j],
+      type,
+      isDir
+    );
+    let { imgHttpLink: url_large } = handleImg(data.content[j], type, isDir);
+    let cid = data.content[j].cid;
+    let file_id = data.content[j].fileId;
+
+    let name = decodeURIComponent(data.content[j].key);
+
+    let isPersistent = data.content[j].isPersistent;
+
+    let item = {
+      isDir: isDir,
+      name,
+      key: data.content[j].key,
+      idList: [
+        {
+          name: "IPFS",
+          code: data.content[j].isPin ? cid : "",
+        },
+        {
+          name: "CYFS",
+          code: data.content[j].isPinCyfs ? file_id : "",
+        },
+      ],
+      date,
+      size: getfilesize(data.content[j].size),
+      status: cid || file_id ? "Published" : "-",
+      type: data.content[j].contentType,
+      file_id: file_id,
+      pubkey: cid,
+      cid,
+      imgUrl: url,
+      imgUrlLarge: url_large,
+      share: {},
+      isSystemImg,
+      canShare: cid ? true : false,
+      isPersistent,
+    };
+    tableData.data.push(item);
+  }
+
+  tableLoading.value = false;
+  if (activeSort.value) {
+    const target = sortList.find((el) => el.key == activeSort.value);
+    const { prop, order, key } = target;
+    nextTick(() => {
+      tableSort({ prop, order, key });
+    });
+  }
+
+  tableSort({ prop: "date", order: 1, key: 1 });
+};
+const initLocalData = (data) => {
+  if (!data) {
+    return;
+  }
+  if (data.err) {
+    proxy.$notify({
+      type: "warning",
+      message: "Failed to fetch data, please try again later",
+      position: "bottom-left",
+    });
+  }
+
+  tableData.data = [];
+  for (let j = 0; j < data?.data?.length; j++) {
+    let date = data.data[j].update_time;
+    let isDir = false;
+
+    let cid = data.data[j].cid;
+    let file_id = data.data[j].fileId;
+
+    let name = decodeURIComponent(data.data[j].file_path);
+
+    const type = data.data[j].file_path.substring(
+      data.data[j].file_path.lastIndexOf(".") + 1
+    );
+    let { isSystemImg } = handleImg(data.data[j], type, isDir);
+
+    let item = {
+      isDir: isDir,
+      name,
+      key: data.data[j].file_path,
+      idList: [
+        {
+          name: "IPFS",
+          code: data.data[j].isPin ? cid : "",
+        },
+        {
+          name: "CYFS",
+          code: data.data[j].isPinCyfs ? file_id : "",
+        },
+      ],
+      date,
+      size: getfilesize(data.data[j].file_size),
+      status: cid || file_id ? "Published" : "-",
+      type: data.data[j].contentType || "",
+      file_id: file_id | "",
+      pubkey: cid,
+      cid,
+      imgUrl: "",
+      imgUrlLarge: "",
+      share: {},
+      isSystemImg,
+      canShare: cid ? true : false,
+      isPersistent: true,
+    };
+    tableData.data.push(item);
+  }
+
+  tableLoading.value = false;
+  if (activeSort.value) {
+    const target = sortList.find((el) => el.key == activeSort.value);
+    const { prop, order, key } = target;
+    nextTick(() => {
+      tableSort({ prop, order, key });
+    });
+  }
+
+  tableSort({ prop: "date", order: 1, key: 1 });
+};
 const doSearch = async () => {
   if (keyWord.value === "") {
-    getFileList("", breadcrumbList.prefix);
+    getFileList();
   } else {
     tableLoading.value = true;
     // let orderId = deviceData.value.space_order_id;
     breadcrumbList.prefix = [];
     let token = store.getters.token;
     let type = "space";
-    let data = await find_objects(
-      email.value,
-      type,
-      token,
-      deviceData.value,
-      keyWord.value
-    );
-    tableData.data = [];
-    initFileData(data);
-
-    // let data = await oodFileSearch(keyWord.value);
-    // initFileData(data.data);
+    if (fileSource.value) {
+      let data = await find_objects(
+        email.value,
+        type,
+        token,
+        deviceData.value,
+        encodeURIComponent(keyWord.value)
+      );
+      tableData.data = [];
+      if (data.contents) {
+        data.content = data.contents;
+      }
+      initRemoteData(data);
+    } else {
+      fileQuery({
+        email: email.value,
+        orderId: orderId.value,
+        deviceType: 3,
+        key: encodeURIComponent(keyWord.value),
+      })
+        .then((res) => {
+          if (res.data[0]?.cid) {
+            initLocalData(res)
+          } else {
+            ElNotification({
+              type: "error",
+              message: "Failed to obtain file information",
+              position: "bottom-left",
+            });
+          }
+        })
+        .catch(() => {
+          ElNotification({
+            type: "error",
+            message: "Failed to obtain file information",
+            position: "bottom-left",
+          });
+        });
+    }
   }
 };
 const setPrefix = (item, isTop = false) => {
@@ -886,8 +1106,46 @@ function setNameCell({ row, column, rowIndex, columnIndex }) {
 }
 defineExpose({ doSearch });
 
+const switchReceiveStatus = () => {
+  return new Promise((resolve, reject) => {
+    try {
+      if (fileSource.value) {
+        console.log("------------remote");
+        ElMessageBox.confirm("Are you sure to get remote data?", "Warning", {
+          confirmButtonText: "OK",
+          cancelButtonText: "Cancel",
+        })
+          .then(() => {
+            // get remote data
+            fileSource.value = !fileSource.value;
+            getLocalData();
+          })
+          .catch(() => {
+            reject(false);
+          });
+      } else {
+        console.log("------------local");
+        ElMessageBox.confirm("Are you sure to get local data?", "Warning", {
+          confirmButtonText: "OK",
+          cancelButtonText: "Cancel",
+        })
+          .then(() => {
+            // get remote data
+            fileSource.value = !fileSource.value;
+            getReomteData();
+          })
+          .catch(() => {
+            reject(false);
+          });
+      }
+    } catch (err) {
+      reject(false);
+    }
+  });
+};
+
 onMounted(() => {
-  loadFileList();
+  getFileList();
 });
 </script>
 
@@ -1169,5 +1427,8 @@ onMounted(() => {
   display: inline-block;
   text-align: center;
   cursor: pointer;
+}
+.file-source {
+  margin-left: 50px;
 }
 </style>

@@ -192,10 +192,10 @@ export default {
       // let ip = "218.2.96.99";
       // let ip = "154.31.34.194";
       // let port = 8007;
-      let ip = deviceData.value.rpc.split(":")[0];
-      let port = deviceData.value.rpc.split(":")[1];
+      let ip = deviceData.rpc.split(":")[0];
+      let port = deviceData.rpc.split(":")[1];
       // let Id = orderId;
-      let Id = deviceData.value.foggie_id;
+      let Id = deviceData.foggie_id;
       let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
       let token = store.getters.token;
       let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&space=foggie&token=${token}`;

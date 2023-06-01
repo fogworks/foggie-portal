@@ -154,7 +154,7 @@ const foggieGetCid = async (item) => {
       name:encodeURIComponent(item.name)
     );
     if (data) {
-      resolve(data.content[0]?.cid);
+      resolve(data.contents[0]?.cid);
     } else {
       ElNotification({
         type: "error",
