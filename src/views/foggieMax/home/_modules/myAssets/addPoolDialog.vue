@@ -133,7 +133,7 @@ const props = defineProps({
     default: "",
   },
 });
-const emits = defineEmits(["update:visible"]);
+const emits = defineEmits(["update:visible", "update:isJoin"]);
 const { visible, expire } = toRefs(props);
 const btnLoading = ref(false);
 const poolForm = reactive({
@@ -237,6 +237,7 @@ const handleRegister = () => {
               message: "Successfully joined the central mining pool!",
               position: "bottom-left",
             });
+            emits("update:isJoin", true);
             beforeClose();
           }
         })
