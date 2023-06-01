@@ -49,6 +49,7 @@ module.exports = defineConfig({
           icon: "public/f1.ico",
         },
       },
+      customFileProtocol: './'
     },
   },
   lintOnSave: true,

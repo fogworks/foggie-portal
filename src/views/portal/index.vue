@@ -271,7 +271,8 @@ watch(
 .portal-main {
   display: flex;
   height: 100%;
-  background: var(--main-background-image);
+  // background: var(--main-background-image);
+  background: url("../../assets/cool-background.png") no-repeat;
   background-size: cover;
 
   .left-box {
