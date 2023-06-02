@@ -294,6 +294,8 @@ import { getSecondTime } from "@/utils/ChinaStandardTime";
 // import { getFileType } from "@/utils/getFileType";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
+import setting from "@/setting";
+const { baseUrl } = setting;
 // import { fa } from "element-plus/es/locale";
 const store = useStore();
 const route = useRoute();
@@ -620,7 +622,7 @@ const handleImg = (item, type, isDir) => {
     // port = 8007;
     // let Id = orderId.value;
     // let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
-    imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
+    imgHttpLink = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
   } else {
     isSystemImg = true;
   }
@@ -781,7 +783,6 @@ const downloadItem = (item) => {
   // let Id = orderId.value;
   let Id = deviceData.value.foggie_id;
   let peerId = deviceData.value.peer_id;
-  // const { baseUrl } = setting;
   // let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
   // // downloadUrl = 'foggie://12D3KooWC2mwaY7P1u9bvqE2JEvPRKdjUjQdVL7nie18Kdvjvgrf/2142/QmX3bmf4Mbs2nfTYVF5CJw3CGR9eogfGaCUcRWbd9R4WHs'
 
@@ -792,7 +793,7 @@ const downloadItem = (item) => {
   //   fileName: item.name, // 下载文件名，需要包含后缀名
   // })
 
-  let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
+  let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
   var oA = document.createElement("a");
   oA.download = item.name;
   oA.href = downloadUrl;
