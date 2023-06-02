@@ -17,6 +17,7 @@
       <orderList
         @setState="setState"
         @setTime="setTime"
+        @setMerkleState="setMerkleState"
         :orderId="orderId"
         :activeDeviceData="activeDeviceData"
         :deviceData="deviceData"
@@ -27,6 +28,7 @@
         :orderId="orderId"
         :createdTime="createdTime"
         :deviceData="deviceData"
+        :merkleState="merkleState"
         @getLocal="getLocal"
       ></myFiles>
     </template>
@@ -68,7 +70,10 @@ const userInfo = computed(() => store.getters.userInfo);
 let customDialogIsShow = ref(true);
 const clientPassword = computed(() => store.getters.clientPassword);
 const isLocal = ref(true);
-
+const merkleState = ref(0);
+const setMerkleState = (val) => {
+  merkleState.value = val;
+};
 const getLocal = (val) => {
   isLocal.value = val;
 };

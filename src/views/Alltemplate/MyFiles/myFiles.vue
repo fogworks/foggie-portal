@@ -27,7 +27,7 @@
     <div class="flex justify-between items-center">
       <el-button
         class="top-btn"
-        :disabled="[4, 5].includes(state)"
+        :disabled="[4, 5].includes(state) || !merkleState"
         @click="openUpload"
         key="plain"
         type="primary"
@@ -307,7 +307,7 @@ const chainId = computed(() => store.getters.ChainId);
 const email = computed(() => store.getters.userInfo?.email);
 const deviceType = computed(() => store.getters.deviceType);
 const order_Id = computed(() => store.getters.orderId);
-const { ipcRenderer } = window.require('electron')
+const { ipcRenderer } = window.require("electron");
 
 const rowState = ({ row }) => {
   let style = {};
@@ -345,6 +345,10 @@ const props = defineProps({
   state: {
     type: [String, Number],
   },
+  merkleState: {
+    type: [String, Number],
+    default: 0,
+  },
   createdTime: {
     type: String,
     default: "",
@@ -355,7 +359,7 @@ const taskDisplay = ref(false);
 const closeRightUpload = () => {
   taskDisplay.value = false;
 };
-const { currentOODItem, orderId, deviceData, state, createdTime } =
+const { currentOODItem, orderId, deviceData, state, createdTime, merkleState } =
   toRefs(props);
 const sortList = [
   {
@@ -780,7 +784,6 @@ const downloadItem = (item) => {
   // const { baseUrl } = setting;
   // let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
   // // downloadUrl = 'foggie://12D3KooWC2mwaY7P1u9bvqE2JEvPRKdjUjQdVL7nie18Kdvjvgrf/2142/QmX3bmf4Mbs2nfTYVF5CJw3CGR9eogfGaCUcRWbd9R4WHs'
-
 
   // console.log('-------------------ipcrenderer----download')
 

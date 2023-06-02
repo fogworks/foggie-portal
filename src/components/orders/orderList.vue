@@ -390,7 +390,7 @@
               placement="top"
             >
               <svg-icon
-                v-if="![4, 5].includes(item.state)"
+                v-if="![4, 5].includes(item.state) && merkleState"
                 icon-class="upload"
                 size="36"
                 style="margin-right: 10px"
@@ -424,7 +424,7 @@
               placement="top"
             >
               <svg-icon
-                v-if="![4, 5].includes(item.state) && isLocal"
+                v-if="![4, 5].includes(item.state) && isLocal && merkleState"
                 icon-class="dinwei"
                 size="34"
                 style="margin-right: 10px"
@@ -469,7 +469,10 @@
               >
                 <svg-icon
                   v-if="
-                    ![4, 5].includes(item.state) && isLocal && !isBuildMerkle
+                    ![4, 5].includes(item.state) &&
+                    isLocal &&
+                    !isBuildMerkle &&
+                    merkleState
                   "
                   @click.stop="popoverClick('submitMerkle', item)"
                   style="color: rgb(16 57 255)"
@@ -604,6 +607,7 @@ const state = reactive({
 const timeLineRef = ref(null);
 const { orderList } = toRefs(state);
 const recordsShow = ref(false);
+const merkleState = ref(0);
 const { orderId, deviceData, activeDeviceData, isLocal } = toRefs(props);
 watch(
   activeDeviceData,
@@ -630,6 +634,7 @@ function loadOrderList() {
         res.data.popoverShow = false;
         res.data.created_time = transferUTCTime(res.data.created_time);
         let nowDate = new Date(res.data.created_time);
+        merkleState.value = res.data?.merkle_state || 1;
 
         res.data.serverTime = getResidueTime(
           nowDate.setDate(nowDate.getDate() + res.data.epoch * 7),
@@ -640,6 +645,7 @@ function loadOrderList() {
         ).toFixed(4);
         state.orderList[0] = res.data;
         emits("setState", orderList.value[0].state);
+        emits("setMerkleState", res.data?.merkle_state || 1);
         emits("setTime", orderList.value[0].created_time);
       }
     })
