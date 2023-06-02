@@ -8,14 +8,17 @@
       :spaceUseSize="spaceUseSize"
     ></DashBoard>
   </div>
-  <MyFiles
-    :currentOODItem="currentOODItem.data"
-    :orderId="deviceData.order_id"
-    @getUseSize="getUseSize"
-  ></MyFiles>
+  <FileComponent>
+    <MyFiles
+      :currentOODItem="currentOODItem.data"
+      :orderId="deviceData.order_id"
+      @getUseSize="getUseSize"
+    ></MyFiles>
+  </FileComponent>
 </template>
 
 <script>
+import FileComponent from "@/components/fileComponent";
 import MyAssets from "./_modules/myAssets/myAssets";
 import DashBoard from "./_modules/myAssets/dashBoard";
 import MyFiles from "./_modules/myFiles";
@@ -46,6 +49,7 @@ export default {
     MyAssets,
     DashBoard,
     MyFiles,
+    FileComponent,
   },
   setup(props) {
     const { haveNet, deviceData } = toRefs(props);

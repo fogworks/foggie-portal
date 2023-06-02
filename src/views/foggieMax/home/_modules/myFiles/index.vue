@@ -264,6 +264,7 @@ import {
   nextTick,
   computed,
   inject,
+  onMounted,
 } from "vue";
 import {
   oodFileList,
@@ -805,6 +806,9 @@ watch(
     }
   }
 );
+onMounted(() => {
+  refresh();
+});
 defineExpose({ doSearch });
 const upload = () => {
   store.commit("upload/setUploadOptions", deviceData);
