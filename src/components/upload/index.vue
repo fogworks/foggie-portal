@@ -33,9 +33,9 @@
           <uploader-btn class="uploader-btn" :single="false"
             >Select File</uploader-btn
           >
-          <uploader-btn class="uploader-btn" :directory="true" :single="false"
+          <!-- <uploader-btn class="uploader-btn" :directory="true" :single="false"
             >Select a folder</uploader-btn
-          >
+          > -->
         </uploader-drop>
       </uploader>
 
