@@ -653,6 +653,7 @@ const cyfsPin = () => {
     }
   });
 };
+const { ipcRenderer } = window.require("electron");
 const downloadItem = (item) => {
   // let ID = device_id.value;
   // let pubkey = item.pubkey;
@@ -672,12 +673,17 @@ const downloadItem = (item) => {
 
   let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=foggie&token=${token}`;
 
-  var oA = document.createElement("a");
-  oA.download = item.name;
-  oA.href = downloadUrl;
-  document.body.appendChild(oA);
-  oA.click();
-  oA.remove();
+  ipcRenderer.send('download', {
+    downloadPath: downloadUrl,
+    fileName: item.name,
+  })
+
+  // var oA = document.createElement("a");
+  // oA.download = item.name;
+  // oA.href = downloadUrl;
+  // document.body.appendChild(oA);
+  // oA.click();
+  // oA.remove();
 };
 const deleteItem = (item) => {
   tableLoading.value = true;

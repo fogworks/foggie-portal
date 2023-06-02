@@ -783,23 +783,23 @@ const downloadItem = (item) => {
   // let Id = orderId.value;
   let Id = deviceData.value.foggie_id;
   let peerId = deviceData.value.peer_id;
-  // let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
-  // // downloadUrl = 'foggie://12D3KooWC2mwaY7P1u9bvqE2JEvPRKdjUjQdVL7nie18Kdvjvgrf/2142/QmX3bmf4Mbs2nfTYVF5CJw3CGR9eogfGaCUcRWbd9R4WHs'
-
-  // console.log('-------------------ipcrenderer----download')
-
-  // ipcRenderer.send('download', {
-  //   downloadPath: downloadUrl, // 下载链接（以下载vue文件为例）
-  //   fileName: item.name, // 下载文件名，需要包含后缀名
-  // })
-
   let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
-  var oA = document.createElement("a");
-  oA.download = item.name;
-  oA.href = downloadUrl;
-  document.body.appendChild(oA);
-  oA.click();
-  oA.remove();
+  // downloadUrl = 'foggie://12D3KooWC2mwaY7P1u9bvqE2JEvPRKdjUjQdVL7nie18Kdvjvgrf/2142/QmX3bmf4Mbs2nfTYVF5CJw3CGR9eogfGaCUcRWbd9R4WHs'
+
+  console.log('-------------------ipcrenderer----download')
+
+  ipcRenderer.send('download', {
+    downloadPath: downloadUrl,
+    fileName: item.name,
+  })
+
+  // let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
+  // var oA = document.createElement("a");
+  // oA.download = item.name;
+  // oA.href = downloadUrl;
+  // document.body.appendChild(oA);
+  // oA.click();
+  // oA.remove();
 };
 
 const copyLink = (text) => {
