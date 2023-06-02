@@ -64,11 +64,18 @@ const hasLink = computed(() => {
       el.device_type == "foggie"
   );
 });
+
+const foggieList = computed(()=>{
+  let list = store.getters['global/deviceList'];
+  // return list
+});
 let pin_arr = reactive({
   lsit: [],
 });
 const isShow = false;
 const downloadItem = () => {
+
+
   if (!isShow) {
     return;
   }
