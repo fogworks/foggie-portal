@@ -21,16 +21,14 @@
         :auto-start="false" :file-status-text="fileStatusText" @files-added="onFilesAdded" @file-added="onFileAdded">
         <uploader-unsupport />
         <uploader-drop>
-          <uploader-btn class="uploader-btn" :single="true">Select File</uploader-btn>
-          <!-- <uploader-btn class="uploader-btn" :directory="true" :single="true"
-            >Select a folder</uploader-btn
-          > -->
+          <uploader-btn class="uploader-btn" :single="false">Select File</uploader-btn>
+          <uploader-btn class="uploader-btn" :directory="true" :single="true">Select a folder</uploader-btn>
         </uploader-drop>
       </uploader>
 
       <template v-for="(uploadList, key) in uploadFileList" :key="key" style="height: 100%">
         <fileList @fileShare="fileShare" @fileDetail="fileDetail" :orderID="key" :ref="`fileListRef_${key}`"
-          v-model:uploadLists="uploadFileList[key]" v-show="key == orderId">
+          v-model:uploadLists="uploadFileList[key]" v-show="key == orderId" :deviceType="deviceType">
         </fileList>
       </template>
     </div>
@@ -148,7 +146,7 @@ const onFileAdded = (file) => {
   let target = "";
   file.urlPath = target;
   // file.urlPrefix = directoryPath ? currentPath.value + directoryPath : currentPath.value || "/";
-  file.urlPrefix =  file.file.path.substr(0, file.file.path.lastIndexOf("\\")); 
+  file.urlPrefix = file.file.path.substr(0, file.file.path.lastIndexOf("\\"));
 
   file.urlFileName = directoryPath ? currentPath.value + directoryPath + file.name : currentPath.value + file.name;
 
@@ -184,7 +182,7 @@ const fileDetail = (file) => {
 const closeUploadBox = () => {
   store.commit("upload/closeUpload");
 };
-onMounted(() => { 
+onMounted(() => {
 });
 </script>
 
