@@ -208,7 +208,7 @@ export default {
     justify-content: space-between;
     // margin: 20px 0;
     height: 60px;
-    font-size: 30px;
+    font-size: 24px;
     text-align: left;
     font-weight: 700;
     text-align: left;
@@ -223,6 +223,7 @@ export default {
     }
 
     .setup {
+      font-size: 30px;
       color: #29abff;
       cursor: pointer;
       transition: all 0.5s;

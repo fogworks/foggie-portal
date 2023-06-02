@@ -17,24 +17,53 @@
           </div>
         </div>
       </div>
-      <uploader style="position: relative" ref="uploader" class="uploader-app" :multiple="true" :options="options"
-        :auto-start="false" :file-status-text="fileStatusText" @files-added="onFilesAdded" @file-added="onFileAdded">
+      <uploader
+        style="position: relative"
+        ref="uploader"
+        class="uploader-app"
+        :multiple="true"
+        :options="options"
+        :auto-start="false"
+        :file-status-text="fileStatusText"
+        @files-added="onFilesAdded"
+        @file-added="onFileAdded"
+      >
         <uploader-unsupport />
         <uploader-drop>
-          <uploader-btn class="uploader-btn" :single="false">Select File</uploader-btn>
-          <uploader-btn class="uploader-btn" :directory="true" :single="true">Select a folder</uploader-btn>
+          <uploader-btn class="uploader-btn" :single="false"
+            >Select File</uploader-btn
+          >
+          <uploader-btn class="uploader-btn" :directory="true" :single="false"
+            >Select a folder</uploader-btn
+          >
         </uploader-drop>
       </uploader>
 
-      <template v-for="(uploadList, key) in uploadFileList" :key="key" style="height: 100%">
-        <fileList @fileShare="fileShare" @fileDetail="fileDetail" :orderID="key" :ref="`fileListRef_${key}`"
-          v-model:uploadLists="uploadFileList[key]" v-show="key == orderId" :deviceType="deviceType">
+      <template
+        v-for="(uploadList, key) in uploadFileList"
+        :key="key"
+        style="height: 100%"
+      >
+        <fileList
+          @fileShare="fileShare"
+          @fileDetail="fileDetail"
+          :orderID="key"
+          :ref="`fileListRef_${key}`"
+          v-model:uploadLists="uploadFileList[key]"
+          v-show="key == orderId"
+          :deviceType="deviceType"
+        >
         </fileList>
       </template>
     </div>
   </div>
 
-  <el-drawer v-model="allFileListDrawer" title="To be completed File list" direction="rtl" size="50%">
+  <el-drawer
+    v-model="allFileListDrawer"
+    title="To be completed File list"
+    direction="rtl"
+    size="50%"
+  >
     <div class="uploader-list" style="height: 100%">
       <ul>
         <li>
@@ -47,7 +76,12 @@
             <div class="uploader-file-actions">Operate</div>
           </div>
         </li>
-        <TobeCompleted v-for="(curFile, index) in allFileList" :key="curFile.id" :curFile="curFile" :orderID="orderId">
+        <TobeCompleted
+          v-for="(curFile, index) in allFileList"
+          :key="curFile.id"
+          :curFile="curFile"
+          :orderID="orderId"
+        >
         </TobeCompleted>
       </ul>
     </div>
@@ -135,10 +169,8 @@ const onFileAdded = (file) => {
     return;
   }
 
-
   file.paused = false;
   file.deviceType = deviceType.value;
-
 
   file.rootPath = currentPath.value;
   let directory = file.file.webkitRelativePath;
@@ -147,9 +179,15 @@ const onFileAdded = (file) => {
   file.urlPath = target;
   // file.urlPrefix = directoryPath ? currentPath.value + directoryPath : currentPath.value || "/";
   file.urlPrefix = file.file.path.substr(0, file.file.path.lastIndexOf("\\"));
+<<<<<<< HEAD
 
   file.urlFileName = directoryPath ? currentPath.value + directoryPath + file.name : currentPath.value + file.name;
+=======
+>>>>>>> f5b932c8f863587b99a3ed9153c97f1bab34f5a1
 
+  file.urlFileName = directoryPath
+    ? currentPath.value + directoryPath + file.name
+    : currentPath.value + file.name;
 
   let list = store.state.upload.uploadFileList[orderId.value] ?? [];
   if (list.some((item) => item.uniqueIdentifier == file.uniqueIdentifier)) {
@@ -165,9 +203,9 @@ const onFileAdded = (file) => {
   list.unshift(file);
   store.commit("upload/setFileList", list);
 };
-const onFileProgress = (rootFile, file, chunk) => { };
-const onFilesAdded = (files, fileList) => { };
-const onFileSuccess = () => { };
+const onFileProgress = (rootFile, file, chunk) => {};
+const onFilesAdded = (files, fileList) => {};
+const onFileSuccess = () => {};
 const fileShare = (item) => {
   emit("fileShare", item);
 };
@@ -182,8 +220,12 @@ const fileDetail = (file) => {
 const closeUploadBox = () => {
   store.commit("upload/closeUpload");
 };
+<<<<<<< HEAD
 onMounted(() => {
 });
+=======
+onMounted(() => {});
+>>>>>>> f5b932c8f863587b99a3ed9153c97f1bab34f5a1
 </script>
 
 <style lang="scss" scoped>
@@ -267,9 +309,11 @@ onMounted(() => {
         height: 36px;
         -webkit-box-pack: center;
         place-content: center;
-        background: linear-gradient(1turn,
-            rgba(99, 106, 150, 0.4),
-            rgba(182, 186, 214, 0.5));
+        background: linear-gradient(
+          1turn,
+          rgba(99, 106, 150, 0.4),
+          rgba(182, 186, 214, 0.5)
+        );
         box-sizing: border-box;
         box-shadow: 0 20px 40px rgb(0 0 0 / 15%),
           inset 0 0 0 0.5px hsl(0deg 0% 100% / 30%);
@@ -293,8 +337,8 @@ onMounted(() => {
   }
 
   .vood_dialog_wrap {
-    min-width: 700px;
-    // min-width: 1200px;
+    // min-width: 700px;
+    min-width: 900px;
     width: 60%;
     height: 80%;
     top: 10%;
@@ -307,7 +351,7 @@ onMounted(() => {
         .head-info {
           font-size: 18px;
 
-          >div {
+          > div {
             color: #000;
           }
         }
@@ -331,7 +375,8 @@ onMounted(() => {
     border-radius: 16px;
     text-align: center;
 
-    .drop-title {}
+    .drop-title {
+    }
   }
 
   .uploader-btn {
@@ -370,7 +415,7 @@ onMounted(() => {
     border-color: #494646;
   }
 
-  .el-table--enable-row-hover .el-table__body tr:hover>td.el-table__cell {
+  .el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
     background-color: #4b525c;
     background-color: #4b525c;
     background: #f8f8f8;
@@ -380,11 +425,15 @@ onMounted(() => {
     color: #000;
   }
 
-  .el-table--enable-row-hover .el-table__body tr:hover>td.el-table__cell .cell {
+  .el-table--enable-row-hover
+    .el-table__body
+    tr:hover
+    > td.el-table__cell
+    .cell {
     color: #000;
   }
 
-  .el-table th.el-table__cell>.cell,
+  .el-table th.el-table__cell > .cell,
   .el-table__body-wrapper .cell {
     color: #03040a;
     color: #fff;
@@ -515,14 +564,14 @@ onMounted(() => {
   line-height: 50px;
 }
 
-.my_top_uploadText>label {
+.my_top_uploadText > label {
   font-size: 16px;
   position: absolute;
   left: 0;
   color: #fff;
 }
 
-.my_top_uploadText>label .el-checkbox__input {
+.my_top_uploadText > label .el-checkbox__input {
   padding: 0;
   position: relative;
   display: inline-block;
@@ -565,7 +614,7 @@ onMounted(() => {
     .head-info {
       font-size: 18px;
 
-      &>div {
+      & > div {
         color: #000;
       }
     }

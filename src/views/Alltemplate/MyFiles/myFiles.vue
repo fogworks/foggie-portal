@@ -82,6 +82,7 @@
     <div style="height: 100%">
       <el-table
         class="table-box"
+        row-key="key"
         :data="tableData.data"
         :header-cell-style="setNameCell"
         style="width: 100%; margin-top: 10px; height: 1000px"
@@ -306,6 +307,7 @@ const chainId = computed(() => store.getters.ChainId);
 const email = computed(() => store.getters.userInfo?.email);
 const deviceType = computed(() => store.getters.deviceType);
 const order_Id = computed(() => store.getters.orderId);
+const { ipcRenderer } = window.require('electron')
 
 const rowState = ({ row }) => {
   let style = {};
@@ -775,14 +777,25 @@ const downloadItem = (item) => {
   // let Id = orderId.value;
   let Id = deviceData.value.foggie_id;
   let peerId = deviceData.value.peer_id;
-  let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
+  const { baseUrl } = setting;
+  let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
+  // downloadUrl = 'foggie://12D3KooWC2mwaY7P1u9bvqE2JEvPRKdjUjQdVL7nie18Kdvjvgrf/2142/QmX3bmf4Mbs2nfTYVF5CJw3CGR9eogfGaCUcRWbd9R4WHs'
 
-  var oA = document.createElement("a");
-  oA.download = item.name;
-  oA.href = downloadUrl;
-  document.body.appendChild(oA);
-  oA.click();
-  oA.remove();
+
+  console.log('-------------------ipcrenderer----download')
+
+  ipcRenderer.send('download', {
+    downloadPath: downloadUrl, // 下载链接（以下载vue文件为例）
+    fileName: item.name, // 下载文件名，需要包含后缀名
+  })
+
+
+  // var oA = document.createElement("a");
+  // oA.download = item.name;
+  // oA.href = downloadUrl;
+  // document.body.appendChild(oA);
+  // oA.click();
+  // oA.remove();
 };
 
 const copyLink = (text) => {
@@ -829,7 +842,7 @@ const getReomteData = () => {
   oodFileList(email.value, type, token, deviceData.value, list_prefix)
     .then((res) => {
       if (res && res.content) {
-        initRemoteData(res.data);
+        initRemoteData(res);
       }
     })
     .catch(() => {
@@ -1052,7 +1065,7 @@ const doSearch = async () => {
       })
         .then((res) => {
           if (res.data[0]?.cid) {
-            initLocalData(res)
+            initLocalData(res);
           } else {
             ElNotification({
               type: "error",
@@ -1111,7 +1124,7 @@ const switchReceiveStatus = () => {
     try {
       if (fileSource.value) {
         console.log("------------remote");
-        ElMessageBox.confirm("Are you sure to get remote data?", "Warning", {
+        ElMessageBox.confirm("Are you sure to get local data?", "Warning", {
           confirmButtonText: "OK",
           cancelButtonText: "Cancel",
         })
@@ -1125,7 +1138,7 @@ const switchReceiveStatus = () => {
           });
       } else {
         console.log("------------local");
-        ElMessageBox.confirm("Are you sure to get local data?", "Warning", {
+        ElMessageBox.confirm("Are you sure to get remote data?", "Warning", {
           confirmButtonText: "OK",
           cancelButtonText: "Cancel",
         })

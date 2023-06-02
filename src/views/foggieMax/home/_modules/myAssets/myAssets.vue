@@ -102,6 +102,7 @@
 
       <MinerRecords
         v-if="minerRecordsVisible"
+        v-model:isJoin="isJoin"
         v-model:visible="minerRecordsVisible"
       >
       </MinerRecords>
@@ -114,6 +115,7 @@
       <AddPoolDialog
         v-if="PoolDialogVisible"
         v-model:visible="PoolDialogVisible"
+        :expire="deviceData.expire"
       ></AddPoolDialog>
     </div>
   </div>
@@ -135,7 +137,6 @@ import {
   get_miner_reward,
   check_join_mp,
 } from "@/utils/api.js";
-import * as echarts from "echarts";
 import RippleInk from "@/components/rippleInk";
 export default {
   components: {

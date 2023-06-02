@@ -445,21 +445,37 @@
                 size="30"
               ></svg-icon>
             </el-tooltip>
-
-            <el-tooltip
-              class="box-item"
-              effect="dark"
-              content="Upload Merkle"
-              placement="top"
-            >
-              <svg-icon
-                v-if="![4, 5].includes(item.state) && isLocal"
-                @click.stop="popoverClick('submitMerkle', item)"
-                style="color: rgb(16 57 255)"
-                icon-class="setting"
-                size="30"
-              ></svg-icon>
-            </el-tooltip>
+            <div class="merkle-box">
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                :content="merkleProgress + '%'"
+                placement="top"
+              >
+                <el-progress
+                  v-if="isBuildMerkle"
+                  style="margin-bottom: 5px"
+                  :text-inside="true"
+                  :show-text="false"
+                  :stroke-width="3"
+                  :percentage="merkleProgress"
+                />
+              </el-tooltip>
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                content="Upload Merkle"
+                placement="top"
+              >
+                <svg-icon
+                  v-if="![4, 5].includes(item.state) && isLocal"
+                  @click.stop="popoverClick('submitMerkle', item)"
+                  style="color: rgb(16 57 255)"
+                  icon-class="setting"
+                  size="30"
+                ></svg-icon>
+              </el-tooltip>
+            </div>
           </el-col>
         </el-row>
       </div>
@@ -575,6 +591,8 @@ const props = defineProps({
 });
 
 const overShow = ref(false);
+const isBuildMerkle = ref(false);
+const merkleProgress = ref(0);
 const ChainId = computed(() => $state.getters.ChainId);
 
 const email = computed(() => $state.getters.userInfo?.email);
@@ -725,10 +743,8 @@ function popoverClick(type, item) {
           email: email.value,
           orderId: item.id,
         };
-
         pushMerkle(params).then((res) => {
           if (res.code == 200) {
-            item.popoverShow = false;
             ElMessage({
               showClose: true,
               message: "The Merkle tree is uploaded successfully!",
@@ -868,6 +884,22 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+.merkle-box {
+  position: relative;
+  height: 100%;
+  width: 34px;
+  > svg {
+    position: absolute;
+    top: 50%;
+    left: 2px;
+    transform: translateY(-50%);
+  }
+  :deep {
+    .el-progress {
+      margin-top: 15px;
+    }
+  }
+}
 ::v-deep {
   .el-progress-bar__outer {
     background-color: #353a43;
