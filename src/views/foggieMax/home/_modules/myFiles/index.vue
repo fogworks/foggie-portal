@@ -755,6 +755,9 @@ const doSearch = async () => {
       deviceData,
       keyWord.value
     );
+    if (data.contents) {
+        data.content = data.contents;
+      }
     initFileData(data);
   }
 };

@@ -11,19 +11,9 @@
         </div>
       </li>
       <li v-for="file in curFileList" :key="file.id">
-        <upFile
-          :file="file"
-          :list="true"
-          :curFileList="curFileList"
-          :MAX_UPLOAD_NUM="MAX_UPLOAD_NUM"
-          @chanStatus="chanStatus"
-          @getStatus="getStatus"
-          @uploadComplete="uploadComplete"
-          @getProgress="getProgress"
-          @remove="remove"
-          @fileShare="fileShare"
-          @fileDetail="fileDetail"
-        />
+        <upFile :file="file" :list="true" :curFileList="curFileList" :MAX_UPLOAD_NUM="MAX_UPLOAD_NUM"
+          @chanStatus="chanStatus" @getStatus="getStatus" @uploadComplete="uploadComplete" @getProgress="getProgress"
+          @remove="remove" @fileShare="fileShare" @fileDetail="fileDetail" />
       </li>
     </ul>
   </div>
@@ -41,8 +31,6 @@ import {
   watchEffect,
   reactive,
 } from "vue";
-const MAX_UPLOAD_NUM = 1;
-const emits = defineEmits(["fileShare", "fileDetail", "update:uploadLists"]);
 const props = defineProps({
   orderID: {
     type: String,
@@ -52,7 +40,13 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  deviceType: {
+    type: String || Number,
+    default: "",
+  },
 });
+const MAX_UPLOAD_NUM = props.deviceType == 3 ? 1 : 4;
+const emits = defineEmits(["fileShare", "fileDetail", "update:uploadLists"]);
 
 const $store = useStore();
 const progress = ref(0);
@@ -70,6 +64,7 @@ watch(
   (newVal, oldVal) => {
     let oldLength = oldVal?.length ?? 0;
     if (newVal.length >= oldLength) {
+      // 新增文件 或者 当前上传列表中 有文件 上传成功 暂停 或者 上传失败
       if (newVal.length >= MAX_UPLOAD_NUM) {
         if (curFileList.value.length == 0) {
           let startInde =
@@ -117,7 +112,8 @@ watch(
     } else {
       if (newVal.length == curFileList.value.length) {
         return;
-      } else {
+      } else if (newVal.length > curFileList.value.length) {
+        // 待上传列表中仍有数据等待上传
         if (timer.value) clearTimeout(timer.value), (timer.value = null);
         timer.value = setTimeout(() => {
           let pushNumber = JSON.parse(JSON.stringify(MAX_UPLOAD_NUM));
@@ -135,10 +131,7 @@ watch(
           }
           if (pushNumber <= 0) return;
           let index = newVal.length - curFileList.value.length - 1;
-          if (index > -1) {
-            curFileList.value.unshift(newVal[index]);
-          }
-          
+          curFileList.value.unshift(newVal[index]);
         }, 100);
       }
     }
@@ -146,7 +139,24 @@ watch(
   { deep: true }
 );
 watchEffect(() => {
+
   fileList.uploadLists = props.uploadLists;
+  if (fileList.uploadLists.length == 0) {
+    //删除当前设备下上传列表中所有文件 当前上传列表也需要清除
+    curFileList.value = [];
+  }
+  /* 删除文件 */
+  for (let index = 0; index < curFileList.value.length; index++) {
+    if (
+      !fileList.uploadLists.some(
+        (item) => item.id == curFileList.value[index].id
+      )
+    ) {
+      //删除的是已经上传成功的文件
+      curFileList.value.splice(index, 1);
+      break;
+    }
+  }
 });
 const chanStatus = (item) => {
   let index = curFileList.value.findIndex((element) => element.id == item.id);
@@ -193,7 +203,7 @@ defineExpose({
   margin-right: 20px;
 }
 
-.uploader-list > ul {
+.uploader-list>ul {
   list-style: none;
   margin: 0;
   padding: 0;

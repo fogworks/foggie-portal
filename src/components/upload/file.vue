@@ -16,7 +16,7 @@
 
           <el-tooltip placement="top">
             <template #content>
-             <div>{{file.urlPrefix }}</div>
+              <div>{{ file.urlPrefix }}</div>
             </template>
             <a href="javascript:;" @click="toPath">{{ file.urlPrefix }} </a>
           </el-tooltip>
@@ -83,8 +83,6 @@ import {
   isCanUpload_Api,
 } from "@/api/upload";
 import { ElMessage } from "element-plus";
-
-const CHUNK_SIZE = 1024 * 1024 * 5;
 const FILE_SIZE = 10 * 1024 * 1024;
 const simultaneousUploads = 4;
 const maxChunkRetries = 3;
@@ -905,19 +903,18 @@ function fileCompletes() {
 }
 
 const UploadProgress = (progressEvent, part_number) => {
+  console.log(progressEvent, '----------', part_number);
   if (part_number) {
     let number = ArrayProgress.value[part_number - 1];
     if (number < (progressEvent.loaded / progressEvent.total) * 100) {
-      ArrayProgress.value[part_number - 1] =
-        (progressEvent.loaded / progressEvent.total) * 100;
+      ArrayProgress.value[part_number - 1] = (progressEvent.loaded / progressEvent.total) * 100;
     }
 
     NUMBER.value = ArrayProgress.value.reduce((cur, next) => {
       return cur + next;
     }, 0);
 
-    let uploadProgress =
-      (NUMBER.value / (100 * ArrayProgress.value.length)).toFixed(2) * 100;
+    let uploadProgress = (NUMBER.value / (100 * ArrayProgress.value.length)).toFixed(2) * 100;
     progress.value = uploadProgress < 100 ? uploadProgress : 99;
 
     let curTime = new Date().getTime();

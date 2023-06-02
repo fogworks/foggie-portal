@@ -30,10 +30,10 @@
       >
         <uploader-unsupport />
         <uploader-drop>
-          <uploader-btn class="uploader-btn" :single="true"
+          <uploader-btn class="uploader-btn" :single="false"
             >Select File</uploader-btn
           >
-          <!-- <uploader-btn class="uploader-btn" :directory="true" :single="true"
+          <!-- <uploader-btn class="uploader-btn" :directory="true" :single="false"
             >Select a folder</uploader-btn
           > -->
         </uploader-drop>
@@ -51,6 +51,7 @@
           :ref="`fileListRef_${key}`"
           v-model:uploadLists="uploadFileList[key]"
           v-show="key == orderId"
+          :deviceType="deviceType"
         >
         </fileList>
       </template>
@@ -178,6 +179,10 @@ const onFileAdded = (file) => {
   file.urlPath = target;
   // file.urlPrefix = directoryPath ? currentPath.value + directoryPath : currentPath.value || "/";
   file.urlPrefix = file.file.path.substr(0, file.file.path.lastIndexOf("\\"));
+
+  file.urlFileName = directoryPath
+    ? currentPath.value + directoryPath + file.name
+    : currentPath.value + file.name;
 
   file.urlFileName = directoryPath
     ? currentPath.value + directoryPath + file.name
