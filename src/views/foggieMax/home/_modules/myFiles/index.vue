@@ -346,15 +346,15 @@ let breadcrumbList = reactive({
 });
 const fileTable = ref(null);
 
-const tableSort = ({ prop = "", order = 2, key = "" }) => {
-  const sortOrders = ["ascending", "descending", null];
-  activeSort.value = key;
-  // fileTable.value.clearSort();
-  if (fileTable?.value) fileTable.value.sort(prop, sortOrders[order]);
-};
+// const tableSort = ({ prop = "", order = 2, key = "" }) => {
+//   const sortOrders = ["ascending", "descending", null];
+//   activeSort.value = key;
+//   // fileTable.value.clearSort();
+//   if (fileTable?.value) fileTable.value.sort(prop, sortOrders[order]);
+// };
 const refresh = () => {
   keyWord.value = "";
-  tableSort({ prop: "date", order: 1, key: 1 });
+  // tableSort({ prop: "date", order: 1, key: 1 });
   if (tableLoading.value) return;
   getFileList("", breadcrumbList.prefix);
 };
@@ -379,12 +379,13 @@ const getFileList = function (scroll, prefix) {
 
 const initFileData = async (data) => {
   tableData.data = [];
-  for (let i = 0; i < data.commonPrefixes?.length; i++) {
-    let name = decodeURIComponent(data.commonPrefixes[i]);
-    let item = {
+  // let commonPrefixesItem = [];
+  // let contentItem = [];
+  let commonPrefixesItem = data.commonPrefixes?.map((el, i) => {
+    return {
       isDir: true,
-      name,
-      key: data.commonPrefixes[i],
+      name: decodeURIComponent(el),
+      key: el,
       idList: [
         {
           name: "IPFS",
@@ -403,53 +404,39 @@ const initFileData = async (data) => {
       pubkey: "",
       cid: "",
       imgUrl: "",
-      imgUrlLarge: "",
+      // imgUrlLarge: "",
       share: {},
       isSystemImg: false,
       canShare: false,
     };
-    tableData.data.push(item);
-  }
-
-  for (let j = 0; j < data.content?.length; j++) {
-    let date = transferTime(data.content[j].lastModified);
+  });
+  let contentItem = data.content?.map((el, j) => {
+    let date = transferTime(el.lastModified);
     let isDir = false;
-    const type = data.content[j].key.substring(
-      data.content[j].key.lastIndexOf(".") + 1
-    );
+    const type = el.key.substring(el.key.lastIndexOf(".") + 1);
     let { imgHttpLink: url, isSystemImg } = handleImg(
       type,
       deviceData.foggie_id,
-      data.content[j].cid,
-      data.content[j].key,
+      el.cid,
+      el.key,
       isDir,
       deviceData.rpc.split(":")[0],
       deviceData.rpc.split(":")[1],
       deviceData.peer_id
     );
-    let { imgHttpLink: url_large } = handleImg(
-      type,
-      deviceData.foggie_id,
-      data.content[j].cid,
-      data.content[j].key,
-      isDir,
-      deviceData.rpc.split(":")[0],
-      deviceData.rpc.split(":")[1],
-      deviceData.peer_id
-    );
-    // let _url = require(`@/svg-icons/logo-dog-black.svg`);
-    let cid = data.content[j].cid;
-    let file_id = data.content[j].fileId;
 
-    let name = decodeURIComponent(data.content[j].key);
+    let cid = el.cid;
+    let file_id = el.fileId;
+
+    let name = decodeURIComponent(el.key);
     if (data.prefix) {
       name = name.split(data.prefix)[1];
     }
 
-    let item = {
+    return {
       isDir: isDir,
       name,
-      key: data.content[j].key,
+      key: el.key,
       idList: [
         {
           name: "IPFS",
@@ -461,34 +448,24 @@ const initFileData = async (data) => {
         },
       ],
       date,
-      size: getfilesize(data.content[j].size),
+      size: getfilesize(el.size),
       // status: "Published",
       status: cid || file_id ? "Published" : "-",
-      type: data.content[j].contentType,
+      type: el.contentType,
       file_id: file_id,
       pubkey: cid,
       cid,
       imgUrl: url,
-      imgUrlLarge: url_large,
+      // imgUrlLarge: url_large,
       // share: getShareOptions(),
       share: {},
       isSystemImg,
       canShare: cid ? true : false,
     };
-    // data[i] = item;
-    // getCidShare(device_id.value, data[i].cid);
-    tableData.data.push(item);
-  }
-  // tableData.data = data;
-
+    // contentItem.push(item);
+  });
+  tableData.data = [...commonPrefixesItem, ...contentItem];
   tableLoading.value = false;
-  if (activeSort.value) {
-    const target = sortList.find((el) => el.key == activeSort.value);
-    const { prop, order, key } = target;
-    nextTick(() => {
-      tableSort({ prop, order, key });
-    });
-  }
 };
 
 const theme = computed(() => store.getters.theme);

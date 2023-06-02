@@ -468,7 +468,9 @@
                 placement="top"
               >
                 <svg-icon
-                  v-if="![4, 5].includes(item.state) && isLocal"
+                  v-if="
+                    ![4, 5].includes(item.state) && isLocal && !isBuildMerkle
+                  "
                   @click.stop="popoverClick('submitMerkle', item)"
                   style="color: rgb(16 57 255)"
                   icon-class="setting"
@@ -602,7 +604,7 @@ const state = reactive({
 const timeLineRef = ref(null);
 const { orderList } = toRefs(state);
 const recordsShow = ref(false);
-const { orderId, deviceData, activeDeviceData } = toRefs(props);
+const { orderId, deviceData, activeDeviceData, isLocal } = toRefs(props);
 watch(
   activeDeviceData,
   (val) => {
@@ -884,22 +886,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.merkle-box {
-  position: relative;
-  height: 100%;
-  width: 34px;
-  > svg {
-    position: absolute;
-    top: 50%;
-    left: 2px;
-    transform: translateY(-50%);
-  }
-  :deep {
-    .el-progress {
-      margin-top: 15px;
-    }
-  }
-}
 ::v-deep {
   .el-progress-bar__outer {
     background-color: #353a43;
