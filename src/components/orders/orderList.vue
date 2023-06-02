@@ -755,7 +755,7 @@ function popoverClick(type, item) {
           if (res.code == 200) {
             ElMessage({
               showClose: true,
-              message: "Uploading Merkle tree!",
+              message: "Calculating Merkle tree!",
               type: "success",
               grouping: true,
             });
