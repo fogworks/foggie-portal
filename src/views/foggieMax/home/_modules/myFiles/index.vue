@@ -279,7 +279,11 @@ import DetailDialog from "./detailDialog";
 import { getfilesize, transferTime } from "@/utils/util.js";
 import { useStore } from "vuex";
 const { proxy } = getCurrentInstance();
-const emits = defineEmits(["toggleToUpload", "currentPrefix"]);
+const emits = defineEmits([
+  // "toggleToUpload",
+  "getUseSize",
+  // "currentPrefix"
+]);
 const keyWord = ref("");
 const pageNum = ref(1);
 const tableLoading = ref(false);
@@ -465,6 +469,7 @@ const initFileData = async (data) => {
     // contentItem.push(item);
   });
   tableData.data = [...commonPrefixesItem, ...contentItem];
+  emits("getUseSize");
   tableLoading.value = false;
 };
 
@@ -729,7 +734,7 @@ const toDetail = (item) => {
   localStorage.setItem("currentOODItem", JSON.stringify(currentOODItem.value));
   if (item.type === "application/x-directory") {
     breadcrumbList.prefix = item.name.split("/");
-    emits("currentPrefix", breadcrumbList.prefix);
+    // emits("currentPrefix", breadcrumbList.prefix);
   } else {
     detailData.data = item;
     detailShow.value = true;
@@ -756,8 +761,8 @@ const doSearch = async () => {
       keyWord.value
     );
     if (data.contents) {
-        data.content = data.contents;
-      }
+      data.content = data.contents;
+    }
     initFileData(data);
   }
 };
@@ -773,7 +778,7 @@ const setPrefix = (item, isTop = false) => {
       return index <= targetIndex;
     });
   }
-  emits("currentPrefix", breadcrumbList.prefix);
+  // emits("currentPrefix", breadcrumbList.prefix);
 };
 watch(breadcrumbList, (val) => {
   // getFileList("", val.prefix);

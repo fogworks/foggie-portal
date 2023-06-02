@@ -14,11 +14,11 @@
             <div>Available</div>
           </div>
           <MyEcharts
-            style="width: 180px; height: 180px"
+            style="width: 220px; height: 220px"
             :options="spacePieOption.data"
           ></MyEcharts>
         </div>
-        <div class="use-rate">Use Rate: {{ spaceUseRate }}%</div>
+        <div class="use-rate">Use Rate: {{ spaceUseRate * 100 }}%</div>
         <div class="total">Total space {{ spaceTotal }}GB</div>
       </div>
     </div>
@@ -26,7 +26,15 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted, toRefs, watch, inject } from "vue";
+import {
+  ref,
+  reactive,
+  onMounted,
+  toRefs,
+  watch,
+  inject,
+  watchEffect,
+} from "vue";
 import MyEcharts from "@/components/echarts/myEcharts";
 import { oodMonitor } from "@/utils/api.js";
 import { pieOption } from "@/components/echarts/util";
@@ -38,14 +46,24 @@ export default {
       type: Object,
       default: false,
     },
+    spaceUseRate: {
+      type: Number,
+      default: 0,
+    },
+    spaceTotal: {
+      type: Number,
+      default: 0,
+    },
+    spaceUseSize: {
+      type: Number,
+      default: 0,
+    },
   },
   setup(props, { emit }) {
     const deviceData = inject("deviceData");
-    const { currentOODItem } = toRefs(props);
+    const { currentOODItem, spaceUseRate, spaceTotal, spaceUseSize } =
+      toRefs(props);
     const spaceAvailable = ref(0);
-
-    const spaceUseRate = ref(0);
-    const spaceTotal = ref(0);
     const bandwidthAvailable = ref(0);
     const bandwidthUseRate = ref(0);
     const bandwidthTotal = ref(0);
@@ -58,47 +76,18 @@ export default {
     //   bandwidthOption.series[0].label.formatter=[`{value|${bandwidthAvailable.value}GB}`,'{title|Available}'].join('\n')
 
     const initDashboaard = async (newVal) => {
-      currentOODItem.value = newVal;
-      const device_id = currentOODItem.value.device_id;
-
-      spaceAvailable.value = currentOODItem.value.total_disk_size;
-      spaceTotal.value = currentOODItem.value.total_disk_size < 50 ? 50 : 100;
-      let item = {
-        size: 10,
-        field_value: '{"gt":"now-1w"}',
-        miner_ids: device_id,
-        metrics_type: "vood",
-        date: "1h",
-      };
-      let data = await oodMonitor(item);
-      let _data = data && data.value && data.value[device_id];
-      if (_data) {
-        let usageNum =
-          _data.used_disk_space[_data.used_disk_space.length - 1].value;
-        spaceUseRate.value = (
-          (usageNum * 100) /
-          1024 /
-          1024 /
-          spaceTotal.value
-        ).toFixed(2);
-        let pipData = JSON.parse(JSON.stringify(pieOption));
-        pipData.series[0].data = [
-          { value: (spaceUseRate.value / 100).toFixed(4) },
-          { value: 1 - (spaceUseRate.value / 100).toFixed(4) },
-        ];
-        spacePieOption.data = pipData;
-      }
+      spaceAvailable.value = +spaceTotal.value - spaceUseSize.value;
+      let pipData = JSON.parse(JSON.stringify(pieOption));
+      pipData.series[0].data = [
+        { value: +spaceUseRate.value.toFixed(4) },
+        { value: 1 - (+spaceUseRate.value).toFixed(4) },
+      ];
+      spacePieOption.data = pipData;
+      // }
     };
-    watch(
-      currentOODItem,
-      (data) => {
-        initDashboaard(data);
-      },
-      {
-        immediate: true,
-        deep: true,
-      }
-    );
+    watchEffect(() => {
+      initDashboaard();
+    });
     return {
       spaceAvailable,
       spaceUseRate,
@@ -162,8 +151,9 @@ export default {
       justify-content: center;
       .chart-value-title {
         position: absolute;
-        top: 65px;
-        left: 60px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         div {
           color: var(--text-color-777);
           font-size: 16px;
