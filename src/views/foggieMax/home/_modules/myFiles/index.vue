@@ -278,6 +278,8 @@ import PinFormDialog from "./pinFormDialog";
 import DetailDialog from "./detailDialog";
 import { getfilesize, transferTime } from "@/utils/util.js";
 import { useStore } from "vuex";
+import setting from "@/setting";
+const { baseUrl } = setting;
 const { proxy } = getCurrentInstance();
 const emits = defineEmits([
   // "toggleToUpload",
@@ -493,7 +495,7 @@ const handleImg = (type, ID, cid, key, isDir, ip, port, peerId) => {
     // let token = store.getters.token;
     let token = tokenMap.value[deviceData.device_id];
 
-    imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${ID}&peerId=${peerId}&type=foggie&token=${token}`;
+    imgHttpLink = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${ID}&peerId=${peerId}&type=foggie&token=${token}`;
 
     // foggie://peerid/spaceid/cid
   } else {
@@ -651,6 +653,7 @@ const cyfsPin = () => {
     }
   });
 };
+const { ipcRenderer } = window.require("electron");
 const downloadItem = (item) => {
   // let ID = device_id.value;
   // let pubkey = item.pubkey;
@@ -668,14 +671,19 @@ const downloadItem = (item) => {
   // let token = store.getters.token;
   let token = tokenMap.value[deviceData.device_id];
 
-  let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=foggie&token=${token}`;
+  let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=foggie&token=${token}`;
 
-  var oA = document.createElement("a");
-  oA.download = item.name;
-  oA.href = downloadUrl;
-  document.body.appendChild(oA);
-  oA.click();
-  oA.remove();
+  ipcRenderer.send('download', {
+    downloadPath: downloadUrl,
+    fileName: item.name,
+  })
+
+  // var oA = document.createElement("a");
+  // oA.download = item.name;
+  // oA.href = downloadUrl;
+  // document.body.appendChild(oA);
+  // oA.click();
+  // oA.remove();
 };
 const deleteItem = (item) => {
   tableLoading.value = true;
