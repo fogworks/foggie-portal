@@ -124,6 +124,22 @@ export const oodFileList = (email, type, token, deviceData, prefix) => {
   });
 };
 
+export const getSummary = (deviceData, token) => {
+  let url = `${baseUrl}/get_summary`;
+  let data = {
+    deviceData,
+    token
+  };
+
+  return request({
+    url: url,
+    method: "POST",
+    data,
+  });
+};
+
+
+
 export const find_objects = (email, type, token, deviceData, key) => {
   let url = `${baseUrl}/find_objects`,
     cid = "",
