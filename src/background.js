@@ -137,34 +137,34 @@ app.on("ready", async () => {
     // fs.chmod(`${__dirname}/foggie`, 1)
     // fs.chmod(`${__dirname}/config.json`, 1)
 
-    fs.readFile(path.join(__dirname, "./config.json"), "utf8", (err, data) => {
-      // dialog.showErrorBox("data", data);
-      // dialog.showErrorBox("err", err);
-      if (err) throw err;
-      let list = JSON.parse(data);
-      let server = list.server;
-      let db = list.db;
-      if (server.repoPath.indexOf(user_path) !== 0) {
-        server.repoPath = user_path + server.repoPath;
-        db.path = user_path + db.path;
-      }
+    // fs.readFile(path.join(__dirname, "./config.json"), "utf8", (err, data) => {
+    //   // dialog.showErrorBox("data", data);
+    //   // dialog.showErrorBox("err", err);
+    //   if (err) throw err;
+    //   let list = JSON.parse(data);
+    //   let server = list.server;
+    //   let db = list.db;
+    //   if (server.repoPath.indexOf(user_path) !== 0) {
+    //     server.repoPath = user_path + server.repoPath;
+    //     db.path = user_path + db.path;
+    //   }
 
-      let newContent = JSON.stringify(list, null, 4);
-      fs.writeFile(path.join(__dirname, "./config.json"), newContent, "utf8", (err) => {
-        if (err) throw err;
-        console.log("success done");
-      });
-    });
+    //   let newContent = JSON.stringify(list, null, 4);
+    //   fs.writeFile(path.join(__dirname, "./config.json"), newContent, "utf8", (err) => {
+    //     if (err) throw err;
+    //     console.log("success done");
+    //   });
+    // });
 
     // const childProcess = cp.spawn(__dirname + "/mac-arm64/foggie-portal.app/Contents/Resources/app/foggie", ['node'], {
-    const childProcess = cp.spawn(__dirname + "/foggie", ["node"], {
-      detached: true,
-      env: {
-        PROX_LOG: `${user_path}/Library/Logs/foggie.log`,
-        // PROX_CONFIG: `${user_path}/Library/Application Support/foggie/config.json`
-        PROX_CONFIG: `${__dirname}/config.json`,
-      },
-    });
+    // const childProcess = cp.spawn(__dirname + "/foggie", ["node"], {
+    //   detached: true,
+    //   env: {
+    //     PROX_LOG: `${user_path}/Library/Logs/foggie.log`,
+    //     // PROX_CONFIG: `${user_path}/Library/Application Support/foggie/config.json`
+    //     PROX_CONFIG: `${__dirname}/config.json`,
+    //   },
+    // });
 
     childProcess.stdout.on("data", (d) => {
       // dialog.showErrorBox("stdout", d.toString());
