@@ -33,9 +33,9 @@
           <uploader-btn class="uploader-btn" :single="false"
             >Select File</uploader-btn
           >
-          <!-- <uploader-btn class="uploader-btn" :directory="true" :single="false"
+          <uploader-btn class="uploader-btn" :directory="true" :single="false"
             >Select a folder</uploader-btn
-          > -->
+          >
         </uploader-drop>
       </uploader>
 
@@ -64,26 +64,25 @@
     direction="rtl"
     size="50%"
   >
-    <div class="uploader-list" style="height: 100%">
-      <ul>
-        <li>
-          <div class="uploader-file-info head-info">
-            <div class="uploader-file-name" style="width: 30%">File Name</div>
-            <div class="uploader-file-prefix" style="width: 35%">
-              Upload Path
-            </div>
-            <div class="uploader-file-size" style="width: 25%">File Size</div>
-            <div class="uploader-file-actions">Operate</div>
-          </div>
-        </li>
-        <TobeCompleted
-          v-for="(curFile, index) in allFileList"
-          :key="curFile.id"
-          :curFile="curFile"
-          :orderID="orderId"
-        >
-        </TobeCompleted>
-      </ul>
+    <div class="uploader-list">
+ 
+        <div class="uploader-file-info head-info">
+          <div class="uploader-file-name" style="width: 30%">File Name</div>
+          <div class="uploader-file-prefix" style="width: 35%">Upload Path</div>
+          <div class="uploader-file-size" style="width: 25%">File Size</div>
+          <div class="uploader-file-actions">Operate</div>
+        </div>
+
+        <div class="TobeCompletedBox">
+          <TobeCompleted
+            v-for="(curFile, index) in allFileList"
+            :key="curFile.id"
+            :curFile="curFile"
+            :orderID="orderId"
+          >
+          </TobeCompleted>
+        </div>
+ 
     </div>
   </el-drawer>
 </template>
@@ -119,6 +118,7 @@ const deviceData = computed(() => store.getters.deviceData);
 const deviceType = computed(() => store.getters.deviceType);
 
 const uploadFileList = computed(() => store.state.upload.uploadFileList);
+
 const allFileList = computed(() => {
   let fileListArray = _this.refs[`fileListRef_${orderId.value}`] || [];
   let executeLsit =
@@ -138,14 +138,10 @@ const tokenMap = computed(() => store.getters.tokenMap);
 const options = ref({
   simultaneousUploads: 5,
 
-  chunkSize: 1024 * 1024 * 5, // 分片大小
+  chunkSize: 1024 * 1024 * 8, // 分片大小
   forceChunkSize: true, // 每块分片大小是否 一定要小于 chunkSize
   allowDuplicateUploads: true, // 是否可以 重复上传
 });
-// const client = new APIClient('http://154.31.34.194:9007')
-// const client = new APIClient("http://218.2.96.99:8007");
-// window.client = client
-// provide("client", readonly(client));
 
 const fileStatusText = ref({
   success: () => "Upload Success",
@@ -158,6 +154,7 @@ const fileStatusText = ref({
 });
 
 const onFileAdded = (file) => {
+
   if (file.size === 0) return;
   if (file.size > FILE_SIZE) {
     ElMessage({
@@ -203,7 +200,11 @@ const onFileAdded = (file) => {
   store.commit("upload/setFileList", list);
 };
 const onFileProgress = (rootFile, file, chunk) => {};
-const onFilesAdded = (files, fileList) => {};
+const onFilesAdded = (files, fileList) => {
+
+  console.log(files);
+  console.log(fileList);
+};
 const onFileSuccess = () => {};
 const fileShare = (item) => {
   emit("fileShare", item);
@@ -342,6 +343,11 @@ onMounted(() => {});
 
     :deep {
       .uploader-list {
+        & > ul {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+        }
         .head-info {
           font-size: 18px;
 
@@ -604,9 +610,32 @@ onMounted(() => {});
 }
 
 .el-drawer {
+  .head-info:hover {
+    background-color: transparent !important;
+  }
+
   .uploader-list {
+    height: 100% !important;
+
+    overflow: hidden;
+
+    position: relative;
+
+    padding: 20px 0px;
+    margin-left: 20px;
+    margin-right: 20px;
+    & > div {
+      margin: 0;
+      padding: 0;
+    }
     .head-info {
       font-size: 18px;
+      position: relative;
+      height: 49px;
+      line-height: 49px;
+      overflow: hidden;
+      border-bottom: 1px solid #7e7e7e;
+      text-align: left;
 
       & > div {
         color: #000;
@@ -616,6 +645,12 @@ onMounted(() => {});
     .uploader-file-name,
     .uploader-file-size {
       text-align: left;
+    }
+
+    .TobeCompletedBox {
+      height: calc(100% - 50px);
+      overflow-y: auto;
+      overflow-x: hidden;
     }
   }
 }
