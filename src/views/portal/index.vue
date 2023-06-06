@@ -70,10 +70,10 @@
 <script setup>
 import upload from "@/components/upload";
 import ShareDialog from "@/views/foggieMax/home/_modules/myFiles/shareDialog";
-import { ref, reactive, computed, watch, watchEffect } from "vue";
+import { ref, reactive, computed, watch, watchEffect, onMounted } from "vue";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
-import { getUserLoginStatus } from "@/api/common";
+import { getUserLoginStatus, heartbeat } from "@/api/common";
 import { getChain_id } from "@/api/common.js";
 import { publishPin, user, find_objects } from "@/utils/api";
 import { fileQuery } from "@/api/myFiles/myfiles";
@@ -265,6 +265,15 @@ watch(
     deep: true,
   }
 );
+function heartbeatInterval() {
+  heartbeat().then((res) => {});
+}
+onMounted(() => {
+  heartbeatInterval();
+  setInterval(() => {
+    heartbeatInterval();
+  }, 60000);
+});
 </script>
 
 <style lang="scss" scoped>
