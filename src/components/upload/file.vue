@@ -325,7 +325,7 @@ let formatedTimeRemaining = computed(() => {
   return parsedTimeRemaining;
 });
 
-const resume = async () => {
+const resume = () => {
   if (!isFirst.value) {
     let number = 0;
     for (const item of curFileList.value) {
@@ -355,30 +355,44 @@ const resume = async () => {
       foggieToken: file.value.foggieToken ? file.value.foggieToken : "",
     };
 
-    let res = await isCanUpload_Api(params);
-    if (res.code == 200 && res.data) {
-      beginUpload()
-      // 可以上传
-    } else if (res.code == 30039) {
-      ElMessageBox.confirm(
-        "duplicate file name, are you sure to overwrite?",
-        "Warning",
-        {
-          confirmButtonText: "OK",
-          cancelButtonText: "Cancel",
-          type: "warning",
-        }
-      )
-        .then(() => {
-          beginUpload()
-        })
-        .catch(() => {
-          remove();
-        });
-    } else {
-      fileError();
-      return;
-    }
+
+    if (timer.value) clearTimeout(timer.value), (timer.value = null);
+    timer.value = setTimeout(async () => {
+      if (NUMBER_timer.value)
+        clearInterval(NUMBER_timer.value), (NUMBER_timer.value = null);
+      let res = await isCanUpload_Api(params);
+
+      if (res.code == 200 && res.data) {
+        beginUpload()
+        // 可以上传
+      } else if (res.code == 30039) {
+        ElMessageBox.confirm(
+          "duplicate file name, are you sure to overwrite?",
+          "Warning",
+          {
+            confirmButtonText: "OK",
+            cancelButtonText: "Cancel",
+            type: "warning",
+          }
+        )
+          .then(() => {
+            beginUpload()
+          })
+          .catch(() => {
+            remove();
+          });
+      } else {
+        fileError();
+        return;
+      }
+
+
+    }, 600);
+
+
+
+
+
   }
 
 
@@ -388,24 +402,23 @@ const resume = async () => {
 
 function beginUpload() {
   isFirst.value = false;
-  if (timer.value) clearTimeout(timer.value), (timer.value = null);
-  timer.value = setTimeout(() => {
-    averageSpeed.value = 0;
-    if (NUMBER_timer.value)
-      clearInterval(NUMBER_timer.value), (NUMBER_timer.value = null);
-    isPause.value = false;
-    paused.value = false;
-    file.value.paused = false;
-    aborted.value = false;
-    if (file.value.size > FILE_SIZE) {
-      isUploading.value = false;
-      fileLoad(file);
-    } else {
-      isUploading.value = true;
-      isBigFile.value = false;
-      smallLoad(file.value);
-    }
-  }, 600);
+
+
+  averageSpeed.value = 0;
+
+  isPause.value = false;
+  paused.value = false;
+  file.value.paused = false;
+  aborted.value = false;
+  if (file.value.size > FILE_SIZE) {
+    isUploading.value = false;
+    fileLoad(file);
+  } else {
+    isUploading.value = true;
+    isBigFile.value = false;
+    smallLoad(file.value);
+  }
+
 }
 
 const initFile = () => {
