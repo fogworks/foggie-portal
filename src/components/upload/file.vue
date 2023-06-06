@@ -1,34 +1,12 @@
 <template>
   <div class="uploader-file" :status="status">
-    <slot
-      :file="file"
-      :list="list"
-      :status="status"
-      :paused="paused"
-      :error="error"
-      :response="response"
-      :average-speed="averageSpeed"
-      :formated-average-speed="formatedAverageSpeed"
-      :current-speed="currentSpeed"
-      :is-complete="isComplete"
-      :is-uploading="isUploading"
-      :size="size"
-      :formated-size="formatedSize"
-      :uploaded-size="uploadedSize"
-      :progress="progress"
-      :progress-style="progressStyle"
-      :progressing-class="progressingClass"
-      :time-remaining="timeRemaining"
-      :formated-time-remaining="formatedTimeRemaining"
-      :type="type"
-      :extension="extension"
-      :file-category="fileCategory"
-    >
-      <div
-        class="uploader-file-progress"
-        :class="progressingClass"
-        :style="progressStyle"
-      />
+    <slot :file="file" :list="list" :status="status" :paused="paused" :error="error" :response="response"
+      :average-speed="averageSpeed" :formated-average-speed="formatedAverageSpeed" :current-speed="currentSpeed"
+      :is-complete="isComplete" :is-uploading="isUploading" :size="size" :formated-size="formatedSize"
+      :uploaded-size="uploadedSize" :progress="progress" :progress-style="progressStyle"
+      :progressing-class="progressingClass" :time-remaining="timeRemaining"
+      :formated-time-remaining="formatedTimeRemaining" :type="type" :extension="extension" :file-category="fileCategory">
+      <div class="uploader-file-progress" :class="progressingClass" :style="progressStyle" />
       <div class="uploader-file-info">
         <div class="uploader-file-name" :title="file.name">
           <img class="iconfont-uploadType" :src="fileIcon" />
@@ -56,27 +34,13 @@
           </span>
         </div>
         <div class="uploader-file-actions" v-if="status !== 'success'">
-          <span
-            class="uploader-file-pause"
-            v-show="isBigFile"
-            @click="pause()"
-          />
-          <span
-            class="uploader-file-resume"
-            v-show="!ISCIDING"
-            @click="resume()"
-          />️
+          <span class="uploader-file-pause" v-show="isBigFile" @click="pause()" />
+          <span class="uploader-file-resume" v-show="!ISCIDING" @click="resume()" />️
           <span class="uploader-file-retry" @click="retry()" />
           <span class="uploader-file-remove" @click="remove()" />
         </div>
-        <div
-          class="uploader-file-actions"
-          v-if="status === 'success'"
-          @click="fileShare"
-        >
-          <div
-            style="color: #3f2dec; text-decoration: underline; cursor: pointer"
-          >
+        <div class="uploader-file-actions" v-if="status === 'success'" @click="fileShare">
+          <div style="color: #3f2dec; text-decoration: underline; cursor: pointer">
             Share
           </div>
         </div>
@@ -393,6 +357,7 @@ const resume = async () => {
 
     let res = await isCanUpload_Api(params);
     if (res.code == 200 && res.data) {
+      beginUpload()
       // 可以上传
     } else if (res.code == 30039) {
       ElMessageBox.confirm(
@@ -404,7 +369,9 @@ const resume = async () => {
           type: "warning",
         }
       )
-        .then(() => {})
+        .then(() => {
+          beginUpload()
+        })
         .catch(() => {
           remove();
         });
@@ -414,6 +381,12 @@ const resume = async () => {
     }
   }
 
+
+};
+
+
+
+function beginUpload() {
   isFirst.value = false;
   if (timer.value) clearTimeout(timer.value), (timer.value = null);
   timer.value = setTimeout(() => {
@@ -433,7 +406,7 @@ const resume = async () => {
       smallLoad(file.value);
     }
   }, 600);
-};
+}
 
 const initFile = () => {
   resume();
@@ -977,7 +950,7 @@ const UploadProgress = (progressEvent, part_number) => {
         averageSpeed.value =
           Number(
             (NUMBER.value - lastNUMBER.value) /
-              (100 * ArrayProgress.value.length * time)
+            (100 * ArrayProgress.value.length * time)
           ) * file.value.size;
       }
       lastTime.value = curTime;
@@ -1037,7 +1010,7 @@ const processResponse = (message) => {
   let res = message;
   try {
     res = JSON.parse(message);
-  } catch (e) {}
+  } catch (e) { }
   response.value = res;
 };
 const fileEventsHandler = (event, args) => {
@@ -1160,12 +1133,10 @@ onUnmounted(() => {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    171deg,
-    #8388fe 0%,
-    #519ff4 42%,
-    #b783c9 100%
-  ) !important;
+  background: linear-gradient(171deg,
+      #8388fe 0%,
+      #519ff4 42%,
+      #b783c9 100%) !important;
   transform: translateX(-100%);
   overflow: hidden;
 }
@@ -1297,7 +1268,7 @@ onUnmounted(() => {
   width: 10%;
 }
 
-.uploader-file-actions > span {
+.uploader-file-actions>span {
   display: none;
   float: left;
   width: 16px;
@@ -1309,7 +1280,7 @@ onUnmounted(() => {
   background-position: 0 0;
 }
 
-.uploader-file-actions > span:hover {
+.uploader-file-actions>span:hover {
   background-position-x: -21px;
 }
 
