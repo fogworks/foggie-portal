@@ -388,7 +388,9 @@ const resume = async () => {
       deviceType: file.value.deviceType,
       fileName: encodeURIComponent(file.value.urlFileName),
       email: email.value,
+      foggieToken: file.value.foggieToken ? file.value.foggieToken : "",
     };
+
     let res = await isCanUpload_Api(params);
     if (res.code == 200 && res.data) {
       // 可以上传
@@ -474,7 +476,7 @@ async function Save_File() {
 }
 
 const toPath = () => {
-console.log(file.value);
+  console.log(file.value);
 
   // const folderPath = "/path/to/folder";
 
