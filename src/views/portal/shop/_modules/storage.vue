@@ -369,7 +369,17 @@ function inputPrestoreDMC(text) {
     Number(state.formLine.prestoreDMC) + Number(state.orderDetail.deposit)
   ).toFixed(4);
 }
-
+watch(
+  () => state.formLine.prestoreDMC,
+  () => {
+    state.orderDetail.aggregate = (
+      Number(state.formLine.prestoreDMC) + Number(state.orderDetail.deposit)
+    ).toFixed(4);
+  },
+  {
+    immediate: true,
+  }
+);
 function computeTotalPrices(item) {
   let total =
     (item.price / 10000) * state.formLine.week * state.formLine.quantity +
