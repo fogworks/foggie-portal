@@ -771,7 +771,7 @@ const doSearch = async () => {
       type,
       token,
       deviceData,
-      keyWord.value
+      encodeURIComponent(keyWord.value)
     );
     isSearch.value = false;
     if (data.contents) {
