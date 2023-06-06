@@ -1,11 +1,7 @@
 <template>
   <div class="card-box formBox">
     <el-breadcrumb :separator-icon="ArrowRight">
-      <el-breadcrumb-item @click="setPrefix(item, true)">
-        <div class="flex items-center">
-          <svg-icon icon-class="my-files" class="title-img"></svg-icon>
-          <div class="title">Files</div>
-          <el-switch
+      <el-switch
             class="file-source"
             v-model="fileSource"
             size="large"
@@ -15,6 +11,11 @@
             :inactive-value="local"
             :before-change="switchReceiveStatus"
           />
+      <el-breadcrumb-item @click="setPrefix(item, true)">
+        <div class="flex items-center">
+          <svg-icon icon-class="my-files" class="title-img"></svg-icon>
+          <div class="title">Files</div>
+         
         </div>
       </el-breadcrumb-item>
       <el-breadcrumb-item
@@ -448,7 +449,7 @@ const tableSort = ({ prop = "", order = 2, key = "" }) => {
 };
 const refresh = () => {
   tableData.data = [];
-  getFileList();
+  getFileList("", breadcrumbList.prefix);
   tableSort({ prop: "create_time", order: 1, key: 1 });
 };
 
@@ -831,18 +832,21 @@ const toDetail = (item) => {
     // router.push("/detail");
   }
 };
-const getFileList = function () {
+const getFileList = function (scroll ,prefix) {
   if (fileSource.value) {
-    getReomteData();
+    getReomteData(scroll, prefix);
   } else {
     getLocalData();
   }
 };
-const getReomteData = () => {
+const getReomteData = (scroll, prefix) => {
   let list_prefix = "";
   tableLoading.value = true;
   let token = "";
   let type = "space";
+  if (prefix?.length) {
+    list_prefix = prefix.join("/");
+  }
   oodFileList(email.value, type, token, deviceData.value, list_prefix)
     .then((res) => {
       if (res && res.content) {
@@ -1097,12 +1101,16 @@ const setPrefix = (item, isTop = false) => {
       if (el === item) targetIndex = index;
       return index <= targetIndex;
     });
+    let len = breadcrumbList.prefix.length;
+    if (len > 0 && breadcrumbList.prefix[len -1] !== '') {
+      breadcrumbList.prefix.push('')
+    }
   }
   emits("currentPrefix", breadcrumbList.prefix);
 };
-// watch(breadcrumbList, (val) => {
-//   // getFileList("", val.prefix);
-// });
+watch(breadcrumbList, (val) => {
+  getFileList("", val.prefix);
+});
 watch(
   () => currentOODItem,
   () => {
@@ -1135,6 +1143,7 @@ const switchReceiveStatus = () => {
           .then(() => {
             // get remote data
             fileSource.value = !fileSource.value;
+            breadcrumbList.prefix = [];
             getLocalData();
           })
           .catch(() => {
@@ -1149,6 +1158,7 @@ const switchReceiveStatus = () => {
           .then(() => {
             // get remote data
             fileSource.value = !fileSource.value;
+            breadcrumbList.prefix = [];
             getReomteData();
           })
           .catch(() => {

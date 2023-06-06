@@ -1,34 +1,12 @@
 <template>
   <div class="uploader-file" :status="status">
-    <slot
-      :file="file"
-      :list="list"
-      :status="status"
-      :paused="paused"
-      :error="error"
-      :response="response"
-      :average-speed="averageSpeed"
-      :formated-average-speed="formatedAverageSpeed"
-      :current-speed="currentSpeed"
-      :is-complete="isComplete"
-      :is-uploading="isUploading"
-      :size="size"
-      :formated-size="formatedSize"
-      :uploaded-size="uploadedSize"
-      :progress="progress"
-      :progress-style="progressStyle"
-      :progressing-class="progressingClass"
-      :time-remaining="timeRemaining"
-      :formated-time-remaining="formatedTimeRemaining"
-      :type="type"
-      :extension="extension"
-      :file-category="fileCategory"
-    >
-      <div
-        class="uploader-file-progress"
-        :class="progressingClass"
-        :style="progressStyle"
-      />
+    <slot :file="file" :list="list" :status="status" :paused="paused" :error="error" :response="response"
+      :average-speed="averageSpeed" :formated-average-speed="formatedAverageSpeed" :current-speed="currentSpeed"
+      :is-complete="isComplete" :is-uploading="isUploading" :size="size" :formated-size="formatedSize"
+      :uploaded-size="uploadedSize" :progress="progress" :progress-style="progressStyle"
+      :progressing-class="progressingClass" :time-remaining="timeRemaining"
+      :formated-time-remaining="formatedTimeRemaining" :type="type" :extension="extension" :file-category="fileCategory">
+      <div class="uploader-file-progress" :class="progressingClass" :style="progressStyle" />
       <div class="uploader-file-info">
         <div class="uploader-file-name" :title="file.name">
           <img class="iconfont-uploadType" :src="fileIcon" />
@@ -56,27 +34,13 @@
           </span>
         </div>
         <div class="uploader-file-actions" v-if="status !== 'success'">
-          <span
-            class="uploader-file-pause"
-            v-show="isBigFile"
-            @click="pause()"
-          />
-          <span
-            class="uploader-file-resume"
-            v-show="!ISCIDING"
-            @click="resume()"
-          />️
+          <span class="uploader-file-pause" v-show="isBigFile" @click="pause()" />
+          <span class="uploader-file-resume" v-show="!ISCIDING" @click="resume()" />️
           <span class="uploader-file-retry" @click="retry()" />
           <span class="uploader-file-remove" @click="remove()" />
         </div>
-        <div
-          class="uploader-file-actions"
-          v-if="status === 'success'"
-          @click="fileShare"
-        >
-          <div
-            style="color: #3f2dec; text-decoration: underline; cursor: pointer"
-          >
+        <div class="uploader-file-actions" v-if="status === 'success'" @click="fileShare">
+          <div style="color: #3f2dec; text-decoration: underline; cursor: pointer">
             Share
           </div>
         </div>
@@ -114,7 +78,7 @@ import {
   SaveFile,
   isCanUpload_Api,
 } from "@/api/upload";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 const FILE_SIZE = 10 * 1024 * 1024;
 const simultaneousUploads = 4;
 const maxChunkRetries = 3;
@@ -361,7 +325,7 @@ let formatedTimeRemaining = computed(() => {
   return parsedTimeRemaining;
 });
 
-const resume = async () => {
+const resume = () => {
   if (!isFirst.value) {
     let number = 0;
     for (const item of curFileList.value) {
@@ -391,35 +355,71 @@ const resume = async () => {
       foggieToken: file.value.foggieToken ? file.value.foggieToken : "",
     };
 
-    let res = await isCanUpload_Api(params);
-    if (res.code == 200 && res.data) {
-      // 可以上传
-    } else {
-      fileError();
-      return;
-    }
+
+    if (timer.value) clearTimeout(timer.value), (timer.value = null);
+    timer.value = setTimeout(async () => {
+      if (NUMBER_timer.value)
+        clearInterval(NUMBER_timer.value), (NUMBER_timer.value = null);
+      let res = await isCanUpload_Api(params);
+
+      if (res.code == 200 && res.data) {
+        beginUpload()
+        // 可以上传
+      } else if (res.code == 30039) {
+        ElMessageBox.confirm(
+          "duplicate file name, are you sure to overwrite?",
+          "Warning",
+          {
+            confirmButtonText: "OK",
+            cancelButtonText: "Cancel",
+            type: "warning",
+          }
+        )
+          .then(() => {
+            beginUpload()
+          })
+          .catch(() => {
+            remove();
+          });
+      } else {
+        fileError();
+        return;
+      }
+
+
+    }, 600);
+
+
+
+
+
   }
 
-  isFirst.value = false;
-  if (timer.value) clearTimeout(timer.value), (timer.value = null);
-  timer.value = setTimeout(() => {
-    averageSpeed.value = 0;
-    if (NUMBER_timer.value)
-      clearInterval(NUMBER_timer.value), (NUMBER_timer.value = null);
-    isPause.value = false;
-    paused.value = false;
-    file.value.paused = false;
-    aborted.value = false;
-    if (file.value.size > FILE_SIZE) {
-      isUploading.value = false;
-      fileLoad(file);
-    } else {
-      isUploading.value = true;
-      isBigFile.value = false;
-      smallLoad(file.value);
-    }
-  }, 600);
+
 };
+
+
+
+function beginUpload() {
+  isFirst.value = false;
+
+
+  averageSpeed.value = 0;
+
+  isPause.value = false;
+  paused.value = false;
+  file.value.paused = false;
+  aborted.value = false;
+  if (file.value.size > FILE_SIZE) {
+    isUploading.value = false;
+    fileLoad(file);
+  } else {
+    isUploading.value = true;
+    isBigFile.value = false;
+    smallLoad(file.value);
+  }
+
+}
 
 const initFile = () => {
   resume();
@@ -963,7 +963,7 @@ const UploadProgress = (progressEvent, part_number) => {
         averageSpeed.value =
           Number(
             (NUMBER.value - lastNUMBER.value) /
-              (100 * ArrayProgress.value.length * time)
+            (100 * ArrayProgress.value.length * time)
           ) * file.value.size;
       }
       lastTime.value = curTime;
@@ -1001,30 +1001,6 @@ const remove = () => {
     aborted.value = false;
     emits("remove", file.value.id);
     file.value.cancel();
-
-    // const deletReq = new DeleteObjectReq();
-    // const DeleteRequest = new DeleteObjectRequest();
-    // const uploadID = new Upload();
-    // deletReq.setHeader(header);
-
-    // uploadID.setKey(encodeURIComponent(file.value.urlFileName));
-    // uploadID.setUploadid(upload_id.value);
-
-    // DeleteRequest.setCidsList([""]);
-    // DeleteRequest.setObjectType("multipart");
-    // DeleteRequest.setObjectsList([uploadID]);
-    // deletReq.setRequest(DeleteRequest);
-
-    // if (abortController.value)
-    //   abortController.value.abort("Cancel request");
-
-    // client.deleteObject(deletReq, {}, (error, res) => {
-    //   isPause.value = true;
-    //   paused.value = true;
-    //   aborted.value = false;
-    //   emit("remove", file.value.id);
-    //   file.value.cancel();
-    // });
   } else {
     if (abortController.value) abortController.value.abort("Cancel request");
     isPause.value = true;
@@ -1047,7 +1023,7 @@ const processResponse = (message) => {
   let res = message;
   try {
     res = JSON.parse(message);
-  } catch (e) {}
+  } catch (e) { }
   response.value = res;
 };
 const fileEventsHandler = (event, args) => {
@@ -1170,12 +1146,10 @@ onUnmounted(() => {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    171deg,
-    #8388fe 0%,
-    #519ff4 42%,
-    #b783c9 100%
-  ) !important;
+  background: linear-gradient(171deg,
+      #8388fe 0%,
+      #519ff4 42%,
+      #b783c9 100%) !important;
   transform: translateX(-100%);
   overflow: hidden;
 }
@@ -1307,7 +1281,7 @@ onUnmounted(() => {
   width: 10%;
 }
 
-.uploader-file-actions > span {
+.uploader-file-actions>span {
   display: none;
   float: left;
   width: 16px;
@@ -1319,7 +1293,7 @@ onUnmounted(() => {
   background-position: 0 0;
 }
 
-.uploader-file-actions > span:hover {
+.uploader-file-actions>span:hover {
   background-position-x: -21px;
 }
 
