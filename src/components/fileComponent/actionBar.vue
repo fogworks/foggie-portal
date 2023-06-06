@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="action-box">
+    <div v-if="hasChecked" class="action-box">
       <div class="action-item" @click="handlerClick('download')">
         <svg-icon icon-class="download"></svg-icon>
         <span> Download </span>
@@ -25,6 +25,16 @@
         <span> Move </span>
       </div>
     </div>
+    <div class="action-box" v-else>
+      <el-button
+        class="top-btn action-item"
+        @click="upload"
+        key="plain"
+        type="primary"
+        link
+        >Upload +</el-button
+      >
+    </div>
 
     <folderDialog
       v-if="visible"
@@ -36,9 +46,11 @@
 
 <script setup>
 import folderDialog from "./folderDialog.vue";
-import { ref, toRefs } from "vue";
+import { ref, toRefs, inject, computed } from "vue";
+import { useStore } from "vuex";
 const visible = ref(false);
 const actionType = ref("");
+const deviceData = inject("deviceData");
 const props = defineProps({
   checkedData: {
     type: Array,
@@ -53,9 +65,27 @@ const props = defineProps({
     default: "",
   },
 });
+const store = useStore();
 const { checkedData, imgCheckedData, activeName } = toRefs(props);
+const hasChecked = computed(() => {
+  if (activeName.value == "Image") {
+    return Object.keys(imgCheckedData.value).some((key) => {
+      if (imgCheckedData.value[key].length) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  } else {
+    return checkedData.value.length ? true : false;
+  }
+});
 const downLoad = () => {
   console.log(imgCheckedData.value, "imgCheckedDataimgCheckedData");
+};
+const upload = () => {
+  store.commit("upload/setUploadOptions", deviceData);
+  // store.commit("upload/openUpload", deviceData.device_id);
 };
 const handlerClick = (type) => {
   actionType.value = type;
@@ -75,13 +105,20 @@ const handlerClick = (type) => {
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  margin-bottom: 20px;
   border-radius: 99px;
+  transition: all 0.3s;
+  .top-btn {
+    width: unset;
+    font-size: 16px;
+    text-align: left;
+  }
   .action-item {
     position: relative;
     padding: 0 12px;
     height: 32px;
     line-height: 32px;
-    background-color: #f0faff;
+    background-color: #caedff;
     cursor: pointer;
     svg {
       color: $light_blue;
@@ -101,10 +138,16 @@ const handlerClick = (type) => {
       margin-top: -6px;
     }
     &:first-child {
-      border-radius: 99px 0 0 99px;
+      border-top-left-radius: 99px;
+      border-bottom-left-radius: 99px;
+
+      &::after {
+        display: none;
+      }
     }
     &:last-child {
-      border-radius: 0 99px 99px 0;
+      border-top-right-radius: 99px;
+      border-bottom-right-radius: 99px;
     }
   }
   //   :deep {

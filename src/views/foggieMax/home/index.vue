@@ -8,12 +8,17 @@
       :spaceUseSize="spaceUseSize"
     ></DashBoard>
   </div>
-  <FileComponent>
-    <MyFiles
+  <FileComponent
+    :currentOODItem="currentOODItem.data"
+    :orderId="deviceData.order_id"
+    @getUseSize="getUseSize"
+  >
+    <!-- <MyFiles
+      v-model:checkedData="checkedData"
       :currentOODItem="currentOODItem.data"
       :orderId="deviceData.order_id"
       @getUseSize="getUseSize"
-    ></MyFiles>
+    ></MyFiles> -->
   </FileComponent>
 </template>
 
@@ -62,6 +67,7 @@ export default {
         device_id: "",
       },
     });
+    // const checkedData = ref([]);
     const tokenMap = computed(() => store.getters.tokenMap);
     provide("currentOODItem", currentOODItem);
 
@@ -107,6 +113,7 @@ export default {
       spaceUseRate,
       spaceTotal,
       spaceUseSize,
+      // checkedData,
       getUseSize,
     };
   },

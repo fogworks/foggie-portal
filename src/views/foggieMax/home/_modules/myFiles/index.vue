@@ -93,11 +93,13 @@
         style="width: 100%"
         max-height="1000"
         ref="fileTable"
+        @selection-change="handleSelectionChange"
       >
+        <el-table-column type="selection" width="30" />
         <el-table-column
           label="Name"
           show-overflow-tooltip
-          width="440"
+          width="410"
           prop="name"
         >
           <template #default="{ row }">
@@ -283,6 +285,7 @@ const { proxy } = getCurrentInstance();
 const emits = defineEmits([
   // "toggleToUpload",
   "getUseSize",
+  "update:checkedData",
   // "currentPrefix"
 ]);
 const keyWord = ref("");
@@ -357,6 +360,9 @@ const fileTable = ref(null);
 //   // fileTable.value.clearSort();
 //   if (fileTable?.value) fileTable.value.sort(prop, sortOrders[order]);
 // };
+const handleSelectionChange = (val) => {
+  emits("update:checkedData", val);
+};
 const refresh = () => {
   keyWord.value = "";
   // tableSort({ prop: "date", order: 1, key: 1 });
@@ -383,6 +389,7 @@ const getFileList = function (scroll, prefix) {
 };
 
 const initFileData = async (data) => {
+  emits("update:checkedData", []);
   tableData.data = [];
   let commonPrefixesItem = [];
   let contentItem = [];
@@ -837,8 +844,8 @@ const upload = () => {
   // .card-box();
   color: #000;
   background: var(--bg-color);
-  border: var(--theme-border);
-  @include card-box;
+  // border: var(--theme-border);
+  // @include card-box;
 
   :deep {
     .el-breadcrumb {

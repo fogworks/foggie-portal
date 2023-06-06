@@ -14,16 +14,21 @@
 </template>
 
 <script setup>
-import { ref, toRefs, onMounted } from "vue";
+import { ref, toRefs, onMounted, watch } from "vue";
 const props = defineProps({
   srcData: {
     type: Object,
     default: () => {},
   },
+  visible: {
+    type: Boolean,
+    default: false,
+  },
 });
-const { srcData } = toRefs(props);
+const { srcData, visible } = toRefs(props);
 const player = ref("");
-onMounted(() => {
+
+const init = () => {
   player.value = videojs(
     document.getElementById("myVideo"),
     {
@@ -92,7 +97,7 @@ onMounted(() => {
     },
     function () {}
   );
-});
+};
 const changeSrc = (data) => {
   player.value.pause();
 
@@ -104,9 +109,36 @@ const changeSrc = (data) => {
 
   player.value.play();
 };
-onMounted(() => {
-  changeSrc(srcData.value);
-});
+// onMounted(() => {
+//   changeSrc(srcData.value);
+// });
+watch(
+  visible,
+  (val) => {
+    if (val && player.value) {
+      player.value.play();
+    } else if (!val && player.value) {
+      player.value.pause();
+    } else {
+      init();
+    }
+  },
+  {
+    immediate: true,
+  }
+);
+watch(
+  srcData,
+  (val) => {
+    if (val) {
+      changeSrc(val);
+    }
+  },
+  {
+    deep: true,
+    immediate,
+  }
+);
 </script>
 
 <style lang="scss">

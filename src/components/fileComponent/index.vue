@@ -1,17 +1,35 @@
 <template>
-  <div>
+  <div class="card-box">
     <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-      <el-tab-pane label="File" name="File"></el-tab-pane>
-      <el-tab-pane label="Image" name="Image"></el-tab-pane>
+      <el-tab-pane label="All" name="All">
+        <template #label>
+          <svg-icon icon-class="file"></svg-icon>
+          All
+        </template>
+      </el-tab-pane>
+      <el-tab-pane label="Image" name="Image">
+        <template #label>
+          <svg-icon icon-class="picture"></svg-icon>
+          Picture
+        </template>
+      </el-tab-pane>
+      <el-tab-pane label="Video" name="Video">
+        <template #label>
+          <svg-icon icon-class="video"></svg-icon>
+          Video
+        </template>
+      </el-tab-pane>
     </el-tabs>
     <ActionBar
       :activeName="activeName"
       :checkedData="checkedData"
       :imgCheckedData="imgCheckedData.value"
     ></ActionBar>
-    <template v-if="activeName === 'File'">
-      <slot> </slot>
-    </template>
+    <AllFile
+      v-if="activeName === 'All'"
+      v-model:checkedData="checkedData"
+      v-bind="$attrs"
+    ></AllFile>
     <ImgList
       v-else-if="activeName === 'Image'"
       v-model:checkedData="imgCheckedData.value"
@@ -20,10 +38,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, provide } from "vue";
+import { ref, toRefs, reactive, watch, provide } from "vue";
 import ImgList from "./imgList";
+import AllFile from "@/views/foggieMax/home/_modules/myFiles";
 import ActionBar from "./actionBar.vue";
-const activeName = ref("File");
+const activeName = ref("All");
 
 const checkedData = ref([]);
 const imgCheckedData = reactive({
@@ -49,10 +68,24 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-.demo-tabs > .el-tabs__content {
-  padding: 32px;
-  color: #6b778c;
-  font-size: 32px;
-  font-weight: 600;
+.card-box {
+  @include card-box;
+  margin-top: 20px;
+  background-color: var(--bg-color);
+}
+.demo-tabs {
+  :deep {
+    .el-tabs__header {
+      .el-tabs__item {
+        font-size: 24px;
+      }
+      .is-active {
+        color: $light_blue2;
+      }
+      .el-tabs__active-bar {
+        background: $light_blue2;
+      }
+    }
+  }
 }
 </style>

@@ -80,6 +80,7 @@ import {
 import { useStore } from "vuex";
 import { ArrowRight } from "@element-plus/icons-vue";
 import { oodFileList } from "@/utils/api.js";
+import RippleInk from "@/components/rippleInk";
 const { proxy } = getCurrentInstance();
 const store = useStore();
 const props = defineProps({
@@ -93,7 +94,7 @@ const props = defineProps({
   },
 });
 const { visible, actionType } = toRefs(props);
-const activeName = inject("inject");
+const activeName = inject("activeName");
 const checkedData = inject("checkedData");
 const imgCheckedData = inject("imgCheckedData");
 const email = computed(() => store.getters.userInfo?.email);
@@ -183,11 +184,12 @@ const setPrefix = (item, isTop = false) => {
 };
 const handleConfirm = () => {
   if (activeName.value == "Image") {
-    console.log(imgCheckedData, "imgCheckedData");
+    console.log(imgCheckedData.value, "imgCheckedData");
     if (actionType == "cpoy") {
     } else {
     }
-  } else {
+  } else if (activeName.value == "All") {
+    console.log(checkedData.value, "564894984984191984198419841981");
   }
 };
 onMounted(() => {
