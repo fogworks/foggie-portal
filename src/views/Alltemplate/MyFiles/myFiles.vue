@@ -623,7 +623,7 @@ const handleImg = (item, type, isDir) => {
     // port = 8007;
     // let Id = orderId.value;
     // let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
-    imgHttpLink = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
+    imgHttpLink = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&token=${deviceData.value.upload_file_token}`;
   } else {
     isSystemImg = true;
   }
@@ -784,7 +784,7 @@ const downloadItem = (item) => {
   // let Id = orderId.value;
   let Id = deviceData.value.foggie_id;
   let peerId = deviceData.value.peer_id;
-  let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
+  let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&token=${deviceData.value.upload_file_token}`;
   // downloadUrl = 'foggie://12D3KooWC2mwaY7P1u9bvqE2JEvPRKdjUjQdVL7nie18Kdvjvgrf/2142/QmX3bmf4Mbs2nfTYVF5CJw3CGR9eogfGaCUcRWbd9R4WHs'
 
   console.log('-------------------ipcrenderer----download')
@@ -794,7 +794,7 @@ const downloadItem = (item) => {
     fileName: item.name,
   })
 
-  // let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
+  // let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&token=${deviceData.value.upload_file_token}`;
   // var oA = document.createElement("a");
   // oA.download = item.name;
   // oA.href = downloadUrl;
@@ -842,7 +842,7 @@ const getFileList = function (scroll ,prefix) {
 const getReomteData = (scroll, prefix) => {
   let list_prefix = "";
   tableLoading.value = true;
-  let token = "";
+  let token = deviceData.value.upload_file_token;
   let type = "space";
   if (prefix?.length) {
     list_prefix = prefix.join("/");
@@ -1042,6 +1042,7 @@ const initLocalData = (data) => {
 
   tableSort({ prop: "date", order: 1, key: 1 });
 };
+const isSearch = ref(false)
 const doSearch = async () => {
   if (keyWord.value === "") {
     getFileList();
@@ -1049,8 +1050,9 @@ const doSearch = async () => {
     tableLoading.value = true;
     // let orderId = deviceData.value.space_order_id;
     breadcrumbList.prefix = [];
-    let token = store.getters.token;
+    let token = deviceData.value.upload_file_token;
     let type = "space";
+    isSearch.value = true;
     if (fileSource.value) {
       let data = await find_objects(
         email.value,
@@ -1059,6 +1061,7 @@ const doSearch = async () => {
         deviceData.value,
         encodeURIComponent(keyWord.value)
       );
+      isSearch.value = false;
       tableData.data = [];
       if (data.contents) {
         data.content = data.contents;
@@ -1072,6 +1075,7 @@ const doSearch = async () => {
         key: encodeURIComponent(keyWord.value),
       })
         .then((res) => {
+          isSearch.value = false;
           if (res.data[0]?.cid) {
             initLocalData(res);
           } else {
@@ -1083,6 +1087,7 @@ const doSearch = async () => {
           }
         })
         .catch(() => {
+          isSearch.value = false;
           ElNotification({
             type: "error",
             message: "Failed to obtain file information",
@@ -1109,7 +1114,9 @@ const setPrefix = (item, isTop = false) => {
   emits("currentPrefix", breadcrumbList.prefix);
 };
 watch(breadcrumbList, (val) => {
-  getFileList("", val.prefix);
+  if (!isSearch.value) {
+    getFileList("", val.prefix);
+  }
 });
 watch(
   () => currentOODItem,
