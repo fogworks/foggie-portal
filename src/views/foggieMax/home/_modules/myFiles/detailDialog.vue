@@ -42,7 +42,12 @@
         <div v-if="!documentInfo.url" class="no-previewed-tip">
           The current file type cannot be previewed
         </div>
-        <img v-if="documentInfo.url" :src="documentInfo.url" />
+        <VideoPlay
+          v-if="documentInfo.url && detailData.data.type == 'video/mp4'"
+          :srcData="detailData.data"
+        ></VideoPlay>
+
+        <img v-else-if="documentInfo.url" :src="documentInfo.url" />
       </div>
       <div class="action-btn">
         <div>
@@ -76,13 +81,14 @@ import {
   toRefs,
   getCurrentInstance,
 } from "vue";
+import VideoPlay from "@/components/fileComponent/videoPlay";
 import ShareDialog from "./shareDialog";
 import { pIN, shareLink } from "@/utils/api.js";
 import { ElNotification } from "element-plus";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 export default {
-  components: { ShareDialog },
+  components: { ShareDialog, VideoPlay },
   props: {
     visible: {
       type: Boolean,
@@ -115,8 +121,9 @@ export default {
     const documentInfo = reactive({
       title: detailData.data.name,
       idList: detailData.data.idList,
-      url: detailData.data.imgUrlLarge,
+      url: detailData.data.imgUrl,
     });
+    console.log(detailData, "detailData");
     const shareRefContent = reactive({});
     const showShareDialog = ref(false);
     const device_id = currentOODItem.value.data.device_id;
@@ -155,7 +162,9 @@ export default {
         let _key = encodeURIComponent(key);
         let peer_id = deviceData.peer_id;
         let foggieStr = `foggie://${peer_id}/${orderId}/${item.cid}`;
-        let httpStr = `http://${deviceData.rpc.split(':')[0]}/fog/${deviceData.foggie_id}/${item.cid}`;
+        let httpStr = `http://${deviceData.rpc.split(":")[0]}/fog/${
+          deviceData.foggie_id
+        }/${item.cid}`;
         let cyfsStr = item.file_id
           ? `cyfs://o/${ood_id_cyfs}/${item.file_id}`
           : "";
@@ -178,8 +187,8 @@ export default {
         // shareRefContent.value=shareCopyContent
         showShareDialog.value = true;
         // this.shareBoxShow = true;
-      } 
-    }
+      }
+    };
     const downloadItem = () => {
       // let ID = device_id.value;
       // let pubkey = item.pubkey;

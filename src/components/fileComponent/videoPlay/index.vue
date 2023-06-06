@@ -16,12 +16,12 @@
 <script setup>
 import { ref, toRefs, onMounted } from "vue";
 const props = defineProps({
-  src: {
-    type: String,
-    default: "",
+  srcData: {
+    type: Object,
+    default: () => {},
   },
 });
-const { src } = toRefs(props);
+const { srcData } = toRefs(props);
 const player = ref("");
 onMounted(() => {
   player.value = videojs(
@@ -85,7 +85,7 @@ onMounted(() => {
 
       sources: [
         {
-          src: require("@/assets/Vue3-video-play.mp4"),
+          src: srcData.value.url,
           type: "video/mp4",
         },
       ],
@@ -104,6 +104,9 @@ const changeSrc = (data) => {
 
   player.value.play();
 };
+onMounted(() => {
+  changeSrc(srcData.value);
+});
 </script>
 
 <style lang="scss">

@@ -384,9 +384,9 @@ const getFileList = function (scroll, prefix) {
 
 const initFileData = async (data) => {
   tableData.data = [];
-  // let commonPrefixesItem = [];
-  // let contentItem = [];
-  let commonPrefixesItem = data.commonPrefixes?.map((el, i) => {
+  let commonPrefixesItem = [];
+  let contentItem = [];
+  commonPrefixesItem = data?.commonPrefixes?.map((el, i) => {
     return {
       isDir: true,
       name: decodeURIComponent(el),
@@ -415,7 +415,7 @@ const initFileData = async (data) => {
       canShare: false,
     };
   });
-  let contentItem = data.content?.map((el, j) => {
+  contentItem = data.content?.map((el, j) => {
     let date = transferTime(el.lastModified);
     let isDir = false;
     const type = el.key.substring(el.key.lastIndexOf(".") + 1);
@@ -469,7 +469,7 @@ const initFileData = async (data) => {
     };
     // contentItem.push(item);
   });
-  tableData.data = [...commonPrefixesItem, ...contentItem];
+  tableData.data = [...(commonPrefixesItem || []), ...(contentItem || [])];
   emits("getUseSize");
   tableLoading.value = false;
 };
@@ -497,6 +497,11 @@ const handleImg = (type, ID, cid, key, isDir, ip, port, peerId) => {
     imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${ID}&peerId=${peerId}&type=foggie&token=${token}`;
 
     // foggie://peerid/spaceid/cid
+  } else if (type === "mp4") {
+    type = "video";
+    let token = tokenMap.value[deviceData.device_id];
+
+    imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${ID}&peerId=${peerId}&type=foggie&token=${token}`;
   } else {
     isSystemImg = true;
     // imgHttpLink =

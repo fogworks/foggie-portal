@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from "vue";
+import { ref, reactive, watch, provide } from "vue";
 import ImgList from "./imgList";
 import ActionBar from "./actionBar.vue";
 const activeName = ref("File");
@@ -29,6 +29,9 @@ const checkedData = ref([]);
 const imgCheckedData = reactive({
   value: {},
 });
+provide("activeName", activeName);
+provide("checkedData", checkedData);
+provide("imgCheckedData", imgCheckedData);
 const handleClick = (tab, event) => {
   console.log(tab, event);
 };
