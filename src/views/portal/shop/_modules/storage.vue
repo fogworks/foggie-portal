@@ -526,8 +526,8 @@ function loadChainId() {
   });
 }
 function reset() {
-  formLine.quantity = 1;
-  formLine.week = 24;
+  formLine.value.quantity = 1;
+  formLine.value.week = 24;
 }
 onMounted(() => {
   loadCurReferenceRate();
