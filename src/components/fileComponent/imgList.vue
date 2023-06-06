@@ -25,20 +25,39 @@
             >
               <el-checkbox :key="img.id" :label="img.id"></el-checkbox>
               <div class="more-box">
-                <el-dropdown popper-class="more-list">
+                <el-dropdown popper-class="more-list" @command="handleCommand">
                   <svg-icon icon-class="more"></svg-icon>
                   <template #dropdown>
                     <el-dropdown-menu>
-                      <el-dropdown-item :icon="Download"
+                      <el-dropdown-item
+                        :command="{
+                          flag: 'download',
+                          data: img,
+                          pid: item.dateId,
+                        }"
+                        :icon="Download"
                         >Download</el-dropdown-item
                       >
-                      <el-dropdown-item :icon="Delete">
+                      <el-dropdown-item
+                        :command="{
+                          flag: 'delete',
+                          data: img,
+                          pid: item.dateId,
+                        }"
+                        :icon="Delete"
+                      >
                         Delete
                       </el-dropdown-item>
-                      <el-dropdown-item :icon="CopyDocument"
+                      <el-dropdown-item
+                        :command="{ flag: 'copy', data: img, pid: item.dateId }"
+                        :icon="CopyDocument"
                         >Copy</el-dropdown-item
                       >
-                      <el-dropdown-item :icon="Rank">Move</el-dropdown-item>
+                      <el-dropdown-item
+                        :command="{ flag: 'move', data: img, pid: item.dateId }"
+                        :icon="Rank"
+                        >Move</el-dropdown-item
+                      >
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
@@ -70,7 +89,18 @@ import { Download, Delete, CopyDocument, Rank } from "@element-plus/icons-vue";
 const imgCheckedData = reactive({
   value: {},
 });
+// const props = defineProps({
+//   imgCheckedData: {
+//     type: Object,
+//     default:()=>{}
+//   }
+// })
+// const {imgCheckedData}=toRefs(props)
 const emits = defineEmits(["update:checkedData"]);
+const resetChecked = () => {
+  imgCheckedData.value = {};
+  refCheckAll();
+};
 const state = reactive({
   imgData: [
     {
@@ -114,8 +144,20 @@ const handleCheckAllChange = (val, item) => {
 };
 const handleCheckedItemsChange = (val, item) => {
   const checkedCount = val.length;
-  console.log(checkedCount, "checkedCount");
   item.checkAll = checkedCount === item.list.length;
+};
+const handleCommand = ({ flag, data, pid }) => {
+  if (flag == "download") {
+  } else if (flag == "delete") {
+    imgCheckedData.value[pid] = imgCheckedData.value[pid].filter(
+      (el) => el.dateId == pid
+    );
+  } else if (flag == "copy") {
+  } else if (flag == "move") {
+    imgCheckedData.value[pid] = imgCheckedData.value[pid].filter(
+      (el) => el.dateId == pid
+    );
+  }
 };
 watch(
   imgCheckedData,
@@ -130,6 +172,7 @@ watch(
 onMounted(() => {
   refCheckAll();
 });
+defineExpose({ resetChecked });
 </script>
 
 <style lang="scss" scoped>

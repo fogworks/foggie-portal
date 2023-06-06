@@ -16,8 +16,11 @@
         {{ item }}
       </el-breadcrumb-item>
     </el-breadcrumb>
-    <div class="flex justify-between items-center">
-      <el-button
+    <div
+      class="flex justify-between items-center"
+      style="justify-content: flex-end"
+    >
+      <!-- <el-button
         :disabled="!hasSVC"
         class="top-btn"
         @click="upload"
@@ -25,7 +28,7 @@
         type="primary"
         link
         >Upload +</el-button
-      >
+      > -->
       <el-button class="top-btn refresh" @click="refresh" key="plain" link>
         <svg-icon icon-class="refresh" class="refresh-icon"></svg-icon>
         Refresh</el-button
@@ -71,7 +74,7 @@
         ></svg-icon>
         PIN Task List</el-button
       > -->
-      <div>
+      <div style="margin-left: 30px">
         <el-input
           class="search-input"
           v-model="keyWord"
@@ -298,6 +301,7 @@ const deviceData = inject("deviceData");
 const props = defineProps({
   currentOODItem: Object,
   orderId: [String, Number],
+  checkedData: Array,
 });
 const syncDialog = ref(false);
 const taskDisplay = ref(false);
@@ -363,6 +367,9 @@ const fileTable = ref(null);
 const handleSelectionChange = (val) => {
   emits("update:checkedData", val);
 };
+const resetChecked = () => {
+  fileTable.value.clearSelection();
+};
 const refresh = () => {
   keyWord.value = "";
   // tableSort({ prop: "date", order: 1, key: 1 });
@@ -390,6 +397,7 @@ const getFileList = function (scroll, prefix) {
 
 const initFileData = async (data) => {
   emits("update:checkedData", []);
+  fileTable.value.clearSelection();
   tableData.data = [];
   let commonPrefixesItem = [];
   let contentItem = [];
@@ -821,7 +829,7 @@ watch(
 onMounted(() => {
   refresh();
 });
-defineExpose({ doSearch });
+defineExpose({ doSearch, resetChecked });
 const upload = () => {
   store.commit("upload/setUploadOptions", deviceData);
   // store.commit("upload/openUpload", deviceData.device_id);

@@ -22,15 +22,18 @@
     </el-tabs>
     <ActionBar
       :activeName="activeName"
-      :checkedData="checkedData"
-      :imgCheckedData="imgCheckedData.value"
+      v-model:checkedData="checkedData"
+      v-model:imgCheckedData="imgCheckedData.value"
+      @reset="reset"
     ></ActionBar>
     <AllFile
       v-if="activeName === 'All'"
       v-model:checkedData="checkedData"
       v-bind="$attrs"
+      ref="AllFileRef"
     ></AllFile>
     <ImgList
+      ref="ImgListRef"
       v-else-if="activeName === 'Image'"
       v-model:checkedData="imgCheckedData.value"
     ></ImgList>
@@ -43,6 +46,8 @@ import ImgList from "./imgList";
 import AllFile from "@/views/foggieMax/home/_modules/myFiles";
 import ActionBar from "./actionBar.vue";
 const activeName = ref("All");
+const AllFileRef = ref(null);
+const ImgListRef = ref(null);
 
 const checkedData = ref([]);
 const imgCheckedData = reactive({
@@ -51,6 +56,15 @@ const imgCheckedData = reactive({
 provide("activeName", activeName);
 provide("checkedData", checkedData);
 provide("imgCheckedData", imgCheckedData);
+const reset = () => {
+  checkedData.value = [];
+  imgCheckedData.value = {};
+  if (activeName.value === "All") {
+    AllFileRef.value.resetChecked();
+  } else if (activeName.value === "Image") {
+    ImgListRef.value.resetChecked();
+  }
+};
 const handleClick = (tab, event) => {
   console.log(tab, event);
 };

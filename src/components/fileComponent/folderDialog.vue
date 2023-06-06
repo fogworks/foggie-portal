@@ -164,7 +164,7 @@ const toDetail = (item) => {
     // emits("currentPrefix", breadcrumbList.prefix);
   }
 };
-const emits = defineEmits(["update:visible"]);
+const emits = defineEmits(["update:visible", "resetChecked"]);
 const beforeClose = () => {
   emits("update:visible", false);
 };
@@ -187,8 +187,11 @@ const handleConfirm = () => {
     console.log(imgCheckedData.value, "imgCheckedData");
     if (actionType == "cpoy") {
     } else {
+      emits("resetChecked");
     }
   } else if (activeName.value == "All") {
+    emits("resetChecked");
+
     console.log(checkedData.value, "564894984984191984198419841981");
   }
 };

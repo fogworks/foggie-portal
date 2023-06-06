@@ -16,7 +16,7 @@
         <svg-icon icon-class="rename"></svg-icon>
         <span> Rename </span>
       </div>
-      <div class="action-item">
+      <div class="action-item" @click="handlerClick('copy')">
         <svg-icon icon-class="copy"></svg-icon>
         <span> Copy </span>
       </div>
@@ -40,6 +40,7 @@
       v-if="visible"
       v-model:visible="visible"
       :actionType="actionType"
+      @resetChecked="resetChecked"
     ></folderDialog>
   </div>
 </template>
@@ -65,6 +66,11 @@ const props = defineProps({
     default: "",
   },
 });
+const emits = defineEmits([
+  "update:checkedData",
+  "update:imgCheckedData",
+  "reset",
+]);
 const store = useStore();
 const { checkedData, imgCheckedData, activeName } = toRefs(props);
 const hasChecked = computed(() => {
@@ -87,6 +93,9 @@ const upload = () => {
   store.commit("upload/setUploadOptions", deviceData);
   // store.commit("upload/openUpload", deviceData.device_id);
 };
+const resetChecked = () => {
+  emits("reset");
+};
 const handlerClick = (type) => {
   actionType.value = type;
   if (type === "move" || type === "copy") {
@@ -94,6 +103,7 @@ const handlerClick = (type) => {
   } else if (type === "download") {
     downLoad();
   } else if (type === "delete") {
+    resetChecked();
   } else if (type === "rename") {
   } else if (type === "copy") {
   }
