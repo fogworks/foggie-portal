@@ -18,7 +18,7 @@
             :options="spacePieOption.data"
           ></MyEcharts>
         </div>
-        <div class="use-rate">Use Rate: {{ spaceUseRate * 100 }}%</div>
+        <div class="use-rate">Use Rate: {{ (spaceUseRate * 100).toFixed(2) }}%</div>
         <div class="total">Total space {{ spaceTotal }}GB</div>
       </div>
     </div>
