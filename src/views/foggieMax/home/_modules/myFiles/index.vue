@@ -785,11 +785,15 @@ const setPrefix = (item, isTop = false) => {
       if (el === item) targetIndex = index;
       return index <= targetIndex;
     });
+    let len =  breadcrumbList.prefix.length;
+    if (len > 0 && breadcrumbList.prefix[len  - 1] !== '') {
+      breadcrumbList.prefix.push('');
+    }
   }
   // emits("currentPrefix", breadcrumbList.prefix);
 };
 watch(breadcrumbList, (val) => {
-  // getFileList("", val.prefix);
+  getFileList("", val.prefix);
 });
 watch(
   () => currentOODItem,

@@ -47,6 +47,7 @@ module.exports = defineConfig({
         },
         win: {
           icon: "public/f1.ico",
+          target: "nsis"
         },
       },
       customFileProtocol: './'
