@@ -144,23 +144,23 @@
               class="formBox clearfix"
               style="margin-left: 20px; margin-top: 15px"
             >
-              <el-input
+              <el-input-number
                 v-model="formLine.prestoreDMC"
-                maxlength="6"
+                :max="999999"
+                :min="(orderDetail.total - orderDetail.deposit).toFixed(4)"
+                :controls="false"
+                :precision="4"
                 :placeholder="`Minimum ${(
                   orderDetail.total - orderDetail.deposit
                 ).toFixed(4)}`"
                 style="width: 270px"
-                @input="inputPrestoreDMC"
+                @change="inputPrestoreDMC"
                 @blur="blurPrestoreDMC"
               >
-                <template #prefix>
-                  <svg-icon icon-class="search2" size="25"></svg-icon>
-                </template>
                 <template #suffix>
                   <span style="font-size: 16px">DMC</span>
                 </template>
-              </el-input>
+              </el-input-number>
               <div
                 style="
                   margin-left: 15px;
@@ -352,7 +352,6 @@ function blurPrestoreDMC() {
 }
 
 function inputPrestoreDMC(text) {
-  text = text.replace(/[^0-9\.]/g, "");
   state.formLine.prestoreDMC = text;
   state.orderDetail.week = Math.round(
     text / (state.orderDetail.price * state.formLine.quantity)
