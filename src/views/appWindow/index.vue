@@ -280,13 +280,13 @@ onMounted(async () => {
     // overflow-y: auto;
     box-sizing: border-box;
     // height: 100%;
-    height: 100%;
+    height: calc(100% - 60px);
     width: 240px;
     // padding: 0 10px;
     // float: right;
-    position: absolute;
-    top: 0px;
-    right: 0px;
+    position: fixed;
+    top: 30px;
+    right: 20px;
     transition: all 0.5s;
 
     border-radius: 20px;

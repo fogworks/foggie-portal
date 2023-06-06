@@ -8,7 +8,6 @@ import 'element-plus/theme-chalk/dark/css-vars.css'
 import router from "./router";
 import store from "./store";
 import uploader from "vue-simple-uploader";
-
 import 'normalize.css/normalize.css'
 import '../src/static/style/index.scss'
 

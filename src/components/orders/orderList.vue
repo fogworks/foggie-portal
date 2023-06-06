@@ -737,7 +737,7 @@ function popoverClick(type, item) {
   }
   if (type == "submitMerkle") {
     ElMessageBox.confirm(
-      "<Strong>Are you sure to upload Merkle?</Strong> <br /><span>This behavior is to verify the reliability of the storage provider and is also a prerequisite for conducting storage challenges without payment. <br/> If there is any inconsistency, you can choose to refund. <br /> <strong>Once Merkle reaches an agreement, revenue can be generated.</strong> </span>",
+      "<Strong>Are you sure to upload Merkle?</Strong> <br /><span>This behavior is to verify the reliability of the storage provider and is also a prerequisite for conducting storage challenges without payment. <br/> If there is any inconsistency, you can choose to refund. <br /> <strong>Once Merkle reaches an agreement, revenue can be generated.</strong><br/> It takes a while to calculate the merkle tree.  The larger the space, the longer the calculation time.  It is estimated that the calculation of 1GB of space will take 1 minute.  After the calculation is completed, it will be automatically submitted merkle tree.  During the calculation process, files cannot be uploaded, challenges cannot be initiated, and merkle calculations cannot be started again.</span>",
       "Warning",
       {
         confirmButtonText: "OK",
@@ -755,7 +755,7 @@ function popoverClick(type, item) {
           if (res.code == 200) {
             ElMessage({
               showClose: true,
-              message: "The Merkle tree is uploaded successfully!",
+              message: "Calculating Merkle tree!",
               type: "success",
               grouping: true,
             });
