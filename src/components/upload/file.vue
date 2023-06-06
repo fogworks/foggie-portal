@@ -114,7 +114,7 @@ import {
   SaveFile,
   isCanUpload_Api,
 } from "@/api/upload";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 const FILE_SIZE = 10 * 1024 * 1024;
 const simultaneousUploads = 4;
 const maxChunkRetries = 3;
@@ -394,6 +394,20 @@ const resume = async () => {
     let res = await isCanUpload_Api(params);
     if (res.code == 200 && res.data) {
       // 可以上传
+    } else if (res.code == 30039) {
+      ElMessageBox.confirm(
+        "duplicate file name, are you sure to overwrite?",
+        "Warning",
+        {
+          confirmButtonText: "OK",
+          cancelButtonText: "Cancel",
+          type: "warning",
+        }
+      )
+        .then(() => {})
+        .catch(() => {
+          remove();
+        });
     } else {
       fileError();
       return;
@@ -1001,30 +1015,6 @@ const remove = () => {
     aborted.value = false;
     emits("remove", file.value.id);
     file.value.cancel();
-
-    // const deletReq = new DeleteObjectReq();
-    // const DeleteRequest = new DeleteObjectRequest();
-    // const uploadID = new Upload();
-    // deletReq.setHeader(header);
-
-    // uploadID.setKey(encodeURIComponent(file.value.urlFileName));
-    // uploadID.setUploadid(upload_id.value);
-
-    // DeleteRequest.setCidsList([""]);
-    // DeleteRequest.setObjectType("multipart");
-    // DeleteRequest.setObjectsList([uploadID]);
-    // deletReq.setRequest(DeleteRequest);
-
-    // if (abortController.value)
-    //   abortController.value.abort("Cancel request");
-
-    // client.deleteObject(deletReq, {}, (error, res) => {
-    //   isPause.value = true;
-    //   paused.value = true;
-    //   aborted.value = false;
-    //   emit("remove", file.value.id);
-    //   file.value.cancel();
-    // });
   } else {
     if (abortController.value) abortController.value.abort("Cancel request");
     isPause.value = true;
