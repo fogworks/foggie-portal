@@ -448,10 +448,15 @@ const initFileData = async (data) => {
   // tableData.data = [];
   // let commonPrefixesItem = [];
   // let contentItem = [];
+  let dir = breadcrumbList.prefix.join('/')
   let commonPrefixesItem = data.commonPrefixes?.map((el, i) => {
+    let name = decodeURIComponent(el);
+    if (data.prefix) {
+      name = name.split(data.prefix)[1];
+    }
     return {
       isDir: true,
-      name: decodeURIComponent(el),
+      name,
       key: el,
       idList: [
         {
@@ -812,7 +817,8 @@ const detailData = reactive({ data: {} });
 const toDetail = (item) => {
   localStorage.setItem("currentOODItem", JSON.stringify(currentOODItem.value));
   if (item.type === "application/x-directory") {
-    breadcrumbList.prefix = item.name.split("/");
+    let long_name = breadcrumbList.prefix.join('/') + item.name;
+    breadcrumbList.prefix = long_name.split("/");
     // emits("currentPrefix", breadcrumbList.prefix);
   } else {
     detailData.data = item;
