@@ -93,6 +93,10 @@
         style="width: 100%"
         max-height="1000"
         ref="fileTable"
+        v-el-table-infinite-scroll="fileListsInfinite"
+        :infinite-scroll-immediate="false"
+        infinite-scroll-distance="150px"
+        :infinite-scroll-disabled="false"
       >
         <el-table-column
           label="Name"
@@ -299,6 +303,7 @@
 </template>
 
 <script setup>
+import { default as vElTableInfiniteScroll } from "el-table-infinite-scroll";
 import { ArrowRight } from "@element-plus/icons-vue";
 import {
   reactive,
@@ -326,6 +331,8 @@ import DetailDialog from "./detailDialog";
 import { getfilesize, transferTime } from "@/utils/util.js";
 import { useStore } from "vuex";
 import setting from "@/setting";
+import _ from "lodash";
+
 const { baseUrl } = setting;
 
 const { proxy } = getCurrentInstance();
@@ -398,6 +405,7 @@ const activeSort = ref("1");
 let breadcrumbList = reactive({
   prefix: [],
 });
+const continuationToken = ref("");
 const fileTable = ref(null);
 
 // const tableSort = ({ prop = "", order = 2, key = "" }) => {
@@ -427,7 +435,7 @@ const getFileList = function (scroll, prefix) {
   tableLoading.value = true;
   let token = tokenMap.value[deviceData.device_id];
   let type = "foggie";
-  oodFileList(email.value, type, token, deviceData, list_prefix)
+  oodFileList(email.value, type, token, deviceData, list_prefix, scroll)
     .then((res) => {
       if (res && res.content) {
         initFileData(res);
@@ -437,7 +445,7 @@ const getFileList = function (scroll, prefix) {
 };
 
 const initFileData = async (data) => {
-  tableData.data = [];
+  // tableData.data = [];
   // let commonPrefixesItem = [];
   // let contentItem = [];
   let commonPrefixesItem = data.commonPrefixes?.map((el, i) => {
@@ -526,6 +534,13 @@ const initFileData = async (data) => {
   if (!commonPrefixesItem) {
     commonPrefixesItem = [];
   }
+
+  if (data.isTruncated) {
+    continuationToken.value = data.continuationToken;
+  } else {
+    continuationToken.value = '';
+  }
+
   tableData.data = [...commonPrefixesItem, ...contentItem];
   emits("getUseSize");
   tableLoading.value = false;
@@ -851,6 +866,12 @@ const setPrefix = (item, isTop = false) => {
   }
   // emits("currentPrefix", breadcrumbList.prefix);
 };
+const fileListsInfinite = _.debounce(() => {
+  if (continuationToken.value && tableData.data.length < 5000) {
+    getFileList(continuationToken.value, breadcrumbList.prefix);
+  }
+}, 300);
+
 watch(breadcrumbList, (val) => {
   if (!isSearch.value) {
     getFileList("", val.prefix);

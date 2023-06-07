@@ -389,6 +389,7 @@ const props = defineProps({
 });
 const syncDialog = ref(false);
 const taskDisplay = ref(false);
+const continuationToken = ref("");
 const closeRightUpload = () => {
   taskDisplay.value = false;
 };
@@ -462,11 +463,14 @@ function openUpload() {
 
 /* */
 const fileListsInfinite = _.debounce(() => {
-  if (tableData.total > tableData.data.length) {
-    tableData.pageNum += 1;
-    getFileList();
-  } else {
-    return;
+  // if (tableData.total > tableData.data.length) {
+  //   tableData.pageNum += 1;
+  //   getFileList();
+  // } else {
+  //   return;
+  // }
+  if (fileSource.value && continuationToken.value && tableData.data.length < 5000) {
+    getReomteData(continuationToken.value, breadcrumbList.prefix);
   }
 }, 300);
 
@@ -882,7 +886,7 @@ const getReomteData = (scroll, prefix) => {
   if (prefix?.length) {
     list_prefix = prefix.join("/");
   }
-  oodFileList(email.value, type, token, deviceData.value, list_prefix)
+  oodFileList(email.value, type, token, deviceData.value, list_prefix, scroll)
     .then((res) => {
       if (res && res.content) {
         initRemoteData(res);
@@ -915,7 +919,7 @@ const initRemoteData = (data) => {
     });
   }
 
-  tableData.data = [];
+  // tableData.data = [];
   for (let i = 0; i < data.commonPrefixes?.length; i++) {
     let item = {
       isDir: true,
@@ -995,6 +999,12 @@ const initRemoteData = (data) => {
       isPersistent,
     };
     tableData.data.push(item);
+  }
+
+  if (data.isTruncated) {
+    continuationToken.value = data.continuationToken;
+  } else {
+    continuationToken.value = '';
   }
 
   tableLoading.value = false;
