@@ -27,7 +27,7 @@
     </div>
     <template v-else>
       <div style="display: flex; align-items: center">
-        <div class="action-box" style="margin-right: 20px">
+        <div class="action-box" style="margin-right: 20px; margin-bottom: 0">
           <el-button
             class="top-btn action-item"
             style="background-color: dodgerblue; color: #fff"
@@ -38,7 +38,11 @@
             >Upload +</el-button
           >
         </div>
-        <div class="action-box" v-if="activeName !== 'Image'">
+        <div
+          class="action-box"
+          style="margin-right: 20px; margin-bottom: 0"
+          v-if="activeName == 'All'"
+        >
           <div class="action-item" @click="handlerClick('newFolder')">
             <svg-icon icon-class="new_folder"></svg-icon>
             <span> New folder </span>
