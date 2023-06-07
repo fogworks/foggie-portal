@@ -1,12 +1,34 @@
 <template>
   <div class="uploader-file" :status="status">
-    <slot :file="file" :list="list" :status="status" :paused="paused" :error="error" :response="response"
-      :average-speed="averageSpeed" :formated-average-speed="formatedAverageSpeed" :current-speed="currentSpeed"
-      :is-complete="isComplete" :is-uploading="isUploading" :size="size" :formated-size="formatedSize"
-      :uploaded-size="uploadedSize" :progress="progress" :progress-style="progressStyle"
-      :progressing-class="progressingClass" :time-remaining="timeRemaining"
-      :formated-time-remaining="formatedTimeRemaining" :type="type" :extension="extension" :file-category="fileCategory">
-      <div class="uploader-file-progress" :class="progressingClass" :style="progressStyle" />
+    <slot
+      :file="file"
+      :list="list"
+      :status="status"
+      :paused="paused"
+      :error="error"
+      :response="response"
+      :average-speed="averageSpeed"
+      :formated-average-speed="formatedAverageSpeed"
+      :current-speed="currentSpeed"
+      :is-complete="isComplete"
+      :is-uploading="isUploading"
+      :size="size"
+      :formated-size="formatedSize"
+      :uploaded-size="uploadedSize"
+      :progress="progress"
+      :progress-style="progressStyle"
+      :progressing-class="progressingClass"
+      :time-remaining="timeRemaining"
+      :formated-time-remaining="formatedTimeRemaining"
+      :type="type"
+      :extension="extension"
+      :file-category="fileCategory"
+    >
+      <div
+        class="uploader-file-progress"
+        :class="progressingClass"
+        :style="progressStyle"
+      />
       <div class="uploader-file-info">
         <div class="uploader-file-name" :title="file.name">
           <img class="iconfont-uploadType" :src="fileIcon" />
@@ -34,13 +56,27 @@
           </span>
         </div>
         <div class="uploader-file-actions" v-if="status !== 'success'">
-          <span class="uploader-file-pause" v-show="isBigFile" @click="pause()" />
-          <span class="uploader-file-resume" v-show="!ISCIDING" @click="resume()" />️
+          <span
+            class="uploader-file-pause"
+            v-show="isBigFile"
+            @click="pause()"
+          />
+          <span
+            class="uploader-file-resume"
+            v-show="!ISCIDING"
+            @click="resume()"
+          />️
           <span class="uploader-file-retry" @click="retry()" />
           <span class="uploader-file-remove" @click="remove()" />
         </div>
-        <div class="uploader-file-actions" v-if="status === 'success'" @click="fileShare">
-          <div style="color: #3f2dec; text-decoration: underline; cursor: pointer">
+        <div
+          class="uploader-file-actions"
+          v-if="status === 'success'"
+          @click="fileShare"
+        >
+          <div
+            style="color: #3f2dec; text-decoration: underline; cursor: pointer"
+          >
             Share
           </div>
         </div>
@@ -83,15 +119,7 @@ const FILE_SIZE = 10 * 1024 * 1024;
 const simultaneousUploads = 4;
 const maxChunkRetries = 3;
 
-const emits = defineEmits([
-  "fileShare",
-  "fileDetail",
-  "chanStatus",
-  "uploadComplete",
-  "getStatus",
-  "getProgress",
-  "remove",
-]);
+const emits = defineEmits(["fileShare", "chanStatus", "remove"]);
 const props = defineProps({
   file: {
     type: Object,
@@ -330,19 +358,17 @@ const resume = () => {
     let number = 0;
     for (const item of curFileList.value) {
       if (item.id == file.value.id) continue;
-      if (!item.completed) {
-        if (item.error || item.paused) {
-        } else {
-          number++;
+      if (item.fileUploading) {
+        number++;
+        if (number >= MAX_UPLOAD_NUM.value) {
+          ElMessage({
+            message: `Maximum allowed to upload ${MAX_UPLOAD_NUM.value} files simultaneously`,
+            type: "warning",
+            grouping: true,
+          });
+          return false;
         }
       }
-    }
-    if (number >= MAX_UPLOAD_NUM.value) {
-      ElMessage({
-        message: `Maximum allowed to upload ${MAX_UPLOAD_NUM.value} files simultaneously`,
-        type: "warning",
-      });
-      return;
     }
   }
 
@@ -355,7 +381,6 @@ const resume = () => {
       foggieToken: file.value.foggieToken ? file.value.foggieToken : "",
     };
 
-
     if (timer.value) clearTimeout(timer.value), (timer.value = null);
     timer.value = setTimeout(async () => {
       if (NUMBER_timer.value)
@@ -363,7 +388,7 @@ const resume = () => {
       let res = await isCanUpload_Api(params);
 
       if (res.code == 200 && res.data) {
-        beginUpload()
+        beginUpload();
         // 可以上传
       } else if (res.code == 30039) {
         ElMessageBox.confirm(
@@ -376,7 +401,7 @@ const resume = () => {
           }
         )
           .then(() => {
-            beginUpload()
+            beginUpload();
           })
           .catch(() => {
             remove();
@@ -385,25 +410,15 @@ const resume = () => {
         fileError();
         return;
       }
-
-
     }, 600);
-
-
-
-
-
+  } else {
+    beginUpload();
   }
-
-
 };
-
-
 
 function beginUpload() {
   isFirst.value = false;
-
-
+  file.value.fileUploading = true;
   averageSpeed.value = 0;
 
   isPause.value = false;
@@ -418,7 +433,6 @@ function beginUpload() {
     isBigFile.value = false;
     smallLoad(file.value);
   }
-
 }
 
 const initFile = () => {
@@ -476,13 +490,12 @@ async function Save_File() {
 }
 
 const toPath = () => {
-  console.log(file.value);
+  // console.log(file.value);
 
   // const folderPath = "/path/to/folder";
 
   // // 使用remote模块调用操作系统的文件管理器打开文件夹
   // remote.shell.openItem(folderPath);
-  // emits("fileDetail", file.value);
 };
 const actionCheck = () => {
   paused.value = file.value.paused;
@@ -594,6 +607,7 @@ const pause = () => {
     blobFileArray[item.partId - 1].complete = false;
   }
   curUploadList.value = [];
+  file.value.fileUploading = false;
 
   emits("chanStatus", data);
   if (abortController.value) {
@@ -629,13 +643,12 @@ const smallLoad = async (smallFile) => {
   fileUpload(form, abortController.value, UploadProgress)
     .then(async (res) => {
       if (res.code == 200) {
-        console.log(123);
         let succeed = await Save_File();
         if (!succeed) {
           fileError();
           return;
         }
-        console.log(456);
+        file.value.fileUploading = false;
         progress.value = 100;
         completed.value = true;
         let data = {
@@ -645,7 +658,6 @@ const smallLoad = async (smallFile) => {
         };
         emits("chanStatus", data);
         file.value.completed = true;
-        emits("uploadComplete", "Upload Success");
       } else {
         fileError();
       }
@@ -705,7 +717,6 @@ const fileLoad = async (file) => {
               type: "completed",
             };
             emits("chanStatus", data);
-            emits("getStatus", "Upload Success");
           } else {
             fileError();
           }
@@ -751,11 +762,8 @@ const multipartUpload = () => {
     };
   }
 
-  emits("getStatus", "Uploading...");
-
   if (uploadSucceedNumber.value == blobFileArray.length) {
     if (blobFileArray.every((item) => item.complete == true)) {
-      console.log("上传完了");
       fileCompletes();
     }
   }
@@ -907,22 +915,21 @@ function fileCompletes() {
       if (res.code == 200) {
         let data = {
           id: file.value.id,
+
           completed: true,
           type: "completed",
         };
-        console.log(123);
         let succeed = await Save_File();
         if (!succeed) {
           fileError();
           return;
         }
+        file.value.fileUploading = false;
 
         emits("chanStatus", data);
         file.value.completed = true;
         progress.value = 100;
         completed.value = true;
-        emits("getStatus", "Upload Success");
-        emits("uploadComplete", "Upload Success");
       } else {
         console.log("error");
         fileError();
@@ -935,7 +942,7 @@ function fileCompletes() {
 }
 
 const UploadProgress = (progressEvent, part_number) => {
-  console.log(progressEvent, "----------", part_number);
+  // console.log(progressEvent, "----------", part_number);
   if (part_number) {
     let number = ArrayProgress.value[part_number - 1];
     if (number < (progressEvent.loaded / progressEvent.total) * 100) {
@@ -963,7 +970,7 @@ const UploadProgress = (progressEvent, part_number) => {
         averageSpeed.value =
           Number(
             (NUMBER.value - lastNUMBER.value) /
-            (100 * ArrayProgress.value.length * time)
+              (100 * ArrayProgress.value.length * time)
           ) * file.value.size;
       }
       lastTime.value = curTime;
@@ -1007,11 +1014,12 @@ const remove = () => {
     paused.value = true;
     aborted.value = false;
 
-    emits("remove", file.value.id);
+    emits("remove", file.value.id,file.value.orderId);
     file.value.cancel();
   }
 };
 const retry = () => {
+  file.value.fileUploading = true;
   file.value.error = false;
   error.value = false;
   isComplete.value = true;
@@ -1023,7 +1031,7 @@ const processResponse = (message) => {
   let res = message;
   try {
     res = JSON.parse(message);
-  } catch (e) { }
+  } catch (e) {}
   response.value = res;
 };
 const fileEventsHandler = (event, args) => {
@@ -1069,6 +1077,8 @@ const fileError = () => {
     error: true,
     type: "error",
   };
+  file.value.fileUploading = false;
+
   emits("chanStatus", data);
   file.value.error = true;
   error.value = true;
@@ -1146,10 +1156,12 @@ onUnmounted(() => {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: linear-gradient(171deg,
-      #8388fe 0%,
-      #519ff4 42%,
-      #b783c9 100%) !important;
+  background: linear-gradient(
+    171deg,
+    #8388fe 0%,
+    #519ff4 42%,
+    #b783c9 100%
+  ) !important;
   transform: translateX(-100%);
   overflow: hidden;
 }
@@ -1281,7 +1293,7 @@ onUnmounted(() => {
   width: 10%;
 }
 
-.uploader-file-actions>span {
+.uploader-file-actions > span {
   display: none;
   float: left;
   width: 16px;
@@ -1293,7 +1305,7 @@ onUnmounted(() => {
   background-position: 0 0;
 }
 
-.uploader-file-actions>span:hover {
+.uploader-file-actions > span:hover {
   background-position-x: -21px;
 }
 

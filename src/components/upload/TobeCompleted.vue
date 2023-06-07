@@ -25,6 +25,7 @@ import { ElMessage } from 'element-plus'
 import { useStore } from "vuex";
 const formatedSize = ref()
 const store = useStore()
+const emits = defineEmits(['deleteAllFileList'])
 const props = defineProps({
   curFile: {
     type: Object,
@@ -38,6 +39,7 @@ const props = defineProps({
   }
 })
 const { curFile } = toRefs(props)
+
 formatedSize.value = curFile.value["getFormatSize"]();
 const fileIconArr = ref({
   image: require("@/assets/fileType/icon_img.svg"),
@@ -108,6 +110,7 @@ let fileIcon = computed(() => {
 });
 
 function remove() {
+  emits('deleteAllFileList',curFile.value.id)
   let uploadFileList = store.state.upload.uploadFileList[props.orderID]
   store.state.upload.uploadFileList[props.orderID] = uploadFileList.filter(item => item.id != curFile.value.id)
 }

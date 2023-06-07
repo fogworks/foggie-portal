@@ -1,71 +1,73 @@
 <template>
-  <div class="upload_dialog" @click="closeUploadBox" v-show="uploadIsShow">
-    <!-- my_top_upload -->
-    <div class="upload_dialog_wrap vood_dialog_wrap" @click.stop="">
-      <div>
-        <!-- my_top_uploadText my_top_uploadTitle -->
-        <div class="upload_dialog_title">Publish</div>
-        <div class="my_top_uploadText">
-          Support single file and directory upload. The maximum upload size of a
-          single file is 2GB. If there are large files, you can choose to slice
-          them with tools before uploading
-        </div>
-        <!-- <div class="my_top_uploadText">The OOD you have chosen is: 456</div> -->
-        <div class="today-right">
-          <div class="color-box">
-            <el-button @click="allFileListDrawer = true"> File List </el-button>
+  <div>
+    <div class="upload_dialog" @click="closeUploadBox" v-show="uploadIsShow">
+      <!-- my_top_upload -->
+      <div class="upload_dialog_wrap vood_dialog_wrap" @click.stop="">
+        <div>
+          <!-- my_top_uploadText my_top_uploadTitle -->
+          <div class="upload_dialog_title">Publish</div>
+          <div class="my_top_uploadText">
+            Support single file and directory upload. The maximum upload size of
+            a single file is 2GB. If there are large files, you can choose to
+            slice them with tools before uploading
+          </div>
+          <!-- <div class="my_top_uploadText">The OOD you have chosen is: 456</div> -->
+          <div class="today-right">
+            <div class="color-box">
+              <el-button @click="allFileListDrawer = true">
+                File List
+              </el-button>
+            </div>
           </div>
         </div>
-      </div>
-      <uploader
-        style="position: relative"
-        ref="uploader"
-        class="uploader-app"
-        :multiple="true"
-        :options="options"
-        :auto-start="false"
-        :file-status-text="fileStatusText"
-        @files-added="onFilesAdded"
-        @file-added="onFileAdded"
-      >
-        <uploader-unsupport />
-        <uploader-drop>
-          <uploader-btn class="uploader-btn" :single="false"
-            >Select File</uploader-btn
-          >
-          <uploader-btn class="uploader-btn" :directory="true" :single="false"
-            >Select a folder</uploader-btn
-          >
-        </uploader-drop>
-      </uploader>
-
-      <template
-        v-for="(uploadList, key) in uploadFileList"
-        :key="key"
-        style="height: 100%"
-      >
-        <fileList
-          @fileShare="fileShare"
-          @fileDetail="fileDetail"
-          :orderID="key"
-          :ref="`fileListRef_${key}`"
-          v-model:uploadLists="uploadFileList[key]"
-          v-show="key == orderId"
-          :deviceType="deviceType"
+        <uploader
+          style="position: relative"
+          ref="uploader"
+          class="uploader-app"
+          :multiple="true"
+          :options="options"
+          :auto-start="false"
+          :file-status-text="fileStatusText"
+          @files-added="onFilesAdded"
+          @file-added="onFileAdded"
         >
-        </fileList>
-      </template>
-    </div>
-  </div>
+          <uploader-unsupport />
+          <uploader-drop>
+            <uploader-btn class="uploader-btn" :single="false"
+              >Select File</uploader-btn
+            >
+            <uploader-btn class="uploader-btn" :directory="true" :single="false"
+              >Select a folder</uploader-btn
+            >
+          </uploader-drop>
+        </uploader>
 
-  <el-drawer
-    v-model="allFileListDrawer"
-    title="To be completed File list"
-    direction="rtl"
-    size="50%"
-  >
-    <div class="uploader-list">
- 
+        <template
+          v-for="(uploadList, key) in uploadFileList"
+          :key="key"
+          style="height: 100%"
+        >
+          <fileList
+            @fileShare="fileShare"
+            @newQueueID="newQueueID"
+            :orderID="key"
+            :ref="`fileListRef_${key}`"
+            v-model:uploadLists="uploadFileList[key]"
+            v-show="key == orderId"
+            :deviceType="deviceType"
+          >
+          </fileList>
+        </template>
+      </div>
+    </div>
+
+    <el-drawer
+      v-model="allFileListDrawer"
+      title="To be completed File list"
+      direction="rtl"
+      size="50%"
+    >
+      <div class="uploader-list">
         <div class="uploader-file-info head-info">
           <div class="uploader-file-name" style="width: 30%">File Name</div>
           <div class="uploader-file-prefix" style="width: 35%">Upload Path</div>
@@ -74,17 +76,21 @@
         </div>
 
         <div class="TobeCompletedBox">
-          <TobeCompleted
-            v-for="(curFile, index) in allFileList"
+          <template
+            v-for="(curFile, index) in allFileList[orderId]"
             :key="curFile.id"
-            :curFile="curFile"
-            :orderID="orderId"
           >
-          </TobeCompleted>
+            <TobeCompleted
+              @deleteAllFileList="deleteAllFileList"
+              :curFile="curFile"
+              :orderID="orderId"
+            >
+            </TobeCompleted>
+          </template>
         </div>
- 
-    </div>
-  </el-drawer>
+      </div>
+    </el-drawer>
+  </div>
 </template>
 
 <script setup>
@@ -99,48 +105,21 @@ import {
   getCurrentInstance,
 } from "vue";
 import fileList from "../upload/fileList.vue";
-// import uploader from "vue-simple-uploader";
 import { useStore } from "vuex";
-import { ElMessage } from "element-plus";
+import { ElMessage,ElMessageBox } from "element-plus";
 import TobeCompleted from "@/components/upload/TobeCompleted.vue";
-import { APIClient } from "@/pb/node_grpc_web_pb";
 const _this = getCurrentInstance();
 const emit = defineEmits(["fileShare"]);
 const currentPath = ref("");
-const fileListRef = ref();
 const allFileListDrawer = ref(false);
-
-let uploadIsShow = computed(() => store.getters.uploadIsShow);
-const FILE_SIZE = readonly(1024 * 1024 * 1024 * 2);
-const store = useStore();
-const orderId = computed(() => store.getters.orderId);
-const deviceData = computed(() => store.getters.deviceData);
-const deviceType = computed(() => store.getters.deviceType);
-
-const uploadFileList = computed(() => store.state.upload.uploadFileList);
-
-const allFileList = computed(() => {
-  let fileListArray = _this.refs[`fileListRef_${orderId.value}`] || [];
-  let executeLsit =
-    fileListArray.filter((item) => item.orderID == orderId.value)[0]
-      ?.curFileList || [];
-  let list = [];
-  for (const item of store.state.upload.uploadFileList[orderId.value] || []) {
-    if (!executeLsit.some((element) => element.id == item.id)) {
-      list.push(item);
-    }
-  }
-  return list;
-});
-
-const tokenMap = computed(() => store.getters.tokenMap);
-
 const options = ref({
   simultaneousUploads: 5,
-
+  singleFile: false,
   chunkSize: 1024 * 1024 * 8, // 分片大小
   forceChunkSize: true, // 每块分片大小是否 一定要小于 chunkSize
   allowDuplicateUploads: true, // 是否可以 重复上传
+  generateUniqueIdentifier: generateUniqueIdentifier, //自定义生成文件唯一标识
+  initFileFn: initFileFn, //初始化文件对象
 });
 
 const fileStatusText = ref({
@@ -153,8 +132,97 @@ const fileStatusText = ref({
   CID: () => "Calculate CID...",
 });
 
-const onFileAdded = (file) => {
+let uploadIsShow = computed(() => store.getters.uploadIsShow);
+const FILE_SIZE = readonly(1024 * 1024 * 1024 * 2);
+const store = useStore();
+const orderId = computed(() => store.getters.orderId);
+const deviceData = computed(() => store.getters.deviceData);
+const deviceType = computed(() => store.getters.deviceType);
 
+const uploadFileList = computed(() => store.state.upload.uploadFileList);
+const allFileList = reactive({});
+
+// const allFileList = computed(() => {
+//   let fileListArray = _this.refs[`fileListRef_${orderId.value}`] || [];
+//   let executeLsit =
+//     fileListArray.filter((item) => item.orderID == orderId.value)[0]
+//       ?.curFileList || [];
+//   let list = [];
+//   for (const item of store.state.upload.uploadFileList[orderId.value] || []) {
+//     if (!executeLsit.some((element) => element.id == item.id)) {
+//       list.push(item);
+//     }
+//   }
+//   return list;
+// });
+
+const tokenMap = computed(() => store.getters.tokenMap);
+
+let fileCache = [];
+const onFileAdded = (file) => {
+  // if (file.size === 0) return;
+  // if (file.size > FILE_SIZE) {
+  //   ElMessage({
+  //     message:
+  //       "The maximum upload size of a single file should not exceed 2GB.",
+  //     type: "warning",
+  //     duration: 3000,
+  //   });
+  //   return;
+  // }
+  // let list = store.state.upload.uploadFileList[orderId.value] ?? [];
+  // if (list.length > 1000) {
+  //   fileCache.push(file);
+  //   if (fileCache.length % 1000 == 0) {
+  //     list = list.concat(fileCache);
+  //     allFileList[orderId.value] = allFileList[orderId.value].concat(fileCache);
+  //     store.commit("upload/setFileList", list);
+  //     fileCache = [];
+  //   }
+  // } else {
+  //   list.push(file);
+  //   store.commit("upload/setFileList", list);
+  //   if (allFileList[orderId.value]) {
+  //     allFileList[orderId.value].push(file);
+  //   } else {
+  //     allFileList[orderId.value] = [];
+  //     allFileList[orderId.value].push(file);
+  //   }
+  // }
+};
+
+const onFilesAdded = (files, fileList) => {
+  if (files.length > 500) {
+    ElMessageBox.alert(
+      `The folder you are currently uploading contains ${files.length} small files. The number of files is too large, which may cause severe page lag during the upload process. Are you sure you want to upload it`,
+      "warning",
+      {
+        confirmButtonText: "OK",
+        callback: (type) => {
+          if (type == "confirm") {
+            for (const file of files) {
+              inituploadList(file);
+            }
+          }
+        },
+      }
+    );
+  } else {
+    for (const file of files) {
+      inituploadList(file);
+    }
+  }
+
+  if (fileCache.length > 0) {
+    let list = store.state.upload.uploadFileList[orderId.value] ?? [];
+    list = list.concat(fileCache);
+    allFileList[orderId.value] = allFileList[orderId.value].concat(fileCache);
+    store.commit("upload/setFileList", list);
+    fileCache = [];
+  }
+};
+
+function inituploadList(file) {
   if (file.size === 0) return;
   if (file.size > FILE_SIZE) {
     ElMessage({
@@ -166,14 +234,60 @@ const onFileAdded = (file) => {
     return;
   }
 
+  let list = store.state.upload.uploadFileList[orderId.value] ?? [];
+
+  if (list.length > 1000) {
+    fileCache.push(file);
+    if (fileCache.length % 1000 == 0) {
+      list = list.concat(fileCache);
+      allFileList[orderId.value] = allFileList[orderId.value].concat(fileCache);
+      store.commit("upload/setFileList", list);
+      fileCache = [];
+    }
+  } else {
+    list.push(file);
+    store.commit("upload/setFileList", list);
+
+    if (allFileList[orderId.value]) {
+      allFileList[orderId.value].push(file);
+    } else {
+      allFileList[orderId.value] = [];
+      allFileList[orderId.value].push(file);
+    }
+  }
+}
+const fileShare = (item) => {
+  emit("fileShare", item);
+};
+
+/* 在上传过程中 每当有新的文件进行上传操作待上传列表中就删除对应的文件 */
+const newQueueID = (id, fileOrderID) => {
+  let index = allFileList[fileOrderID].findIndex((file) => file.id == id);
+  allFileList[fileOrderID].splice(index, 1);
+
+  console.log(uploadFileList,'uploadFileList');
+  console.log(store.state.upload.uploadFileList,'store.state.upload.uploadFileList');
+};
+
+/* 在待上传列表中删除指定文件 */
+function deleteAllFileList(id) {
+  let index = allFileList[orderId.value].findIndex((file) => file.id == id);
+  index > -1 ? allFileList[orderId.value].splice(index, 1) : "";
+}
+/* 生成文件唯一标识 */
+function generateUniqueIdentifier(file) {
+  return file.path;
+}
+/*  初始化文件对象 */
+function initFileFn(file) {
   file.paused = false;
   file.deviceType = deviceType.value;
+  file.fileUploading = false; // 代表文件是否正在上传
 
   file.rootPath = currentPath.value;
   let directory = file.file.webkitRelativePath;
   let directoryPath = directory.substr(0, directory.lastIndexOf("/") + 1);
-  let target = "";
-  file.urlPath = target;
+
   // file.urlPrefix = directoryPath ? currentPath.value + directoryPath : currentPath.value || "/";
   file.urlPrefix = file.file.path.substr(0, file.file.path.lastIndexOf("\\"));
 
@@ -181,41 +295,12 @@ const onFileAdded = (file) => {
     ? currentPath.value + directoryPath + file.name
     : currentPath.value + file.name;
 
-  file.urlFileName = directoryPath
-    ? currentPath.value + directoryPath + file.name
-    : currentPath.value + file.name;
-
-  let list = store.state.upload.uploadFileList[orderId.value] ?? [];
-  if (list.some((item) => item.uniqueIdentifier == file.uniqueIdentifier)) {
-    return;
-  }
-
   file.orderId = orderId.value;
   if (deviceType.value == 1 || deviceType.value == 2) {
     file.foggieToken = tokenMap.value[orderId.value] || "";
   }
   file.deviceData = deviceData.value;
-
-  list.unshift(file);
-  store.commit("upload/setFileList", list);
-};
-const onFileProgress = (rootFile, file, chunk) => {};
-const onFilesAdded = (files, fileList) => {
-
-  console.log(files);
-  console.log(fileList);
-};
-const onFileSuccess = () => {};
-const fileShare = (item) => {
-  emit("fileShare", item);
-};
-const fileDetail = (file) => {
-  // window.localStorage.setItem(
-  //   "voodItem",
-  //   JSON.stringify(currentOODItem.value.data)
-  // );
-  // emit("closeUploadBox");
-};
+}
 
 const closeUploadBox = () => {
   store.commit("upload/closeUpload");
@@ -348,6 +433,7 @@ onMounted(() => {});
           margin: 0;
           padding: 0;
         }
+
         .head-info {
           font-size: 18px;
 
@@ -624,10 +710,12 @@ onMounted(() => {});
     padding: 20px 0px;
     margin-left: 20px;
     margin-right: 20px;
+
     & > div {
       margin: 0;
       padding: 0;
     }
+
     .head-info {
       font-size: 18px;
       position: relative;
@@ -651,6 +739,11 @@ onMounted(() => {});
       height: calc(100% - 50px);
       overflow-y: auto;
       overflow-x: hidden;
+
+      & > .uploader-file {
+        content-visibility: auto;
+        contain-intrinsic-size: 50px;
+      }
     }
   }
 }

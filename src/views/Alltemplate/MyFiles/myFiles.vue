@@ -2,20 +2,19 @@
   <div class="card-box formBox">
     <el-breadcrumb :separator-icon="ArrowRight">
       <el-switch
-            class="file-source"
-            v-model="fileSource"
-            size="large"
-            active-text="Remote Files"
-            :active-value="remote"
-            inactive-text="Local Files"
-            :inactive-value="local"
-            :before-change="switchReceiveStatus"
-          />
+        class="file-source"
+        v-model="fileSource"
+        size="large"
+        active-text="Remote Files"
+        :active-value="remote"
+        inactive-text="Local Files"
+        :inactive-value="local"
+        :before-change="switchReceiveStatus"
+      />
       <el-breadcrumb-item @click="setPrefix(item, true)">
         <div class="flex items-center">
           <svg-icon icon-class="my-files" class="title-img"></svg-icon>
           <div class="title">Files</div>
-         
         </div>
       </el-breadcrumb-item>
       <el-breadcrumb-item
@@ -133,14 +132,13 @@
               </el-tooltip> -->
 
               <el-tooltip
+                v-if="!row.isPersistent"
                 class="box-item"
                 effect="dark"
                 content="Not Persisted"
                 placement="top-start"
               >
-                <div v-if="!row.isPersistent">
-                  <i class="i-ersistent">*</i> {{ row.name }}
-                </div>
+                <div><i class="i-ersistent">*</i> {{ row.name }}</div>
               </el-tooltip>
               <div v-if="row.isPersistent">
                 {{ row.name }}
@@ -787,12 +785,12 @@ const downloadItem = (item) => {
   let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&token=${deviceData.value.upload_file_token}`;
   // downloadUrl = 'foggie://12D3KooWC2mwaY7P1u9bvqE2JEvPRKdjUjQdVL7nie18Kdvjvgrf/2142/QmX3bmf4Mbs2nfTYVF5CJw3CGR9eogfGaCUcRWbd9R4WHs'
 
-  console.log('-------------------ipcrenderer----download')
+  console.log("-------------------ipcrenderer----download");
 
-  ipcRenderer.send('download', {
+  ipcRenderer.send("download", {
     downloadPath: downloadUrl,
     fileName: item.name,
-  })
+  });
 
   // let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&token=${deviceData.value.upload_file_token}`;
   // var oA = document.createElement("a");
@@ -832,7 +830,7 @@ const toDetail = (item) => {
     // router.push("/detail");
   }
 };
-const getFileList = function (scroll ,prefix) {
+const getFileList = function (scroll, prefix) {
   if (fileSource.value) {
     getReomteData(scroll, prefix);
   } else {
@@ -1042,7 +1040,7 @@ const initLocalData = (data) => {
 
   tableSort({ prop: "date", order: 1, key: 1 });
 };
-const isSearch = ref(false)
+const isSearch = ref(false);
 const doSearch = async () => {
   if (keyWord.value === "") {
     getFileList();
@@ -1107,8 +1105,8 @@ const setPrefix = (item, isTop = false) => {
       return index <= targetIndex;
     });
     let len = breadcrumbList.prefix.length;
-    if (len > 0 && breadcrumbList.prefix[len -1] !== '') {
-      breadcrumbList.prefix.push('')
+    if (len > 0 && breadcrumbList.prefix[len - 1] !== "") {
+      breadcrumbList.prefix.push("");
     }
   }
   emits("currentPrefix", breadcrumbList.prefix);

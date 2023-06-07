@@ -17,12 +17,8 @@
           :curFileList="curFileList"
           :MAX_UPLOAD_NUM="MAX_UPLOAD_NUM"
           @chanStatus="chanStatus"
-          @getStatus="getStatus"
-          @uploadComplete="uploadComplete"
-          @getProgress="getProgress"
           @remove="remove"
           @fileShare="fileShare"
-          @fileDetail="fileDetail"
         />
       </li>
     </ul>
@@ -31,16 +27,18 @@
 
 <script setup>
 import upFile from "./file.vue";
-import { useStore } from "vuex";
-
 import {
   ref,
   watch,
   defineProps,
   defineEmits,
   watchEffect,
+  toRefs,
   reactive,
+  onMounted,
 } from "vue";
+import { useStore } from "vuex";
+const store = useStore();
 const props = defineProps({
   orderID: {
     type: String,
@@ -55,148 +53,102 @@ const props = defineProps({
     default: "",
   },
 });
-const MAX_UPLOAD_NUM = props.deviceType == 3 ? 1 : 4;
-const emits = defineEmits(["fileShare", "fileDetail", "update:uploadLists"]);
 
-const $store = useStore();
-const progress = ref(0);
-const status = ref("original state");
+const Max_CurFileListLength = 20;
+const MAX_UPLOAD_NUM = props.deviceType == 3 ? 1 : 4;
+const emits = defineEmits(["fileShare", "newQueueID"]);
+
 const fileList = reactive({
   uploadLists: [],
 });
 
-const count = ref(0);
 const curFileList = ref([]);
-const timer = ref(null);
 
 watch(
-  () => fileList.uploadLists,
+  () => fileList.uploadLists.length,
   (newVal, oldVal) => {
-    let oldLength = oldVal?.length ?? 0;
-    if (newVal.length >= oldLength) {
-      // 新增文件 或者 当前上传列表中 有文件 上传成功 暂停 或者 上传失败
-      if (newVal.length >= MAX_UPLOAD_NUM) {
-        if (curFileList.value.length == 0) {
-          let startInde =
-            newVal.length -
-            (MAX_UPLOAD_NUM > newVal.length ? newVal.length : MAX_UPLOAD_NUM);
-          let endInde = newVal.length + 1;
-          curFileList.value = newVal.slice(startInde, endInde);
-        } else {
-          if (timer.value) clearTimeout(timer.value), (timer.value = null);
-          timer.value = setTimeout(() => {
-            let pushNumber = JSON.parse(JSON.stringify(MAX_UPLOAD_NUM));
-            for (const item of curFileList.value) {
-              if (!item.completed) {
-                if (pushNumber <= 0) {
-                  return;
-                } else {
-                  if (item.error || item.paused) {
-                  } else {
-                    pushNumber--;
-                  }
-                }
-              }
-            }
-            if (pushNumber <= 0) return;
+    let oldLength = oldVal ?? 0;
+    // if (newVal == 0) {
+    //   // 删除当前设备下上传列表中所有文件 当前上传列表也需要清除
+    //   curFileList.value = [];
+    // }
+    if (newVal >= oldLength) {
+      // 新增文件
+      let pushNumber = JSON.parse(JSON.stringify(MAX_UPLOAD_NUM));
 
-            let startInde =
-              newVal.length - curFileList.value.length > MAX_UPLOAD_NUM
-                ? newVal.length - curFileList.value.length - MAX_UPLOAD_NUM
-                : 0;
-            let endInde = newVal.length - curFileList.value.length;
-            for (const item of newVal.slice(startInde, endInde).reverse()) {
-              if (
-                pushNumber > 0 &&
-                !curFileList.value.some((element) => element.id == item.id)
-              ) {
-                curFileList.value.unshift(item);
-                pushNumber--;
-              }
-            }
-          }, 100);
+      for (const item of curFileList.value) {
+        if (item.fileUploading) {
+          pushNumber--;
+          if (pushNumber <= 0 || curFileList.value.length == newVal) return;
         }
-      } else {
-        curFileList.value = newVal;
+      }
+      for (let index = 0; index < pushNumber; index++) {
+        chanStatus();
       }
     } else {
-      if (newVal.length == curFileList.value.length) {
-        return;
-      } else if (newVal.length > curFileList.value.length) {
-        // 待上传列表中仍有数据等待上传
-        if (timer.value) clearTimeout(timer.value), (timer.value = null);
-        timer.value = setTimeout(() => {
-          let pushNumber = JSON.parse(JSON.stringify(MAX_UPLOAD_NUM));
-          for (const item of curFileList.value) {
-            if (!item.completed) {
-              if (pushNumber <= 0) {
-                return;
-              } else {
-                if (item.error || item.paused) {
-                } else {
-                  pushNumber--;
-                }
-              }
-            }
-          }
-          if (pushNumber <= 0) return;
-          let index = newVal.length - curFileList.value.length - 1;
-          curFileList.value.unshift(newVal[index]);
-        }, 100);
-      }
+      // 删除文件
+      // for (let index = 0; index < curFileList.value.length; index++) {
+      //   if (!fileList.uploadLists.some((item) => item.id == curFileList.value[index].id)) {
+      //     //删除的是已经上传成功的文件
+      //     curFileList.value.splice(index, 1);
+      //     break;
+      //   }
+      // }
     }
   },
   { deep: true }
 );
+
 watchEffect(() => {
   fileList.uploadLists = props.uploadLists;
-  if (fileList.uploadLists.length == 0) {
-    //删除当前设备下上传列表中所有文件 当前上传列表也需要清除
-    curFileList.value = [];
-  }
-  /* 删除文件 */
-  for (let index = 0; index < curFileList.value.length; index++) {
-    if (
-      !fileList.uploadLists.some(
-        (item) => item.id == curFileList.value[index].id
-      )
-    ) {
-      //删除的是已经上传成功的文件
-      curFileList.value.splice(index, 1);
-      break;
+});
+
+const chanStatus = (item) => {
+  let curFileListLength = curFileList.value.length;
+  let pushNumber = 0;
+  for (const element of curFileList.value) {
+    if (element.fileUploading) {
+      pushNumber++;
+      if (pushNumber >= MAX_UPLOAD_NUM) {
+        return;
+      }
     }
   }
-});
-const chanStatus = (item) => {
-  let index = curFileList.value.findIndex((element) => element.id == item.id);
-  curFileList.value[index][item.type] = item[item.type];
+
+  if (fileList.uploadLists.length == 0) {
+    return;
+  }
+  let pushItem = fileList.uploadLists[0];
+  curFileList.value.unshift(pushItem);
+  fileList.uploadLists.shift();
+  emits("update:uploadLists", fileList.uploadLists);
+  // store.commit("upload/setFileList", fileList.uploadLists,pushItem.orderId);
+  if (++curFileListLength > Max_CurFileListLength) {
+    curFileList.value.pop();
+  }
+ 
+  emits("newQueueID", pushItem.id,pushItem.orderId);
 };
 
-const getStatus = (val) => {
-  status.value = val;
-};
-const getProgress = (val) => {
-  progress.value = val;
-};
-const remove = (id) => {
+const remove = (id,fileOrderId) => {
   curFileList.value = curFileList.value.filter((item) => item.id !== id);
   fileList.uploadLists = fileList.uploadLists.filter((item) => item.id !== id);
   emits("update:uploadLists", fileList.uploadLists);
+
+  // store.commit("upload/setFileList", fileList.uploadLists,fileOrderId);
+  chanStatus();
 };
-const uploadComplete = () => {
-  count.value++;
-};
+
 const fileShare = (file) => {
   emits("fileShare", file);
 };
-const fileDetail = (file) => {
-  emits("fileDetail", file);
-};
 
-defineExpose({
-  curFileList,
-  orderID: props.orderID,
-});
+onMounted(() => {});
+
+// defineExpose({
+//   curFileList,
+//   orderID: props.orderID,
+// });
 </script>
 
 <style scoped>
