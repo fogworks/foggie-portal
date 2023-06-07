@@ -97,33 +97,81 @@
         <el-table-column
           label="Name"
           show-overflow-tooltip
-          width="440"
+          class-name="action-btn-column"
+          width="565"
           prop="name"
         >
-          <template #default="{ row }">
-            <div class="name-link" @click="toDetail(row)">
-              <div class="name-img">
-                <img
-                  v-if="row.type === 'application/x-directory'"
-                  src="@/assets/folder.png"
-                  alt=""
-                />
-                <!-- <svg-icon icon-class="logo-dog-black" v-if="row.type === 'application/x-directory'"></svg-icon> -->
-                <template v-else-if="row.isSystemImg">
+          <template #default="scope">
+            <div class="name-box">
+              <div class="name-link" @click="toDetail(scope.row)">
+                <div class="name-img">
                   <img
-                    v-show="theme === 'light'"
-                    src="@/assets/logo-dog-black.svg"
+                    v-if="scope.row.type === 'application/x-directory'"
+                    src="@/assets/folder.png"
                     alt=""
                   />
-                  <img
-                    v-show="theme === 'dark'"
-                    src="@/assets/logo-dog.svg"
-                    alt=""
-                  />
-                </template>
-                <!-- <img v-else :src="row.imgUrl" alt="" /> -->
+                  <!-- <svg-icon icon-class="logo-dog-black" v-if="row.type === 'application/x-directory'"></svg-icon> -->
+                  <template v-else-if="scope.row.isSystemImg">
+                    <img
+                      v-show="theme === 'light'"
+                      src="@/assets/logo-dog-black.svg"
+                      alt=""
+                    />
+                    <img
+                      v-show="theme === 'dark'"
+                      src="@/assets/logo-dog.svg"
+                      alt=""
+                    />
+                  </template>
+                  <!-- <img v-else :src="row.imgUrl" alt="" /> -->
+                </div>
+                {{ scope.row.name }}
               </div>
-              {{ row.name }}
+              <el-dropdown trigger="click" @command="handleCommand">
+                <div class="color-box table-action">
+                  <svg-icon icon-class="more"></svg-icon>
+                </div>
+                <template #dropdown>
+                  <el-dropdown-menu class="more-dropdown" slot="dropdown">
+                    <el-dropdown-item
+                      :command="{ flag: 'share', command: scope.row }"
+                      :disabled="!scope.row.canShare || !hasSVC"
+                      >share</el-dropdown-item
+                    >
+                    <el-dropdown-item
+                      :command="{ flag: 'ipfs', command: scope.row }"
+                      :disabled="
+                        !(
+                          !scope.row.isDir &&
+                          currentOODItem.svc_state === 'finish'
+                        )
+                      "
+                      >IPFS PIN</el-dropdown-item
+                    >
+                    <el-dropdown-item
+                      :command="{ flag: 'cyfs', command: scope.row }"
+                      :disabled="
+                        !(
+                          !scope.row.isDir &&
+                          currentOODItem.cyfs_state === 'finish' &&
+                          currentOODItem.cyfs_service_state === 'start'
+                        )
+                      "
+                      >CYFS PIN</el-dropdown-item
+                    >
+                    <el-dropdown-item
+                      :command="{ flag: 'download', command: scope.row }"
+                      :disabled="scope.row.isDir"
+                      >Download</el-dropdown-item
+                    >
+                    <el-dropdown-item
+                      class="delete-item"
+                      :command="{ flag: 'delete', command: scope.row }"
+                      >Delete</el-dropdown-item
+                    >
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </div>
           </template>
         </el-table-column>
@@ -156,7 +204,7 @@
           width="120"
           show-overflow-tooltip
         />
-        <el-table-column
+        <!-- <el-table-column
           label="Actions"
           class-name="action-btn-column"
           width="125"
@@ -166,7 +214,6 @@
             <el-dropdown trigger="click" @command="handleCommand">
               <div class="color-box">
                 <svg-icon icon-class="more"></svg-icon>
-                <!-- <img src="@/assets/more.svg" alt="" /> -->
               </div>
               <template #dropdown>
                 <el-dropdown-menu class="more-dropdown" slot="dropdown">
@@ -210,7 +257,7 @@
               </template>
             </el-dropdown>
           </template>
-        </el-table-column>
+        </el-table-column> -->
       </el-table>
     </div>
   </div>
@@ -971,11 +1018,14 @@ const upload = () => {
       }
       --el-table-row-hover-bg-color: transparent;
       .el-table__row {
+        height: 55.2px;
         content-visibility: auto;
         contain-intrinsic-size: 55.2px;
-        // &:hover {
-        //   background: var(--card-bg);
-        // }
+        &:hover {
+          .table-action {
+            display: inline-block;
+          }
+        }
       }
       .el-table__cell {
         color: var(--text-color);
@@ -993,16 +1043,24 @@ const upload = () => {
         }
       }
     }
-
+    .name-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
     .name-link {
       font-weight: 700;
       font-size: 16px;
       color: $light_blue;
       cursor: pointer;
+
       // img {
       //   width: 24px;
       //   margin-right: 8px;
       // }
+    }
+    .table-action {
+      display: none;
     }
     .id-box {
       .copy {
