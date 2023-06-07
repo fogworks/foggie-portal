@@ -56,7 +56,7 @@
             style="width: 100%; height: 50px"
             :options="lastWeekOptions"
           ></MyEcharts> -->
-          {{ deviceList.length }}
+          {{ assetsOrderNum }}
           <!-- {{  lastweekCount }} -->
           <!-- <div class="dmc">DMC</div> -->
         </div>
@@ -174,7 +174,7 @@ export default {
       () => store.getters["global/currentOODItem"]
     );
     const email = computed(() => store.getters["token/currentUser"]);
-    const { deviceList, search } = useOrderList();
+    const { assetsOrderNum, getAssetsOrderNum } = useOrderList();
     const getUserAssets = () => {
       userAssets({ email: email.value }).then((res) => {
         if (res.code == 200) {
@@ -248,7 +248,8 @@ export default {
       getUserInfo();
       // initAccountMoney();
       getUserAssets();
-      search();
+      // search();
+      getAssetsOrderNum();
     });
     onMounted(() => {
       // loadUserLoginStatus();
@@ -256,7 +257,6 @@ export default {
       adminCategoriesListInit();
     });
     return {
-      deviceList,
       addNum,
       email,
       estimateNum,
@@ -277,6 +277,7 @@ export default {
       // lastweekCount,
       // lastWeekOptions,
       currentOODItem,
+      assetsOrderNum,
       // nftLink,
       openNoVoodDialog,
       adminCategoriesListInit,
