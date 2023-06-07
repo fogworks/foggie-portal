@@ -127,13 +127,13 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="Content / File ID" width="250">
+        <el-table-column label="Content / File ID" width="180">
           <template #default="{ row }">
             <template v-for="item in row.idList">
               <div v-if="item.code" class="id-box">
                 <div class="copy" v-if="item.code">
-                  <span class="id-name">{{ item.name }}</span>
-                  <span class="code">{{ item.code }}</span>
+                  <!-- <span class="id-name">{{ item.name }}</span> -->
+                  <span class="code">{{ handleID(item.code) }}</span>
                   <svg-icon
                     icon-class="copy"
                     class="copy-icon"
@@ -147,19 +147,19 @@
         <el-table-column
           prop="date"
           label="Date"
-          width="150"
+          width="175"
           show-overflow-tooltip
         />
         <el-table-column
           prop="size"
           label="Size"
-          width="100"
+          width="120"
           show-overflow-tooltip
         />
         <el-table-column
           label="Actions"
           class-name="action-btn-column"
-          width="100"
+          width="125"
           style="text-align: center"
         >
           <template #default="scope">
@@ -280,6 +280,7 @@ import { getfilesize, transferTime } from "@/utils/util.js";
 import { useStore } from "vuex";
 import setting from "@/setting";
 const { baseUrl } = setting;
+
 const { proxy } = getCurrentInstance();
 const emits = defineEmits([
   // "toggleToUpload",
@@ -358,6 +359,11 @@ const fileTable = ref(null);
 //   // fileTable.value.clearSort();
 //   if (fileTable?.value) fileTable.value.sort(prop, sortOrders[order]);
 // };
+const handleID = (str) => {
+  return (
+    str.substring(0, 6) + "..." + str.substring(str.length - 6, str.length)
+  );
+};
 const refresh = () => {
   keyWord.value = "";
   // tableSort({ prop: "date", order: 1, key: 1 });
@@ -676,10 +682,10 @@ const downloadItem = (item) => {
 
   let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=foggie&token=${token}`;
 
-  ipcRenderer.send('download', {
+  ipcRenderer.send("download", {
     downloadPath: downloadUrl,
     fileName: item.name,
-  })
+  });
 
   // var oA = document.createElement("a");
   // oA.download = item.name;
@@ -791,9 +797,9 @@ const setPrefix = (item, isTop = false) => {
       if (el === item) targetIndex = index;
       return index <= targetIndex;
     });
-    let len =  breadcrumbList.prefix.length;
-    if (len > 0 && breadcrumbList.prefix[len  - 1] !== '') {
-      breadcrumbList.prefix.push('');
+    let len = breadcrumbList.prefix.length;
+    if (len > 0 && breadcrumbList.prefix[len - 1] !== "") {
+      breadcrumbList.prefix.push("");
     }
   }
   // emits("currentPrefix", breadcrumbList.prefix);
