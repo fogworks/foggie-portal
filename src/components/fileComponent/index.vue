@@ -24,11 +24,16 @@
       :activeName="activeName"
       v-model:checkedData="checkedData"
       v-model:imgCheckedData="imgCheckedData.value"
+      v-model:folderVisible="folderVisible"
+      v-model:isSingle="isSingle"
       @reset="reset"
     ></ActionBar>
     <AllFile
       v-if="activeName === 'All'"
       v-model:checkedData="checkedData"
+      v-model:folderVisible="folderVisible"
+      v-model:isSingle="isSingle"
+      v-model:renameVisible="renameVisible"
       v-bind="$attrs"
       ref="AllFileRef"
     ></AllFile>
@@ -38,13 +43,25 @@
       v-model:checkedData="imgCheckedData.value"
     ></ImgList>
   </div>
+  <!-- action dialog -->
+  <folderDialog
+    v-if="folderVisible"
+    v-model:folderVisible="folderVisible"
+    :actionType="actionType"
+    :isSingle="isSingle"
+    @reset="reset"
+  ></folderDialog>
 </template>
 
 <script setup>
 import { ref, toRefs, reactive, watch, provide } from "vue";
 import ImgList from "./imgList";
+import folderDialog from "./folderDialog.vue";
+
 import AllFile from "@/views/foggieMax/home/_modules/myFiles";
 import ActionBar from "./actionBar.vue";
+const folderVisible = ref(false);
+const isSingle = ref(false);
 const activeName = ref("All");
 const AllFileRef = ref(null);
 const ImgListRef = ref(null);

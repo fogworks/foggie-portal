@@ -207,6 +207,21 @@
                     >Download</el-dropdown-item
                   >
                   <el-dropdown-item
+                    :command="{ flag: 'rename', command: scope.row }"
+                    :disabled="scope.row.isDir"
+                    >Rename</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    :command="{ flag: 'copy', command: scope.row }"
+                    :disabled="scope.row.isDir"
+                    >Copy</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    :command="{ flag: 'move', command: scope.row }"
+                    :disabled="scope.row.isDir"
+                    >Move</el-dropdown-item
+                  >
+                  <el-dropdown-item
                     class="delete-item"
                     :command="{ flag: 'delete', command: scope.row }"
                     >Delete</el-dropdown-item
@@ -290,6 +305,9 @@ const { proxy } = getCurrentInstance();
 const emits = defineEmits([
   // "toggleToUpload",
   "getUseSize",
+  "update:folderVisible",
+  "update:renameVisible",
+  "update:isSingle",
   "update:checkedData",
   // "currentPrefix"
 ]);
@@ -564,6 +582,17 @@ const handleCommand = async (val) => {
       break;
     case "download":
       downloadItem(item);
+      break;
+    case "rename":
+      emits("update:isSingle", true);
+      emits("update:renameVisible", true);
+      emits("update:checkedData", [val]);
+      break;
+    case "copy":
+    case "move":
+      emits("update:isSingle", true);
+      emits("update:folderVisible", true);
+      emits("update:checkedData", [val]);
       break;
     case "delete":
       proxy

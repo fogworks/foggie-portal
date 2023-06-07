@@ -3,7 +3,7 @@
     <el-dialog
       append-to-body
       title="MOVE TO"
-      :model-value="visible"
+      :model-value="folderVisible"
       class="folder-dialog"
       width="600px"
       :close-on-click-modal="false"
@@ -84,7 +84,7 @@ import RippleInk from "@/components/rippleInk";
 const { proxy } = getCurrentInstance();
 const store = useStore();
 const props = defineProps({
-  visible: {
+  folderVisible: {
     type: Boolean,
     default: false,
   },
@@ -93,7 +93,7 @@ const props = defineProps({
     default: "copy",
   },
 });
-const { visible, actionType } = toRefs(props);
+const { folderVisible, actionType } = toRefs(props);
 const activeName = inject("activeName");
 const checkedData = inject("checkedData");
 const imgCheckedData = inject("imgCheckedData");
@@ -164,9 +164,9 @@ const toDetail = (item) => {
     // emits("currentPrefix", breadcrumbList.prefix);
   }
 };
-const emits = defineEmits(["update:visible", "resetChecked"]);
+const emits = defineEmits(["update:folderVisible", "reset"]);
 const beforeClose = () => {
-  emits("update:visible", false);
+  emits("update:folderVisible", false);
 };
 const setPrefix = (item, isTop = false) => {
   if (tableLoading.value) return;
@@ -187,10 +187,10 @@ const handleConfirm = () => {
     console.log(imgCheckedData.value, "imgCheckedData");
     if (actionType == "cpoy") {
     } else {
-      emits("resetChecked");
+      emits("reset");
     }
   } else if (activeName.value == "All") {
-    emits("resetChecked");
+    emits("reset");
 
     console.log(checkedData.value, "564894984984191984198419841981");
   }

@@ -50,21 +50,12 @@
         </div>
       </div>
     </template>
-
-    <folderDialog
-      v-if="visible"
-      v-model:visible="visible"
-      :actionType="actionType"
-      @resetChecked="resetChecked"
-    ></folderDialog>
   </div>
 </template>
 
 <script setup>
-import folderDialog from "./folderDialog.vue";
 import { ref, toRefs, inject, computed } from "vue";
 import { useStore } from "vuex";
-const visible = ref(false);
 const actionType = ref("");
 const deviceData = inject("deviceData");
 const props = defineProps({
@@ -83,6 +74,8 @@ const props = defineProps({
 });
 const emits = defineEmits([
   "update:checkedData",
+  "update:folderVisible",
+  "update:isSingle",
   "update:imgCheckedData",
   "reset",
 ]);
@@ -113,8 +106,9 @@ const resetChecked = () => {
 };
 const handlerClick = (type) => {
   actionType.value = type;
+  emits("update:isSingle", false);
   if (type === "move" || type === "copy") {
-    visible.value = true;
+    emits("update:folderVisible", true);
   } else if (type === "download") {
     downLoad();
   } else if (type === "delete") {
