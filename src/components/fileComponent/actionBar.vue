@@ -25,16 +25,27 @@
         <span> Move </span>
       </div>
     </div>
-    <div class="action-box" v-else>
-      <el-button
-        class="top-btn action-item"
-        @click="upload"
-        key="plain"
-        type="primary"
-        link
-        >Upload +</el-button
-      >
-    </div>
+    <template v-else>
+      <div style="display: flex; align-items: center">
+        <div class="action-box" style="margin-right: 20px">
+          <el-button
+            class="top-btn action-item"
+            style="background-color: dodgerblue; color: #fff"
+            @click="upload"
+            key="plain"
+            type="primary"
+            link
+            >Upload +</el-button
+          >
+        </div>
+        <div class="action-box" v-if="activeName !== 'Image'">
+          <div class="action-item" @click="handlerClick('newFolder')">
+            <svg-icon icon-class="new_folder"></svg-icon>
+            <span> New folder </span>
+          </div>
+        </div>
+      </div>
+    </template>
 
     <folderDialog
       v-if="visible"
@@ -106,6 +117,7 @@ const handlerClick = (type) => {
     resetChecked();
   } else if (type === "rename") {
   } else if (type === "copy") {
+  } else if (type === "newFolder") {
   }
 };
 </script>
