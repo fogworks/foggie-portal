@@ -97,43 +97,91 @@
         <el-table-column
           label="Name"
           show-overflow-tooltip
-          width="440"
+          class-name="action-btn-column"
+          width="565"
           prop="name"
         >
-          <template #default="{ row }">
-            <div class="name-link" @click="toDetail(row)">
-              <div class="name-img">
-                <img
-                  v-if="row.type === 'application/x-directory'"
-                  src="@/assets/folder.png"
-                  alt=""
-                />
-                <!-- <svg-icon icon-class="logo-dog-black" v-if="row.type === 'application/x-directory'"></svg-icon> -->
-                <template v-else-if="row.isSystemImg">
+          <template #default="scope">
+            <div class="name-box">
+              <div class="name-link" @click="toDetail(scope.row)">
+                <div class="name-img">
                   <img
-                    v-show="theme === 'light'"
-                    src="@/assets/logo-dog-black.svg"
+                    v-if="scope.row.type === 'application/x-directory'"
+                    src="@/assets/folder.png"
                     alt=""
                   />
-                  <img
-                    v-show="theme === 'dark'"
-                    src="@/assets/logo-dog.svg"
-                    alt=""
-                  />
-                </template>
-                <!-- <img v-else :src="row.imgUrl" alt="" /> -->
+                  <!-- <svg-icon icon-class="logo-dog-black" v-if="row.type === 'application/x-directory'"></svg-icon> -->
+                  <template v-else-if="scope.row.isSystemImg">
+                    <img
+                      v-show="theme === 'light'"
+                      src="@/assets/logo-dog-black.svg"
+                      alt=""
+                    />
+                    <img
+                      v-show="theme === 'dark'"
+                      src="@/assets/logo-dog.svg"
+                      alt=""
+                    />
+                  </template>
+                  <!-- <img v-else :src="row.imgUrl" alt="" /> -->
+                </div>
+                {{ scope.row.name }}
               </div>
-              {{ row.name }}
+              <el-dropdown trigger="click" @command="handleCommand">
+                <div class="color-box table-action">
+                  <svg-icon icon-class="more"></svg-icon>
+                </div>
+                <template #dropdown>
+                  <el-dropdown-menu class="more-dropdown" slot="dropdown">
+                    <el-dropdown-item
+                      :command="{ flag: 'share', command: scope.row }"
+                      :disabled="!scope.row.canShare || !hasSVC"
+                      >share</el-dropdown-item
+                    >
+                    <el-dropdown-item
+                      :command="{ flag: 'ipfs', command: scope.row }"
+                      :disabled="
+                        !(
+                          !scope.row.isDir &&
+                          currentOODItem.svc_state === 'finish'
+                        )
+                      "
+                      >IPFS PIN</el-dropdown-item
+                    >
+                    <el-dropdown-item
+                      :command="{ flag: 'cyfs', command: scope.row }"
+                      :disabled="
+                        !(
+                          !scope.row.isDir &&
+                          currentOODItem.cyfs_state === 'finish' &&
+                          currentOODItem.cyfs_service_state === 'start'
+                        )
+                      "
+                      >CYFS PIN</el-dropdown-item
+                    >
+                    <el-dropdown-item
+                      :command="{ flag: 'download', command: scope.row }"
+                      :disabled="scope.row.isDir"
+                      >Download</el-dropdown-item
+                    >
+                    <el-dropdown-item
+                      class="delete-item"
+                      :command="{ flag: 'delete', command: scope.row }"
+                      >Delete</el-dropdown-item
+                    >
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="Content / File ID" width="250">
+        <el-table-column label="Content / File ID" width="180">
           <template #default="{ row }">
             <template v-for="item in row.idList">
               <div v-if="item.code" class="id-box">
                 <div class="copy" v-if="item.code">
-                  <span class="id-name">{{ item.name }}</span>
-                  <span class="code">{{ item.code }}</span>
+                  <!-- <span class="id-name">{{ item.name }}</span> -->
+                  <span class="code">{{ handleID(item.code) }}</span>
                   <svg-icon
                     icon-class="copy"
                     class="copy-icon"
@@ -147,26 +195,25 @@
         <el-table-column
           prop="date"
           label="Date"
-          width="150"
+          width="175"
           show-overflow-tooltip
         />
         <el-table-column
           prop="size"
           label="Size"
-          width="100"
+          width="120"
           show-overflow-tooltip
         />
-        <el-table-column
+        <!-- <el-table-column
           label="Actions"
           class-name="action-btn-column"
-          width="100"
+          width="125"
           style="text-align: center"
         >
           <template #default="scope">
             <el-dropdown trigger="click" @command="handleCommand">
               <div class="color-box">
                 <svg-icon icon-class="more"></svg-icon>
-                <!-- <img src="@/assets/more.svg" alt="" /> -->
               </div>
               <template #dropdown>
                 <el-dropdown-menu class="more-dropdown" slot="dropdown">
@@ -210,7 +257,7 @@
               </template>
             </el-dropdown>
           </template>
-        </el-table-column>
+        </el-table-column> -->
       </el-table>
     </div>
   </div>
@@ -280,6 +327,7 @@ import { getfilesize, transferTime } from "@/utils/util.js";
 import { useStore } from "vuex";
 import setting from "@/setting";
 const { baseUrl } = setting;
+
 const { proxy } = getCurrentInstance();
 const emits = defineEmits([
   // "toggleToUpload",
@@ -358,6 +406,11 @@ const fileTable = ref(null);
 //   // fileTable.value.clearSort();
 //   if (fileTable?.value) fileTable.value.sort(prop, sortOrders[order]);
 // };
+const handleID = (str) => {
+  return (
+    str.substring(0, 6) + "..." + str.substring(str.length - 6, str.length)
+  );
+};
 const refresh = () => {
   keyWord.value = "";
   // tableSort({ prop: "date", order: 1, key: 1 });
@@ -676,10 +729,10 @@ const downloadItem = (item) => {
 
   let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=foggie&token=${token}`;
 
-  ipcRenderer.send('download', {
+  ipcRenderer.send("download", {
     downloadPath: downloadUrl,
     fileName: item.name,
-  })
+  });
 
   // var oA = document.createElement("a");
   // oA.download = item.name;
@@ -791,9 +844,9 @@ const setPrefix = (item, isTop = false) => {
       if (el === item) targetIndex = index;
       return index <= targetIndex;
     });
-    let len =  breadcrumbList.prefix.length;
-    if (len > 0 && breadcrumbList.prefix[len  - 1] !== '') {
-      breadcrumbList.prefix.push('');
+    let len = breadcrumbList.prefix.length;
+    if (len > 0 && breadcrumbList.prefix[len - 1] !== "") {
+      breadcrumbList.prefix.push("");
     }
   }
   // emits("currentPrefix", breadcrumbList.prefix);
@@ -965,11 +1018,14 @@ const upload = () => {
       }
       --el-table-row-hover-bg-color: transparent;
       .el-table__row {
+        height: 55.2px;
         content-visibility: auto;
         contain-intrinsic-size: 55.2px;
-        // &:hover {
-        //   background: var(--card-bg);
-        // }
+        &:hover {
+          .table-action {
+            display: inline-block;
+          }
+        }
       }
       .el-table__cell {
         color: var(--text-color);
@@ -987,16 +1043,24 @@ const upload = () => {
         }
       }
     }
-
+    .name-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
     .name-link {
       font-weight: 700;
       font-size: 16px;
       color: $light_blue;
       cursor: pointer;
+
       // img {
       //   width: 24px;
       //   margin-right: 8px;
       // }
+    }
+    .table-action {
+      display: none;
     }
     .id-box {
       .copy {

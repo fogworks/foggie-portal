@@ -1,15 +1,26 @@
-import { getOrderList } from "@/api/order/orderList";
-import { search_foggie } from "@/utils/api";
+import { getOrderList, getOrderNum } from "@/api/order/orderList";
+import { search_foggie, search_foggie_count } from "@/utils/api";
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 export default function useOrderList() {
     const store = useStore()
     const keyWord = ref("");
-
+    const orderNum = ref(0)
+    const foggieNum = ref(0)
     const spaceList = ref([])
     const loading = ref(false)
     const deviceList = ref([])
     const email = computed(() => store.getters.userInfo?.email)
+    const getAssetsOrderNum = () => {
+        getOrderNum({ email: email.value }).then(res => {
+            if (res.code == 200) {
+                orderNum.value = res.data
+            }
+        })
+        search_foggie_count().then(res => {
+            foggieNum.value = res.data
+        })
+    }
     const getSpaceList = () => {
         getOrderList({ email: email.value }).then(res => {
             if (res.code == 200) {
@@ -59,6 +70,7 @@ export default function useOrderList() {
             });
         }
     });
+    const assetsOrderNum = computed(() => orderNum.value + foggieNum.value)
     const handleProgress = (item) => {
         if (!item.device_type) {
             let created = new Date(item.created_at).getTime() / 1000;
@@ -107,10 +119,12 @@ export default function useOrderList() {
         spaceList,
         deviceList,
         list,
+        assetsOrderNum,
         getSpaceList,
         search,
         handleProgress,
         copyLink,
-        handleID
+        handleID,
+        getAssetsOrderNum
     }
 }

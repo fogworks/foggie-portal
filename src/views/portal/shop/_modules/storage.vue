@@ -147,20 +147,21 @@
               <el-input-number
                 v-model="formLine.prestoreDMC"
                 :max="999999"
-                :min="(orderDetail.total - orderDetail.deposit).toFixed(4)"
+                :min="+(+orderDetail.total - +orderDetail.deposit).toFixed(4)"
                 :controls="false"
                 :precision="4"
                 :placeholder="`Minimum ${(
                   orderDetail.total - orderDetail.deposit
                 ).toFixed(4)}`"
                 style="width: 270px"
-                @change="inputPrestoreDMC"
                 @blur="blurPrestoreDMC"
               >
                 <template #suffix>
                   <span style="font-size: 16px">DMC</span>
                 </template>
               </el-input-number>
+              <span style="font-size: 16px">DMC</span>
+
               <div
                 style="
                   margin-left: 15px;
@@ -351,27 +352,38 @@ function blurPrestoreDMC() {
   }
 }
 
-function inputPrestoreDMC(text) {
-  state.formLine.prestoreDMC = text;
-  state.orderDetail.week = Math.round(
-    text / (state.orderDetail.price * state.formLine.quantity)
-  );
-  if (state.orderDetail.week) {
-    state.orderDetail.serverTime = ChinaTime4(
-      state.orderDetail.week * 7,
-      "YYYY-MM-DD"
-    );
-  } else {
-    state.orderDetail.serverTime = "";
-  }
+// function inputPrestoreDMC(text) {
+//   state.formLine.prestoreDMC = text;
+//   state.orderDetail.week = Math.round(
+//     text / (state.orderDetail.price * state.formLine.quantity)
+//   );
+//   if (state.orderDetail.week) {
+//     state.orderDetail.serverTime = ChinaTime4(
+//       state.orderDetail.week * 7,
+//       "YYYY-MM-DD"
+//     );
+//   } else {
+//     state.orderDetail.serverTime = "";
+//   }
 
-  state.orderDetail.aggregate = (
-    Number(state.formLine.prestoreDMC) + Number(state.orderDetail.deposit)
-  ).toFixed(4);
-}
+//   state.orderDetail.aggregate = (
+//     Number(state.formLine.prestoreDMC) + Number(state.orderDetail.deposit)
+//   ).toFixed(4);
+// }
 watch(
   () => state.formLine.prestoreDMC,
-  () => {
+  (val) => {
+    state.orderDetail.week = Math.round(
+      val / (state.orderDetail.price * state.formLine.quantity)
+    );
+    if (state.orderDetail.week) {
+      state.orderDetail.serverTime = ChinaTime4(
+        state.orderDetail.week * 7,
+        "YYYY-MM-DD"
+      );
+    } else {
+      state.orderDetail.serverTime = "";
+    }
     state.orderDetail.aggregate = (
       Number(state.formLine.prestoreDMC) + Number(state.orderDetail.deposit)
     ).toFixed(4);

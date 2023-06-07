@@ -10,6 +10,13 @@ export function getOrderList(data) {
     data,
   });
 }
+export function getOrderNum(data) {
+  return request({
+    url: baseUrl + "/order/sum",
+    method: "post",
+    data,
+  });
+}
 
 export function getOrderById(data) {
   return request({

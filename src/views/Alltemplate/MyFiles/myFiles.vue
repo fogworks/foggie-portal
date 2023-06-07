@@ -97,29 +97,31 @@
         <el-table-column
           label="Name"
           show-overflow-tooltip
-          min-width="340"
+          min-width="490"
+          class-name="action-btn-column"
           prop="name"
         >
-          <template #default="{ row }">
-            <div
-              class="name-link"
-              to="detail"
-              style="display: flex; align-items: center; padding-left: 15px"
-              @click.prevent="toDetail(row)"
-            >
+          <template #default="scope">
+            <div class="name-box">
               <div
-                class="name-img"
-                v-if="row.type === 'application/x-directory'"
+                class="name-link"
+                to="detail"
+                style="display: flex; align-items: center; padding-left: 15px"
+                @click.prevent="toDetail(scope.row)"
               >
-                <img src="@/assets/folder.png" alt="" />
+                <div
+                  class="name-img"
+                  v-if="scope.row.type === 'application/x-directory'"
+                >
+                  <img src="@/assets/folder.png" alt="" />
 
-                <!-- <template v-else-if="row.isSystemImg">
+                  <!-- <template v-else-if="row.isSystemImg">
                   <img v-show="theme" src="@/assets/logo-dog-black.svg" alt="" />
                   <img v-show="!theme" src="@/assets/logo-dog.svg" alt="" />
                 </template> -->
-                <!-- <img v-else :src="row.imgUrl" alt="" /> -->
-              </div>
-              <!-- 
+                  <!-- <img v-else :src="row.imgUrl" alt="" /> -->
+                </div>
+                <!-- 
               <el-tooltip
                 class="box-item"
                 effect="dark"
@@ -131,27 +133,59 @@
                 </div>
               </el-tooltip> -->
 
-              <el-tooltip
-                v-if="!row.isPersistent"
-                class="box-item"
-                effect="dark"
-                content="Not Persisted"
-                placement="top-start"
-              >
-                <div><i class="i-ersistent">*</i> {{ row.name }}</div>
-              </el-tooltip>
-              <div v-if="row.isPersistent">
-                {{ row.name }}
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  content="Not Persisted"
+                  placement="top-start"
+                  v-if="!scope.row.isPersistent"
+                >
+                  <div >
+                    <i class="i-ersistent">*</i> {{ scope.row.name }}
+                  </div>
+                </el-tooltip>
+                <div v-if="scope.row.isPersistent">
+                  {{ scope.row.name }}
+                </div>
               </div>
+              <el-dropdown trigger="click" @command="handleCommand">
+                <div class="color-box table-action">
+                  <svg-icon icon-class="more"></svg-icon>
+                </div>
+                <template #dropdown>
+                  <el-dropdown-menu class="more-dropdown" slot="dropdown">
+                    <el-dropdown-item
+                      :command="{ flag: 'share', command: scope.row }"
+                      :disabled="!scope.row.canShare"
+                      >share</el-dropdown-item
+                    >
+                    <el-dropdown-item
+                      :command="{ flag: 'ipfs', command: scope.row }"
+                      :disabled="true"
+                      >IPFS PIN</el-dropdown-item
+                    >
+                    <el-dropdown-item
+                      :command="{ flag: 'cyfs', command: scope.row }"
+                      :disabled="true"
+                      >CYFS PIN</el-dropdown-item
+                    >
+                    <el-dropdown-item
+                      :command="{ flag: 'download', command: scope.row }"
+                      :disabled="scope.row.isDir"
+                      >Download</el-dropdown-item
+                    >
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="Content / File ID" min-width="250">
+        <el-table-column label="Content / File ID" min-width="180">
           <template #default="{ row }">
             <div v-if="row.cid" class="id-box">
               <div class="copy" v-if="row.cid">
                 <!-- <span class="id-name">{{ item.name }}</span> -->
-                <span class="code">{{ row.cid }}</span>
+                <span class="code">{{ handleID(row.cid) }}</span>
                 <svg-icon
                   icon-class="copy"
                   class="copy-icon"
@@ -164,14 +198,14 @@
         <el-table-column
           prop="date"
           label="Date"
-          min-width="150"
+          min-width="195"
           show-overflow-tooltip
           align="center"
         />
         <el-table-column
           prop="size"
           label="Size"
-          min-width="100"
+          min-width="125"
           show-overflow-tooltip
           align="center"
         />
@@ -183,7 +217,7 @@
           </template>
         </el-table-column> -->
 
-        <el-table-column
+        <!-- <el-table-column
           label="Actions"
           class-name="action-btn-column"
           min-width="150"
@@ -193,7 +227,6 @@
             <el-dropdown trigger="click" @command="handleCommand">
               <div class="color-box">
                 <svg-icon icon-class="more"></svg-icon>
-                <!-- <img src="@/assets/more.svg" alt="" /> -->
               </div>
               <template #dropdown>
                 <el-dropdown-menu class="more-dropdown" slot="dropdown">
@@ -202,7 +235,6 @@
                     :disabled="!scope.row.canShare"
                     >share</el-dropdown-item
                   >
-                  <!-- :disabled="scope.row.isDir && false" -->
                   <el-dropdown-item
                     :command="{ flag: 'ipfs', command: scope.row }"
                     :disabled="true"
@@ -222,7 +254,7 @@
               </template>
             </el-dropdown>
           </template>
-        </el-table-column>
+        </el-table-column> -->
       </el-table>
     </div>
   </div>
@@ -400,6 +432,11 @@ let tableData = reactive({
   pageNum: 1,
 });
 const { data, total, pageSize, pageNum } = toRefs(tableData);
+const handleID = (str) => {
+  return (
+    str.substring(0, 6) + "..." + str.substring(str.length - 6, str.length)
+  );
+};
 function countDownRun(timestamp) {
   let nowTime = new Date().getTime();
   let endTime = new Date(createdTime.value).getTime() + 1000 * 60 * 3;
@@ -1337,8 +1374,14 @@ onMounted(() => {
       --el-table-border-color: rgba(50, 61, 109, 0.75);
 
       .el-table__row {
+        height: 55.2px;
+        content-visibility: auto;
+        contain-intrinsic-size: 55.2px;
         &:hover {
           // background: rgba(50, 61, 109, 0.75);
+          .table-action {
+            display: inline-block;
+          }
         }
       }
 
@@ -1362,14 +1405,20 @@ onMounted(() => {
         }
       }
     }
-
+    .name-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
     .name-link {
       font-weight: 700;
       font-size: 16px;
       color: #{$light_blue};
       cursor: pointer;
     }
-
+    .table-action {
+      display: none;
+    }
     .id-box {
       .copy {
         display: flex;

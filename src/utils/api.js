@@ -137,6 +137,14 @@ export const getSummary = (deviceData, token) => {
     data,
   });
 };
+export const search_foggie_count = () => {
+  let url = `${apiUrl}/api/accounts/search_foggie_count`;
+  return request({
+    url: url,
+    method: "GET",
+  });
+};
+
 
 
 
