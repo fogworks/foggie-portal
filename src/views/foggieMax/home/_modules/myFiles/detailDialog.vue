@@ -26,7 +26,12 @@
           <!-- <img src="@/assets/copy.png" alt="" /> -->
         </template>
       </div>
-      <div class="preview-box">
+      <VideoPlay
+        style="width: 100%; margin-top: 20px"
+        v-if="documentInfo.url && detailData.data.type == 'video/mp4'"
+        :srcData="detailData.data"
+      ></VideoPlay>
+      <div v-else class="preview-box">
         <div class="logo-box" v-if="!detailData.data.isSystemImg">
           <svg-icon
             v-if="theme === 'dark'"
@@ -42,12 +47,7 @@
         <div v-if="!documentInfo.url" class="no-previewed-tip">
           The current file type cannot be previewed
         </div>
-        <VideoPlay
-          v-if="documentInfo.url && detailData.data.type == 'video/mp4'"
-          :srcData="detailData.data"
-        ></VideoPlay>
-
-        <img v-else-if="documentInfo.url" :src="documentInfo.url" />
+        <img v-if="documentInfo.url" :src="documentInfo.url" />
       </div>
       <div class="action-btn">
         <div>

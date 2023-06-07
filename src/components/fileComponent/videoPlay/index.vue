@@ -41,7 +41,7 @@ const init = () => {
       autoplay: false,
 
       fluid: true,
-      techOrder: ["html5", "hls"],
+      techOrder: ["html5"],
 
       language: "en",
 
@@ -90,7 +90,8 @@ const init = () => {
 
       sources: [
         {
-          src: srcData.value.url,
+          // src: srcData.value.url,
+          src: require("@/assets/Vue3-video-play.mp4"),
           type: "video/mp4",
         },
       ],
@@ -109,36 +110,36 @@ const changeSrc = (data) => {
 
   player.value.play();
 };
-// onMounted(() => {
-//   changeSrc(srcData.value);
-// });
-watch(
-  visible,
-  (val) => {
-    if (val && player.value) {
-      player.value.play();
-    } else if (!val && player.value) {
-      player.value.pause();
-    } else {
-      init();
-    }
-  },
-  {
-    immediate: true,
-  }
-);
-watch(
-  srcData,
-  (val) => {
-    if (val) {
-      changeSrc(val);
-    }
-  },
-  {
-    deep: true,
-    immediate,
-  }
-);
+onMounted(() => {
+  init();
+});
+// watch(
+//   visible,
+//   (val) => {
+//     if (val && player.value) {
+//       player.value.play();
+//     } else if (!val && player.value) {
+//       player.value.pause();
+//     } else {
+//       init();
+//     }
+//   },
+//   {
+//     immediate: true,
+//   }
+// );
+// watch(
+//   srcData,
+//   (val) => {
+//     if (val) {
+//       changeSrc(val);
+//     }
+//   },
+//   {
+//     deep: true,
+//     immediate,
+//   }
+// );
 </script>
 
 <style lang="scss">

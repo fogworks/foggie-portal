@@ -20,7 +20,7 @@
         <div class="color-box">
           <el-button @click="handleConfirm">
             <RippleInk></RippleInk>
-            {{ actionType === "copy" ? "Copy Here" : "Move Here" }}</el-button
+            Rename</el-button
           >
         </div>
       </div>
