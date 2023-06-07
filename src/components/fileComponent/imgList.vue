@@ -201,7 +201,6 @@ defineExpose({ resetChecked });
       width: 128px;
       height: 128px;
       margin: 0 10px 10px 0;
-
       .mask {
         display: none;
         position: absolute;
@@ -239,7 +238,9 @@ defineExpose({ resetChecked });
             display: none;
           }
         }
+
         .more-box {
+          display: none;
           position: absolute;
           top: 0;
           right: 5px;
@@ -258,6 +259,9 @@ defineExpose({ resetChecked });
       &:hover {
         .mask {
           display: block;
+          .more-box {
+            display: block;
+          }
         }
       }
     }

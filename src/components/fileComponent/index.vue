@@ -25,7 +25,11 @@
       v-model:checkedData="checkedData"
       v-model:imgCheckedData="imgCheckedData.value"
       v-model:folderVisible="folderVisible"
+      v-model:renameVisible="renameVisible"
       v-model:isSingle="isSingle"
+      v-model:actionType="actionType"
+      v-model:singleData="singleData.value"
+      @setNoSingle="setNoSingle"
       @reset="reset"
     ></ActionBar>
     <AllFile
@@ -34,6 +38,8 @@
       v-model:folderVisible="folderVisible"
       v-model:isSingle="isSingle"
       v-model:renameVisible="renameVisible"
+      v-model:actionType="actionType"
+      @setSingle="setSingle"
       v-bind="$attrs"
       ref="AllFileRef"
     ></AllFile>
@@ -44,24 +50,32 @@
     ></ImgList>
   </div>
   <!-- action dialog -->
-  <folderDialog
+  <FolderDialog
     v-if="folderVisible"
     v-model:folderVisible="folderVisible"
     :actionType="actionType"
     :isSingle="isSingle"
+    :singleData="singleData.value"
     @reset="reset"
-  ></folderDialog>
+  ></FolderDialog>
+  <RenameDialog
+    v-if="renameVisible"
+    v-model:renameVisible="renameVisible"
+    :singleData="singleData.value"
+    @reset="reset"
+  ></RenameDialog>
 </template>
 
 <script setup>
 import { ref, toRefs, reactive, watch, provide } from "vue";
 import ImgList from "./imgList";
-import folderDialog from "./folderDialog.vue";
+import FolderDialog from "./folderDialog.vue";
+import RenameDialog from "./renameDialog.vue";
 
 import AllFile from "@/views/foggieMax/home/_modules/myFiles";
 import ActionBar from "./actionBar.vue";
 const folderVisible = ref(false);
-const isSingle = ref(false);
+const renameVisible = ref(false);
 const activeName = ref("All");
 const AllFileRef = ref(null);
 const ImgListRef = ref(null);
@@ -70,6 +84,18 @@ const checkedData = ref([]);
 const imgCheckedData = reactive({
   value: {},
 });
+const actionType = ref("");
+const isSingle = ref(false);
+const singleData = reactive({
+  value: {},
+});
+const setSingle = (data) => {
+  isSingle.value = true;
+  singleData.value = data;
+};
+const setNoSingle = () => {
+  isSingle.value = false;
+};
 provide("activeName", activeName);
 provide("checkedData", checkedData);
 provide("imgCheckedData", imgCheckedData);

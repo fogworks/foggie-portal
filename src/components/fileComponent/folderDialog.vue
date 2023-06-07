@@ -92,8 +92,10 @@ const props = defineProps({
     type: String,
     default: "copy",
   },
+  isSingle: Boolean,
+  singleData: Object,
 });
-const { folderVisible, actionType } = toRefs(props);
+const { folderVisible, actionType, isSingle, singleData } = toRefs(props);
 const activeName = inject("activeName");
 const checkedData = inject("checkedData");
 const imgCheckedData = inject("imgCheckedData");
@@ -183,16 +185,20 @@ const setPrefix = (item, isTop = false) => {
   // emits("currentPrefix", breadcrumbList.prefix);
 };
 const handleConfirm = () => {
+  let fetchMethod;
+  if (actionType == "cpoy") {
+  } else {
+    // emits("reset");
+  }
   if (activeName.value == "Image") {
     console.log(imgCheckedData.value, "imgCheckedData");
-    if (actionType == "cpoy") {
-    } else {
-      emits("reset");
-    }
   } else if (activeName.value == "All") {
-    emits("reset");
-
-    console.log(checkedData.value, "564894984984191984198419841981");
+    if (isSingle.value) {
+      console.log(singleData.value, "singleDatasingleDatasingleData");
+    } else {
+      console.log(checkedData.value, "checkedDatacheckedDatacheckedData");
+    }
+    // emits("reset");
   }
 };
 onMounted(() => {

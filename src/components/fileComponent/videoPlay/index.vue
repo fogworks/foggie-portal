@@ -41,7 +41,7 @@ const init = () => {
       autoplay: false,
 
       fluid: true,
-      techOrder: ["html5"],
+      techOrder: ["html5", "hls"],
 
       language: "en",
 

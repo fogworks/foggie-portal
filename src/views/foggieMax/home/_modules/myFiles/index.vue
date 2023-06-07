@@ -307,8 +307,9 @@ const emits = defineEmits([
   "getUseSize",
   "update:folderVisible",
   "update:renameVisible",
-  "update:isSingle",
   "update:checkedData",
+  "update:actionType",
+  "setSingle",
   // "currentPrefix"
 ]);
 const keyWord = ref("");
@@ -584,15 +585,14 @@ const handleCommand = async (val) => {
       downloadItem(item);
       break;
     case "rename":
-      emits("update:isSingle", true);
       emits("update:renameVisible", true);
-      emits("update:checkedData", [val]);
+      emits("setSingle", val.command);
       break;
     case "copy":
     case "move":
-      emits("update:isSingle", true);
       emits("update:folderVisible", true);
-      emits("update:checkedData", [val]);
+      emits("update:actionType", val.flag);
+      emits("setSingle", val.command);
       break;
     case "delete":
       proxy

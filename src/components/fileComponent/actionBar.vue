@@ -11,6 +11,7 @@
       </div>
       <div
         class="action-item"
+        @click="handlerClick('rename')"
         v-show="checkedData.length <= 1 && activeName !== 'Image'"
       >
         <svg-icon icon-class="rename"></svg-icon>
@@ -56,7 +57,6 @@
 <script setup>
 import { ref, toRefs, inject, computed } from "vue";
 import { useStore } from "vuex";
-const actionType = ref("");
 const deviceData = inject("deviceData");
 const props = defineProps({
   checkedData: {
@@ -75,8 +75,11 @@ const props = defineProps({
 const emits = defineEmits([
   "update:checkedData",
   "update:folderVisible",
+  "update:renameVisible",
   "update:isSingle",
   "update:imgCheckedData",
+  "update:actionType",
+  "update:singleData",
   "reset",
 ]);
 const store = useStore();
@@ -105,15 +108,17 @@ const resetChecked = () => {
   emits("reset");
 };
 const handlerClick = (type) => {
-  actionType.value = type;
   emits("update:isSingle", false);
   if (type === "move" || type === "copy") {
+    emits("update:actionType", type);
     emits("update:folderVisible", true);
   } else if (type === "download") {
     downLoad();
   } else if (type === "delete") {
     resetChecked();
   } else if (type === "rename") {
+    emits("update:singleData", checkedData.value[0]);
+    emits("update:renameVisible", true);
   } else if (type === "copy") {
   } else if (type === "newFolder") {
   }
