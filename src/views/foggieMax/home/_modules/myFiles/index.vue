@@ -470,6 +470,9 @@ const initFileData = async (data) => {
     };
     // contentItem.push(item);
   });
+  if (!commonPrefixesItem) {
+    commonPrefixesItem = [];
+  }
   tableData.data = [...commonPrefixesItem, ...contentItem];
   emits("getUseSize");
   tableLoading.value = false;
@@ -750,6 +753,7 @@ const toDetail = (item) => {
     // router.push("/detail");
   }
 };
+const isSearch = ref(false);
 const doSearch = async () => {
   if (tableLoading.value) return false;
   tableData.data = [];
@@ -761,13 +765,15 @@ const doSearch = async () => {
     // let token = store.getters.token;
     let token = tokenMap.value[deviceData.device_id];
     let type = "foggie";
+    isSearch.value = true;
     let data = await find_objects(
       email.value,
       type,
       token,
       deviceData,
-      keyWord.value
+      encodeURIComponent(keyWord.value)
     );
+    isSearch.value = false;
     if (data.contents) {
       data.content = data.contents;
     }
@@ -793,7 +799,9 @@ const setPrefix = (item, isTop = false) => {
   // emits("currentPrefix", breadcrumbList.prefix);
 };
 watch(breadcrumbList, (val) => {
-  getFileList("", val.prefix);
+  if (!isSearch.value) {
+    getFileList("", val.prefix);
+  }
 });
 watch(
   () => currentOODItem,
