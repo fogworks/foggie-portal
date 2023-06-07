@@ -70,13 +70,13 @@ export default {
     // const checkedData = ref([]);
     const tokenMap = computed(() => store.getters.tokenMap);
     provide("currentOODItem", currentOODItem);
+    spaceTotal.value = +deviceData.value.total_disk_size;
 
     const getUseSize = () => {
       getSummary(
         deviceData.value,
         tokenMap.value[deviceData.value.device_id]
       ).then((res) => {
-        spaceTotal.value = +res.contents[0]?.count;
         spaceUseSize.value = +(
           +res.contents[0]?.total /
           1024 /

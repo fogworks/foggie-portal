@@ -144,23 +144,24 @@
               class="formBox clearfix"
               style="margin-left: 20px; margin-top: 15px"
             >
-              <el-input
+              <el-input-number
                 v-model="formLine.prestoreDMC"
-                maxlength="6"
+                :max="999999"
+                :min="+(+orderDetail.total - +orderDetail.deposit).toFixed(4)"
+                :controls="false"
+                :precision="4"
                 :placeholder="`Minimum ${(
                   orderDetail.total - orderDetail.deposit
                 ).toFixed(4)}`"
                 style="width: 270px"
-                @input="inputPrestoreDMC"
                 @blur="blurPrestoreDMC"
               >
-                <template #prefix>
-                  <svg-icon icon-class="search2" size="25"></svg-icon>
-                </template>
                 <template #suffix>
                   <span style="font-size: 16px">DMC</span>
                 </template>
-              </el-input>
+              </el-input-number>
+              <span style="font-size: 16px">DMC</span>
+
               <div
                 style="
                   margin-left: 15px;
@@ -351,26 +352,46 @@ function blurPrestoreDMC() {
   }
 }
 
-function inputPrestoreDMC(text) {
-  text = text.replace(/[^0-9\.]/g, "");
-  state.formLine.prestoreDMC = text;
-  state.orderDetail.week = Math.round(
-    text / (state.orderDetail.price * state.formLine.quantity)
-  );
-  if (state.orderDetail.week) {
-    state.orderDetail.serverTime = ChinaTime4(
-      state.orderDetail.week * 7,
-      "YYYY-MM-DD"
+// function inputPrestoreDMC(text) {
+//   state.formLine.prestoreDMC = text;
+//   state.orderDetail.week = Math.round(
+//     text / (state.orderDetail.price * state.formLine.quantity)
+//   );
+//   if (state.orderDetail.week) {
+//     state.orderDetail.serverTime = ChinaTime4(
+//       state.orderDetail.week * 7,
+//       "YYYY-MM-DD"
+//     );
+//   } else {
+//     state.orderDetail.serverTime = "";
+//   }
+
+//   state.orderDetail.aggregate = (
+//     Number(state.formLine.prestoreDMC) + Number(state.orderDetail.deposit)
+//   ).toFixed(4);
+// }
+watch(
+  () => state.formLine.prestoreDMC,
+  (val) => {
+    state.orderDetail.week = Math.round(
+      val / (state.orderDetail.price * state.formLine.quantity)
     );
-  } else {
-    state.orderDetail.serverTime = "";
+    if (state.orderDetail.week) {
+      state.orderDetail.serverTime = ChinaTime4(
+        state.orderDetail.week * 7,
+        "YYYY-MM-DD"
+      );
+    } else {
+      state.orderDetail.serverTime = "";
+    }
+    state.orderDetail.aggregate = (
+      Number(state.formLine.prestoreDMC) + Number(state.orderDetail.deposit)
+    ).toFixed(4);
+  },
+  {
+    immediate: true,
   }
-
-  state.orderDetail.aggregate = (
-    Number(state.formLine.prestoreDMC) + Number(state.orderDetail.deposit)
-  ).toFixed(4);
-}
-
+);
 function computeTotalPrices(item) {
   let total =
     (item.price / 10000) * state.formLine.week * state.formLine.quantity +
@@ -517,8 +538,8 @@ function loadChainId() {
   });
 }
 function reset() {
-  formLine.quantity = 1;
-  formLine.week = 24;
+  formLine.value.quantity = 1;
+  formLine.value.week = 24;
 }
 onMounted(() => {
   loadCurReferenceRate();

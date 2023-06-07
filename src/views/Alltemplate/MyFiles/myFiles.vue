@@ -1,11 +1,7 @@
 <template>
   <div class="card-box formBox">
     <el-breadcrumb :separator-icon="ArrowRight">
-      <el-breadcrumb-item @click="setPrefix(item, true)">
-        <div class="flex items-center">
-          <svg-icon icon-class="my-files" class="title-img"></svg-icon>
-          <div class="title">Files</div>
-          <el-switch
+      <el-switch
             class="file-source"
             v-model="fileSource"
             size="large"
@@ -15,6 +11,11 @@
             :inactive-value="local"
             :before-change="switchReceiveStatus"
           />
+      <el-breadcrumb-item @click="setPrefix(item, true)">
+        <div class="flex items-center">
+          <svg-icon icon-class="my-files" class="title-img"></svg-icon>
+          <div class="title">Files</div>
+         
         </div>
       </el-breadcrumb-item>
       <el-breadcrumb-item
@@ -294,6 +295,8 @@ import { getSecondTime } from "@/utils/ChinaStandardTime";
 // import { getFileType } from "@/utils/getFileType";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
+import setting from "@/setting";
+const { baseUrl } = setting;
 // import { fa } from "element-plus/es/locale";
 const store = useStore();
 const route = useRoute();
@@ -446,7 +449,7 @@ const tableSort = ({ prop = "", order = 2, key = "" }) => {
 };
 const refresh = () => {
   tableData.data = [];
-  getFileList();
+  getFileList("", breadcrumbList.prefix);
   tableSort({ prop: "create_time", order: 1, key: 1 });
 };
 
@@ -620,7 +623,7 @@ const handleImg = (item, type, isDir) => {
     // port = 8007;
     // let Id = orderId.value;
     // let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
-    imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
+    imgHttpLink = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&token=${deviceData.value.upload_file_token}`;
   } else {
     isSystemImg = true;
   }
@@ -699,12 +702,12 @@ const doShare = async (item) => {
     shareCopyContent = shareCopyContent + ipfsStr + " \n";
     shareCopyContent = shareCopyContent + " " + " \n ";
     shareRefContent.ipfsStr = ipfsStr;
-    shareRefContent.httpStr = shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
+    // shareRefContent.httpStr = shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
 
     shareCopyContent = shareCopyContent + cyfsStr + " \n";
     shareCopyContent = shareCopyContent + " " + " \n ";
     shareRefContent.cyfsStr = cyfsStr;
-    shareRefContent.httpStr = shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
+    // shareRefContent.httpStr = shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
 
     shareCopyContent = shareCopyContent + shareStr + " \n";
     shareRefContent.shareStr = shareStr;
@@ -781,24 +784,23 @@ const downloadItem = (item) => {
   // let Id = orderId.value;
   let Id = deviceData.value.foggie_id;
   let peerId = deviceData.value.peer_id;
-  // const { baseUrl } = setting;
-  // let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
-  // // downloadUrl = 'foggie://12D3KooWC2mwaY7P1u9bvqE2JEvPRKdjUjQdVL7nie18Kdvjvgrf/2142/QmX3bmf4Mbs2nfTYVF5CJw3CGR9eogfGaCUcRWbd9R4WHs'
+  let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&token=${deviceData.value.upload_file_token}`;
+  // downloadUrl = 'foggie://12D3KooWC2mwaY7P1u9bvqE2JEvPRKdjUjQdVL7nie18Kdvjvgrf/2142/QmX3bmf4Mbs2nfTYVF5CJw3CGR9eogfGaCUcRWbd9R4WHs'
 
-  // console.log('-------------------ipcrenderer----download')
+  console.log('-------------------ipcrenderer----download')
 
-  // ipcRenderer.send('download', {
-  //   downloadPath: downloadUrl, // 下载链接（以下载vue文件为例）
-  //   fileName: item.name, // 下载文件名，需要包含后缀名
-  // })
+  ipcRenderer.send('download', {
+    downloadPath: downloadUrl,
+    fileName: item.name,
+  })
 
-  let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email.value}`;
-  var oA = document.createElement("a");
-  oA.download = item.name;
-  oA.href = downloadUrl;
-  document.body.appendChild(oA);
-  oA.click();
-  oA.remove();
+  // let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&token=${deviceData.value.upload_file_token}`;
+  // var oA = document.createElement("a");
+  // oA.download = item.name;
+  // oA.href = downloadUrl;
+  // document.body.appendChild(oA);
+  // oA.click();
+  // oA.remove();
 };
 
 const copyLink = (text) => {
@@ -830,18 +832,21 @@ const toDetail = (item) => {
     // router.push("/detail");
   }
 };
-const getFileList = function () {
+const getFileList = function (scroll ,prefix) {
   if (fileSource.value) {
-    getReomteData();
+    getReomteData(scroll, prefix);
   } else {
     getLocalData();
   }
 };
-const getReomteData = () => {
+const getReomteData = (scroll, prefix) => {
   let list_prefix = "";
   tableLoading.value = true;
-  let token = "";
+  let token = deviceData.value.upload_file_token;
   let type = "space";
+  if (prefix?.length) {
+    list_prefix = prefix.join("/");
+  }
   oodFileList(email.value, type, token, deviceData.value, list_prefix)
     .then((res) => {
       if (res && res.content) {
@@ -1037,6 +1042,7 @@ const initLocalData = (data) => {
 
   tableSort({ prop: "date", order: 1, key: 1 });
 };
+const isSearch = ref(false)
 const doSearch = async () => {
   if (keyWord.value === "") {
     getFileList();
@@ -1044,8 +1050,9 @@ const doSearch = async () => {
     tableLoading.value = true;
     // let orderId = deviceData.value.space_order_id;
     breadcrumbList.prefix = [];
-    let token = store.getters.token;
+    let token = deviceData.value.upload_file_token;
     let type = "space";
+    isSearch.value = true;
     if (fileSource.value) {
       let data = await find_objects(
         email.value,
@@ -1054,6 +1061,7 @@ const doSearch = async () => {
         deviceData.value,
         encodeURIComponent(keyWord.value)
       );
+      isSearch.value = false;
       tableData.data = [];
       if (data.contents) {
         data.content = data.contents;
@@ -1067,6 +1075,7 @@ const doSearch = async () => {
         key: encodeURIComponent(keyWord.value),
       })
         .then((res) => {
+          isSearch.value = false;
           if (res.data[0]?.cid) {
             initLocalData(res);
           } else {
@@ -1078,6 +1087,7 @@ const doSearch = async () => {
           }
         })
         .catch(() => {
+          isSearch.value = false;
           ElNotification({
             type: "error",
             message: "Failed to obtain file information",
@@ -1096,12 +1106,18 @@ const setPrefix = (item, isTop = false) => {
       if (el === item) targetIndex = index;
       return index <= targetIndex;
     });
+    let len = breadcrumbList.prefix.length;
+    if (len > 0 && breadcrumbList.prefix[len -1] !== '') {
+      breadcrumbList.prefix.push('')
+    }
   }
   emits("currentPrefix", breadcrumbList.prefix);
 };
-// watch(breadcrumbList, (val) => {
-//   // getFileList("", val.prefix);
-// });
+watch(breadcrumbList, (val) => {
+  if (!isSearch.value) {
+    getFileList("", val.prefix);
+  }
+});
 watch(
   () => currentOODItem,
   () => {
@@ -1134,6 +1150,7 @@ const switchReceiveStatus = () => {
           .then(() => {
             // get remote data
             fileSource.value = !fileSource.value;
+            breadcrumbList.prefix = [];
             getLocalData();
           })
           .catch(() => {
@@ -1148,6 +1165,7 @@ const switchReceiveStatus = () => {
           .then(() => {
             // get remote data
             fileSource.value = !fileSource.value;
+            breadcrumbList.prefix = [];
             getReomteData();
           })
           .catch(() => {

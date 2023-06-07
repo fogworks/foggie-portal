@@ -241,7 +241,7 @@ export default {
       let port = deviceData.rpc.split(":")[1];
       let Id = deviceData.foggie_id;
       let peerId = deviceData.peer_id;
-      let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&email=${email}`;
+      let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&token=${deviceData.value.upload_file_token}`;
 
       var oA = document.createElement("a");
       oA.download = item.name;

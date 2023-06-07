@@ -284,6 +284,8 @@ import PinFormDialog from "./pinFormDialog";
 import DetailDialog from "./detailDialog";
 import { getfilesize, transferTime } from "@/utils/util.js";
 import { useStore } from "vuex";
+import setting from "@/setting";
+const { baseUrl } = setting;
 const { proxy } = getCurrentInstance();
 const emits = defineEmits([
   // "toggleToUpload",
@@ -509,7 +511,7 @@ const handleImg = (type, ID, cid, key, isDir, ip, port, peerId) => {
     // let token = store.getters.token;
     let token = tokenMap.value[deviceData.device_id];
 
-    imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${ID}&peerId=${peerId}&type=foggie&token=${token}`;
+    imgHttpLink = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${ID}&peerId=${peerId}&type=foggie&token=${token}`;
 
     // foggie://peerid/spaceid/cid
   } else if (type === "mp4") {
@@ -607,12 +609,12 @@ const doShare = async (item) => {
     shareCopyContent = shareCopyContent + ipfsStr + " \n";
     shareCopyContent = shareCopyContent + " " + " \n ";
     shareRefContent.ipfsStr = ipfsStr;
-    shareRefContent.httpStr = shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
+    // shareRefContent.httpStr = shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
 
     shareCopyContent = shareCopyContent + cyfsStr + " \n";
     shareCopyContent = shareCopyContent + " " + " \n ";
     shareRefContent.cyfsStr = cyfsStr;
-    shareRefContent.httpStr = shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
+    // shareRefContent.httpStr = shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
 
     shareCopyContent = shareCopyContent + shareStr + " \n";
     shareRefContent.shareStr = shareStr;
@@ -672,6 +674,7 @@ const cyfsPin = () => {
     }
   });
 };
+const { ipcRenderer } = window.require("electron");
 const downloadItem = (item) => {
   // let ID = device_id.value;
   // let pubkey = item.pubkey;
@@ -689,14 +692,19 @@ const downloadItem = (item) => {
   // let token = store.getters.token;
   let token = tokenMap.value[deviceData.device_id];
 
-  let downloadUrl = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=foggie&token=${token}`;
+  let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=foggie&token=${token}`;
 
-  var oA = document.createElement("a");
-  oA.download = item.name;
-  oA.href = downloadUrl;
-  document.body.appendChild(oA);
-  oA.click();
-  oA.remove();
+  ipcRenderer.send("download", {
+    downloadPath: downloadUrl,
+    fileName: item.name,
+  });
+
+  // var oA = document.createElement("a");
+  // oA.download = item.name;
+  // oA.href = downloadUrl;
+  // document.body.appendChild(oA);
+  // oA.click();
+  // oA.remove();
 };
 const deleteItem = (item) => {
   tableLoading.value = true;
@@ -763,6 +771,7 @@ const toDetail = (item) => {
     // router.push("/detail");
   }
 };
+const isSearch = ref(false);
 const doSearch = async () => {
   if (tableLoading.value) return false;
   tableData.data = [];
@@ -774,13 +783,15 @@ const doSearch = async () => {
     // let token = store.getters.token;
     let token = tokenMap.value[deviceData.device_id];
     let type = "foggie";
+    isSearch.value = true;
     let data = await find_objects(
       email.value,
       type,
       token,
       deviceData,
-      keyWord.value
+      encodeURIComponent(keyWord.value)
     );
+    isSearch.value = false;
     if (data.contents) {
       data.content = data.contents;
     }
@@ -798,11 +809,17 @@ const setPrefix = (item, isTop = false) => {
       if (el === item) targetIndex = index;
       return index <= targetIndex;
     });
+    let len = breadcrumbList.prefix.length;
+    if (len > 0 && breadcrumbList.prefix[len - 1] !== "") {
+      breadcrumbList.prefix.push("");
+    }
   }
   // emits("currentPrefix", breadcrumbList.prefix);
 };
 watch(breadcrumbList, (val) => {
-  // getFileList("", val.prefix);
+  if (!isSearch.value) {
+    getFileList("", val.prefix);
+  }
 });
 watch(
   () => currentOODItem,

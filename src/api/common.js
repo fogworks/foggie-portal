@@ -99,6 +99,14 @@ export function getDmcUsername(data) {
     data,
   });
 }
+export function heartbeat(data) {
+  return request({
+    // url: baseUrl + '/user/get_username',
+    url: baseUrl + '/heartbeat',
+    method: 'POST',
+    data,
+  });
+}
 
 
 

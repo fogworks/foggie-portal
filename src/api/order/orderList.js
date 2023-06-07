@@ -21,7 +21,7 @@ export function getOrderById(data) {
 
 export function pushMerkle(data) {
   return request({
-    url: baseUrl + "/order/push_merkle",
+    url: baseUrl + "/order/pre_push_merkle",
     method: "post",
     data,
   });

@@ -13,15 +13,12 @@
           {{ file.name }}
         </div>
         <div class="uploader-file-prefix">
-
           <el-tooltip placement="top">
             <template #content>
               <div>{{ file.urlPrefix }}</div>
             </template>
             <a href="javascript:;" @click="toPath">{{ file.urlPrefix }} </a>
           </el-tooltip>
-
-
         </div>
         <div class="uploader-file-size">{{ formatedSize }}</div>
         <div class="uploader-file-status">
@@ -57,7 +54,6 @@ import Uploader from "simple-uploader.js";
 import events from "./file-events";
 import { secondsToStr } from "./utils";
 import SparkMD5 from "spark-md5";
-import axios from "axios";
 import { useStore } from "vuex";
 import {
   ref,
@@ -82,13 +78,10 @@ import {
   SaveFile,
   isCanUpload_Api,
 } from "@/api/upload";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 const FILE_SIZE = 10 * 1024 * 1024;
 const simultaneousUploads = 4;
 const maxChunkRetries = 3;
-const peerId = "12D3KooWDj1NkJ1DrVvpbBhtJ3nLCNA9CKyg3eynpiUTKsVEDkgx";
-const token =
-  "58df9379402ab6c87a51be426290e0f752ba5be4fe45736674a05dc12e642c50";
 
 const emits = defineEmits([
   "fileShare",
@@ -179,10 +172,10 @@ const NUMBER_timer = ref(null);
 const aborted = ref(false);
 const fileMd5 = ref(null);
 
-const header = new Header();
-header.setId(file.value.orderId);
-header.setPeerid(peerId);
-header.setToken(token);
+// const header = new Header();
+// header.setId(file.value.orderId);
+// header.setPeerid(peerId);
+// header.setToken(token);
 
 const username = computed(() => store.getters.userInfo?.dmc);
 const email = computed(() => store.getters.userInfo?.email);
@@ -332,7 +325,7 @@ let formatedTimeRemaining = computed(() => {
   return parsedTimeRemaining;
 });
 
-const resume = async () => {
+const resume = () => {
   if (!isFirst.value) {
     let number = 0;
     for (const item of curFileList.value) {
@@ -359,36 +352,74 @@ const resume = async () => {
       deviceType: file.value.deviceType,
       fileName: encodeURIComponent(file.value.urlFileName),
       email: email.value,
+      foggieToken: file.value.foggieToken ? file.value.foggieToken : "",
     };
-    let res = await isCanUpload_Api(params);
-    if (res.code == 200 && res.data) {
-      // 可以上传
-    } else {
-      fileError();
-      return;
-    }
+
+
+    if (timer.value) clearTimeout(timer.value), (timer.value = null);
+    timer.value = setTimeout(async () => {
+      if (NUMBER_timer.value)
+        clearInterval(NUMBER_timer.value), (NUMBER_timer.value = null);
+      let res = await isCanUpload_Api(params);
+
+      if (res.code == 200 && res.data) {
+        beginUpload()
+        // 可以上传
+      } else if (res.code == 30039) {
+        ElMessageBox.confirm(
+          "duplicate file name, are you sure to overwrite?",
+          "Warning",
+          {
+            confirmButtonText: "OK",
+            cancelButtonText: "Cancel",
+            type: "warning",
+          }
+        )
+          .then(() => {
+            beginUpload()
+          })
+          .catch(() => {
+            remove();
+          });
+      } else {
+        fileError();
+        return;
+      }
+
+
+    }, 600);
+
+
+
+
+
   }
 
-  isFirst.value = false;
-  if (timer.value) clearTimeout(timer.value), (timer.value = null);
-  timer.value = setTimeout(() => {
-    averageSpeed.value = 0;
-    if (NUMBER_timer.value)
-      clearInterval(NUMBER_timer.value), (NUMBER_timer.value = null);
-    isPause.value = false;
-    paused.value = false;
-    file.value.paused = false;
-    aborted.value = false;
-    if (file.value.size > FILE_SIZE) {
-      isUploading.value = false;
-      fileLoad(file);
-    } else {
-      isUploading.value = true;
-      isBigFile.value = false;
-      smallLoad(file.value);
-    }
-  }, 600);
+
 };
+
+
+
+function beginUpload() {
+  isFirst.value = false;
+
+
+  averageSpeed.value = 0;
+
+  isPause.value = false;
+  paused.value = false;
+  file.value.paused = false;
+  aborted.value = false;
+  if (file.value.size > FILE_SIZE) {
+    isUploading.value = false;
+    fileLoad(file);
+  } else {
+    isUploading.value = true;
+    isBigFile.value = false;
+    smallLoad(file.value);
+  }
+
+}
 
 const initFile = () => {
   resume();
@@ -426,7 +457,7 @@ const fileShare = () => {
 
 async function Save_File() {
   if (file.value.deviceType != "3") {
-    return true
+    return true;
   }
   let params = {
     md5: fileMd5.value,
@@ -436,16 +467,22 @@ async function Save_File() {
     fileSize: file.value.size,
     deviceType: file.value.deviceType,
   };
-  let isSucceed = await SaveFile(params)
+  let isSucceed = await SaveFile(params);
   if (isSucceed.code == 200) {
-    return true
+    return true;
   } else {
-    return false
+    return false;
   }
 }
 
 const toPath = () => {
-  emits("fileDetail", file.value);
+  console.log(file.value);
+
+  // const folderPath = "/path/to/folder";
+
+  // // 使用remote模块调用操作系统的文件管理器打开文件夹
+  // remote.shell.openItem(folderPath);
+  // emits("fileDetail", file.value);
 };
 const actionCheck = () => {
   paused.value = file.value.paused;
@@ -526,8 +563,6 @@ async function initParams(params, fileResult) {
   form.append("wholeMd5", fileMd5.value);
   form.append("minOffset", params.start);
   form.append("maxOffset", params.end);
-  form.append("peerId", peerId);
-  form.append("token", token);
   form.append("orderId", file.value.orderId);
   if (file.value.foggieToken) {
     form.append("foggieToken", file.value.foggieToken);
@@ -598,7 +633,7 @@ const smallLoad = async (smallFile) => {
         let succeed = await Save_File();
         if (!succeed) {
           fileError();
-          return
+          return;
         }
         console.log(456);
         progress.value = 100;
@@ -635,8 +670,6 @@ const fileLoad = async (file) => {
       md5: fileMd5.value,
       fileSize: file.value.size,
       orderId: file.value.orderId,
-      token: token,
-      peerId: peerId,
       email: email.value,
       deviceType: file.value.deviceType,
       foggieToken: file.value.foggieToken,
@@ -881,9 +914,8 @@ function fileCompletes() {
         let succeed = await Save_File();
         if (!succeed) {
           fileError();
-          return
+          return;
         }
-
 
         emits("chanStatus", data);
         file.value.completed = true;
@@ -903,18 +935,20 @@ function fileCompletes() {
 }
 
 const UploadProgress = (progressEvent, part_number) => {
-  console.log(progressEvent, '----------', part_number);
+  console.log(progressEvent, "----------", part_number);
   if (part_number) {
     let number = ArrayProgress.value[part_number - 1];
     if (number < (progressEvent.loaded / progressEvent.total) * 100) {
-      ArrayProgress.value[part_number - 1] = (progressEvent.loaded / progressEvent.total) * 100;
+      ArrayProgress.value[part_number - 1] =
+        (progressEvent.loaded / progressEvent.total) * 100;
     }
 
     NUMBER.value = ArrayProgress.value.reduce((cur, next) => {
       return cur + next;
     }, 0);
 
-    let uploadProgress = (NUMBER.value / (100 * ArrayProgress.value.length)).toFixed(2) * 100;
+    let uploadProgress =
+      (NUMBER.value / (100 * ArrayProgress.value.length)).toFixed(2) * 100;
     progress.value = uploadProgress < 100 ? uploadProgress : 99;
 
     let curTime = new Date().getTime();
@@ -967,30 +1001,6 @@ const remove = () => {
     aborted.value = false;
     emits("remove", file.value.id);
     file.value.cancel();
-
-    // const deletReq = new DeleteObjectReq();
-    // const DeleteRequest = new DeleteObjectRequest();
-    // const uploadID = new Upload();
-    // deletReq.setHeader(header);
-
-    // uploadID.setKey(encodeURIComponent(file.value.urlFileName));
-    // uploadID.setUploadid(upload_id.value);
-
-    // DeleteRequest.setCidsList([""]);
-    // DeleteRequest.setObjectType("multipart");
-    // DeleteRequest.setObjectsList([uploadID]);
-    // deletReq.setRequest(DeleteRequest);
-
-    // if (abortController.value)
-    //   abortController.value.abort("Cancel request");
-
-    // client.deleteObject(deletReq, {}, (error, res) => {
-    //   isPause.value = true;
-    //   paused.value = true;
-    //   aborted.value = false;
-    //   emit("remove", file.value.id);
-    //   file.value.cancel();
-    // });
   } else {
     if (abortController.value) abortController.value.abort("Cancel request");
     isPause.value = true;

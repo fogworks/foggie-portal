@@ -140,7 +140,7 @@ const active = ref("");
 const { passwordIsExist, loadUserLoginStatus } = usePrivateKey();
 
 const handleActive = async (val = "") => {
-  if (val == "storage") {
+  if (val == "storage" || val === "foggie") {
     if (!passwordIsExist.value) {
       let bool = await loadUserLoginStatus();
       if (bool) {

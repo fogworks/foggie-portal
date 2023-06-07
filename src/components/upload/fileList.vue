@@ -11,9 +11,19 @@
         </div>
       </li>
       <li v-for="file in curFileList" :key="file.id">
-        <upFile :file="file" :list="true" :curFileList="curFileList" :MAX_UPLOAD_NUM="MAX_UPLOAD_NUM"
-          @chanStatus="chanStatus" @getStatus="getStatus" @uploadComplete="uploadComplete" @getProgress="getProgress"
-          @remove="remove" @fileShare="fileShare" @fileDetail="fileDetail" />
+        <upFile
+          :file="file"
+          :list="true"
+          :curFileList="curFileList"
+          :MAX_UPLOAD_NUM="MAX_UPLOAD_NUM"
+          @chanStatus="chanStatus"
+          @getStatus="getStatus"
+          @uploadComplete="uploadComplete"
+          @getProgress="getProgress"
+          @remove="remove"
+          @fileShare="fileShare"
+          @fileDetail="fileDetail"
+        />
       </li>
     </ul>
   </div>
@@ -139,7 +149,6 @@ watch(
   { deep: true }
 );
 watchEffect(() => {
-
   fileList.uploadLists = props.uploadLists;
   if (fileList.uploadLists.length == 0) {
     //删除当前设备下上传列表中所有文件 当前上传列表也需要清除
@@ -190,7 +199,7 @@ defineExpose({
 });
 </script>
 
-<style>
+<style scoped>
 .uploader-list {
   overflow: auto;
   overflow-x: hidden;
@@ -203,7 +212,7 @@ defineExpose({
   margin-right: 20px;
 }
 
-.uploader-list>ul {
+.uploader-list > ul {
   list-style: none;
   margin: 0;
   padding: 0;
