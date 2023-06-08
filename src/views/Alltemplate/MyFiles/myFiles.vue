@@ -138,12 +138,13 @@
                   effect="dark"
                   content="Not Persisted"
                   placement="top-start"
+                  v-if="!scope.row.isPersistent && scope.row.type !== 'application/x-directory'"
                 >
-                  <div v-if="!scope.row.isPersistent">
-                    <i class="i-ersistent">*</i> {{ scope.row.name }}
+                  <div >
+                    <i class="i-ersistent">*</i> 111{{ scope.row.name }}
                   </div>
                 </el-tooltip>
-                <div v-if="scope.row.isPersistent">
+                <div v-if="scope.row.isPersistent || scope.row.type === 'application/x-directory'">
                   {{ scope.row.name }}
                 </div>
               </div>
@@ -463,6 +464,7 @@ const props = defineProps({
 });
 const syncDialog = ref(false);
 const taskDisplay = ref(false);
+const continuationToken = ref("");
 const closeRightUpload = () => {
   taskDisplay.value = false;
 };
@@ -536,11 +538,14 @@ function openUpload() {
 
 /* */
 const fileListsInfinite = _.debounce(() => {
-  if (tableData.total > tableData.data.length) {
-    tableData.pageNum += 1;
-    getFileList();
-  } else {
-    return;
+  // if (tableData.total > tableData.data.length) {
+  //   tableData.pageNum += 1;
+  //   getFileList();
+  // } else {
+  //   return;
+  // }
+  if (fileSource.value && continuationToken.value && tableData.data.length < 5000) {
+    getReomteData(continuationToken.value, breadcrumbList.prefix);
   }
 }, 300);
 
@@ -932,7 +937,8 @@ const detailData = reactive({ data: {} });
 const toDetail = (item) => {
   localStorage.setItem("currentOODItem", JSON.stringify(currentOODItem.value));
   if (item.type === "application/x-directory") {
-    breadcrumbList.prefix = item.name.split("/");
+    let long_name = breadcrumbList.prefix.join('/') + item.name;
+    breadcrumbList.prefix = long_name.split("/");
     emits("currentPrefix", breadcrumbList.prefix);
   } else {
     detailData.data = item;
@@ -956,7 +962,7 @@ const getReomteData = (scroll, prefix) => {
   if (prefix?.length) {
     list_prefix = prefix.join("/");
   }
-  oodFileList(email.value, type, token, deviceData.value, list_prefix)
+  oodFileList(email.value, type, token, deviceData.value, list_prefix, scroll)
     .then((res) => {
       if (res && res.content) {
         initRemoteData(res);
@@ -988,12 +994,17 @@ const initRemoteData = (data) => {
       position: "bottom-left",
     });
   }
+  let dir = breadcrumbList.prefix.join('/');
 
-  tableData.data = [];
+  // tableData.data = [];
   for (let i = 0; i < data.commonPrefixes?.length; i++) {
+    let name = decodeURIComponent(data.commonPrefixes[i]);
+    if (data.prefix) {
+      name = name.split(data.prefix)[1];
+    }
     let item = {
       isDir: true,
-      name: decodeURIComponent(data.commonPrefixes[i]),
+      name,
       key: data.commonPrefixes[i],
       idList: [
         {
@@ -1021,6 +1032,8 @@ const initRemoteData = (data) => {
     tableData.data.push(item);
   }
 
+  
+
   for (let j = 0; j < data?.content?.length; j++) {
     let date = transferTime(data.content[j].lastModified);
     let isDir = false;
@@ -1037,7 +1050,9 @@ const initRemoteData = (data) => {
     let file_id = data.content[j].fileId;
 
     let name = decodeURIComponent(data.content[j].key);
-
+    if (data.prefix) {
+      name = name.split(data.prefix)[1];
+    }
     let isPersistent = data.content[j].isPersistent;
 
     let item = {
@@ -1069,6 +1084,12 @@ const initRemoteData = (data) => {
       isPersistent,
     };
     tableData.data.push(item);
+  }
+
+  if (data.isTruncated) {
+    continuationToken.value = data.continuationToken;
+  } else {
+    continuationToken.value = '';
   }
 
   tableLoading.value = false;
@@ -1224,12 +1245,14 @@ const setPrefix = (item, isTop = false) => {
 };
 watch(breadcrumbList, (val) => {
   if (!isSearch.value) {
+    tableData.data = [];
     getFileList("", val.prefix);
   }
 });
 watch(
   () => currentOODItem,
   () => {
+    tableData.data = [];
     getFileList("", breadcrumbList.prefix);
   },
   {
@@ -1260,7 +1283,8 @@ const switchReceiveStatus = () => {
             // get remote data
             fileSource.value = !fileSource.value;
             breadcrumbList.prefix = [];
-            getLocalData();
+            tableData.data = [];
+            // getLocalData();
           })
           .catch(() => {
             reject(false);
@@ -1275,7 +1299,8 @@ const switchReceiveStatus = () => {
             // get remote data
             fileSource.value = !fileSource.value;
             breadcrumbList.prefix = [];
-            getReomteData();
+            tableData.data = [];
+            // getReomteData();
           })
           .catch(() => {
             reject(false);

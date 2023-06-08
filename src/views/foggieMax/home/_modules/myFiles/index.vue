@@ -97,6 +97,10 @@
         max-height="1000"
         ref="fileTable"
         @selection-change="handleSelectionChange"
+        v-el-table-infinite-scroll="fileListsInfinite"
+        :infinite-scroll-immediate="false"
+        infinite-scroll-distance="150px"
+        :infinite-scroll-disabled="false"
       >
         <el-table-column type="selection" width="30" />
         <el-table-column
@@ -479,6 +483,7 @@
 
 <script setup>
 import ActionDrop from "@/components/actionDrop";
+import { default as vElTableInfiniteScroll } from "el-table-infinite-scroll";
 import { ArrowRight } from "@element-plus/icons-vue";
 import {
   reactive,
@@ -507,6 +512,8 @@ import DetailDialog from "./detailDialog";
 import { getfilesize, transferTime } from "@/utils/util.js";
 import { useStore } from "vuex";
 import setting from "@/setting";
+import _ from "lodash";
+
 const { baseUrl } = setting;
 
 const { proxy } = getCurrentInstance();
@@ -585,6 +592,7 @@ const activeSort = ref("1");
 let breadcrumbList = reactive({
   prefix: [],
 });
+const continuationToken = ref("");
 const fileTable = ref(null);
 
 // const tableSort = ({ prop = "", order = 2, key = "" }) => {
@@ -620,7 +628,7 @@ const getFileList = function (scroll, prefix) {
   tableLoading.value = true;
   let token = tokenMap.value[deviceData.device_id];
   let type = "foggie";
-  oodFileList(email.value, type, token, deviceData, list_prefix)
+  oodFileList(email.value, type, token, deviceData, list_prefix, scroll)
     .then((res) => {
       if (res && res.content) {
         initFileData(res);
@@ -630,15 +638,20 @@ const getFileList = function (scroll, prefix) {
 };
 
 const initFileData = async (data) => {
+  // tableData.data = [];
+  // let commonPrefixesItem = [];
+  // let contentItem = [];
   emits("update:checkedData", []);
   fileTable.value.clearSelection();
-  tableData.data = [];
-  let commonPrefixesItem = [];
-  let contentItem = [];
-  commonPrefixesItem = data?.commonPrefixes?.map((el, i) => {
+  let dir = breadcrumbList.prefix.join("/");
+  let commonPrefixesItem = data.commonPrefixes?.map((el, i) => {
+    let name = decodeURIComponent(el);
+    if (data.prefix) {
+      name = name.split(data.prefix)[1];
+    }
     return {
       isDir: true,
-      name: decodeURIComponent(el),
+      name,
       key: el,
       idList: [
         {
@@ -718,7 +731,17 @@ const initFileData = async (data) => {
     };
     // contentItem.push(item);
   });
-  tableData.data = [...(commonPrefixesItem || []), ...(contentItem || [])];
+  if (!commonPrefixesItem) {
+    commonPrefixesItem = [];
+  }
+
+  if (data.isTruncated) {
+    continuationToken.value = data.continuationToken;
+  } else {
+    continuationToken.value = "";
+  }
+
+  tableData.data = [...commonPrefixesItem, ...contentItem];
   emits("getUseSize");
   tableLoading.value = false;
 };
@@ -1004,7 +1027,8 @@ const detailData = reactive({ data: {} });
 const toDetail = (item) => {
   localStorage.setItem("currentOODItem", JSON.stringify(currentOODItem.value));
   if (item.type === "application/x-directory") {
-    breadcrumbList.prefix = item.name.split("/");
+    let long_name = breadcrumbList.prefix.join("/") + item.name;
+    breadcrumbList.prefix = long_name.split("/");
     // emits("currentPrefix", breadcrumbList.prefix);
   } else {
     detailData.data = item;
@@ -1058,6 +1082,12 @@ const setPrefix = (item, isTop = false) => {
   }
   // emits("currentPrefix", breadcrumbList.prefix);
 };
+const fileListsInfinite = _.debounce(() => {
+  if (continuationToken.value && tableData.data.length < 5000) {
+    getFileList(continuationToken.value, breadcrumbList.prefix);
+  }
+}, 300);
+
 watch(breadcrumbList, (val) => {
   if (!isSearch.value) {
     getFileList("", val.prefix);

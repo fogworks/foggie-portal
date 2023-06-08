@@ -7,8 +7,12 @@ const state = {
   deviceData: {}
 };
 const mutations = {
-  setFileList(state, data) {
-    state.uploadFileList[state.orderId] = data;
+  setFileList(state, data, fileOrderId) {
+    if (fileOrderId) {
+      state.uploadFileList[fileOrderId] = data;
+    } else {
+      state.uploadFileList[state.orderId] = data;
+    }
   },
   closeUpload(state, data) {
     state.uploadIsShow = false;

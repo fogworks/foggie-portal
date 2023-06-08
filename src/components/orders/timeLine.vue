@@ -78,6 +78,18 @@
               "
               >{{ item.stateTitle || "" }}</span
             >
+
+            <div style="padding: 10px" class="font-weight-bolder">
+              <span class="text-muted">Data block count #</span>
+              <span class="ml-8 text-muted fs4">{{ item.block_num }}</span>
+            </div>
+            <div style="padding: 10px" class="font-weight-bolder">
+              <span class="text-muted">Version #</span>
+              <span class="ml-8 text-muted fs4">{{
+                item.merkle_version ? item.merkle_version : item.versionUser
+              }}</span>
+            </div>
+
             <div style="padding: 10px" class="font-weight-bolder">
               <span
                 class="mr-20"
@@ -179,6 +191,8 @@ function loadChallengeList() {
         for (const item of res.data.list) {
           // item.createdAt = transferUTCTime(item.create_time);
           item.createdAt = item.create_time;
+          item.versionUser = item.nonce ? item.nonce.split('#').slice(-1)[0] : ''
+
           if (item.state == 3) {
             item.state = "";
             item.stateTitle = "Challenging";

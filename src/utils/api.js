@@ -94,13 +94,13 @@ export const refreshToken = () => {
 };
 
 //File LIST
-export const oodFileList = (email, type, token, deviceData, prefix) => {
+export const oodFileList = (email, type, token, deviceData, prefix, scroll) => {
   let url = `${baseUrl}/list_files`,
     // prefix = "",
     delimiter = "/",
     max_keys = "50",
     start_after = "",
-    continuation_token = "",
+    continuation_token = scroll || "",
     version_id_marker = "",
     key_marker = "";
   let data = {
