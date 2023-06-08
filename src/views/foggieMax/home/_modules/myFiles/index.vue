@@ -103,7 +103,7 @@
           label="Name"
           show-overflow-tooltip
           class-name="action-btn-column"
-          width="565"
+          width="535"
           prop="name"
         >
           <template #default="scope">
@@ -133,7 +133,8 @@
                 {{ scope.row.name }}
               </div>
               <el-popover
-                offset="-5"
+                popper-class="action-popover"
+                :offset="-3"
                 :hide-after="0"
                 placement="bottom"
                 :width="150"
@@ -148,7 +149,7 @@
                   <li>
                     <el-button
                       @click="
-                        handleCommand({ flag: 'ipfs', command: scope.row })
+                        handleCommand({ flag: 'share', command: scope.row })
                       "
                       :disabled="
                         !(
@@ -160,13 +161,6 @@
                       share</el-button
                     >
                   </li>
-                </ul>
-              </el-popover>
-              <!-- <ActionDrop class="table-action">
-                <div class="color-box">
-                  <svg-icon icon-class="more"></svg-icon>
-                </div>
-                <ul class="more-dropdown">
                   <li>
                     <el-button
                       @click="
@@ -179,11 +173,77 @@
                         )
                       "
                     >
-                      share</el-button
+                      IPFS PIN</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'cyfs', command: scope.row })
+                      "
+                      :disabled="
+                        !(
+                          !scope.row.isDir &&
+                          currentOODItem.cyfs_state === 'finish' &&
+                          currentOODItem.cyfs_service_state === 'start'
+                        )
+                      "
+                    >
+                      CYFS PIN</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'download', command: scope.row })
+                      "
+                      :disabled="!scope.row.isDir"
+                    >
+                      Download</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'rename', command: scope.row })
+                      "
+                      :disabled="scope.row.isDir"
+                    >
+                      Rename</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'copy', command: scope.row })
+                      "
+                      :disabled="scope.row.isDir"
+                    >
+                      Copy</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'move', command: scope.row })
+                      "
+                      :disabled="scope.row.isDir"
+                    >
+                      Move</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      class="delete-item"
+                      @click="
+                        handleCommand({ flag: 'delete', command: scope.row })
+                      "
+                    >
+                      Delete</el-button
                     >
                   </li>
                 </ul>
-              </ActionDrop> -->
+              </el-popover>
               <!-- <el-dropdown
                 class="table-action"
                 trigger="hover"
@@ -1173,15 +1233,15 @@ const upload = () => {
       z-index: 99;
       // position: relative;
       display: none;
-      &:hover {
-        .more-dropdown {
-          display: block;
-          position: absolute;
-          top: 30px;
-          left: -55px;
-          background: #fff;
-        }
-      }
+      // &:hover {
+      //   .more-dropdown {
+      //     display: block;
+      //     position: absolute;
+      //     top: 30px;
+      //     left: -55px;
+      //     background: #fff;
+      //   }
+      // }
     }
     .id-box {
       .copy {
@@ -1224,6 +1284,7 @@ const upload = () => {
     .color-box {
       // .color-box();
       @include color-box;
+      padding: 0;
 
       svg {
         font-size: 28px;
@@ -1245,10 +1306,11 @@ const upload = () => {
   // &:hover {
   //   display: block;
   // }
-  display: none;
-  // :deep(.delete-item) {
-  //   color: #ff3353 !important;
-  // }
+  // display: none;
+  .delete-item {
+    color: #ff3353 !important;
+  }
+  display: block;
   background-color: var(--bg-color);
   list-style: none;
   border-radius: 16px;
@@ -1258,8 +1320,13 @@ const upload = () => {
       .el-button {
         background-color: #fff;
         color: #000;
-        width: 150px;
-        height: 40px;
+        width: 100%;
+        height: 30px;
+        border: none;
+        border-radius: 0;
+        &:hover {
+          background-color: rgb(219, 219, 219);
+        }
       }
     }
   }
@@ -1273,5 +1340,12 @@ const upload = () => {
       color: $light_blue;
     }
   }
+}
+</style>
+<style lang="scss">
+.action-popover {
+  padding: 3px 0 !important;
+  border-radius: 16px !important;
+  overflow: hidden;
 }
 </style>
