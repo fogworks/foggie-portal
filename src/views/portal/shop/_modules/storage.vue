@@ -336,8 +336,8 @@ function blurPrestoreDMC() {
     });
     return false;
   } else if (
-    (+state.formLine.prestoreDMC).toFixed(4) <
-    (state.orderDetail.total - state.orderDetail.deposit).toFixed(4)
+    state.formLine.prestoreDMC <
+    state.orderDetail.total - state.orderDetail.deposit
   ) {
     ElMessage({
       message: `The deposit amount cannot be less than ${(
@@ -428,7 +428,7 @@ function returnBG(index) {
 }
 const maxRetry = ref(0);
 async function submit() {
-  let flag = await blurPrestoreDMC();
+  let flag = blurPrestoreDMC();
   if (flag) {
     loading.value = true;
     await loadCurReferenceRate();
