@@ -67,6 +67,14 @@
       direction="rtl"
       size="50%"
     >
+      <template #header="{ close, titleId, titleClass }">
+        <p  :class="titleClass">
+          <span>To be completed File list</span>
+        <div class="fs20"> List length # {{(allFileList[orderId] ?? []).length}}</div>
+
+        </p>
+      </template>
+
       <div class="uploader-list">
         <div class="uploader-file-info head-info">
           <div class="uploader-file-name" style="width: 30%">File Name</div>
@@ -77,7 +85,7 @@
 
         <div class="TobeCompletedBox">
           <template
-            v-for="(curFile, index) in allFileList[orderId]"
+            v-for="(curFile, index) in (allFileList[orderId] ?? []).slice(0, 800)"
             :key="curFile.id"
           >
             <TobeCompleted
@@ -106,8 +114,9 @@ import {
 } from "vue";
 import fileList from "../upload/fileList.vue";
 import { useStore } from "vuex";
-import { ElMessage,ElMessageBox } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import TobeCompleted from "@/components/upload/TobeCompleted.vue";
+import _ from "lodash";
 const _this = getCurrentInstance();
 const emit = defineEmits(["fileShare"]);
 const currentPath = ref("");
@@ -192,6 +201,8 @@ const onFileAdded = (file) => {
 };
 
 const onFilesAdded = (files, fileList) => {
+  let timer = null;
+  
   if (files.length > 500) {
     ElMessageBox.alert(
       `The folder you are currently uploading contains ${files.length} small files. The number of files is too large, which may cause severe page lag during the upload process. Are you sure you want to upload it`,
@@ -213,49 +224,48 @@ const onFilesAdded = (files, fileList) => {
     }
   }
 
-  if (fileCache.length > 0) {
+  function inituploadList(file) {
+    if (file.size === 0) return;
+    if (file.size > FILE_SIZE) {
+      ElMessage({
+        message:
+          "The maximum upload size of a single file should not exceed 2GB.",
+        type: "warning",
+        duration: 3000,
+      });
+      return;
+    }
+
     let list = store.state.upload.uploadFileList[orderId.value] ?? [];
-    list = list.concat(fileCache);
-    allFileList[orderId.value] = allFileList[orderId.value].concat(fileCache);
-    store.commit("upload/setFileList", list);
-    fileCache = [];
+
+    if (list.length > 200) {
+ 
+      fileCache.push(file);
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      timer = setTimeout(() => {
+        list = list.concat(fileCache);
+        allFileList[orderId.value] =
+          allFileList[orderId.value].concat(fileCache);
+        store.commit("upload/setFileList", list);
+        fileCache = [];
+      }, 10);
+    } else {
+      list.push(file);
+      store.commit("upload/setFileList", list);
+
+      if (allFileList[orderId.value]) {
+        allFileList[orderId.value].push(file);
+      } else {
+        allFileList[orderId.value] = [];
+        allFileList[orderId.value].push(file);
+      }
+    }
   }
 };
 
-function inituploadList(file) {
-  if (file.size === 0) return;
-  if (file.size > FILE_SIZE) {
-    ElMessage({
-      message:
-        "The maximum upload size of a single file should not exceed 2GB.",
-      type: "warning",
-      duration: 3000,
-    });
-    return;
-  }
-
-  let list = store.state.upload.uploadFileList[orderId.value] ?? [];
-
-  if (list.length > 1000) {
-    fileCache.push(file);
-    if (fileCache.length % 1000 == 0) {
-      list = list.concat(fileCache);
-      allFileList[orderId.value] = allFileList[orderId.value].concat(fileCache);
-      store.commit("upload/setFileList", list);
-      fileCache = [];
-    }
-  } else {
-    list.push(file);
-    store.commit("upload/setFileList", list);
-
-    if (allFileList[orderId.value]) {
-      allFileList[orderId.value].push(file);
-    } else {
-      allFileList[orderId.value] = [];
-      allFileList[orderId.value].push(file);
-    }
-  }
-}
 const fileShare = (item) => {
   emit("fileShare", item);
 };
@@ -264,9 +274,6 @@ const fileShare = (item) => {
 const newQueueID = (id, fileOrderID) => {
   let index = allFileList[fileOrderID].findIndex((file) => file.id == id);
   allFileList[fileOrderID].splice(index, 1);
-
-  console.log(uploadFileList,'uploadFileList');
-  console.log(store.state.upload.uploadFileList,'store.state.upload.uploadFileList');
 };
 
 /* 在待上传列表中删除指定文件 */
@@ -428,12 +435,6 @@ onMounted(() => {});
 
     :deep {
       .uploader-list {
-        & > ul {
-          list-style: none;
-          margin: 0;
-          padding: 0;
-        }
-
         .head-info {
           font-size: 18px;
 
