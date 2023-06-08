@@ -27,6 +27,7 @@
 
 <script setup>
 import upFile from "./file.vue";
+import { findLastIndex } from "lodash";
 import {
   ref,
   watch,
@@ -79,9 +80,10 @@ watch(
       for (const item of curFileList.value) {
         if (item.fileUploading) {
           pushNumber--;
-          if (pushNumber <= 0 || curFileList.value.length == newVal) return;
+          if (pushNumber <= 0) return;
         }
       }
+
       for (let index = 0; index < pushNumber; index++) {
         chanStatus();
       }
@@ -119,23 +121,21 @@ const chanStatus = (item) => {
     return;
   }
   let pushItem = fileList.uploadLists[0];
+  pushItem.fileUploading = true;
   curFileList.value.unshift(pushItem);
   fileList.uploadLists.shift();
   emits("update:uploadLists", fileList.uploadLists);
-  // store.commit("upload/setFileList", fileList.uploadLists,pushItem.orderId);
-  if (++curFileListLength > Max_CurFileListLength) {
-    curFileList.value.pop();
+  if (curFileListLength >= Max_CurFileListLength) {
+    let deleteIndex =  findLastIndex(curFileList.value,(lastItem) => lastItem.fileUploading == false ) 
+    curFileList.value.splice(deleteIndex, 1);
   }
- 
-  emits("newQueueID", pushItem.id,pushItem.orderId);
+  emits("newQueueID", pushItem.id, pushItem.orderId);
 };
 
-const remove = (id,fileOrderId) => {
+const remove = (id, fileOrderId) => {
   curFileList.value = curFileList.value.filter((item) => item.id !== id);
   fileList.uploadLists = fileList.uploadLists.filter((item) => item.id !== id);
   emits("update:uploadLists", fileList.uploadLists);
-
-  // store.commit("upload/setFileList", fileList.uploadLists,fileOrderId);
   chanStatus();
 };
 
