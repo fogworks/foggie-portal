@@ -53,7 +53,6 @@
   <FolderDialog
     v-if="folderVisible"
     v-model:folderVisible="folderVisible"
-    :actionType="actionType"
     :isSingle="isSingle"
     :singleData="singleData.value"
     @reset="reset"
@@ -66,12 +65,17 @@
   ></RenameDialog>
 </template>
 
+<script>
+export default {
+  inheritAttrs: false,
+};
+</script>
 <script setup>
 import { ref, toRefs, reactive, watch, provide } from "vue";
 import ImgList from "./imgList";
 import FolderDialog from "./folderDialog.vue";
 import RenameDialog from "./renameDialog.vue";
-
+const emits = defineEmits(["getUseSize"]);
 import AllFile from "@/views/foggieMax/home/_modules/myFiles";
 import ActionBar from "./actionBar.vue";
 const folderVisible = ref(false);
@@ -115,13 +119,13 @@ watch(activeName, () => {
   checkedData.value = [];
   imgCheckedData.value = {};
 });
-watch(
-  imgCheckedData,
-  () => {
-    console.log(imgCheckedData, "imgCheckedDataimgCheckedData");
-  },
-  { deep: true }
-);
+// watch(
+//   imgCheckedData,
+//   () => {
+//     console.log(imgCheckedData, "imgCheckedDataimgCheckedData");
+//   },
+//   { deep: true }
+// );
 </script>
 
 <style lang="scss" scoped>

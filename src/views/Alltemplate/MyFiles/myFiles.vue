@@ -147,7 +147,77 @@
                   {{ scope.row.name }}
                 </div>
               </div>
-              <el-dropdown
+              <ActionDrop class="action-popover">
+                <div class="color-box table-action">
+                  <svg-icon icon-class="more"></svg-icon>
+                </div>
+                <template #reference>
+                  <ul class="more-dropdown">
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'share', command: scope.row })
+                        "
+                        :disabled="!scope.row.canShare"
+                      >
+                        share</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'ipfs', command: scope.row })
+                        "
+                        :disabled="true"
+                      >
+                        IPFS PIN</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'cyfs', command: scope.row })
+                        "
+                        :disabled="true"
+                      >
+                        CYFS PIN</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({
+                            flag: 'download',
+                            command: scope.row,
+                          })
+                        "
+                        :disabled="scope.row.isDir"
+                      >
+                        Download</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'rename', command: scope.row })
+                        "
+                      >
+                        Rename</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'move', command: scope.row })
+                        "
+                      >
+                        Move</el-button
+                      >
+                    </li>
+                  </ul>
+                </template>
+              </ActionDrop>
+              <!-- <el-dropdown
                 class="table-action"
                 trigger="click"
                 @command="handleCommand"
@@ -179,7 +249,7 @@
                     >
                   </el-dropdown-menu>
                 </template>
-              </el-dropdown>
+              </el-dropdown> -->
             </div>
           </template>
         </el-table-column>
@@ -287,6 +357,7 @@
 </template>
 
 <script setup>
+import ActionDrop from "@/components/actionDrop";
 import { default as vElTableInfiniteScroll } from "el-table-infinite-scroll";
 
 import { ArrowRight } from "@element-plus/icons-vue";
@@ -1349,7 +1420,11 @@ onMounted(() => {
     margin-bottom: 40px;
     background: transparent;
     font-size: 16px;
-
+    :deep {
+      .dropdown {
+        left: 0;
+      }
+    }
     .name-img {
       display: inline-block;
       width: 25px;
@@ -1361,6 +1436,21 @@ onMounted(() => {
         max-width: 25px;
         max-height: 25px;
       }
+    }
+    .table-action {
+      z-index: 99;
+      padding: 0;
+      // position: relative;
+      display: none;
+      // &:hover {
+      //   .more-dropdown {
+      //     display: block;
+      //     position: absolute;
+      //     top: 30px;
+      //     left: -55px;
+      //     background: #fff;
+      //   }
+      // }
     }
 
     ::v-deep {
@@ -1383,8 +1473,6 @@ onMounted(() => {
         &:hover {
           // background: rgba(50, 61, 109, 0.75);
           .table-action {
-            width: unset;
-            height: unset;
             display: inline-block;
           }
         }
@@ -1404,6 +1492,7 @@ onMounted(() => {
       }
 
       .action-btn-column {
+        position: static;
         .cell {
           text-align: center;
           overflow: visible;
@@ -1421,11 +1510,7 @@ onMounted(() => {
       color: #{$light_blue};
       cursor: pointer;
     }
-    .table-action {
-      height: 0;
-      width: 0;
-      display: none;
-    }
+
     .id-box {
       .copy {
         display: flex;
@@ -1472,6 +1557,7 @@ onMounted(() => {
     .color-box {
       // .color-box();
       @include color-box;
+      padding: 0;
 
       svg {
         font-size: 28px;

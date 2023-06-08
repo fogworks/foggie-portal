@@ -108,7 +108,11 @@
         >
           <template #default="scope">
             <div class="name-box">
-              <div class="name-link" @click="toDetail(scope.row)">
+              <div
+                class="name-link"
+                style="overflow: hidden"
+                @click="toDetail(scope.row)"
+              >
                 <div class="name-img">
                   <img
                     v-if="scope.row.type === 'application/x-directory'"
@@ -132,13 +136,111 @@
                 </div>
                 {{ scope.row.name }}
               </div>
-              <el-popover
+              <ActionDrop class="action-popover">
+                <div class="color-box table-action">
+                  <svg-icon icon-class="more"></svg-icon>
+                </div>
+                <template #reference>
+                  <ul class="more-dropdown">
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'share', command: scope.row })
+                        "
+                        :disabled="
+                          !(
+                            !scope.row.isDir &&
+                            currentOODItem.svc_state === 'finish'
+                          )
+                        "
+                      >
+                        share</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'ipfs', command: scope.row })
+                        "
+                        :disabled="
+                          !(
+                            !scope.row.isDir &&
+                            currentOODItem.svc_state === 'finish'
+                          )
+                        "
+                      >
+                        IPFS PIN</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'cyfs', command: scope.row })
+                        "
+                        :disabled="
+                          !(
+                            !scope.row.isDir &&
+                            currentOODItem.cyfs_state === 'finish' &&
+                            currentOODItem.cyfs_service_state === 'start'
+                          )
+                        "
+                      >
+                        CYFS PIN</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({
+                            flag: 'download',
+                            command: scope.row,
+                          })
+                        "
+                        :disabled="!scope.row.isDir"
+                      >
+                        Download</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'rename', command: scope.row })
+                        "
+                        :disabled="scope.row.isDir"
+                      >
+                        Rename</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'move', command: scope.row })
+                        "
+                        :disabled="scope.row.isDir"
+                      >
+                        Move</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        class="delete-item"
+                        @click="
+                          handleCommand({ flag: 'delete', command: scope.row })
+                        "
+                      >
+                        Delete</el-button
+                      >
+                    </li>
+                  </ul>
+                </template>
+              </ActionDrop>
+              <!-- <el-popover
                 popper-class="action-popover"
                 :offset="-3"
                 :hide-after="0"
                 placement="bottom"
                 :width="150"
-                trigger="hover"
+                trigger="click"
               >
                 <template #reference>
                   <div class="color-box table-action">
@@ -215,16 +317,6 @@
                   <li>
                     <el-button
                       @click="
-                        handleCommand({ flag: 'copy', command: scope.row })
-                      "
-                      :disabled="scope.row.isDir"
-                    >
-                      Copy</el-button
-                    >
-                  </li>
-                  <li>
-                    <el-button
-                      @click="
                         handleCommand({ flag: 'move', command: scope.row })
                       "
                       :disabled="scope.row.isDir"
@@ -243,56 +335,7 @@
                     >
                   </li>
                 </ul>
-              </el-popover>
-              <!-- <el-dropdown
-                class="table-action"
-                trigger="hover"
-                @command="handleCommand"
-              >
-                <div class="color-box">
-                  <svg-icon icon-class="more"></svg-icon>
-                </div>
-                <template #dropdown>
-                  <el-dropdown-menu class="more-dropdown" slot="dropdown">
-                    <el-dropdown-item
-                      :command="{ flag: 'share', command: scope.row }"
-                      :disabled="!scope.row.canShare || !hasSVC"
-                      >share</el-dropdown-item
-                    >
-                    <el-dropdown-item
-                      :command="{ flag: 'ipfs', command: scope.row }"
-                      :disabled="
-                        !(
-                          !scope.row.isDir &&
-                          currentOODItem.svc_state === 'finish'
-                        )
-                      "
-                      >IPFS PIN</el-dropdown-item
-                    >
-                    <el-dropdown-item
-                      :command="{ flag: 'cyfs', command: scope.row }"
-                      :disabled="
-                        !(
-                          !scope.row.isDir &&
-                          currentOODItem.cyfs_state === 'finish' &&
-                          currentOODItem.cyfs_service_state === 'start'
-                        )
-                      "
-                      >CYFS PIN</el-dropdown-item
-                    >
-                    <el-dropdown-item
-                      :command="{ flag: 'download', command: scope.row }"
-                      :disabled="scope.row.isDir"
-                      >Download</el-dropdown-item
-                    >
-                    <el-dropdown-item
-                      class="delete-item"
-                      :command="{ flag: 'delete', command: scope.row }"
-                      >Delete</el-dropdown-item
-                    >
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown> -->
+              </el-popover> -->
             </div>
           </template>
         </el-table-column>
@@ -1207,6 +1250,7 @@ const upload = () => {
       }
       .action-btn-column {
         z-index: 9;
+        position: static;
         .cell {
           text-align: center;
           overflow: visible;
@@ -1217,6 +1261,11 @@ const upload = () => {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      :deep {
+        .dropdown {
+          left: 0;
+        }
+      }
     }
     .name-link {
       font-weight: 700;
@@ -1302,35 +1351,6 @@ const upload = () => {
   }
 }
 
-.more-dropdown {
-  // &:hover {
-  //   display: block;
-  // }
-  // display: none;
-  .delete-item {
-    color: #ff3353 !important;
-  }
-  display: block;
-  background-color: var(--bg-color);
-  list-style: none;
-  border-radius: 16px;
-  box-shadow: var(--box-shadow);
-  li {
-    :deep {
-      .el-button {
-        background-color: #fff;
-        color: #000;
-        width: 100%;
-        height: 30px;
-        border: none;
-        border-radius: 0;
-        &:hover {
-          background-color: rgb(219, 219, 219);
-        }
-      }
-    }
-  }
-}
 .sort-menu {
   :deep {
     .el-dropdown-menu__item {
@@ -1346,6 +1366,32 @@ const upload = () => {
 .action-popover {
   padding: 3px 0 !important;
   border-radius: 16px !important;
-  overflow: hidden;
+  overflow: visible;
+  width: 100px !important;
+  min-width: 100px !important;
+  .more-dropdown {
+    .delete-item {
+      color: #ff3353 !important;
+    }
+    display: block;
+    background-color: var(--bg-color);
+    list-style: none;
+    border-radius: 16px;
+    box-shadow: var(--box-shadow);
+    li {
+      .el-button {
+        background-color: #fff;
+        color: #000;
+        width: 100%;
+        height: 30px;
+        border: none;
+        border-radius: 0;
+        font-size: 16px;
+        &:hover {
+          background-color: rgb(219, 219, 219);
+        }
+      }
+    }
+  }
 }
 </style>

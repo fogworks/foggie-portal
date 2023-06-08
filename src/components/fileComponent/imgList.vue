@@ -1,6 +1,6 @@
 <template>
-  <div class="img-content">
-    <div v-for="item in imgData" class="img-box">
+  <div class="img-content" ref="imgContentRef">
+    <div v-for="(item, index) in imgData" class="img-box">
       <p>
         <el-checkbox
           v-model="item.checkAll"
@@ -13,7 +13,7 @@
           v-model="imgCheckedData.value[item.dateId]"
           @change="(val) => handleCheckedItemsChange(val, item)"
         >
-          <div :class="['img-item']" v-for="img in item.list">
+          <div :class="['img-item']" v-for="(img, index) in item.list">
             <div
               :class="[
                 'mask',
@@ -23,47 +23,59 @@
                   : '',
               ]"
             >
-              <el-checkbox :key="img.id" :label="img.id"></el-checkbox>
-              <div class="more-box">
-                <el-dropdown popper-class="more-list" @command="handleCommand">
+              <el-checkbox :key="index" :label="index"></el-checkbox>
+              <ActionDrop class="action-popover">
+                <div class="more-box">
                   <svg-icon icon-class="more"></svg-icon>
-                  <template #dropdown>
-                    <el-dropdown-menu>
-                      <el-dropdown-item
-                        :command="{
-                          flag: 'download',
-                          data: img,
-                          pid: item.dateId,
-                        }"
-                        :icon="Download"
-                        >Download</el-dropdown-item
+                </div>
+                <template #reference>
+                  <ul class="more-dropdown">
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({
+                            flag: 'download',
+                            data: img,
+                            pid: item.dateId,
+                          })
+                        "
                       >
-                      <el-dropdown-item
-                        :command="{
-                          flag: 'delete',
-                          data: img,
-                          pid: item.dateId,
-                        }"
-                        :icon="Delete"
+                        Download</el-button
                       >
-                        Delete
-                      </el-dropdown-item>
-                      <el-dropdown-item
-                        :command="{ flag: 'copy', data: img, pid: item.dateId }"
-                        :icon="CopyDocument"
-                        >Copy</el-dropdown-item
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({
+                            flag: 'move',
+                            data: img,
+                            pid: item.dateId,
+                          })
+                        "
                       >
-                      <el-dropdown-item
-                        :command="{ flag: 'move', data: img, pid: item.dateId }"
-                        :icon="Rank"
-                        >Move</el-dropdown-item
+                        Move</el-button
                       >
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
-              </div>
+                    </li>
+                    <li>
+                      <el-button
+                        class="delete-item"
+                        @click="
+                          handleCommand({
+                            flag: 'delete',
+                            data: img,
+                            pid: item.dateId,
+                          })
+                        "
+                      >
+                        Delete</el-button
+                      >
+                    </li>
+                  </ul>
+                </template>
+              </ActionDrop>
             </div>
             <el-image
+              scroll-container=".img-content"
               :preview-teleported="true"
               :teleported="true"
               :hide-on-click-modal="true"
@@ -82,6 +94,7 @@
 </template>
 
 <script setup>
+import ActionDrop from "@/components/actionDrop";
 import { toRefs, ref, reactive, nextTick, watch, onMounted } from "vue";
 import useCheckItem from "./hooks/useCheckItem";
 import { Download, Delete, CopyDocument, Rank } from "@element-plus/icons-vue";
@@ -89,6 +102,8 @@ import { Download, Delete, CopyDocument, Rank } from "@element-plus/icons-vue";
 const imgCheckedData = reactive({
   value: {},
 });
+const scrollContainer = ref(null);
+const imgContentRef = ref(null);
 // const props = defineProps({
 //   imgCheckedData: {
 //     type: Object,
@@ -108,11 +123,707 @@ const state = reactive({
       dateId: "xx",
       list: [
         {
-          url: "https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg",
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
           id: 1,
         },
         {
-          url: "https://fuss10.elemecdn.com/1/34/19aa98b1fcb2781c4fba33d850549jpeg.jpeg",
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 2,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 1,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
           id: 2,
         },
       ],
@@ -122,11 +833,151 @@ const state = reactive({
       dateId: "zz",
       list: [
         {
-          url: "https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg",
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
           id: 3,
         },
         {
-          url: "https://fuss10.elemecdn.com/1/34/19aa98b1fcb2781c4fba33d850549jpeg.jpeg",
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 4,
+        },
+      ],
+    },
+    {
+      time: "2023-6-3",
+      dateId: "zz",
+      list: [
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 3,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 4,
+        },
+      ],
+    },
+    {
+      time: "2023-6-3",
+      dateId: "zz",
+      list: [
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 3,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 4,
+        },
+      ],
+    },
+    {
+      time: "2023-6-3",
+      dateId: "zz",
+      list: [
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 3,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 4,
+        },
+      ],
+    },
+    {
+      time: "2023-6-3",
+      dateId: "zz",
+      list: [
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 3,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 4,
+        },
+      ],
+    },
+    {
+      time: "2023-6-3",
+      dateId: "zz",
+      list: [
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 3,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 4,
+        },
+      ],
+    },
+    {
+      time: "2023-6-3",
+      dateId: "zz",
+      list: [
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 3,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 4,
+        },
+      ],
+    },
+    {
+      time: "2023-6-3",
+      dateId: "zz",
+      list: [
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 3,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 4,
+        },
+      ],
+    },
+    {
+      time: "2023-6-3",
+      dateId: "zz",
+      list: [
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 3,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 4,
+        },
+      ],
+    },
+    {
+      time: "2023-6-3",
+      dateId: "zz",
+      list: [
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 3,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 4,
+        },
+      ],
+    },
+    {
+      time: "2023-6-3",
+      dateId: "zz",
+      list: [
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          id: 3,
+        },
+        {
+          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
           id: 4,
         },
       ],
@@ -153,6 +1004,9 @@ const handleCommand = ({ flag, data, pid }) => {
       (el) => el.dateId == pid
     );
   } else if (flag == "copy") {
+    imgCheckedData.value[pid] = imgCheckedData.value[pid].filter(
+      (el) => el.dateId == pid
+    );
   } else if (flag == "move") {
     imgCheckedData.value[pid] = imgCheckedData.value[pid].filter(
       (el) => el.dateId == pid
@@ -170,7 +1024,10 @@ watch(
   }
 );
 onMounted(() => {
-  refCheckAll();
+  nextTick(() => {
+    refCheckAll();
+  });
+  scrollContainer.value = imgContentRef.value;
 });
 defineExpose({ resetChecked });
 </script>
@@ -178,6 +1035,7 @@ defineExpose({ resetChecked });
 <style lang="scss" scoped>
 .img-content {
   height: 1000px;
+  padding-bottom: 100px;
   overflow-y: auto;
   .img-box {
     p {
@@ -194,6 +1052,7 @@ defineExpose({ resetChecked });
         display: flex;
         justify-content: flex-start;
         align-items: flex-start;
+        flex-wrap: wrap;
       }
     }
     .img-item {
@@ -243,7 +1102,7 @@ defineExpose({ resetChecked });
           display: none;
           position: absolute;
           top: 0;
-          right: 5px;
+          left: 80%;
           height: 20px;
           width: 20px;
           margin-top: 6px;
@@ -255,6 +1114,31 @@ defineExpose({ resetChecked });
             color: $light_blue;
           }
         }
+        .more-dropdown {
+          .delete-item {
+            color: #ff3353 !important;
+          }
+          display: block;
+          background-color: var(--bg-color);
+          list-style: none;
+          border-radius: 16px;
+          box-shadow: var(--box-shadow);
+          li {
+            .el-button {
+              // background-color: transparent;
+              background-color: #fff;
+              color: #000;
+              width: 100%;
+              height: 30px;
+              border: none;
+              border-radius: 0;
+              font-size: 16px;
+              &:hover {
+                background-color: rgb(219, 219, 219);
+              }
+            }
+          }
+        }
       }
       &:hover {
         .mask {
@@ -262,6 +1146,14 @@ defineExpose({ resetChecked });
           .more-box {
             display: block;
           }
+        }
+      }
+    }
+    .action-popover {
+      overflow: visible;
+      width: unset !important;
+      :deep {
+        .dropdown {
         }
       }
     }

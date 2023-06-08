@@ -17,17 +17,13 @@
         <svg-icon icon-class="rename"></svg-icon>
         <span> Rename </span>
       </div>
-      <div class="action-item" @click="handlerClick('copy')">
-        <svg-icon icon-class="copy"></svg-icon>
-        <span> Copy </span>
-      </div>
       <div class="action-item" @click="handlerClick('move')">
         <svg-icon icon-class="move"></svg-icon>
         <span> Move </span>
       </div>
     </div>
     <template v-else>
-      <div style="display: flex; align-items: center">
+      <div style="display: flex; align-items: center; margin-bottom: 20px">
         <div class="action-box" style="margin-right: 20px; margin-bottom: 0">
           <el-button
             class="top-btn action-item"

@@ -56,7 +56,7 @@
         <div class="color-box">
           <el-button @click="handleConfirm">
             <RippleInk></RippleInk>
-            {{ actionType === "copy" ? "Copy Here" : "Move Here" }}</el-button
+            Move Here</el-button
           >
         </div>
       </div>
@@ -88,14 +88,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  actionType: {
-    type: String,
-    default: "copy",
-  },
   isSingle: Boolean,
   singleData: Object,
 });
-const { folderVisible, actionType, isSingle, singleData } = toRefs(props);
+const { folderVisible, isSingle, singleData } = toRefs(props);
 const activeName = inject("activeName");
 const checkedData = inject("checkedData");
 const imgCheckedData = inject("imgCheckedData");
@@ -186,10 +182,6 @@ const setPrefix = (item, isTop = false) => {
 };
 const handleConfirm = () => {
   let fetchMethod;
-  if (actionType == "cpoy") {
-  } else {
-    // emits("reset");
-  }
   if (activeName.value == "Image") {
     console.log(imgCheckedData.value, "imgCheckedData");
   } else if (activeName.value == "All") {
