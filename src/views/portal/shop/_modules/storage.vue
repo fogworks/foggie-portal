@@ -336,8 +336,8 @@ function blurPrestoreDMC() {
     });
     return false;
   } else if (
-    state.formLine.prestoreDMC <
-    state.orderDetail.total - state.orderDetail.deposit
+    Number(state.formLine.prestoreDMC) <
+    Number(state.orderDetail.total - state.orderDetail.deposit)
   ) {
     ElMessage({
       message: `The deposit amount cannot be less than ${(
