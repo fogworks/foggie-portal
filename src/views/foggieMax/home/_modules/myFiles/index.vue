@@ -132,8 +132,64 @@
                 </div>
                 {{ scope.row.name }}
               </div>
-              <el-dropdown trigger="click" @command="handleCommand">
-                <div class="color-box table-action">
+              <el-popover
+                offset="-5"
+                :hide-after="0"
+                placement="bottom"
+                :width="150"
+                trigger="hover"
+              >
+                <template #reference>
+                  <div class="color-box table-action">
+                    <svg-icon icon-class="more"></svg-icon>
+                  </div>
+                </template>
+                <ul class="more-dropdown">
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'ipfs', command: scope.row })
+                      "
+                      :disabled="
+                        !(
+                          !scope.row.isDir &&
+                          currentOODItem.svc_state === 'finish'
+                        )
+                      "
+                    >
+                      share</el-button
+                    >
+                  </li>
+                </ul>
+              </el-popover>
+              <!-- <ActionDrop class="table-action">
+                <div class="color-box">
+                  <svg-icon icon-class="more"></svg-icon>
+                </div>
+                <ul class="more-dropdown">
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'ipfs', command: scope.row })
+                      "
+                      :disabled="
+                        !(
+                          !scope.row.isDir &&
+                          currentOODItem.svc_state === 'finish'
+                        )
+                      "
+                    >
+                      share</el-button
+                    >
+                  </li>
+                </ul>
+              </ActionDrop> -->
+              <!-- <el-dropdown
+                class="table-action"
+                trigger="hover"
+                @command="handleCommand"
+              >
+                <div class="color-box">
                   <svg-icon icon-class="more"></svg-icon>
                 </div>
                 <template #dropdown>
@@ -176,7 +232,7 @@
                     >
                   </el-dropdown-menu>
                 </template>
-              </el-dropdown>
+              </el-dropdown> -->
             </div>
           </template>
         </el-table-column>
@@ -319,6 +375,7 @@
 </template>
 
 <script setup>
+import ActionDrop from "@/components/actionDrop";
 import { ArrowRight } from "@element-plus/icons-vue";
 import {
   reactive,
@@ -438,6 +495,7 @@ const handleSelectionChange = (val) => {
 };
 const resetChecked = () => {
   fileTable.value.clearSelection();
+};
 const handleID = (str) => {
   return (
     str.substring(0, 6) + "..." + str.substring(str.length - 6, str.length)
@@ -503,7 +561,7 @@ const initFileData = async (data) => {
       canShare: false,
     };
   });
-  contentItem = data.content?.map((el, j) => {
+  contentItem = data?.content?.map((el, j) => {
     let date = transferTime(el.lastModified);
     let isDir = false;
     const type = el.key.substring(el.key.lastIndexOf(".") + 1);
@@ -1070,6 +1128,7 @@ const upload = () => {
         height: 55.2px;
         content-visibility: auto;
         contain-intrinsic-size: 55.2px;
+        z-index: 2;
         &:hover {
           .table-action {
             display: inline-block;
@@ -1078,7 +1137,8 @@ const upload = () => {
       }
       .el-table__cell {
         color: var(--text-color);
-        background: var(--card-bg);
+        // background: var(--card-bg);
+        background: transparent;
         .cell {
           color: var(--text-color);
           min-height: 25px;
@@ -1086,6 +1146,7 @@ const upload = () => {
         }
       }
       .action-btn-column {
+        z-index: 9;
         .cell {
           text-align: center;
           overflow: visible;
@@ -1109,7 +1170,18 @@ const upload = () => {
       // }
     }
     .table-action {
+      z-index: 99;
+      // position: relative;
       display: none;
+      &:hover {
+        .more-dropdown {
+          display: block;
+          position: absolute;
+          top: 30px;
+          left: -55px;
+          background: #fff;
+        }
+      }
     }
     .id-box {
       .copy {
@@ -1170,8 +1242,26 @@ const upload = () => {
 }
 
 .more-dropdown {
-  :deep(.delete-item) {
-    color: #ff3353 !important;
+  // &:hover {
+  //   display: block;
+  // }
+  display: none;
+  // :deep(.delete-item) {
+  //   color: #ff3353 !important;
+  // }
+  background-color: var(--bg-color);
+  list-style: none;
+  border-radius: 16px;
+  box-shadow: var(--box-shadow);
+  li {
+    :deep {
+      .el-button {
+        background-color: #fff;
+        color: #000;
+        width: 150px;
+        height: 40px;
+      }
+    }
   }
 }
 .sort-menu {

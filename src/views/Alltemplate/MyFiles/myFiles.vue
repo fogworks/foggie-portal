@@ -147,8 +147,12 @@
                   {{ scope.row.name }}
                 </div>
               </div>
-              <el-dropdown trigger="click" @command="handleCommand">
-                <div class="color-box table-action">
+              <el-dropdown
+                class="table-action"
+                trigger="click"
+                @command="handleCommand"
+              >
+                <div class="color-box">
                   <svg-icon icon-class="more"></svg-icon>
                 </div>
                 <template #dropdown>
@@ -1379,6 +1383,8 @@ onMounted(() => {
         &:hover {
           // background: rgba(50, 61, 109, 0.75);
           .table-action {
+            width: unset;
+            height: unset;
             display: inline-block;
           }
         }
@@ -1416,6 +1422,8 @@ onMounted(() => {
       cursor: pointer;
     }
     .table-action {
+      height: 0;
+      width: 0;
       display: none;
     }
     .id-box {
