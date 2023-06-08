@@ -138,13 +138,13 @@
                   effect="dark"
                   content="Not Persisted"
                   placement="top-start"
-                  v-if="!scope.row.isPersistent"
+                  v-if="!scope.row.isPersistent && scope.row.type !== 'application/x-directory'"
                 >
                   <div >
-                    <i class="i-ersistent">*</i> {{ scope.row.name }}
+                    <i class="i-ersistent">*</i> 111{{ scope.row.name }}
                   </div>
                 </el-tooltip>
-                <div v-if="scope.row.isPersistent">
+                <div v-if="scope.row.isPersistent || scope.row.type === 'application/x-directory'">
                   {{ scope.row.name }}
                 </div>
               </div>
