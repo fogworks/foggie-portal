@@ -13,14 +13,16 @@ import installExtension, { VUEJS3_DEVTOOLS } from "electron-devtools-installer";
 const isDevelopment = process.env.NODE_ENV !== "production";
 const path = require("path");
 const cp = require("child_process");
+const { spawn } = require("child_process");
 const os = require("os");
-const spawn1 = require("cross-spawn");
 const fs = require("fs");
-const { initDownload } = require('./download.js')
+const { initDownload } = require("./download.js");
 let spawnObject = {
   childSpawn: null,
-  childSpawn1: null
-}
+  childSpawn1: null,
+};
+let childProcess = null;
+let npmInstall = null;
 // let childSpawn;
 // let childSpawn1;
 // let childSpawn;
@@ -71,9 +73,233 @@ async function createWindow() {
       nodeIntegrationInWorker: true,
       enableRemoteModule: true,
       webSecurity: false,
+      experimentalFeatures: true,
     },
     icon: nativeImage.createFromPath(getTrayIcon()),
   });
+
+  if (!isDevelopment) {
+    if (checkMacOS()) {
+      closePort(3000)
+        .then(() => {
+          // console.log('端口关闭成功');
+        })
+        .catch((error) => {
+          // console.error('发生错误', error);
+        });
+
+      closePort(8007)
+        .then(() => {
+          // console.log('端口关闭成功');
+        })
+        .catch((error) => {
+          // console.error('发生错误', error);
+        });
+      let user_path = os.homedir();
+
+      // let childSpawn2;
+
+      spawnObject.childSpawn = cp.exec(
+        `cd ${__dirname}/foggie-node && npm run serve`,
+        (err, stdout, stderr) => {
+          // dialog.showErrorBox("foggie-node", stderr);
+        }
+      );
+
+      spawnObject.childSpawn1 = cp.exec(
+        `chmod +x ${__dirname}/foggie`,
+        (err, stdout, stderr) => {
+          // dialog.showErrorBox("chmod", stderr);
+        }
+      );
+      // fs.chmod(`${__dirname}/foggie`, 1)
+      // fs.chmod(`${__dirname}/config.json`, 1)
+
+      fs.readFile(
+        path.join(__dirname, "./config.json"),
+        "utf8",
+        (err, data) => {
+          // dialog.showErrorBox("data", data);
+          // dialog.showErrorBox("err", err);
+          if (err) throw err;
+          let list = JSON.parse(data);
+          let server = list.server;
+          let db = list.db;
+          if (server.repoPath.indexOf(user_path) !== 0) {
+            server.repoPath = user_path + server.repoPath;
+            db.path = user_path + db.path;
+          }
+
+          let newContent = JSON.stringify(list, null, 4);
+          fs.writeFile(
+            path.join(__dirname, "./config.json"),
+            newContent,
+            "utf8",
+            (err) => {
+              if (err) throw err;
+              console.log("success done");
+            }
+          );
+        }
+      );
+
+      // const childProcess = cp.spawn(__dirname + "/mac-arm64/foggie-portal.app/Contents/Resources/app/foggie", ['node'], {
+      childProcess = cp.spawn(__dirname + "/foggie", ["node"], {
+        detached: true,
+        env: {
+          PROX_LOG: `${user_path}/Library/Logs/foggie.log`,
+          // PROX_CONFIG: `${user_path}/Library/Application Support/foggie/config.json`
+          PROX_CONFIG: `${__dirname}/config.json`,
+        },
+      });
+
+      childProcess.stdout.on("data", (d) => {
+        // dialog.showErrorBox("stdout", d.toString());
+      });
+
+      childProcess.stderr.on("data", (d) => {
+        // dialog.showErrorBox("stderr", d.toString());
+      });
+
+      childProcess.unref();
+
+      childProcess.on("exit", (code, signal) => {
+        // dialog.showErrorBox("exit", `code: ${code}, signal: ${signal}`);
+      });
+    } else if (process.platform === "win32") {
+      let user_path = os.homedir();
+
+      const workingDir = `${__dirname}/foggie-node`;
+
+      process.chdir(workingDir); // 切换到指定目录
+
+      const childProcess = spawn("node", ["--experimental-fetch", "server.js"]);
+
+      childProcess.stdout.on("data", (data) => {
+        // dialog.showErrorBox("stdout", data.toString());
+      });
+
+      childProcess.stderr.on("data", (data) => {
+        // dialog.showErrorBox("stderr", data.toString());
+      });
+
+      childProcess.on("close", (code) => {
+        dialog.showErrorBox("close", `Child process exited with code ${code}`);
+      });
+
+      // const npmPath = path.join(process.env.APP_PATH, 'node_modules', '.bin', 'npm.cmd');
+      // const childProcess = spawn(npmPath, ["run", "serve"]);
+
+      // childProcess.stdout.on("data", (data) => {
+      //   console.log(data.toString());
+      // });
+
+      // childProcess.stderr.on("data", (data) => {
+      //   console.error(data.toString());
+      // });
+
+      // childProcess.on("close", (code) => {
+      //   console.log(`Child process exited with code ${code}`);
+      // });
+
+      // spawnObject.childSpawn = spawn(
+      //   `cd ${__dirname}/foggie-node && npm run serve`,
+      //   (err, stdout, stderr) => {
+      //     dialog.showErrorBox("foggie-node", stderr);
+      //   }
+      // );
+
+      // spawnObject.childSpawn1 = spawn(
+      //   `chmod +x ${__dirname}/foggie`,
+      //   (err, stdout, stderr) => {
+      //     dialog.showErrorBox("chmod", stderr);
+      //   }
+      // );
+
+      // spawnObject.childSpawn1 = spawn("chmod", ["+x", `${__dirname}/foggie.exe`]);
+
+      // spawnObject.childSpawn1.stdout.on("data", (data) => {
+      //   console.log(data.toString());
+      // });
+
+      // spawnObject.childSpawn1.stderr.on("data", (data) => {
+      //   console.error(data.toString());
+      // });
+
+      // spawnObject.childSpawn1.on("close", (code) => {
+      //   console.log(`Child process exited with code ${code}`);
+      // });
+
+      const filePath = path.resolve(`${__dirname}/foggie.exe`); // Replace with the actual path to the file
+      fs.chmod(filePath, 0o755, err => {
+        if (err) {
+          console.error('Error occurred while changing file permissions:', err);
+        } else {
+          console.log('File permissions changed successfully.');
+        }
+      });
+
+      // fs.chmod(`${__dirname}/foggie`, 1)
+      // fs.chmod(`${__dirname}/config.json`, 1)
+
+      fs.readFile(
+        path.join(__dirname, "./config.json"),
+        "utf8",
+        (err, data) => {
+          if (data) {
+            // dialog.showErrorBox("data", data);
+          }
+          if (err) {
+            // dialog.showErrorBox("err", err);
+          }
+
+          if (err) throw err;
+          let list = JSON.parse(data);
+          let server = list.server;
+          let db = list.db;
+          if (server.repoPath.indexOf(user_path) !== 0) {
+            server.repoPath = `${user_path}/AppData/Roaming/foggie/repo`;
+            db.path = `${user_path}/AppData/Roaming/foggie/db`;
+          }
+
+          let newContent = JSON.stringify(list, null, 4);
+          fs.writeFile(
+            path.join(__dirname, "./config.json"),
+            newContent,
+            "utf8",
+            (err) => {
+              if (err) throw err;
+              console.log("success done");
+            }
+          );
+        }
+      );
+
+      // const childProcess = cp.spawn(__dirname + "/mac-arm64/foggie-portal.app/Contents/Resources/app/foggie", ['node'], {
+      childProcess = spawn(__dirname + "/foggie.exe", ["node"], {
+        detached: true,
+        env: {
+          PROX_LOG: `${user_path}/AppData/Roaming/foggie/Logs/foggie.log`,
+          // PROX_CONFIG: `${user_path}/Library/Application Support/foggie/config.json`
+          PROX_CONFIG: `${__dirname}/config.json`,
+        },
+      });
+
+      childProcess.stdout.on("data", (d) => {
+        dialog.showErrorBox("stdout", d.toString());
+      });
+
+      childProcess.stderr.on("data", (d) => {
+        dialog.showErrorBox("stderr", d.toString());
+      });
+
+      childProcess.unref();
+
+      childProcess.on("exit", (code, signal) => {
+        dialog.showErrorBox("exit", `code: ${code}, signal: ${signal}`);
+      });
+    }
+  }
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -92,30 +318,42 @@ app.on("window-all-closed", () => {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   // if (process.platform !== "darwin") {
-    // app.quit();
+  // app.quit();
   // }
   // dialog.showErrorBox("close", spawnObject.childSpawn);
   // dialog.showErrorBox("close1", spawnObject.childSpawn1);
 
-  closePort(3000)
-  .then(() => {
-    dialog.showErrorBox("close----3000", '3000');
-    // console.log('端口关闭成功');
-  })
-  .catch((error) => {
-    dialog.showErrorBox("close---3000-----error", error);
-    // console.error('发生错误', error);
-  });
+  // closePort(3000)
+  //   .then(() => {
+  //     dialog.showErrorBox("close----3000", "3000");
+  //     // console.log('端口关闭成功');
+  //   })
+  //   .catch((error) => {
+  //     dialog.showErrorBox("close---3000-----error", error);
+  //     // console.error('发生错误', error);
+  //   });
 
-  closePort(8007)
-  .then(() => {
-    dialog.showErrorBox("close---8007", '8007');
-    // console.log('端口关闭成功');
-  })
-  .catch((error) => {
-    dialog.showErrorBox("close----error------8007", error);
-    // console.error('发生错误', error);
-  });
+  // closePort(8007)
+  //   .then(() => {
+  //     dialog.showErrorBox("close---8007", "8007");
+  //     // console.log('端口关闭成功');
+  //   })
+  //   .catch((error) => {
+  //     dialog.showErrorBox("close----error------8007", error);
+  //     // console.error('发生错误', error);
+  //   });
+  if (npmInstall) {
+    npmInstall.kill();
+    npmInstall = null;
+  }
+  if (spawnObject.childSpawn) {
+    spawnObject.childSpawn.kill();
+    spawnObject.childSpawn = null;
+  }
+  if (childProcess) {
+    childProcess.kill();
+    childProcess = null;
+  }
   app.quit();
 });
 
@@ -133,32 +371,29 @@ const express = require("express");
 const app1 = express();
 const checkMacOS = () => process.platform === "darwin";
 
-const net = require('net');
+const net = require("net");
 
 function closePort(port) {
   return new Promise((resolve, reject) => {
     const server = net.createServer();
 
-    server.once('error', (err) => {
+    server.once("error", (err) => {
       dialog.showErrorBox("close----error", error);
       reject(err); // 发生错误
       server.close();
     });
 
-    server.once('close', () => {
-      dialog.showErrorBox("close----success", '');
+    server.once("close", () => {
+      dialog.showErrorBox("close----success", "");
       resolve(); // 端口关闭成功
     });
 
-    server.listen(port, '127.0.0.1', () => {
-      dialog.showErrorBox("close----listen", '');
+    server.listen(port, "127.0.0.1", () => {
+      dialog.showErrorBox("close----listen", "");
       server.close();
     });
   });
 }
-
-
-
 
 app.on("ready", async () => {
   if (isDevelopment && !process.env.IS_TEST) {
@@ -170,167 +405,6 @@ app.on("ready", async () => {
     }
   }
   createWindow();
-
-  if (!isDevelopment) {
-    if (checkMacOS()) {
-      closePort(3000)
-      .then(() => {
-        // console.log('端口关闭成功');
-      })
-      .catch((error) => {
-        // console.error('发生错误', error);
-      });
-    
-      closePort(8007)
-      .then(() => {
-        // console.log('端口关闭成功');
-      })
-      .catch((error) => {
-        // console.error('发生错误', error);
-      });
-      let user_path = os.homedir();
-      
-      // let childSpawn2;
-  
-      console.log('---------------__dirname', __dirname)
-  
-      spawnObject.childSpawn = cp.exec(
-        `cd ${__dirname}/foggie-node && npm run serve`,
-        (err, stdout, stderr) => {
-          // dialog.showErrorBox("foggie-node", stderr);
-        }
-      );
-  
-      spawnObject.childSpawn1 = cp.exec(
-        `chmod +x ${__dirname}/foggie`,
-        (err, stdout, stderr) => {
-          // dialog.showErrorBox("chmod", stderr);
-        }
-      );
-      // fs.chmod(`${__dirname}/foggie`, 1)
-      // fs.chmod(`${__dirname}/config.json`, 1)
-  
-      fs.readFile(path.join(__dirname, "./config.json"), "utf8", (err, data) => {
-        // dialog.showErrorBox("data", data);
-        // dialog.showErrorBox("err", err);
-        if (err) throw err;
-        let list = JSON.parse(data);
-        let server = list.server;
-        let db = list.db;
-        if (server.repoPath.indexOf(user_path) !== 0) {
-          server.repoPath = user_path + server.repoPath;
-          db.path = user_path + db.path;
-        }
-  
-        let newContent = JSON.stringify(list, null, 4);
-        fs.writeFile(path.join(__dirname, "./config.json"), newContent, "utf8", (err) => {
-          if (err) throw err;
-          console.log("success done");
-        });
-      });
-  
-      // const childProcess = cp.spawn(__dirname + "/mac-arm64/foggie-portal.app/Contents/Resources/app/foggie", ['node'], {
-      const childProcess = cp.spawn(__dirname + "/foggie", ["node"], {
-        detached: true,
-        env: {
-          PROX_LOG: `${user_path}/Library/Logs/foggie.log`,
-          // PROX_CONFIG: `${user_path}/Library/Application Support/foggie/config.json`
-          PROX_CONFIG: `${__dirname}/config.json`,
-        },
-      });
-  
-      childProcess.stdout.on("data", (d) => {
-        // dialog.showErrorBox("stdout", d.toString());
-      });
-  
-      childProcess.stderr.on("data", (d) => {
-        // dialog.showErrorBox("stderr", d.toString());
-      });
-  
-      childProcess.unref();
-  
-      childProcess.on("exit", (code, signal) => {
-        // dialog.showErrorBox("exit", `code: ${code}, signal: ${signal}`);
-      });
-    } else if (process.platform === "win32") {
-      closePort(3000)
-      .then(() => {
-        // console.log('端口关闭成功');
-      })
-      .catch((error) => {
-        // console.error('发生错误', error);
-      });
-    
-      closePort(8007)
-      .then(() => {
-        // console.log('端口关闭成功');
-      })
-      .catch((error) => {
-        // console.error('发生错误', error);
-      });
-      let user_path = os.homedir();    
-      spawnObject.childSpawn = cp.exec(
-        `cd ${__dirname}/foggie-node && npm run serve`,
-        (err, stdout, stderr) => {
-          // dialog.showErrorBox("foggie-node", stderr);
-        }
-      );
-  
-      spawnObject.childSpawn1 = cp.exec(
-        `chmod +x ${__dirname}/foggie`,
-        (err, stdout, stderr) => {
-          dialog.showErrorBox("chmod", stderr);
-        }
-      );
-      // fs.chmod(`${__dirname}/foggie`, 1)
-      // fs.chmod(`${__dirname}/config.json`, 1)
-  
-      fs.readFile(path.join(__dirname, "./config.json"), "utf8", (err, data) => {
-        // dialog.showErrorBox("data", data);
-        // dialog.showErrorBox("err", err);
-        if (err) throw err;
-        let list = JSON.parse(data);
-        let server = list.server;
-        let db = list.db;
-        if (server.repoPath.indexOf(user_path) !== 0) {
-          server.repoPath = user_path + server.repoPath;
-          db.path = user_path + db.path;
-        }
-  
-        let newContent = JSON.stringify(list, null, 4);
-        fs.writeFile(path.join(__dirname, "./config.json"), newContent, "utf8", (err) => {
-          if (err) throw err;
-          console.log("success done");
-        });
-      });
-  
-      // const childProcess = cp.spawn(__dirname + "/mac-arm64/foggie-portal.app/Contents/Resources/app/foggie", ['node'], {
-      const childProcess = cp.spawn(__dirname + "/foggie", ["node"], {
-        detached: true,
-        env: {
-          PROX_LOG: `${user_path}/Library/Logs/foggie.log`,
-          // PROX_CONFIG: `${user_path}/Library/Application Support/foggie/config.json`
-          PROX_CONFIG: `${__dirname}/config.json`,
-        },
-      });
-  
-      childProcess.stdout.on("data", (d) => {
-        // dialog.showErrorBox("stdout", d.toString());
-      });
-  
-      childProcess.stderr.on("data", (d) => {
-        // dialog.showErrorBox("stderr", d.toString());
-      });
-  
-      childProcess.unref();
-  
-      childProcess.on("exit", (code, signal) => {
-        // dialog.showErrorBox("exit", `code: ${code}, signal: ${signal}`);
-      });
-    }
-
-  }
-  
 });
 
 // Exit cleanly on request from parent process in development mode.
