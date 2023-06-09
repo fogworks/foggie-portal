@@ -81,14 +81,14 @@ function isPortInUse(port) {
       .createServer()
       .once("error", (err) => {
         if (err.code === "EADDRINUSE") {
-          resolve(true); // 端口被占用
+          resolve(true); //
         } else {
-          reject(err); // 其他错误
+          reject(err); //
         }
       })
       .once("listening", () => {
         server.close();
-        resolve(false); // 端口未被占用
+        resolve(false); //
       })
       .listen(port);
   });
@@ -99,18 +99,18 @@ function closePort(port) {
     const server = net.createServer();
 
     server.once("error", (err) => {
-      dialog.showErrorBox("close----error", err);
+      // dialog.showErrorBox("close----error", err);
       reject(err);
       server.close();
     });
 
     server.once("close", () => {
-      dialog.showErrorBox("close----success", "");
+      // dialog.showErrorBox("close----success", "");
       resolve();
     });
 
     server.listen(port, "127.0.0.1", () => {
-      dialog.showErrorBox("close----listen", "");
+      // dialog.showErrorBox("close----listen", "");
       server.close();
     });
   });
@@ -124,15 +124,15 @@ function initNodeProces() {
   nodeProcess = spawn("node", ["--experimental-fetch", "server.js"]);
 
   nodeProcess.stdout.on("data", (data) => {
-    // dialog.showErrorBox("stdout", data.toString());
+    // dialog.showErrorBox("stdout-----node", data.toString());
   });
 
   nodeProcess.stderr.on("data", (data) => {
-    // dialog.showErrorBox("stderr", data.toString());
+    // dialog.showErrorBox("stderr------node", data.toString());
   });
 
   nodeProcess.on("exit", (code) => {
-    dialog.showErrorBox("exit", `Child process exited with code ${code}`);
+    // dialog.showErrorBox("exit------node", `Child process exited with code ${code}`);
     if (code === 0) {
       initNodeProces();
     }
@@ -150,17 +150,17 @@ function initFoggieProcess() {
   });
 
   spawnObject.foggieProcess.stdout.on("data", (d) => {
-    dialog.showErrorBox("stdout", d.toString());
+    // dialog.showErrorBox("stdout", d.toString());
   });
 
   spawnObject.foggieProcess.stderr.on("data", (d) => {
-    dialog.showErrorBox("stderr", d.toString());
+    // dialog.showErrorBox("stderr", d.toString());
   });
 
   // spawnObject.foggieProcess.unref();
 
   spawnObject.foggieProcess.on("exit", (code, signal) => {
-    dialog.showErrorBox("exit", `code: ${code}, signal: ${signal}`);
+    // dialog.showErrorBox("exit", `code: ${code}, signal: ${signal}`);
     if (code === 0) {
       initFoggieProcess();
     }
@@ -172,20 +172,12 @@ function checkMemory() {
   const totalMemoryGB = totalMemory / (1024 * 1024 * 1024); // 将总内存转换为GB
 
   if (totalMemoryGB < 8) {
-    console.log("系统内存小于8GB");
     dialog.showMessageBox({
       type: "info",
-      title: "提示",
-      message: "系统内存小于8GB，建议您升级内存",
-      buttons: ["确定"],
-    });
-  } else {
-    console.log("系统内存大于等于8GB");
-    dialog.showMessageBox({
-      type: "info",
-      title: "提示",
-      message: "系统内存d大于等于8GB",
-      buttons: ["确定"],
+      title: "Info",
+      message:
+        "The system memory is less than 8GB, it is recommended that you upgrade the memory",
+      buttons: ["OK"],
     });
   }
 }
@@ -226,41 +218,25 @@ async function createWindow() {
     isPortInUse(3000)
       .then((inUse) => {
         if (inUse) {
-          dialog.showErrorBox("foggie-node", "端口被占用");
           dialog
             .showMessageBox({
               type: "question",
-              title: "确认",
-              message: "3000端口被占用，是否关闭？",
-              buttons: ["确定", "取消"],
+              title: "OK",
+              message: "Port 3000 is occupied, is it closed?",
+              buttons: ["OK", "Cancel"],
             })
             .then((result) => {
               if (result.response === 0) {
-                // 用户点击了确定按钮
-                // 执行操作
                 closePort(3000)
-                  .then(() => {
-                    // console.log('端口关闭成功');
-                  })
-                  .catch((error) => {
-                    // console.error('发生错误', error);
-                  });
+                  .then(() => {})
+                  .catch((error) => {});
               } else {
-                // 用户点击了取消按钮
-                // 取消操作
                 return;
               }
             });
-
-          // console.log('端口被占用');
-        } else {
-          dialog.showErrorBox("foggie-node", "端口未被占用");
-          // console.log('端口未被占用');
         }
       })
-      .catch((err) => {
-        console.error("检查端口时出错:", err);
-      });
+      .catch((err) => {});
     if (checkMacOS()) {
       closePort(8007)
         .then(() => {
@@ -340,7 +316,6 @@ async function createWindow() {
       });
     } else if (process.platform === "win32") {
       initNodeProces();
-
       const filePath = path.resolve(`${__dirname}/foggie.exe`); // Replace with the actual path to the file
       fs.chmod(filePath, 0o755, (err) => {
         if (err) {
@@ -366,8 +341,24 @@ async function createWindow() {
           let server = list.server;
           let db = list.db;
           if (server.repoPath.indexOf(user_path) !== 0) {
-            server.repoPath = `${user_path}/AppData/Roaming/foggie/repo`;
-            db.path = `${user_path}/AppData/Roaming/foggie/db`;
+            let isExistRepo = fs.existsSync(
+              `${user_path}/AppData/Roaming/foggie/repo`
+            );
+            let isExistDb = fs.existsSync(
+              `${user_path}/AppData/Roaming/foggie/db`
+            );
+            if (!isExistRepo) {
+              try {
+                fs.mkdirSync(`${user_path}/AppData/Roaming/foggie/repo`);
+                server.repoPath = `${user_path}/AppData/Roaming/foggie/repo`;
+              } catch (error) {}
+            }
+            if (!isExistDb) {
+              try {
+                fs.mkdirSync(`${user_path}/AppData/Roaming/foggie/db`);
+                db.path = `${user_path}/AppData/Roaming/foggie/db`;
+              } catch (error) {}
+            }
           }
 
           let newContent = JSON.stringify(list, null, 4);

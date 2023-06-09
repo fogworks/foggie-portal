@@ -52,7 +52,7 @@ module.exports = defineConfig({
         extraResources: [
           {
             from: "public/foggie-node",
-            to: "foggie-node",
+            to: "app/foggie-node",
           },
         ],
       },
