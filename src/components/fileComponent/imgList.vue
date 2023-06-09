@@ -1,5 +1,5 @@
 <template>
-  <div class="img-content" ref="imgContentRef">
+  <div class="img-content">
     <div v-for="(item, index) in imgData" class="img-box">
       <p>
         <el-checkbox
@@ -23,57 +23,57 @@
                   : '',
               ]"
             >
-              <el-checkbox :key="index" :label="index"></el-checkbox>
-              <ActionDrop class="action-popover">
-                <div class="more-box">
-                  <svg-icon icon-class="more"></svg-icon>
-                </div>
-                <template #reference>
-                  <ul class="more-dropdown">
-                    <li>
-                      <el-button
-                        @click="
-                          handleCommand({
-                            flag: 'download',
-                            data: img,
-                            pid: item.dateId,
-                          })
-                        "
-                      >
-                        Download</el-button
-                      >
-                    </li>
-                    <li>
-                      <el-button
-                        @click="
-                          handleCommand({
-                            flag: 'move',
-                            data: img,
-                            pid: item.dateId,
-                          })
-                        "
-                      >
-                        Move</el-button
-                      >
-                    </li>
-                    <li>
-                      <el-button
-                        class="delete-item"
-                        @click="
-                          handleCommand({
-                            flag: 'delete',
-                            data: img,
-                            pid: item.dateId,
-                          })
-                        "
-                      >
-                        Delete</el-button
-                      >
-                    </li>
-                  </ul>
-                </template>
-              </ActionDrop>
+              <el-checkbox :key="img.id" :label="img.id"></el-checkbox>
             </div>
+            <!-- <ActionDrop class="action-popover">
+              <div class="more-box">
+                <svg-icon icon-class="more"></svg-icon>
+              </div>
+              <template #reference>
+                <ul class="more-dropdown">
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({
+                          flag: 'download',
+                          data: img,
+                          pid: item.dateId,
+                        })
+                      "
+                    >
+                      Download</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({
+                          flag: 'move',
+                          data: img,
+                          pid: item.dateId,
+                        })
+                      "
+                    >
+                      Move</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      class="delete-item"
+                      @click="
+                        handleCommand({
+                          flag: 'delete',
+                          data: img,
+                          pid: item.dateId,
+                        })
+                      "
+                    >
+                      Delete</el-button
+                    >
+                  </li>
+                </ul>
+              </template>
+            </ActionDrop> -->
             <el-image
               scroll-container=".img-content"
               :preview-teleported="true"
@@ -100,10 +100,12 @@ import useCheckItem from "./hooks/useCheckItem";
 import { Download, Delete, CopyDocument, Rank } from "@element-plus/icons-vue";
 // const { imgCheckedData } = useCheckItem();
 const imgCheckedData = reactive({
-  value: {},
+  value: {
+    xx: [],
+  },
 });
-const scrollContainer = ref(null);
-const imgContentRef = ref(null);
+// const scrollContainer = ref(null);
+// const imgContentRef = ref(null);
 // const props = defineProps({
 //   imgCheckedData: {
 //     type: Object,
@@ -111,7 +113,7 @@ const imgContentRef = ref(null);
 //   }
 // })
 // const {imgCheckedData}=toRefs(props)
-const emits = defineEmits(["update:checkedData"]);
+const emits = defineEmits(["update:checkedData", "update:folderVisible"]);
 const resetChecked = () => {
   imgCheckedData.value = {};
   refCheckAll();
@@ -991,7 +993,9 @@ const refCheckAll = () => {
   });
 };
 const handleCheckAllChange = (val, item) => {
+  console.log(Date.now());
   imgCheckedData.value[item.dateId] = val ? item.list.map((el) => el.id) : [];
+  console.log(Date.now());
 };
 const handleCheckedItemsChange = (val, item) => {
   const checkedCount = val.length;
@@ -1003,14 +1007,11 @@ const handleCommand = ({ flag, data, pid }) => {
     imgCheckedData.value[pid] = imgCheckedData.value[pid].filter(
       (el) => el.dateId == pid
     );
-  } else if (flag == "copy") {
-    imgCheckedData.value[pid] = imgCheckedData.value[pid].filter(
-      (el) => el.dateId == pid
-    );
   } else if (flag == "move") {
     imgCheckedData.value[pid] = imgCheckedData.value[pid].filter(
       (el) => el.dateId == pid
     );
+    emits("update:folderVisible", true);
   }
 };
 watch(
@@ -1024,10 +1025,10 @@ watch(
   }
 );
 onMounted(() => {
-  nextTick(() => {
-    refCheckAll();
-  });
-  scrollContainer.value = imgContentRef.value;
+  // nextTick(() => {
+  //   refCheckAll();
+  // });
+  // scrollContainer.value = imgContentRef.value;
 });
 defineExpose({ resetChecked });
 </script>
@@ -1039,6 +1040,10 @@ defineExpose({ resetChecked });
   overflow-y: auto;
   .img-box {
     p {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background-color: var(--bg-color);
       text-align: left;
     }
   }
@@ -1097,9 +1102,16 @@ defineExpose({ resetChecked });
             display: none;
           }
         }
+      }
+      .action-popover {
+        display: none;
 
+        min-width: unset !important;
+        width: 100% !important;
+        position: absolute;
+        top: 0;
+        z-index: 9;
         .more-box {
-          display: none;
           position: absolute;
           top: 0;
           left: 80%;
@@ -1115,6 +1127,7 @@ defineExpose({ resetChecked });
           }
         }
         .more-dropdown {
+          z-index: 999;
           .delete-item {
             color: #ff3353 !important;
           }
@@ -1143,9 +1156,9 @@ defineExpose({ resetChecked });
       &:hover {
         .mask {
           display: block;
-          .more-box {
-            display: block;
-          }
+        }
+        .action-popover {
+          display: block;
         }
       }
     }

@@ -640,7 +640,7 @@ const getFileList = function (scroll, prefix) {
 const initFileData = async (data) => {
   // tableData.data = [];
   // let commonPrefixesItem = [];
-  // let contentItem = [];
+  let contentItem = [];
   emits("update:checkedData", []);
   fileTable.value.clearSelection();
   let dir = breadcrumbList.prefix.join("/");

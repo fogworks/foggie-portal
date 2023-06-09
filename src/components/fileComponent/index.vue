@@ -47,6 +47,7 @@
       ref="ImgListRef"
       v-else-if="activeName === 'Image'"
       v-model:checkedData="imgCheckedData.value"
+      v-model:folderVisible="folderVisible"
     ></ImgList>
   </div>
   <!-- action dialog -->
@@ -75,7 +76,6 @@ import { ref, toRefs, reactive, watch, provide } from "vue";
 import ImgList from "./imgList";
 import FolderDialog from "./folderDialog.vue";
 import RenameDialog from "./renameDialog.vue";
-const emits = defineEmits(["getUseSize"]);
 import AllFile from "@/views/foggieMax/home/_modules/myFiles";
 import ActionBar from "./actionBar.vue";
 const folderVisible = ref(false);
@@ -83,6 +83,7 @@ const renameVisible = ref(false);
 const activeName = ref("All");
 const AllFileRef = ref(null);
 const ImgListRef = ref(null);
+const emits = defineEmits(["getUseSize"]);
 
 const checkedData = ref([]);
 const imgCheckedData = reactive({
