@@ -10,82 +10,25 @@
       </p>
       <div class="img-item-box">
         <el-checkbox-group
-          :validate-event="false"
-          v-model="imgCheckedData.value[item.dateId]"
+          :key="'itembox' + index"
+          v-model="imgCheckedData.value"
           @change="(val) => handleCheckedItemsChange(val, item)"
         >
-          <div :class="['img-item']" v-for="(img, index) in item.list">
-            <div :class="['mask', isChecking ? 'isChecking' : '']">
+          <div
+            :key="'item' + index"
+            :class="['img-item']"
+            v-for="(img, index) in item.list"
+          >
+            <div>
               <el-checkbox
                 :class="[
                   'mask-checkbox',
                   itemChecked(img.id, item.dateId) ? 'itemChecked' : '',
                 ]"
-                :key="index"
+                 :key="'check' + index"
                 :label="img.id"
               ></el-checkbox>
             </div>
-            <ActionDrop class="action-popover">
-              <div class="more-box">
-                <svg-icon icon-class="more"></svg-icon>
-              </div>
-              <template #reference>
-                <ul class="more-dropdown">
-                  <li>
-                    <el-button
-                      @click="
-                        handleCommand({
-                          flag: 'download',
-                          data: img,
-                          pid: item.dateId,
-                        })
-                      "
-                    >
-                      Download</el-button
-                    >
-                  </li>
-                  <li>
-                    <el-button
-                      @click="
-                        handleCommand({
-                          flag: 'move',
-                          data: img,
-                          pid: item.dateId,
-                        })
-                      "
-                    >
-                      Move</el-button
-                    >
-                  </li>
-                  <li>
-                    <el-button
-                      class="delete-item"
-                      @click="
-                        handleCommand({
-                          flag: 'delete',
-                          data: img,
-                          pid: item.dateId,
-                        })
-                      "
-                    >
-                      Delete</el-button
-                    >
-                  </li>
-                </ul>
-              </template>
-            </ActionDrop>
-            <el-image
-              scroll-container=".img-content"
-              :preview-teleported="true"
-              :teleported="true"
-              :hide-on-click-modal="true"
-              :initial-index="1"
-              :preview-src-list="[img.url]"
-              fit="cover"
-              :key="img.id"
-              :src="img.url"
-              lazy
-            />
           </div>
         </el-checkbox-group>
       </div>
@@ -108,9 +51,7 @@ import useCheckItem from "./hooks/useCheckItem";
 import { Download, Delete, CopyDocument, Rank } from "@element-plus/icons-vue";
 // const { imgCheckedData } = useCheckItem();
 const imgCheckedData = reactive({
-  value: {
-    xx: [],
-  },
+  value: [],
 });
 // const scrollContainer = ref(null);
 // const imgContentRef = ref(null);
@@ -122,8 +63,29 @@ const imgCheckedData = reactive({
 // })
 // const {imgCheckedData}=toRefs(props)
 const emits = defineEmits(["update:checkedData", "update:folderVisible"]);
+const vInWindow = {
+  mounted: (el) => {
+    isInViewPort(el);
+  },
+};
+function isInViewPort(el) {
+  const viewPortHeight =
+    window.innerHeight ||
+    document.documentElement.clientHeight ||
+    document.body.clientHeight;
+  const offsetTop = el.offsetTop;
+  const scrollTop = document.documentElement.scrollTop;
+  const top = offsetTop - scrollTop;
+  const isIn = top <= viewPortHeight;
+  console.log(top, "top");
+  if (isIn) {
+    el.style.display = "block";
+  } else {
+    el.style.display = "none";
+  }
+}
 const resetChecked = () => {
-  imgCheckedData.value = {};
+  imgCheckedData.value = [];
   refCheckAll();
 };
 const state = reactive({
@@ -847,16 +809,14 @@ const refCheckAll = () => {
   });
 };
 const isChecking = computed(() => {
-  return Object.keys(imgCheckedData.value)?.some((key) => {
-    if (imgCheckedData.value[key].length) {
-      return true;
-    } else {
-      return false;
-    }
-  });
+  if (imgCheckedData.value.length) {
+    return true;
+  } else {
+    return false;
+  }
 });
 const itemChecked = (id, pid) => {
-  if (imgCheckedData.value?.[pid]?.indexOf(id) > -1) {
+  if (imgCheckedData.value?.indexOf(id) > -1) {
     return true;
   } else {
     return false;
@@ -864,12 +824,17 @@ const itemChecked = (id, pid) => {
 };
 const handleCheckAllChange = (val, item) => {
   console.log(Date.now());
-  imgCheckedData.value[item.dateId] = val ? item.list.map((el) => el.id) : [];
+  imgCheckedData.value = val ? item.list.map((el) => el.id) : [];
+  console.log(imgCheckedData.value.length, "imgCheckedData.value");
   console.log(Date.now());
+  nextTick(() => {
+    console.log(Date.now());
+  });
 };
 const handleCheckedItemsChange = (val, item) => {
   const checkedCount = val.length;
   item.checkAll = checkedCount === item.list.length;
+  console.log(checkedCount, "checkedCount");
 };
 const handleCommand = ({ flag, data, pid }) => {
   if (flag == "download") {
@@ -884,16 +849,16 @@ const handleCommand = ({ flag, data, pid }) => {
     emits("update:folderVisible", true);
   }
 };
-watch(
-  imgCheckedData,
-  (val) => {
-    emits("update:checkedData", val.value);
-  },
-  {
-    immediate: true,
-    deep: true,
-  }
-);
+// watch(
+//   imgCheckedData,
+//   (val) => {
+//     emits("update:checkedData", val.value);
+//   },
+//   {
+//     immediate: true,
+//     deep: true,
+//   }
+// );
 onMounted(() => {
   // nextTick(() => {
   //   refCheckAll();
@@ -912,7 +877,7 @@ defineExpose({ resetChecked });
     p {
       position: sticky;
       top: 0;
-      z-index: 999;
+      z-index: 2;
       background-color: var(--bg-color);
       text-align: left;
     }

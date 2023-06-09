@@ -140,7 +140,7 @@
                 </div>
                 {{ scope.row.name }}
               </div>
-              <ActionDrop class="action-popover">
+              <!-- <ActionDrop class="action-popover">
                 <div class="color-box table-action">
                   <svg-icon icon-class="more"></svg-icon>
                 </div>
@@ -237,14 +237,14 @@
                     </li>
                   </ul>
                 </template>
-              </ActionDrop>
-              <!-- <el-popover
+              </ActionDrop> -->
+              <el-popover
                 popper-class="action-popover"
                 :offset="-3"
                 :hide-after="0"
                 placement="bottom"
                 :width="150"
-                trigger="click"
+                trigger="hover"
               >
                 <template #reference>
                   <div class="color-box table-action">
@@ -339,7 +339,7 @@
                     >
                   </li>
                 </ul>
-              </el-popover> -->
+              </el-popover>
             </div>
           </template>
         </el-table-column>
@@ -605,7 +605,7 @@ const handleSelectionChange = (val) => {
   emits("update:checkedData", val);
 };
 const resetChecked = () => {
-  fileTable.value.clearSelection();
+  fileTable.value?.clearSelection();
 };
 const handleID = (str) => {
   return (
@@ -642,7 +642,7 @@ const initFileData = async (data) => {
   // let commonPrefixesItem = [];
   let contentItem = [];
   emits("update:checkedData", []);
-  fileTable.value.clearSelection();
+  fileTable.value?.clearSelection();
   let dir = breadcrumbList.prefix.join("/");
   let commonPrefixesItem = data.commonPrefixes?.map((el, i) => {
     let name = decodeURIComponent(el);
@@ -1400,6 +1400,7 @@ const upload = () => {
   width: 100px !important;
   min-width: 100px !important;
   .more-dropdown {
+    overflow: hidden;
     .delete-item {
       color: #ff3353 !important;
     }
