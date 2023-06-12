@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { user, detected_net } from "@/utils/api.js";
 import { useStore } from "vuex";
 import { getToken } from "@/utils/auth";
@@ -30,6 +30,9 @@ const initFoggieDate = async () => {
   canShow.value = true;
 };
 initFoggieDate();
+onMounted(() => {
+  window.localStorage.setItem("language_key", "en");
+});
 </script>
 
 <style lang="scss">
