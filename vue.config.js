@@ -55,6 +55,10 @@ module.exports = defineConfig({
             to: "app/foggie-node",
           },
         ],
+        nsis: {
+          oneClick: false,
+          allowToChangeInstallationDirectory: true,
+        },
       },
       customFileProtocol: "./",
     },

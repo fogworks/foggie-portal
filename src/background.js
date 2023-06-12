@@ -182,6 +182,58 @@ function checkMemory() {
   }
 }
 
+function modifyConfig() {
+  fs.readFile(
+    path.join(__dirname, "./config.json"),
+    "utf8",
+    (err, data) => {
+      if (data) {
+        // dialog.showErrorBox("data", data);
+      }
+      if (err) {
+        // dialog.showErrorBox("err", err);
+      }
+
+      if (err) throw err;
+      let list = JSON.parse(data);
+      let user_path = os.homedir();
+      let server = list.server;
+      let db = list.db;
+      if (server.repoPath.indexOf(user_path) !== 0) {
+        let isExistRepo = fs.existsSync(
+          `${user_path}/AppData/Roaming/foggie/repo`
+        );
+        let isExistDb = fs.existsSync(
+          `${user_path}/AppData/Roaming/foggie/db`
+        );
+        if (!isExistRepo) {
+          try {
+            fs.mkdirSync(`${user_path}/AppData/Roaming/foggie/repo`);
+            server.repoPath = `${user_path}/AppData/Roaming/foggie/repo`;
+          } catch (error) {}
+        }
+        if (!isExistDb) {
+          try {
+            fs.mkdirSync(`${user_path}/AppData/Roaming/foggie/db`);
+            db.path = `${user_path}/AppData/Roaming/foggie/db`;
+          } catch (error) {}
+        }
+      }
+
+      let newContent = JSON.stringify(list, null, 4);
+      fs.writeFile(
+        path.join(__dirname, "./config.json"),
+        newContent,
+        "utf8",
+        (err) => {
+          if (err) throw err;
+          console.log("success done");
+        }
+      );
+    }
+  );
+}
+
 async function createWindow() {
   // Create the browser window.
   let size = screen.getPrimaryDisplay().workAreaSize;
@@ -324,55 +376,14 @@ async function createWindow() {
           initFoggieProcess();
         }
       });
-
-      fs.readFile(
-        path.join(__dirname, "./config.json"),
-        "utf8",
-        (err, data) => {
-          if (data) {
-            // dialog.showErrorBox("data", data);
-          }
-          if (err) {
-            // dialog.showErrorBox("err", err);
-          }
-
-          if (err) throw err;
-          let list = JSON.parse(data);
-          let server = list.server;
-          let db = list.db;
-          if (server.repoPath.indexOf(user_path) !== 0) {
-            let isExistRepo = fs.existsSync(
-              `${user_path}/AppData/Roaming/foggie/repo`
-            );
-            let isExistDb = fs.existsSync(
-              `${user_path}/AppData/Roaming/foggie/db`
-            );
-            if (!isExistRepo) {
-              try {
-                fs.mkdirSync(`${user_path}/AppData/Roaming/foggie/repo`);
-                server.repoPath = `${user_path}/AppData/Roaming/foggie/repo`;
-              } catch (error) {}
-            }
-            if (!isExistDb) {
-              try {
-                fs.mkdirSync(`${user_path}/AppData/Roaming/foggie/db`);
-                db.path = `${user_path}/AppData/Roaming/foggie/db`;
-              } catch (error) {}
-            }
-          }
-
-          let newContent = JSON.stringify(list, null, 4);
-          fs.writeFile(
-            path.join(__dirname, "./config.json"),
-            newContent,
-            "utf8",
-            (err) => {
-              if (err) throw err;
-              console.log("success done");
-            }
-          );
+      const cofigPath = path.resolve(`${__dirname}/config.json`); // Replace with the actual path to the file
+      fs.chmod(cofigPath, 0o755, (err) => {
+        if (err) {
+          console.error("Error occurred while changing file permissions:", err);
+        } else {
+          modifyConfig();
         }
-      );
+      });
     }
   }
 
