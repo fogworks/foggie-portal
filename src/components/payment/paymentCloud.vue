@@ -1,7 +1,12 @@
 <template>
   <div v-show="isShow" class="payment-cloud-box">
     <div class="payment-cloud-box-div">
-      <i class="el-icon-close" @click="closePaymentCloud"></i>
+      <svg-icon
+        class="icon-close"
+        size="14"
+        icon-class="cancel"
+        @click="closePaymentCloud"
+      ></svg-icon>
       <h2>{{ $t("paymentCloud.title") }}</h2>
       <h2>{{ $t("paymentCloud.total_amount") }}{{ amount }}</h2>
       <el-form
@@ -368,7 +373,7 @@ export default {
       font-size: 20px;
       color: #666;
     }
-    .el-icon-close {
+    .icon-close {
       position: absolute;
       top: 15px;
       right: 15px;
@@ -396,7 +401,7 @@ export default {
           position: absolute;
           top: 0px;
           margin-left: 10px;
-          width: 100% !important;
+          // width: 100% !important;
           height: 20px;
           font-size: 12px !important;
           color: grey;
@@ -425,6 +430,7 @@ export default {
         width: 100%;
         text-align: right;
         .el-form-item__content {
+          justify-content: center;
           right: 20px;
           width: 100%;
           button {

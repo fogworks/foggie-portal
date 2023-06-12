@@ -1089,7 +1089,7 @@
         <el-button @click="renewalVisible = false">{{
           $t("index.cancel")
         }}</el-button>
-        <el-button type="primary" @click="rechargPay">{{
+        <el-button type="primary" :loading="loading" @click="rechargPay">{{
           $t("index.confirm")
         }}</el-button>
       </div>
@@ -1198,6 +1198,7 @@ export default {
       cyber: {},
       currentItem: {},
       cyfsBrowser: false,
+      loading: false,
 
       //       VOOD ID
       // VOOD IP
@@ -1684,6 +1685,7 @@ export default {
         JSON.stringify(currentComfirmItem)
       );
       this.currentComfirmItem = currentComfirmItem;
+      this.loading = true;
       orderRecharge(data)
         .then((res) => {
           if (!res.data) {
@@ -1733,11 +1735,15 @@ export default {
           trans_id: trans_id,
           isRenewal: true,
         };
-        payStripe(postData).then((res) => {
-          if (res && res.data && res.data.url) {
-            window.location.href = res.data.url;
-          }
-        });
+        payStripe(postData)
+          .then((res) => {
+            if (res && res.data && res.data.url) {
+              window.location.href = res.data.url;
+            }
+          })
+          .finally(() => {
+            this.loading = false;
+          });
       } else if (this.buyModel === "card") {
         this.payment_cloud_trans_id = trans_id;
         this.renewalVisible = false;
@@ -1746,6 +1752,7 @@ export default {
         this.payment_cloud_amount = this.coupon_number_recharge
           ? Number(this.currentComfirmItem.total_price) * 0.9
           : Number(this.currentComfirmItem.total_price);
+        this.loading = false;
       } else {
         // let reg1 = /^[0-9A-Za-z]{25,50}$/;
         // if (!reg1.test(this.p_account_address_input)) {
@@ -1790,6 +1797,7 @@ export default {
           coupon_number,
           couponRate: coupon_number ? 0.9 : 1,
         };
+        this.loading = false;
         this.blockChainPayVisible = true;
         this.renewalVisible = false;
       }
