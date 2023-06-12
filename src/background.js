@@ -377,8 +377,11 @@ async function createWindow() {
         }
       });
       const cofigPath = path.resolve(`${__dirname}/config.json`); // Replace with the actual path to the file
+      dialog.showErrorBox("cofigPath", cofigPath);
+
       fs.chmod(cofigPath, 0o755, (err) => {
         if (err) {
+          dialog.showErrorBox("Error-----config", err);
           console.error("Error occurred while changing file permissions:", err);
         } else {
           modifyConfig();
