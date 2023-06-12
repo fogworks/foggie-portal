@@ -171,7 +171,7 @@ function checkMemory() {
   const totalMemory = os.totalmem(); // 获取系统总内存，单位为字节
   const totalMemoryGB = totalMemory / (1024 * 1024 * 1024); // 将总内存转换为GB
 
-  if (totalMemoryGB < 8) {
+  if (totalMemoryGB < 7.9) {
     dialog.showMessageBox({
       type: "info",
       title: "Info",
