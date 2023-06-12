@@ -85,7 +85,26 @@
               :key="img.id"
               :src="img.url"
               lazy
-            />
+            >
+              <template #placeholder>
+                <div class="image-placeholder">
+                  <svg-icon
+                    icon-class="picture"
+                    size="30"
+                    style="color: #fff"
+                  ></svg-icon>
+                </div>
+              </template>
+              <template #error>
+                <div class="image-placeholder">
+                  <svg-icon
+                    icon-class="image-failed"
+                    size="30"
+                    style="color: #fff"
+                  ></svg-icon>
+                </div>
+              </template>
+            </el-image>
           </div>
         </el-checkbox-group>
       </div>
@@ -95,6 +114,7 @@
 
 <script setup>
 import ActionDrop from "@/components/actionDrop";
+import { Picture as IconPicture } from "@element-plus/icons-vue";
 import {
   toRefs,
   ref,
@@ -104,24 +124,16 @@ import {
   onMounted,
   computed,
 } from "vue";
-import useCheckItem from "./hooks/useCheckItem";
-import { Download, Delete, CopyDocument, Rank } from "@element-plus/icons-vue";
-// const { imgCheckedData } = useCheckItem();
 const imgCheckedData = reactive({
   value: {
     xx: [],
   },
 });
-// const scrollContainer = ref(null);
-// const imgContentRef = ref(null);
-// const props = defineProps({
-//   imgCheckedData: {
-//     type: Object,
-//     default:()=>{}
-//   }
-// })
-// const {imgCheckedData}=toRefs(props)
-const emits = defineEmits(["update:checkedData", "update:folderVisible"]);
+const emits = defineEmits([
+  "update:checkedData",
+  "update:folderVisible",
+  "setSingle",
+]);
 const resetChecked = () => {
   imgCheckedData.value = {};
   refCheckAll();
@@ -133,7 +145,7 @@ const state = reactive({
       dateId: "xx",
       list: [
         {
-          url: "https://img2.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
+          url: "https://img.baidu.com/it/u=3151448756,2510060928&fm=253&fmt=auto&app=138&f=JPEG?w=626&h=500",
           id: 1,
         },
         {
@@ -863,9 +875,7 @@ const itemChecked = (id, pid) => {
   }
 };
 const handleCheckAllChange = (val, item) => {
-  console.log(Date.now());
   imgCheckedData.value[item.dateId] = val ? item.list.map((el) => el.id) : [];
-  console.log(Date.now());
 };
 const handleCheckedItemsChange = (val, item) => {
   const checkedCount = val.length;
@@ -877,6 +887,9 @@ const handleCommand = ({ flag, data, pid }) => {
     imgCheckedData.value[pid] = imgCheckedData.value[pid].filter(
       (el) => el.dateId == pid
     );
+    // emits('setSingle',imgCheckedData.value[pid].filter(
+    //   (el) => el.dateId == pid
+    // ))
   } else if (flag == "move") {
     imgCheckedData.value[pid] = imgCheckedData.value[pid].filter(
       (el) => el.dateId == pid
@@ -905,7 +918,7 @@ defineExpose({ resetChecked });
 
 <style lang="scss" scoped>
 .img-content {
-  height: 1000px;
+  height: 800px;
   padding-bottom: 100px;
   overflow-y: auto;
   .img-box {
@@ -1048,6 +1061,14 @@ defineExpose({ resetChecked });
         .dropdown {
         }
       }
+    }
+    .image-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f1f1f1;
     }
     :deep {
       .el-image {

@@ -45,6 +45,7 @@
     ></AllFile>
     <ImgList
       ref="ImgListRef"
+      @setSingle="setSingle"
       v-else-if="activeName === 'Image'"
       v-model:checkedData="imgCheckedData.value"
       v-model:folderVisible="folderVisible"

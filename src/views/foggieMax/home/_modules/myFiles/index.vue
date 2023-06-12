@@ -444,11 +444,11 @@
       </el-table>
     </div>
   </div>
-  <PinTaskList
+  <!-- <PinTaskList
     v-model:display="taskDisplay"
     :currentOODItems="currentOODItem"
     @closeRightUpload="closeRightUpload"
-  ></PinTaskList>
+  ></PinTaskList> -->
   <ShareDialog
     :shareRefContent="shareRefContent"
     :copyContent="copyContent"
@@ -616,11 +616,11 @@ const refresh = () => {
   keyWord.value = "";
   // tableSort({ prop: "date", order: 1, key: 1 });
   if (tableLoading.value) return;
-  getFileList("", breadcrumbList.prefix);
+  getFileList("", breadcrumbList.prefix, true);
 };
 const email = computed(() => store.getters.userInfo?.email);
 const tokenMap = computed(() => store.getters.tokenMap);
-const getFileList = function (scroll, prefix) {
+const getFileList = function (scroll, prefix, reset = false) {
   let list_prefix = "";
   if (prefix?.length) {
     list_prefix = prefix.join("/");
@@ -631,13 +631,13 @@ const getFileList = function (scroll, prefix) {
   oodFileList(email.value, type, token, deviceData, list_prefix, scroll)
     .then((res) => {
       if (res && res.content) {
-        initFileData(res);
+        initFileData(res, reset);
       }
     })
     .finally(() => (tableLoading.value = false));
 };
 
-const initFileData = async (data) => {
+const initFileData = async (data, reset = false) => {
   // tableData.data = [];
   // let commonPrefixesItem = [];
   let contentItem = [];
@@ -740,8 +740,11 @@ const initFileData = async (data) => {
   } else {
     continuationToken.value = "";
   }
-
-  tableData.data = [...commonPrefixesItem, ...contentItem];
+  if (reset) {
+    tableData.data = [...commonPrefixesItem, ...contentItem];
+  } else {
+    tableData.data = [...tableData.data, ...commonPrefixesItem, ...contentItem];
+  }
   emits("getUseSize");
   tableLoading.value = false;
 };
@@ -1042,7 +1045,7 @@ const doSearch = async () => {
   if (tableLoading.value) return false;
   tableData.data = [];
   if (keyWord.value === "") {
-    getFileList("", breadcrumbList.prefix);
+    getFileList("", breadcrumbList.prefix, true);
   } else {
     tableLoading.value = true;
     breadcrumbList.prefix = [];
@@ -1061,7 +1064,7 @@ const doSearch = async () => {
     if (data.contents) {
       data.content = data.contents;
     }
-    initFileData(data);
+    initFileData(data, true);
   }
 };
 const setPrefix = (item, isTop = false) => {
@@ -1084,19 +1087,19 @@ const setPrefix = (item, isTop = false) => {
 };
 const fileListsInfinite = _.debounce(() => {
   if (continuationToken.value && tableData.data.length < 5000) {
-    getFileList(continuationToken.value, breadcrumbList.prefix);
+    getFileList(continuationToken.value, breadcrumbList.prefix, false);
   }
 }, 300);
 
 watch(breadcrumbList, (val) => {
   if (!isSearch.value) {
-    getFileList("", val.prefix);
+    getFileList("", val.prefix, true);
   }
 });
 watch(
   () => currentOODItem,
   () => {
-    getFileList("", breadcrumbList.prefix);
+    getFileList("", breadcrumbList.prefix, true);
   },
   {
     // immediate: true,
@@ -1111,7 +1114,7 @@ watch(
     if (!newVal && order_Id.value == deviceData.device_id) {
       tableData.data = [];
       tableData.pageNum = 1;
-      getFileList("", breadcrumbList.prefix);
+      getFileList("", breadcrumbList.prefix, true);
     }
   }
 );
