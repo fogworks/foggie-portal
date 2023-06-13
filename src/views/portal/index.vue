@@ -49,7 +49,7 @@
       </el-menu>
     </div>
     <teleport to="body">
-      <upload @fileShare="fileShare" v-show="uploadIsShow"></upload>
+      <upload ref="uploadRef" @fileShare="fileShare" v-show="uploadIsShow"></upload>
     </teleport>
     <div class="main" id="main">
       <router-view v-slot="{ Component }">
@@ -70,7 +70,7 @@
 <script setup>
 import upload from "@/components/upload";
 import ShareDialog from "@/views/foggieMax/home/_modules/myFiles/shareDialog";
-import { ref, reactive, computed, watch, watchEffect, onMounted } from "vue";
+import { ref, reactive, computed, watch, watchEffect, onMounted,provide } from "vue";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
 import { getUserLoginStatus, heartbeat } from "@/api/common";
@@ -78,6 +78,12 @@ import { getChain_id } from "@/api/common.js";
 import { publishPin, user, find_objects } from "@/utils/api";
 import { fileQuery } from "@/api/myFiles/myfiles";
 import { ElNotification } from "element-plus";
+
+const uploadRef = ref()
+
+provide('test', 123)
+
+
 const store = useStore();
 
 let uploadIsShow = computed(() => store.getters.uploadIsShow);

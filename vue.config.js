@@ -47,10 +47,20 @@ module.exports = defineConfig({
         },
         win: {
           icon: "public/f1.ico",
-          target: "nsis"
+          target: "nsis",
+        },
+        extraResources: [
+          {
+            from: "public/foggie-node",
+            to: "app/foggie-node",
+          },
+        ],
+        nsis: {
+          oneClick: false,
+          allowToChangeInstallationDirectory: true,
         },
       },
-      customFileProtocol: './'
+      customFileProtocol: "./",
     },
   },
   lintOnSave: true,
@@ -58,7 +68,7 @@ module.exports = defineConfig({
     port: port,
     open: true,
     client: {
-      overlay: false
+      overlay: false,
     },
     proxy: {
       "/api/paynode": {
