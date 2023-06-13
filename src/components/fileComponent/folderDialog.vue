@@ -107,6 +107,12 @@ const getFileList = function (scroll, prefix) {
   let list_prefix = "";
   if (prefix?.length) {
     list_prefix = prefix.join("/");
+    if (list_prefix.charAt(list_prefix.length - 1) !== "/") {
+      list_prefix = list_prefix + "/";
+    }
+    // if (prefix?.length == 1) {
+    //   list_prefix = list_prefix
+    // }
   }
   tableLoading.value = true;
   let token = tokenMap.value[deviceData.device_id];
@@ -125,9 +131,13 @@ const initFileData = async (data) => {
   // let commonPrefixesItem = [];
   // let contentItem = [];
   let commonPrefixesItem = data.commonPrefixes?.map((el, i) => {
+    let name = decodeURIComponent(el);
+    if (data.prefix) {
+      name = name.split(data.prefix)[1];
+    }
     return {
       isDir: true,
-      name: decodeURIComponent(el),
+      name,
       key: el,
       idList: [
         {
@@ -158,7 +168,14 @@ const initFileData = async (data) => {
 };
 const toDetail = (item) => {
   if (item.type === "application/x-directory") {
-    breadcrumbList.prefix = item.name.split("/");
+    console.log(item.name, "itemitemitemitem");
+
+    let long_name = breadcrumbList.prefix.length
+      ? breadcrumbList.prefix?.join("/") + "/" + item.name
+      : item.name;
+    console.log(long_name, "long_name");
+    breadcrumbList.prefix = long_name.split("/").slice(0, -1);
+    console.log(breadcrumbList.prefix, "breadcrumbList.prefix");
     // emits("currentPrefix", breadcrumbList.prefix);
   }
 };
@@ -177,6 +194,7 @@ const setPrefix = (item, isTop = false) => {
       if (el === item) targetIndex = index;
       return index <= targetIndex;
     });
+    console.log(breadcrumbList.prefix, "breadcrumbList.prefix");
   }
   // emits("currentPrefix", breadcrumbList.prefix);
 };
@@ -193,6 +211,9 @@ const handleConfirm = () => {
     // emits("reset");
   }
 };
+watch(breadcrumbList, (val) => {
+  getFileList("", val.prefix);
+});
 onMounted(() => {
   getFileList("", breadcrumbList.prefix);
 });

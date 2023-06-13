@@ -624,6 +624,9 @@ const getFileList = function (scroll, prefix, reset = false) {
   let list_prefix = "";
   if (prefix?.length) {
     list_prefix = prefix.join("/");
+    if (list_prefix.charAt(list_prefix.length - 1) !== "/") {
+      list_prefix = list_prefix + "/";
+    }
   }
   tableLoading.value = true;
   let token = tokenMap.value[deviceData.device_id];
@@ -1030,8 +1033,10 @@ const detailData = reactive({ data: {} });
 const toDetail = (item) => {
   localStorage.setItem("currentOODItem", JSON.stringify(currentOODItem.value));
   if (item.type === "application/x-directory") {
-    let long_name = breadcrumbList.prefix.join("/") + item.name;
-    breadcrumbList.prefix = long_name.split("/");
+    let long_name = breadcrumbList.prefix.length
+      ? breadcrumbList.prefix?.join("/") + "/" + item.name
+      : item.name;
+    breadcrumbList.prefix = long_name.split("/").slice(0, -1);
     // emits("currentPrefix", breadcrumbList.prefix);
   } else {
     detailData.data = item;
