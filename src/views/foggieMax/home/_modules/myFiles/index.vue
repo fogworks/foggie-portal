@@ -88,11 +88,26 @@
       </div>
     </div>
     <div>
-      <el-table
+      <div style="width: 100%; height: 600px">
+        <el-auto-resizer>
+          <template #default="{ height, width }">
+            <el-table-v2
+              v-loading="tableLoading"
+              class="table-box"
+              :columns="columns"
+              :data="tableData"
+              :width="width"
+              :height="height"
+              fixed
+            />
+          </template>
+        </el-auto-resizer>
+      </div>
+      <!-- <el-table
         class="table-box"
         row-key="key"
         v-loading="tableLoading"
-        :data="tableData.data"
+        :data="tableData"
         style="width: 100%"
         max-height="1000"
         ref="fileTable"
@@ -111,7 +126,18 @@
           prop="name"
         >
           <template #default="scope">
-            <div class="name-box">
+            <template v-if="scope.row.isNewFolder">
+              <div class="new-folder">
+                <el-input v-model="newFolderName"></el-input>
+                <el-button type="primary">
+                  <svg-icon size="20" icon-class="yes2"></svg-icon>
+                </el-button>
+                <el-button type="primary" @click="cancelNewFolder">
+                  <svg-icon icon-class="cancel"></svg-icon>
+                </el-button>
+              </div>
+            </template>
+            <div v-else class="name-box">
               <div
                 class="name-link"
                 style="overflow: hidden"
@@ -123,7 +149,6 @@
                     src="@/assets/folder.png"
                     alt=""
                   />
-                  <!-- <svg-icon icon-class="logo-dog-black" v-if="row.type === 'application/x-directory'"></svg-icon> -->
                   <template v-else-if="scope.row.isSystemImg">
                     <img
                       v-show="theme === 'light'"
@@ -136,108 +161,9 @@
                       alt=""
                     />
                   </template>
-                  <!-- <img v-else :src="row.imgUrl" alt="" /> -->
                 </div>
                 {{ scope.row.name }}
               </div>
-              <!-- <ActionDrop class="action-popover">
-                <div class="color-box table-action">
-                  <svg-icon icon-class="more"></svg-icon>
-                </div>
-                <template #reference>
-                  <ul class="more-dropdown">
-                    <li>
-                      <el-button
-                        @click="
-                          handleCommand({ flag: 'share', command: scope.row })
-                        "
-                        :disabled="
-                          !(
-                            !scope.row.isDir &&
-                            currentOODItem.svc_state === 'finish'
-                          )
-                        "
-                      >
-                        share</el-button
-                      >
-                    </li>
-                    <li>
-                      <el-button
-                        @click="
-                          handleCommand({ flag: 'ipfs', command: scope.row })
-                        "
-                        :disabled="
-                          !(
-                            !scope.row.isDir &&
-                            currentOODItem.svc_state === 'finish'
-                          )
-                        "
-                      >
-                        IPFS PIN</el-button
-                      >
-                    </li>
-                    <li>
-                      <el-button
-                        @click="
-                          handleCommand({ flag: 'cyfs', command: scope.row })
-                        "
-                        :disabled="
-                          !(
-                            !scope.row.isDir &&
-                            currentOODItem.cyfs_state === 'finish' &&
-                            currentOODItem.cyfs_service_state === 'start'
-                          )
-                        "
-                      >
-                        CYFS PIN</el-button
-                      >
-                    </li>
-                    <li>
-                      <el-button
-                        @click="
-                          handleCommand({
-                            flag: 'download',
-                            command: scope.row,
-                          })
-                        "
-                        :disabled="!scope.row.isDir"
-                      >
-                        Download</el-button
-                      >
-                    </li>
-                    <li>
-                      <el-button
-                        @click="
-                          handleCommand({ flag: 'rename', command: scope.row })
-                        "
-                        :disabled="scope.row.isDir"
-                      >
-                        Rename</el-button
-                      >
-                    </li>
-                    <li>
-                      <el-button
-                        @click="
-                          handleCommand({ flag: 'move', command: scope.row })
-                        "
-                        :disabled="scope.row.isDir"
-                      >
-                        Move</el-button
-                      >
-                    </li>
-                    <li>
-                      <el-button
-                        class="delete-item"
-                        @click="
-                          handleCommand({ flag: 'delete', command: scope.row })
-                        "
-                      >
-                        Delete</el-button
-                      >
-                    </li>
-                  </ul>
-                </template>
-              </ActionDrop> -->
               <el-popover
                 popper-class="action-popover"
                 :offset="-3"
@@ -245,6 +171,7 @@
                 placement="bottom"
                 :width="150"
                 trigger="hover"
+                :persistent="false"
               >
                 <template #reference>
                   <div class="color-box table-action">
@@ -348,7 +275,6 @@
             <template v-for="item in row.idList">
               <div v-if="item.code" class="id-box">
                 <div class="copy" v-if="item.code">
-                  <!-- <span class="id-name">{{ item.name }}</span> -->
                   <span class="code">{{ handleID(item.code) }}</span>
                   <svg-icon
                     icon-class="copy"
@@ -372,7 +298,7 @@
           width="120"
           show-overflow-tooltip
         />
-        <!-- <el-table-column
+        <el-table-column
           label="Actions"
           class-name="action-btn-column"
           width="125"
@@ -440,8 +366,8 @@
               </template>
             </el-dropdown>
           </template>
-        </el-table-column> -->
-      </el-table>
+        </el-table-column>
+      </el-table> -->
     </div>
   </div>
   <!-- <PinTaskList
@@ -497,6 +423,7 @@ import {
   computed,
   inject,
   onMounted,
+  unref,
 } from "vue";
 import {
   oodFileList,
@@ -509,11 +436,18 @@ import PinDialog from "./pinDialog";
 import PinTaskList from "./pinTaskList";
 import PinFormDialog from "./pinFormDialog";
 import DetailDialog from "./detailDialog";
-import { getfilesize, transferTime } from "@/utils/util.js";
+import { getfilesize, transferTime, transferUTCTime } from "@/utils/util.js";
 import { useStore } from "vuex";
 import setting from "@/setting";
 import _ from "lodash";
-
+import {
+  ElCheckbox,
+  ElInput,
+  ElButton,
+  ElDropdown,
+  ElDropdownItem,
+  ElPopover,
+} from "element-plus";
 const { baseUrl } = setting;
 
 const { proxy } = getCurrentInstance();
@@ -524,12 +458,14 @@ const emits = defineEmits([
   "update:renameVisible",
   "update:checkedData",
   "update:actionType",
+  "update:tableLoading",
   "setSingle",
   // "currentPrefix"
 ]);
 const keyWord = ref("");
 const pageNum = ref(1);
-const tableLoading = ref(false);
+// const tableLoading = ref(false);
+
 const showShareDialog = ref(false);
 const detailShow = ref(false);
 const deviceData = inject("deviceData");
@@ -538,13 +474,23 @@ const props = defineProps({
   currentOODItem: Object,
   orderId: [String, Number],
   checkedData: Array,
+  tableLoading: Boolean,
 });
+const newFolderName = ref("");
 const syncDialog = ref(false);
 const taskDisplay = ref(false);
 const closeRightUpload = () => {
   taskDisplay.value = false;
 };
 const { currentOODItem, orderId } = toRefs(props);
+const tableLoading = computed({
+  get() {
+    return props.tableLoading || false;
+  },
+  set(val) {
+    emits("update:tableLoading", val);
+  },
+});
 const store = useStore();
 const sortList = [
   {
@@ -586,7 +532,7 @@ const hasCYFS = computed(
     currentOODItem.value.cyfs_service_state === "start"
 );
 let shareCopyContent = "";
-let tableData = reactive({ data: [] });
+let tableData = ref([]);
 // let tableData = [];
 const activeSort = ref("1");
 let breadcrumbList = reactive({
@@ -594,7 +540,242 @@ let breadcrumbList = reactive({
 });
 const continuationToken = ref("");
 const fileTable = ref(null);
+const SelectionCell = ({ value, intermediate = false, onChange }) => {
+  return (
+    <ElCheckbox
+      onChange={onChange}
+      modelValue={value}
+      indeterminate={intermediate}
+    />
+  );
+};
+const columns = [
+  {
+    key: "selection",
+    width: 30,
+    cellRenderer: ({ rowData }) => {
+      const onChange = (value) => {
+        rowData.checked = value;
+        const checkedIdList = tableData.value.filter((el) => el.checked);
+        // .map((el) => el.cid);
+        emits("update:checkedData", checkedIdList);
+      };
 
+      return <SelectionCell value={rowData.checked} onChange={onChange} />;
+    },
+
+    headerCellRenderer: () => {
+      const _data = unref(tableData);
+      const onChange = (value) => {
+        tableData.value = tableData.value.map((row) => {
+          row.checked = value;
+          return row;
+        });
+        const checkedIdList = tableData.value.filter((el) => el.checked);
+        // .map((el) => el.cid);
+        console.log(checkedIdList, "checkedIdList");
+
+        emits("update:checkedData", checkedIdList);
+      };
+
+      const allSelected = _data.every((row) => row.checked);
+      const containsChecked = _data.some((row) => row.checked);
+
+      return (
+        <SelectionCell
+          value={allSelected}
+          intermediate={containsChecked && !allSelected}
+          onChange={onChange}
+        />
+      );
+    },
+  },
+  {
+    key: "name",
+    title: "Name",
+    dataKey: "name",
+    width: 535,
+    align: "left",
+    class: "action-btn-column",
+    cellRenderer: ({ rowData }) => {
+      const themeShow = () => {
+        if (theme.value === "light") {
+          return <img src={require("@/assets/logo-dog-black.svg")} alt="" />;
+        } else {
+          return <img src={require("@/assets/logo-dog.svg")} alt="" />;
+        }
+      };
+      if (rowData.isNewFolder) {
+        return (
+          <div class="new-folder">
+            <el-input modelValue={newFolderName}></el-input>
+            <el-button type="primary">
+              <svg-icon size="20" icon-class="yes2"></svg-icon>
+            </el-button>
+            <el-button type="primary" onClick={cancelNewFolder}>
+              <svg-icon icon-class="cancel"></svg-icon>
+            </el-button>
+          </div>
+        );
+      } else {
+        return (
+          <div class="name-box">
+            <div
+              class="name-link"
+              style="overflow: hidden"
+              onClick={() => toDetail(rowData)}
+            >
+              <div class="name-img">
+                {rowData.type === "application/x-directory" ? (
+                  <img src={require("@/assets/folder.png")} alt="" />
+                ) : null}
+                {rowData.isSystemImg ? themeShow() : null}
+              </div>
+              {rowData.name}
+            </div>
+            {/* <el-popover
+              popper-class="action-popover"
+              offset={-3}
+              hide-after={0}
+              placement="bottom"
+              width={150}
+              trigger="hover"
+              v-slots={{
+                reference: () => {
+                  return (
+                    <div class="color-box table-action">
+                      <svg-icon icon-class="more"></svg-icon>
+                    </div>
+                  );
+                },
+              }}
+            >
+              <ul class="more-dropdown">
+                <li>
+                  <el-button
+                    onClick={() =>
+                      handleCommand({ flag: "share", command: rowData })
+                    }
+                    disabled={
+                      !(!rowData.isDir && currentOODItem.svc_state === "finish")
+                    }
+                  >
+                    share
+                  </el-button>
+                </li>
+                <li>
+                  <el-button
+                    onClick={() =>
+                      handleCommand({ flag: "ipfs", command: rowData })
+                    }
+                    disabled={
+                      !(!rowData.isDir && currentOODItem.svc_state === "finish")
+                    }
+                  >
+                    IPFS PIN
+                  </el-button>
+                </li>
+                <li>
+                  <el-button
+                    onClick={() =>
+                      handleCommand({ flag: "cyfs", command: rowData })
+                    }
+                    disabled={
+                      !(
+                        !rowData.isDir &&
+                        currentOODItem.value.cyfs_state === "finish" &&
+                        currentOODItem.value.cyfs_service_state === "start"
+                      )
+                    }
+                  >
+                    CYFS PIN
+                  </el-button>
+                </li>
+                <li>
+                  <el-button
+                    onClick={() =>
+                      handleCommand({ flag: "download", command: rowData })
+                    }
+                    disabled={!rowData.isDir}
+                  >
+                    Download
+                  </el-button>
+                </li>
+                <li>
+                  <el-button
+                    onClick={() =>
+                      handleCommand({ flag: "rename", command: rowData })
+                    }
+                    disabled={rowData.isDir}
+                  >
+                    Rename
+                  </el-button>
+                </li>
+                <li>
+                  <el-button
+                    onClick={() =>
+                      handleCommand({ flag: "move", command: rowData })
+                    }
+                    disabled={rowData.isDir}
+                  >
+                    Move
+                  </el-button>
+                </li>
+                <li>
+                  <el-button
+                    class="delete-item"
+                    onClick={() =>
+                      handleCommand({ flag: "delete", command: rowData })
+                    }
+                  >
+                    Delete
+                  </el-button>
+                </li>
+              </ul>
+            </el-popover> */}
+          </div>
+        );
+      }
+    },
+  },
+  {
+    key: "idList",
+    title: "Content / File ID",
+    dataKey: "idList",
+    width: 180,
+    align: "left",
+    cellRenderer: ({ rowData }) => {
+      return rowData.idList.map((item) => {
+        return item.code ? (
+          <div class="id-box">
+            <div class="copy">
+              <span class="code">{handleID(item.code)}</span>
+              <svg-icon
+                icon-class="copy"
+                class="copy-icon"
+                onClick={() => copyLink(item.code)}
+              ></svg-icon>
+            </div>
+          </div>
+        ) : null;
+      });
+    },
+  },
+  {
+    key: "date",
+    title: "Date",
+    dataKey: "date",
+    width: 175,
+    align: "left",
+  },
+  {
+    key: "size",
+    title: "Size",
+    dataKey: "size",
+    width: 120,
+    align: "left",
+  },
+];
 // const tableSort = ({ prop = "", order = 2, key = "" }) => {
 //   const sortOrders = ["ascending", "descending", null];
 //   activeSort.value = key;
@@ -604,8 +785,15 @@ const fileTable = ref(null);
 const handleSelectionChange = (val) => {
   emits("update:checkedData", val);
 };
+const selectChangeEvent = (val) => {
+  if (fileTable?.value) {
+    const records = fileTable?.value.getCheckboxRecords();
+    emits("update:checkedData", records);
+  }
+};
 const resetChecked = () => {
   fileTable.value?.clearSelection();
+  emits("update:checkedData", []);
 };
 const handleID = (str) => {
   return (
@@ -613,9 +801,13 @@ const handleID = (str) => {
   );
 };
 const refresh = () => {
+  console.log("refresh111111111111111111111111111111111");
+  console.log(tableLoading.value, "refresh22222222222222");
+
   keyWord.value = "";
   // tableSort({ prop: "date", order: 1, key: 1 });
   if (tableLoading.value) return;
+
   getFileList("", breadcrumbList.prefix, true);
 };
 const email = computed(() => store.getters.userInfo?.email);
@@ -641,9 +833,13 @@ const getFileList = function (scroll, prefix, reset = false) {
 };
 
 const initFileData = async (data, reset = false) => {
-  // tableData.data = [];
+  // tableData.value = [];
   // let commonPrefixesItem = [];
   let contentItem = [];
+  tableData.value.forEach((el) => {
+    el.checked = false;
+  });
+  newFolderName.value = "";
   emits("update:checkedData", []);
   fileTable.value?.clearSelection();
   let dir = breadcrumbList.prefix.join("/");
@@ -666,6 +862,7 @@ const initFileData = async (data, reset = false) => {
           code: "",
         },
       ],
+      checked: false,
       date: "-",
       size: "",
       status: "-",
@@ -704,6 +901,7 @@ const initFileData = async (data, reset = false) => {
     }
 
     return {
+      checked: false,
       isDir: isDir,
       name,
       key: el.key,
@@ -744,9 +942,13 @@ const initFileData = async (data, reset = false) => {
     continuationToken.value = "";
   }
   if (reset) {
-    tableData.data = [...commonPrefixesItem, ...contentItem];
+    tableData.value = [...commonPrefixesItem, ...contentItem];
   } else {
-    tableData.data = [...tableData.data, ...commonPrefixesItem, ...contentItem];
+    tableData.value = [
+      ...tableData.value,
+      ...commonPrefixesItem,
+      ...contentItem,
+    ];
   }
   emits("getUseSize");
   tableLoading.value = false;
@@ -1048,7 +1250,7 @@ const toDetail = (item) => {
 const isSearch = ref(false);
 const doSearch = async () => {
   if (tableLoading.value) return false;
-  tableData.data = [];
+  tableData.value = [];
   if (keyWord.value === "") {
     getFileList("", breadcrumbList.prefix, true);
   } else {
@@ -1091,7 +1293,7 @@ const setPrefix = (item, isTop = false) => {
   // emits("currentPrefix", breadcrumbList.prefix);
 };
 const fileListsInfinite = _.debounce(() => {
-  if (continuationToken.value && tableData.data.length < 5000) {
+  if (continuationToken.value && tableData.value.length < 5000) {
     getFileList(continuationToken.value, breadcrumbList.prefix, false);
   }
 }, 300);
@@ -1112,12 +1314,30 @@ watch(
   }
 );
 const order_Id = computed(() => store.getters.orderId);
-
+const cancelNewFolder = () => {
+  tableData.value.shift();
+  newFolderName.value = "";
+};
+const setNewFolder = () => {
+  if (!tableLoading.value && !tableData.value[0]?.isNewFolder) {
+    tableData.value.unshift({
+      isDir: true,
+      name: "",
+      key: "isNewFolder",
+      isNewFolder: true,
+      isSystemImg: false,
+      canShare: false,
+      date: transferUTCTime(new Date()),
+      idList: [],
+    });
+    fileTable.value.scrollToTop(0);
+  }
+};
 watch(
   () => store.getters.uploadIsShow,
   (newVal, oldVal) => {
     if (!newVal && order_Id.value == deviceData.device_id) {
-      tableData.data = [];
+      tableData.value = [];
       tableData.pageNum = 1;
       getFileList("", breadcrumbList.prefix, true);
     }
@@ -1126,7 +1346,7 @@ watch(
 onMounted(() => {
   refresh();
 });
-defineExpose({ doSearch, resetChecked });
+defineExpose({ doSearch, resetChecked, setNewFolder, refresh });
 const upload = () => {
   store.commit("upload/setUploadOptions", deviceData);
   // store.commit("upload/openUpload", deviceData.device_id);
@@ -1245,30 +1465,21 @@ const upload = () => {
     margin-bottom: 40px;
     background: var(--card-bg);
     font-size: 16px;
-    .name-img {
-      display: inline-block;
-      width: 25px;
-      height: 25px;
-      margin-right: 8px;
-      text-align: center;
-      img {
-        max-width: 25px;
-        max-height: 25px;
-      }
-    }
+
     :deep {
-      .el-table__header {
-        .cell {
+      .el-table-v2__main {
+        background: transparent;
+      }
+      .el-table-v2__header {
+        .el-table-v2__header-cell {
           padding-bottom: 10px;
           color: var(--text-color);
           font-weight: 700;
+          background: transparent;
         }
       }
       --el-table-row-hover-bg-color: transparent;
-      .el-table__row {
-        height: 55.2px;
-        content-visibility: auto;
-        contain-intrinsic-size: 55.2px;
+      .el-table-v2__row {
         z-index: 2;
         &:hover {
           .table-action {
@@ -1276,15 +1487,15 @@ const upload = () => {
           }
         }
       }
-      .el-table__cell {
+      .el-table-v2__row-cell {
         color: var(--text-color);
         // background: var(--card-bg);
         background: transparent;
-        .cell {
-          color: var(--text-color);
-          min-height: 25px;
-          line-height: 25px;
-        }
+        // .cell {
+        //   color: var(--text-color);
+        //   min-height: 25px;
+        //   line-height: 25px;
+        // }
       }
       .action-btn-column {
         z-index: 9;
@@ -1293,96 +1504,112 @@ const upload = () => {
           text-align: center;
           overflow: visible;
         }
-      }
-    }
-    .name-box {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      :deep {
-        .dropdown {
-          left: 0;
-        }
-      }
-    }
-    .name-link {
-      font-weight: 700;
-      font-size: 16px;
-      color: $light_blue;
-      cursor: pointer;
-
-      // img {
-      //   width: 24px;
-      //   margin-right: 8px;
-      // }
-    }
-    .table-action {
-      z-index: 99;
-      // position: relative;
-      display: none;
-      // &:hover {
-      //   .more-dropdown {
-      //     display: block;
-      //     position: absolute;
-      //     top: 30px;
-      //     left: -55px;
-      //     background: #fff;
-      //   }
-      // }
-    }
-    .id-box {
-      .copy {
-        display: flex;
-        align-items: center;
-        .id-name {
-          width: 40px;
-          margin-right: 5px;
-          // font-size: 16px;
-          color: var(--text-color-444);
-          // color: #444;
-          font-size: 12px;
-          font-weight: 500;
-          font-style: italic;
-        }
-        .code {
-          max-width: 150px;
-          font-size: 14px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          color: var(--text-color);
-        }
-        span {
-          display: inline-block;
-        }
-        svg {
-          font-size: 16px;
-          margin-left: 4px;
-          vertical-align: text-top;
-          color: var(--text-color);
-          cursor: pointer;
-          &:hover {
-            color: $light_blue;
+        .new-folder {
+          text-align: left;
+          .el-input {
+            width: 320px;
+            margin-right: 10px;
+            .el-input__wrapper {
+              height: 40px;
+            }
+          }
+          .el-button {
+            width: 30px;
+            height: 30px;
+            border-radius: 10px;
+            font-size: 16px;
           }
         }
       }
     }
-
-    .color-box {
-      // .color-box();
-      @include color-box;
-      padding: 0;
-
-      svg {
-        font-size: 28px;
-        color: $light_blue;
-        transition: all 0.8s cubic-bezier(0.075, 0.82, 0.165, 1) 0s;
+    :deep {
+      .name-img {
+        display: inline-block;
+        width: 25px;
+        height: 25px;
+        margin-right: 8px;
+        text-align: center;
+        img {
+          max-width: 25px;
+          max-height: 25px;
+        }
       }
-      &:hover {
+      .name-box {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        :deep {
+          .dropdown {
+            left: 0;
+          }
+        }
+      }
+      .name-link {
+        display: flex;
+        align-items: center;
+        font-weight: 700;
+        font-size: 16px;
+        color: $light_blue;
+        cursor: pointer;
+      }
+      .table-action {
+        z-index: 99;
+        display: none;
+      }
+      .id-box {
+        .copy {
+          display: flex;
+          align-items: center;
+          .id-name {
+            width: 40px;
+            margin-right: 5px;
+            // font-size: 16px;
+            color: var(--text-color-444);
+            // color: #444;
+            font-size: 12px;
+            font-weight: 500;
+            font-style: italic;
+          }
+          .code {
+            max-width: 150px;
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--text-color);
+          }
+          span {
+            display: inline-block;
+          }
+          svg {
+            font-size: 16px;
+            margin-left: 4px;
+            vertical-align: text-top;
+            color: var(--text-color);
+            cursor: pointer;
+            &:hover {
+              color: $light_blue;
+            }
+          }
+        }
+      }
+      .color-box {
+        // .color-box();
+        @include color-box;
+        padding: 0;
+
         svg {
-          color: #fff;
-          transform: scale(1.1);
-          cursor: pointer;
+          font-size: 28px;
+          color: $light_blue;
+          transition: all 0.8s cubic-bezier(0.075, 0.82, 0.165, 1) 0s;
+        }
+        &:hover {
+          svg {
+            color: #fff;
+            transform: scale(1.1);
+            cursor: pointer;
+          }
         }
       }
     }

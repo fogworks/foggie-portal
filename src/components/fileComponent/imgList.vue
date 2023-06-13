@@ -852,6 +852,9 @@ const state = reactive({
     },
   ],
 });
+const refresh = () => {
+  console.log(111);
+};
 const { imgData } = toRefs(state);
 const refCheckAll = () => {
   imgData.value.forEach((el) => {

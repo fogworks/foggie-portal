@@ -29,8 +29,11 @@
       v-model:isSingle="isSingle"
       v-model:actionType="actionType"
       v-model:singleData="singleData.value"
+      v-model:tableLoading="tableLoading"
       @setNoSingle="setNoSingle"
+      @setNewFolder="setNewFolder"
       @reset="reset"
+      @refreshList="refreshList"
     ></ActionBar>
     <AllFile
       v-if="activeName === 'All'"
@@ -39,6 +42,7 @@
       v-model:isSingle="isSingle"
       v-model:renameVisible="renameVisible"
       v-model:actionType="actionType"
+      v-model:tableLoading="tableLoading"
       @setSingle="setSingle"
       v-bind="$attrs"
       ref="AllFileRef"
@@ -85,7 +89,7 @@ const activeName = ref("All");
 const AllFileRef = ref(null);
 const ImgListRef = ref(null);
 const emits = defineEmits(["getUseSize"]);
-
+const tableLoading = ref(false);
 const checkedData = ref([]);
 const imgCheckedData = reactive({
   value: {},
@@ -114,8 +118,18 @@ const reset = () => {
     ImgListRef.value.resetChecked();
   }
 };
+const refreshList = () => {
+  if (activeName.value === "All") {
+    AllFileRef.value.refresh();
+  } else if (activeName.value === "Image") {
+    ImgListRef.value.refresh();
+  }
+};
 const handleClick = (tab, event) => {
   console.log(tab, event);
+};
+const setNewFolder = () => {
+  AllFileRef.value.setNewFolder();
 };
 watch(activeName, () => {
   checkedData.value = [];

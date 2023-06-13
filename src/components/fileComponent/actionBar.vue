@@ -51,8 +51,16 @@
 </template>
 
 <script setup>
-import { ref, toRefs, inject, computed } from "vue";
+import {
+  ref,
+  toRefs,
+  inject,
+  computed,
+  nextTick,
+  getCurrentInstance,
+} from "vue";
 import { useStore } from "vuex";
+import { file_delete } from "@/utils/api.js";
 const deviceData = inject("deviceData");
 const props = defineProps({
   checkedData: {
@@ -67,6 +75,7 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  tableLoading: Boolean,
 });
 const emits = defineEmits([
   "update:checkedData",
@@ -77,8 +86,20 @@ const emits = defineEmits([
   "update:actionType",
   "update:singleData",
   "reset",
+  "setNewFolder",
+  "refreshList",
 ]);
+const { proxy } = getCurrentInstance();
 const store = useStore();
+const tableLoading = computed({
+  get() {
+    return props.tableLoading || false;
+  },
+  set(val) {
+    emits("update:tableLoading", val);
+  },
+});
+const tokenMap = computed(() => store.getters.tokenMap);
 const { checkedData, imgCheckedData, activeName } = toRefs(props);
 const hasChecked = computed(() => {
   if (activeName.value == "Image") {
@@ -103,6 +124,45 @@ const upload = () => {
 const resetChecked = () => {
   emits("reset");
 };
+const refresh = () => {
+  emits("refreshList");
+};
+const deleteItem = (item) => {
+  tableLoading.value = true;
+  let token = tokenMap.value[deviceData.device_id];
+
+  file_delete(token, item, deviceData).then((res) => {
+    if (res && res.data) {
+      proxy.$notify({
+        type: "success",
+        message: "Delete succeeded",
+        position: "bottom-left",
+      });
+      tableLoading.value = false;
+      let arr = [];
+      if (store.getters.uploadFileList && deviceData.device_id) {
+        arr = store.getters.uploadFileList[deviceData.device_id];
+        if (arr && arr.length > 0) {
+          store.getters.uploadFileList[deviceData.device_id] = arr.filter(
+            (val) => {
+              return val.urlFileName !== item.key;
+            }
+          );
+        }
+      }
+      nextTick(() => {
+        refresh();
+      });
+    } else {
+      tableLoading.value = false;
+      proxy.$notify({
+        type: "error",
+        message: "Delete Failed",
+        position: "bottom-left",
+      });
+    }
+  });
+};
 const handlerClick = (type) => {
   emits("update:isSingle", false);
   if (type === "move" || type === "copy") {
@@ -111,12 +171,23 @@ const handlerClick = (type) => {
   } else if (type === "download") {
     downLoad();
   } else if (type === "delete") {
-    resetChecked();
+    if (checkedData.value.length == 1) {
+      proxy
+        .$confirm("Are you sure to delete it?", "Warning", {
+          confirmButtonText: "YES",
+          cancelButtonText: "NO",
+        })
+        .then(async () => {
+          await deleteItem(checkedData.value[0]);
+          resetChecked();
+        });
+    }
   } else if (type === "rename") {
     emits("update:singleData", checkedData.value[0]);
     emits("update:renameVisible", true);
   } else if (type === "copy") {
   } else if (type === "newFolder") {
+    emits("setNewFolder");
   }
 };
 </script>

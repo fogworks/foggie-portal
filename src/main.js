@@ -14,23 +14,6 @@ import i18n from "@/static/language/index.js"; //引入语言配置
 import 'normalize.css/normalize.css'
 import '../src/static/style/index.scss'
 
-// const fixElTableErr = (table) => {
-//   const oldResizeListener = table.methods.resizeListener;
-//   table.methods.resizeListener = function () {
-//       window.requestAnimationFrame(oldResizeListener.bind(this));
-//   };
-// };
-// fixElTableErr(Table);
-// called before any tests are run
-// const e = window.error
-// window.onerror = function (errorMessage, scriptURI, lineNumber, columnNumber, error) {
-//   if (errorMessage === 'ResizeObserver loop limit exceeded') {
-//     console.warn(errorMessage)
-//     return true
-//   } else {
-//     return e(...arguments)
-//   }
-// }
 
 const req1 = require.context("@/svg-icons", true, /\.svg$/);
 const requireAll = (requireContext) => {
