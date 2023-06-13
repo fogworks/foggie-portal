@@ -1048,17 +1048,17 @@ const initLocalData = (data) => {
     let cid = data.data[j].cid;
     let file_id = data.data[j].fileId;
 
-    let name = decodeURIComponent(data.data[j].file_path);
+    let name = decodeURIComponent(data.data[j].dest_path);
 
-    const type = data.data[j].file_path.substring(
-      data.data[j].file_path.lastIndexOf(".") + 1
+    const type = data.data[j].dest_path.substring(
+      data.data[j].dest_path.lastIndexOf(".") + 1
     );
     let { isSystemImg } = handleImg(data.data[j], type, isDir);
 
     let item = {
       isDir: isDir,
       name,
-      key: data.data[j].file_path,
+      key: data.data[j].dest_path,
       idList: [
         {
           name: "IPFS",
