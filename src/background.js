@@ -210,13 +210,13 @@ function modifyConfig() {
           try {
             fs.mkdirSync(`${user_path}/AppData/Roaming/foggie/repo`);
             server.repoPath = `${user_path}/AppData/Roaming/foggie/repo`;
-          } catch (error) {}
+          } catch (error) { }
         }
         if (!isExistDb) {
           try {
             fs.mkdirSync(`${user_path}/AppData/Roaming/foggie/db`);
             db.path = `${user_path}/AppData/Roaming/foggie/db`;
-          } catch (error) {}
+          } catch (error) { }
         }
       }
 
@@ -280,15 +280,15 @@ async function createWindow() {
             .then((result) => {
               if (result.response === 0) {
                 closePort(3000)
-                  .then(() => {})
-                  .catch((error) => {});
+                  .then(() => { })
+                  .catch((error) => { });
               } else {
                 return;
               }
             });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
     if (checkMacOS()) {
       closePort(8007)
         .then(() => {
@@ -377,8 +377,11 @@ async function createWindow() {
         }
       });
       const cofigPath = path.resolve(`${__dirname}/config.json`); // Replace with the actual path to the file
+      // dialog.showErrorBox("cofigPath", cofigPath);
+
       fs.chmod(cofigPath, 0o755, (err) => {
         if (err) {
+          // dialog.showErrorBox("Error-----config", err);
           console.error("Error occurred while changing file permissions:", err);
         } else {
           modifyConfig();
