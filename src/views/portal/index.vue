@@ -68,7 +68,11 @@
 </template>
 
 <script setup>
-import upload from "@/components/upload";
+import upload from "@/components/newUpload";
+// import upload from "@/components/upload";
+
+
+// import upload from "@/components/upload";
 import ShareDialog from "@/views/foggieMax/home/_modules/myFiles/shareDialog";
 import { ref, reactive, computed, watch, watchEffect, onMounted,provide } from "vue";
 import { useStore } from "vuex";
@@ -81,7 +85,7 @@ import { ElNotification } from "element-plus";
 
 const uploadRef = ref()
 
-provide('test', 123)
+
 
 
 const store = useStore();

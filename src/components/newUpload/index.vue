@@ -1,17 +1,14 @@
 <template>
   <div>
     <div class="upload_dialog" @click="closeUploadBox" v-show="uploadIsShow">
-      <!-- my_top_upload -->
       <div class="upload_dialog_wrap vood_dialog_wrap" @click.stop="">
         <div>
-          <!-- my_top_uploadText my_top_uploadTitle -->
           <div class="upload_dialog_title">Publish</div>
           <div class="my_top_uploadText">
             Support single file and directory upload. The maximum upload size of
             a single file is 2GB. If there are large files, you can choose to
             slice them with tools before uploading
           </div>
-          <!-- <div class="my_top_uploadText">The OOD you have chosen is: 456</div> -->
           <div class="today-right">
             <div class="color-box">
               <el-button @click="allFileListDrawer = true">
@@ -112,11 +109,10 @@ import {
   computed,
   getCurrentInstance,
 } from "vue";
-import fileList from "../upload/fileList.vue";
+import fileList from "./fileList.vue";
 import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
-import TobeCompleted from "@/components/upload/TobeCompleted.vue";
-import _ from "lodash";
+import TobeCompleted from "@/components/newUpload/TobeCompleted.vue";
 const _this = getCurrentInstance();
 const emit = defineEmits(["fileShare"]);
 const currentPath = ref("");
@@ -151,57 +147,15 @@ const deviceType = computed(() => store.getters.deviceType);
 const uploadFileList = computed(() => store.state.upload.uploadFileList);
 const allFileList = reactive({});
 
-// const allFileList = computed(() => {
-//   let fileListArray = _this.refs[`fileListRef_${orderId.value}`] || [];
-//   let executeLsit =
-//     fileListArray.filter((item) => item.orderID == orderId.value)[0]
-//       ?.curFileList || [];
-//   let list = [];
-//   for (const item of store.state.upload.uploadFileList[orderId.value] || []) {
-//     if (!executeLsit.some((element) => element.id == item.id)) {
-//       list.push(item);
-//     }
-//   }
-//   return list;
-// });
+
 
 const tokenMap = computed(() => store.getters.tokenMap);
 
 let fileCache = [];
 const onFileAdded = (file) => {
-  // if (file.size === 0) return;
-  // if (file.size > FILE_SIZE) {
-  //   ElMessage({
-  //     message:
-  //       "The maximum upload size of a single file should not exceed 2GB.",
-  //     type: "warning",
-  //     duration: 3000,
-  //   });
-  //   return;
-  // }
-  // let list = store.state.upload.uploadFileList[orderId.value] ?? [];
-  // if (list.length > 1000) {
-  //   fileCache.push(file);
-  //   if (fileCache.length % 1000 == 0) {
-  //     list = list.concat(fileCache);
-  //     allFileList[orderId.value] = allFileList[orderId.value].concat(fileCache);
-  //     store.commit("upload/setFileList", list);
-  //     fileCache = [];
-  //   }
-  // } else {
-  //   list.push(file);
-  //   store.commit("upload/setFileList", list);
-  //   if (allFileList[orderId.value]) {
-  //     allFileList[orderId.value].push(file);
-  //   } else {
-  //     allFileList[orderId.value] = [];
-  //     allFileList[orderId.value].push(file);
-  //   }
-  // }
 };
 
 const onFilesAdded = (files, fileList) => {
-
   let timer = null;
   
   if (files.length > 500) {
@@ -295,9 +249,7 @@ function initFileFn(file) {
   file.rootPath = currentPath.value;
   let directory = file.file.webkitRelativePath;
   let directoryPath = directory.substr(0, directory.lastIndexOf("/") + 1);
-
-  // file.urlPrefix = directoryPath ? currentPath.value + directoryPath : currentPath.value || "/";
-  file.urlPrefix = file.file.path.substr(0, file.file.path.lastIndexOf("\\"));
+  file.urlPrefix = file.file.path
 
   file.urlFileName = directoryPath
     ? currentPath.value + directoryPath + file.name
@@ -323,12 +275,8 @@ onMounted(() => {});
   height: 100%;
   top: 0;
   left: 0;
-  // background: #272735e3;
   z-index: 2000;
   background-color: rgba(0, 0, 0, 0.4);
-  // -webkit-backdrop-filter: blur(20px) saturate(100%);
-  // backdrop-filter: blur(20px) saturate(100%);
-
   .upload_dialog_wrap {
     position: fixed;
     width: 50%;
@@ -360,9 +308,7 @@ onMounted(() => {});
 
     .upload_dialog_tips {
       font-size: 12px;
-      // transform: scale(0.8);
       text-align: left;
-      // text-indent: 20px;
     }
 
     .upload_dialog_currentood {
@@ -380,7 +326,6 @@ onMounted(() => {});
       background: rgba(255, 255, 255, 0.1);
       border: solid;
       border-image: url(@/assets/dashed-border.png) 2 round;
-      // border: 3px dashed #ccc;
       border-radius: 0.625rem;
       text-align: center;
       margin-top: 20px;
@@ -458,7 +403,6 @@ onMounted(() => {});
     flex-wrap: wrap;
     background: transparent;
     border: 1px dashed #4f4f4f;
-    // margin-bottom: 10px;
     padding: 10px 0;
     border-radius: 16px;
     text-align: center;
@@ -473,7 +417,6 @@ onMounted(() => {});
     line-height: 30px;
     text-align: center;
     font-size: 16px;
-    // background: var(--btn-gradient);
     color: #004aff;
     border: none;
     transition: all 1s;
@@ -483,9 +426,7 @@ onMounted(() => {});
     }
   }
 
-  .uploader-file-progress {
-    // background: #7378e24f;
-  }
+
 
   .el-table,
   .el-table tr,
@@ -534,13 +475,10 @@ onMounted(() => {});
 }
 
 .uploader-app {
-  /* width: 780px; */
   box-sizing: border-box;
   padding: 15px;
-  /* margin: 10px auto 0; */
   margin-top: 10px;
   font-size: 12px;
-  // box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
   margin-left: 20px;
   margin-right: 20px;
 }
