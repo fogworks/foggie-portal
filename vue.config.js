@@ -48,6 +48,7 @@ module.exports = defineConfig({
         win: {
           icon: "public/f1.ico",
           target: "nsis",
+          requestedExecutionLevel: "requireAdministrator",
         },
         extraResources: [
           {
@@ -55,6 +56,10 @@ module.exports = defineConfig({
             to: "app/foggie-node",
           },
         ],
+        nsis: {
+          oneClick: false,
+          allowToChangeInstallationDirectory: true,
+        },
       },
       customFileProtocol: "./",
     },

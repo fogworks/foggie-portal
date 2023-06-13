@@ -171,7 +171,7 @@ function checkMemory() {
   const totalMemory = os.totalmem(); // 获取系统总内存，单位为字节
   const totalMemoryGB = totalMemory / (1024 * 1024 * 1024); // 将总内存转换为GB
 
-  if (totalMemoryGB < 8) {
+  if (totalMemoryGB < 7.9) {
     dialog.showMessageBox({
       type: "info",
       title: "Info",
@@ -180,6 +180,58 @@ function checkMemory() {
       buttons: ["OK"],
     });
   }
+}
+
+function modifyConfig() {
+  fs.readFile(
+    path.join(__dirname, "./config.json"),
+    "utf8",
+    (err, data) => {
+      if (data) {
+        // dialog.showErrorBox("data", data);
+      }
+      if (err) {
+        // dialog.showErrorBox("err", err);
+      }
+
+      if (err) throw err;
+      let list = JSON.parse(data);
+      let user_path = os.homedir();
+      let server = list.server;
+      let db = list.db;
+      if (server.repoPath.indexOf(user_path) !== 0) {
+        let isExistRepo = fs.existsSync(
+          `${user_path}/AppData/Roaming/foggie/repo`
+        );
+        let isExistDb = fs.existsSync(
+          `${user_path}/AppData/Roaming/foggie/db`
+        );
+        if (!isExistRepo) {
+          try {
+            fs.mkdirSync(`${user_path}/AppData/Roaming/foggie/repo`);
+            server.repoPath = `${user_path}/AppData/Roaming/foggie/repo`;
+          } catch (error) { }
+        }
+        if (!isExistDb) {
+          try {
+            fs.mkdirSync(`${user_path}/AppData/Roaming/foggie/db`);
+            db.path = `${user_path}/AppData/Roaming/foggie/db`;
+          } catch (error) { }
+        }
+      }
+
+      let newContent = JSON.stringify(list, null, 4);
+      fs.writeFile(
+        path.join(__dirname, "./config.json"),
+        newContent,
+        "utf8",
+        (err) => {
+          if (err) throw err;
+          console.log("success done");
+        }
+      );
+    }
+  );
 }
 
 async function createWindow() {
@@ -228,15 +280,15 @@ async function createWindow() {
             .then((result) => {
               if (result.response === 0) {
                 closePort(3000)
-                  .then(() => {})
-                  .catch((error) => {});
+                  .then(() => { })
+                  .catch((error) => { });
               } else {
                 return;
               }
             });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
     if (checkMacOS()) {
       closePort(8007)
         .then(() => {
@@ -324,55 +376,17 @@ async function createWindow() {
           initFoggieProcess();
         }
       });
+      const cofigPath = path.resolve(`${__dirname}/config.json`); // Replace with the actual path to the file
+      // dialog.showErrorBox("cofigPath", cofigPath);
 
-      fs.readFile(
-        path.join(__dirname, "./config.json"),
-        "utf8",
-        (err, data) => {
-          if (data) {
-            // dialog.showErrorBox("data", data);
-          }
-          if (err) {
-            // dialog.showErrorBox("err", err);
-          }
-
-          if (err) throw err;
-          let list = JSON.parse(data);
-          let server = list.server;
-          let db = list.db;
-          if (server.repoPath.indexOf(user_path) !== 0) {
-            let isExistRepo = fs.existsSync(
-              `${user_path}/AppData/Roaming/foggie/repo`
-            );
-            let isExistDb = fs.existsSync(
-              `${user_path}/AppData/Roaming/foggie/db`
-            );
-            if (!isExistRepo) {
-              try {
-                fs.mkdirSync(`${user_path}/AppData/Roaming/foggie/repo`);
-                server.repoPath = `${user_path}/AppData/Roaming/foggie/repo`;
-              } catch (error) {}
-            }
-            if (!isExistDb) {
-              try {
-                fs.mkdirSync(`${user_path}/AppData/Roaming/foggie/db`);
-                db.path = `${user_path}/AppData/Roaming/foggie/db`;
-              } catch (error) {}
-            }
-          }
-
-          let newContent = JSON.stringify(list, null, 4);
-          fs.writeFile(
-            path.join(__dirname, "./config.json"),
-            newContent,
-            "utf8",
-            (err) => {
-              if (err) throw err;
-              console.log("success done");
-            }
-          );
+      fs.chmod(cofigPath, 0o755, (err) => {
+        if (err) {
+          // dialog.showErrorBox("Error-----config", err);
+          console.error("Error occurred while changing file permissions:", err);
+        } else {
+          modifyConfig();
         }
-      );
+      });
     }
   }
 

@@ -110,7 +110,14 @@
     >
       <div class="BoxContent">
         <el-row class="BoxContent_header">
-          <el-col :span="14" class="tow_col">
+          <el-col :span="3" style="line-height: 80px; text-align: center">
+            <span
+              style="margin-right: 10px; font-size: 40px; font-weight: 600"
+              >{{ item.miner_lock_pst_amount }}</span
+            >
+            <span style="font-size: 24px; font-weight: 600">GB</span>
+          </el-col>
+          <el-col :span="11" class="tow_col">
             <div>
               <div>Price</div>
               <div>
@@ -216,27 +223,14 @@
           style="margin: 12px 0; border-top: 1px #4a4c51 var(--el-border-style)"
         />
         <el-row style="height: 90px">
-          <el-col :span="3" style="line-height: 80px; text-align: center">
-            <span
-              style="margin-right: 10px; font-size: 40px; font-weight: 600"
-              >{{ item.miner_lock_pst_amount }}</span
-            >
-            <span style="font-size: 24px; font-weight: 600">GB</span>
-          </el-col>
-          <el-col :span="6" class="bottom_col">
-            <!-- <svg-icon
-              icon-class="left"
-              size="40"
-              style="margin-right: 10px"
-            ></svg-icon> -->
-            <!-- <div>
-              <div>Blocks</div>
-              <div>12600</div>
+          <el-col :span="5" class="bottom_col">
+            <div>
+              <svg-icon
+                style="color: rgb(0 97 160) !important"
+                icon-class="local"
+                size="30"
+              ></svg-icon>
             </div>
-            <div style="text-align: center">
-              <div>Foggie</div>
-              <div>12</div>
-            </div> -->
             <div>
               <div>Files</div>
               <div>{{ item.file_count }}</div>
@@ -245,17 +239,30 @@
               <div>Size</div>
               <div>{{ getfilesize(item.used_space) }}</div>
             </div>
-            <!-- <div>
-              <div>Slots</div>
-              <div>82600</div>
-            </div> -->
           </el-col>
           <el-col :span="5" class="bottom_col">
-            <svg-icon
+            <div>
+              <svg-icon
+                style="color: rgb(0 97 160) !important"
+                icon-class="remote"
+                size="30"
+              ></svg-icon>
+            </div>
+            <div>
+              <div>Files</div>
+              <div>{{ spaceFileCount }}</div>
+            </div>
+            <div>
+              <div>Size</div>
+              <div>{{ getfilesize(spaceUseSize) }}</div>
+            </div>
+          </el-col>
+          <el-col :span="4" class="bottom_col">
+            <!-- <svg-icon
               icon-class="hammer"
               size="40"
               style="margin-right: 10px"
-            ></svg-icon>
+            ></svg-icon> -->
             <div>
               <div>User</div>
               <div>
@@ -568,8 +575,11 @@ import {
   ChinaTime4,
   getSecondTime,
 } from "@/utils/ChinaStandardTime";
+import { getToken } from "@/utils/auth";
+
 import AssetsRecords from "./assetsRecords";
 import { getfilesize, transferUTCTime } from "@/utils/util.js";
+import { getSummary } from "@/utils/api";
 const $state = useStore();
 const emits = defineEmits(["setState", "setTime"]);
 // const router = useRouter();
@@ -621,6 +631,16 @@ watch(
     immediate: true,
   }
 );
+const spaceUseSize = ref(0);
+const spaceFileCount = ref(0);
+function getUseSize() {
+  getSummary(deviceData.value, deviceData.value.upload_file_token).then(
+    (res) => {
+      spaceUseSize.value = +res.contents?.[0]?.total || 0;
+      spaceFileCount.value = res.contents?.[0]?.count || 0;
+    }
+  );
+}
 function loadOrderList() {
   let params = {
     orderId: props.orderId,
@@ -650,6 +670,7 @@ function loadOrderList() {
       }
     })
     .catch((error) => {});
+  getUseSize();
 }
 function checkCancel() {
   let nowTime = new Date().getTime();
@@ -1024,7 +1045,7 @@ onMounted(() => {
 
     .bottom_col {
       display: flex;
-      padding: 0px 15px;
+      // padding: 0px 15px;
       justify-content: space-around;
       align-items: center;
 
