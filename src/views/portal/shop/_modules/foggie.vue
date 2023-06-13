@@ -1,77 +1,75 @@
 <template>
-  <div class="viewContainer">
-    <!-- <iframe src="http://154.31.41.36:9876/#/order" style="width:1000px;height:1000px"></iframe> -->
-    <iframe
-      id="iframeRef"
-      ref="iframeRef"
-      src="http://154.31.41.124:9876/"
-      frameborder="no"
-      border="0"
-      class="flexItem"
-      style="width: 100%; height: calc(100vh - 105px)"
-    ></iframe>
+  <div>
+    <div class="vofo_head_center">
+      <div class="order_sub_head">
+        <el-tabs v-model="activeName">
+          <el-tab-pane label="Product" name="index"> </el-tab-pane>
+          <el-tab-pane label="Order" name="Order"> </el-tab-pane>
+          <!-- <el-tab-pane :label="$t('index.setting')" name="User"> </el-tab-pane> -->
+        </el-tabs>
+      </div>
+    </div>
+    <FoggieProduct v-if="activeName === 'index'"> </FoggieProduct>
+    <Order v-else-if="activeName === 'Order'"> </Order>
   </div>
 </template>
 
 <script setup>
-import {
-  getCurReferenceRate,
-  getOrderFilterList,
-  buyOrder,
-  orderSync,
-} from "@/api/order/filterOrder.js";
-import { getChain_id } from "@/api/common.js";
-import { transferTime, ChinaTime4 } from "@/utils/ChinaStandardTime.js";
-import customDialog from "@/components-V3/customDialog";
-import { ElMessage, ElMessageBox } from "element-plus";
-import {
-  h,
-  shallowRef,
-  reactive,
-  toRefs,
-  ref,
-  onMounted,
-  watch,
-  computed,
-  inject,
-} from "vue";
-import { switchCase } from "@babel/types";
-
-import { useStore } from "vuex";
-
-const store = useStore();
-
-const token = computed(() => store.getters["token/token"]);
-
-// const username = computed(() => store.getters.userInfo?.dmc);
-const email = computed(() => store.getters.userInfo?.email);
-const user_id = computed(() => window.localStorage.getItem("user_id"));
-const userInfo = computed(() => store.getters.userInfo);
-
-let iframeRef = ref(null);
-let iframeWindow = ref(null);
-const handleMessage = (event) => {
-  console.log(event.data);
-};
-const sendMessage = () => {
-  iframeRef.value.onload = function () {
-    iframeRef.value.contentWindow.postMessage(
-      {
-        userInfo: JSON.stringify({
-          username: email.value,
-          token: token.value, //res.token
-          user_id: user_id.value,
-        }),
-      },
-      "*"
-    );
-  };
-};
-
-onMounted(() => {
-  window.addEventListener("message", handleMessage);
-  sendMessage();
-});
+import { ref } from "vue";
+import FoggieProduct from "./_foggieModules/index";
+import Order from "./_foggieModules/index1";
+const activeName = ref("index");
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss">
+.vofo_head_center {
+  margin-bottom: 20px;
+}
+.order_sub_head {
+  display: flex;
+  justify-content: center;
+}
+.order_sub_head .el-tabs__item {
+  color: #fff !important;
+  font-size: 16px;
+  font-weight: normal;
+  width: 200px;
+  width: 120px;
+  text-align: center;
+  font-family: Microsoft YaHei;
+  // padding: 0 20px !important;
+  // margin-right: 10px;
+}
+.order_sub_head .el-tabs__nav-wrap::after {
+  background-color: transparent !important;
+}
+
+.order_sub_head .is-active {
+  color: #fff !important;
+  font-weight: bolder;
+}
+.order_sub_head .el-tabs__active-bar {
+  height: 4px;
+  border-radius: 60px;
+  border-radius: 10px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: rgb(31 47 71 / 25%) 0px 20px 40px, rgb(0 0 0 / 10%) 0px 1px 5px,
+    rgb(255 255 255 / 40%) 0px 0px 0px 0.5px inset;
+  background-color: #fff !important;
+}
+.el-tabs__item:hover {
+  // border-radius: 10px;
+  // text-align: center;
+  // background: rgba(255, 255, 255, 0.2);
+  // box-shadow: rgb(31 47 71 / 25%) 0px 20px 40px, rgb(0 0 0 / 10%) 0px 1px 5px,
+  //   rgb(255 255 255 / 40%) 0px 0px 0px 0.5px inset;
+}
+
+.order_sub_head .el-tabs__content {
+  overflow: initial !important;
+}
+.order_sub_head .el-tabs__header {
+  margin: 0;
+}
+</style>
