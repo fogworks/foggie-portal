@@ -20,6 +20,7 @@
 </template>
 
 <script setup>
+import {  getfilesize } from "@/utils/util.js";
 import { ref, reactive, computed, toRefs, onMounted } from "vue";
 import { ElMessage } from 'element-plus'
 import { useStore } from "vuex";
@@ -40,7 +41,7 @@ const props = defineProps({
 })
 const { curFile } = toRefs(props)
 
-formatedSize.value = curFile.value["getFormatSize"]();
+formatedSize.value = getfilesize(curFile.value.size);
 const fileIconArr = ref({
   image: require("@/assets/fileType/icon_img.svg"),
   cmd: require("@/assets/fileType/icon_cmd.svg"),

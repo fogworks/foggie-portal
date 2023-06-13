@@ -11,7 +11,7 @@
           </div>
           <div class="today-right">
             <div class="color-box">
-              <el-button @click="allFileListDrawer = true">
+              <el-button @click="openAllFileListDrawer">
                 File List
               </el-button>
             </div>
@@ -21,7 +21,7 @@
           :auto-start="false" :file-status-text="fileStatusText" @files-added="onFilesAdded" @file-added="onFileAdded">
           <uploader-unsupport />
           <uploader-drop>
-            <uploader-btn class="uploader-btn" :single="true">Select File</uploader-btn>
+            <uploader-btn class="uploader-btn" :single="false">Select File</uploader-btn>
             <uploader-btn class="uploader-btn" :directory="true" :single="false">Select a folder</uploader-btn>
           </uploader-drop>
         </uploader>
@@ -47,7 +47,7 @@
           </el-button>
         </div>
         <div class="color-box">
-          <el-button @click="allFileListDrawer = true" style="background: #EF6666;">
+          <el-button @click="allFileListDrawer = true" style="background: #EF6666;" >
             Error
           </el-button>
         </div>
@@ -73,7 +73,6 @@
 </template>
 
 <script setup>
-import { uploadFolder } from "@/api/upload";
 import {
   ref,
   reactive,
@@ -113,13 +112,25 @@ const fileStatusText = ref({
 let uploadIsShow = computed(() => store.getters.uploadIsShow);
 const FILE_SIZE = readonly(1024 * 1024 * 1024 * 2);
 const store = useStore();
-const email = computed(() => store.getters.userInfo?.email);
 const orderId = computed(() => store.getters.orderId);
 const deviceData = computed(() => store.getters.deviceData);
 const deviceType = computed(() => store.getters.deviceType);
 
 const uploadFileList = computed(() => store.state.upload.uploadFileList);
-const allFileList = reactive({});
+const allFileList = reactive({
+  fileWaiting:{
+    pageNo:1,
+    pageSize:10,
+    dataList:[]
+  },
+  fileError:{
+    pageNo:1,
+    pageSize:10,
+    dataList:[]
+  }
+});
+
+
 
 
 
@@ -130,29 +141,8 @@ const onFileAdded = (file) => {
 };
 
 const onFilesAdded = (files, fileList) => {
-
-
-  // debugger
-// let pathkey = '\\' + files[0].relativePath.split('/')[0]
-// let absoluteuniqueIdentifier = files[0].uniqueIdentifier
-// let absolutePath = absoluteuniqueIdentifier.split(pathkey)[0] + pathkey
-
-// debugger
-
-
-// let params ={
-//   email:email.value,
-//   orderId:orderId.value,
-//   deviceType:deviceType.value,
-//   sourcePath:absolutePath,
-// }
-// uploadFolder(params).then(res =>{
-//   console.log(res);
-// })
-
-
-
   let timer = null;
+
   if (files.length > 500) {
     ElMessageBox.alert(
       `The folder you are currently uploading contains ${files.length} small files. The number of files is too large, which may cause severe page lag during the upload process. Are you sure you want to upload it`,
@@ -197,7 +187,7 @@ const onFilesAdded = (files, fileList) => {
       }
       timer = setTimeout(() => {
         list = list.concat(fileCache);
-        allFileList[orderId.value] = allFileList[orderId.value].concat(fileCache);
+        // allFileList[orderId.value] = allFileList[orderId.value].concat(fileCache);
         store.commit("upload/setFileList", list);
         fileCache = [];
       }, 10);
@@ -205,12 +195,12 @@ const onFilesAdded = (files, fileList) => {
       list.push(file);
       store.commit("upload/setFileList", list);
 
-      if (allFileList[orderId.value]) {
-        allFileList[orderId.value].push(file);
-      } else {
-        allFileList[orderId.value] = [];
-        allFileList[orderId.value].push(file);
-      }
+      // if (allFileList[orderId.value]) {
+      //   allFileList[orderId.value].push(file);
+      // } else {
+      //   allFileList[orderId.value] = [];
+      //   allFileList[orderId.value].push(file);
+      // }
     }
   }
 };
@@ -221,15 +211,28 @@ const fileShare = (item) => {
 
 /* 在上传过程中 每当有新的文件进行上传操作待上传列表中就删除对应的文件 */
 const newQueueID = (id, fileOrderID) => {
-  let index = allFileList[fileOrderID].findIndex((file) => file.id == id);
-  allFileList[fileOrderID].splice(index, 1);
+  // let index = allFileList[fileOrderID].findIndex((file) => file.id == id);
+  // allFileList[fileOrderID].splice(index, 1);
 };
 
 /* 在待上传列表中删除指定文件 */
 function deleteAllFileList(id) {
-  let index = allFileList[orderId.value].findIndex((file) => file.id == id);
-  index > -1 ? allFileList[orderId.value].splice(index, 1) : "";
+  // let index = allFileList[orderId.value].findIndex((file) => file.id == id);
+  // index > -1 ? allFileList[orderId.value].splice(index, 1) : "";
 }
+function openAllFileListDrawer(){
+  allFileListDrawer = true
+
+  
+}
+
+
+
+
+
+
+
+
 /* 生成文件唯一标识 */
 function generateUniqueIdentifier(file) {
   return file.path;
@@ -239,15 +242,16 @@ function initFileFn(file) {
   file.paused = false;
   file.deviceType = deviceType.value;
   file.fileUploading = false; // 代表文件是否正在上传
+
+  file.rootPath = currentPath.value;
+  let directory = file.file.webkitRelativePath;
+ 
   file.urlPrefix = file.file.path
-  // let directory = file.file.webkitRelativePath;
   // let directoryPath = directory.substr(0, directory.lastIndexOf("/") + 1);
   // file.urlFileName = directoryPath
   //   ? currentPath.value + directoryPath + file.name
-  //   : currentPath.value + file.name; 
-
-  
-  file.urlFileName = currentPath.value ? currentPath.value : file.name;
+  //   : currentPath.value + file.name;
+  file.urlFileName = currentPath.value ? currentPath.value : '';
 
   file.orderId = orderId.value;
   if (deviceType.value == 1 || deviceType.value == 2) {

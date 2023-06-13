@@ -109,3 +109,21 @@ export function resumeUpload_Api(data) {
     data,
   });
 }
+
+
+export function getFileListByState_Api(data) {
+  return request({
+    url: baseUrl + "/file/list_by_state",
+    method: "post",
+    data,
+  });
+}
+
+
+export function uploadFolder(data) {
+  return request({
+    url: baseUrl + "/file/upload_dir_valid",
+    method: "post",
+    data,
+  });
+}

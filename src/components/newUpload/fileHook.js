@@ -177,26 +177,26 @@ export default function (params) {
   });
 
 
-  // watch(
-  //   () => status.value,
-  //   (newVal, oldVal) => {
-  //     if (oldVal && newVal === "uploading" && oldVal !== "uploading") {
-  //       if (tid.value) {
-  //         clearTimeout(tid.value);
-  //         tid.value = null
-  //       }
-  //       tid.value = setTimeout(() => {
-  //         progressingClass.value = "uploader-file-progressing";
-  //       }, 200);
-  //     } else {
-  //       if (tid.value) {
-  //         clearTimeout(tid.value);
-  //         tid.value = null
-  //       }
-  //       progressingClass.value = "";
-  //     }
-  //   }
-  // );
+  watch(
+    () => status.value,
+    (newVal, oldVal) => {
+      if (oldVal && newVal === "uploading" && oldVal !== "uploading") {
+        if (tid.value) {
+          clearTimeout(tid.value);
+          tid.value = null
+        }
+        tid.value = setTimeout(() => {
+          progressingClass.value = "uploader-file-progressing";
+        }, 200);
+      } else {
+        if (tid.value) {
+          clearTimeout(tid.value);
+          tid.value = null
+        }
+        progressingClass.value = "";
+      }
+    }
+  );
 
 
 
@@ -207,6 +207,7 @@ export default function (params) {
     formatedAverageSpeed,
     statusText,
     formatedTimeRemaining,
-    status
+    status,
+    progressingClass
   }
 }
