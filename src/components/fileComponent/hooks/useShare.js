@@ -60,12 +60,12 @@ export default function useShare() {
             shareCopyContent = shareCopyContent + ipfsStr + " \n";
             shareCopyContent = shareCopyContent + " " + " \n ";
             shareRefContent.ipfsStr = ipfsStr;
-            // shareRefContent.httpStr = shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
+            shareRefContent.httpStr = shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
 
             shareCopyContent = shareCopyContent + cyfsStr + " \n";
             shareCopyContent = shareCopyContent + " " + " \n ";
             shareRefContent.cyfsStr = cyfsStr;
-            // shareRefContent.httpStr = shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
+            shareRefContent.httpStr = shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
 
             shareCopyContent = shareCopyContent + shareStr + " \n";
             shareRefContent.shareStr = shareStr;

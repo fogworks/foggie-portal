@@ -834,7 +834,7 @@ const initFileData = async (data, reset = false) => {
 
   newFolderName.value = "";
   emits("update:checkedData", []);
-  fileTable.value?.clearSelection();
+  // fileTable.value?.clearSelection();
   let dir = breadcrumbList.prefix.join("/");
   let commonPrefixesItem = data.commonPrefixes?.map((el, i) => {
     let name = decodeURIComponent(el);

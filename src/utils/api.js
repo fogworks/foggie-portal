@@ -846,6 +846,14 @@ export const get_miner_reward = (data, pageSize = 10, pageNumber = 1) => {
     data,
   });
 };
+export const files_download = (params) => {
+  let url = `${baseUrl}/files_download`;
+  return request({
+    url: url,
+    method: "GET",
+    params,
+  });
+}
 
 
 

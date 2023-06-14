@@ -74,9 +74,10 @@ import {
   getCurrentInstance,
 } from "vue";
 import { useStore } from "vuex";
-import { file_delete } from "@/utils/api.js";
+import { file_delete, files_download } from "@/utils/api.js";
 import useShare from "./hooks/useShare.js";
 import useDelete from "./hooks/useDelete.js";
+import { getToken } from "@/utils/auth";
 const deviceData = inject("deviceData");
 const props = defineProps({
   checkedData: {
@@ -122,6 +123,13 @@ const { deleteItem } = useDelete(tableLoading, refresh);
 const store = useStore();
 
 const tokenMap = computed(() => store.getters.tokenMap);
+const token = computed(() => {
+  if (deviceData.device_type == 3) {
+    return getToken();
+  } else {
+    return tokenMap.value[deviceData.device_id];
+  }
+});
 const { checkedData, imgCheckedData, activeName } = toRefs(props);
 const hasChecked = computed(() => {
   if (activeName.value == "Image") {
@@ -137,7 +145,22 @@ const hasChecked = computed(() => {
   }
 });
 const downLoad = () => {
-  console.log(imgCheckedData.value, "imgCheckedDataimgCheckedData");
+  const data = checkedData.value.map((el) => {
+    return {
+      cid: el.cid,
+      key: el.key,
+    };
+  });
+  JSON.stringify();
+  console.log(data);
+  // imgHttpLink = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&token=${deviceData.value.upload_file_token}`;
+
+  files_download({ file_arr: JSON.stringify(data), token: token.value }).then(
+    (res) => {
+      console.log(res, "resssssssssssss");
+    }
+  );
+  // console.log(imgCheckedData.value, "imgCheckedDataimgCheckedData");
 };
 const upload = () => {
   store.commit("upload/setUploadOptions", deviceData);
