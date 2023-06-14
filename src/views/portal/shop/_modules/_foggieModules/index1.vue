@@ -3901,6 +3901,8 @@ $fontColor: #03040a;
   box-shadow: rgb(0 0 0 / 10%) 0px 0px 0px 0.5px inset;
   margin: 0 auto 40px auto;
   background-color: rgb(83 172 208 / 20%) !important;
+  background-color: var(--bg-color) !important;
+  color: var(--text-color);
   backdrop-filter: blur(20px) saturate(100%);
   .item-left,
   .item-left * {
@@ -3957,6 +3959,7 @@ $fontColor: #03040a;
           width: 85px;
           background-color: #ff5722;
           color: #fff;
+          color: var(--text-color);
         }
         .flag-left {
           -moz-transform: rotate(-45deg);
@@ -3983,6 +3986,8 @@ $fontColor: #03040a;
       width: 100%;
       height: 70px;
       color: #fff;
+      color: var(--text-color);
+
       p {
         padding-left: 20px;
         margin: 0;
@@ -4049,6 +4054,8 @@ $fontColor: #03040a;
           line-height: 30px;
           font-size: 12px;
           color: #fff;
+          color: var(--text-color);
+
           margin: 5px;
           border-radius: 15px;
           background: rgba(51, 3, 3, 0.8);
@@ -4149,6 +4156,8 @@ $fontColor: #03040a;
           font-weight: 600;
           // color: #03040a;
           color: #fff;
+          color: var(--text-color);
+
           margin: 0px;
           display: -webkit-box;
           -webkit-line-clamp: 2;
@@ -4164,6 +4173,8 @@ $fontColor: #03040a;
           // color: rgba(3, 4, 10, 0.7);
           // color: #03040a;
           color: #fff;
+          color: var(--text-color);
+
           margin: 0px;
           display: -webkit-box;
           -webkit-line-clamp: 2;
@@ -4190,6 +4201,8 @@ $fontColor: #03040a;
         rgba(255, 255, 255, 0) 100%
       );
       color: #fff;
+      color: var(--text-color);
+
       .item-right-box1 {
         position: absolute;
         top: 0;
@@ -4257,6 +4270,8 @@ $fontColor: #03040a;
               display: block;
               height: 30px;
               color: #fff;
+              color: var(--text-color);
+
               line-height: 30px;
               font-size: 14px;
             }
@@ -4265,6 +4280,8 @@ $fontColor: #03040a;
               display: block;
               height: 30px;
               color: #cdcdcd;
+              color: var(--text-color);
+
               line-height: 30px;
               font-size: 14px;
             }
@@ -4297,7 +4314,7 @@ $fontColor: #03040a;
             cursor: default;
           }
           .el-switch__label {
-            color: #fff;
+            color: #000;
           }
           .el-switch__label--left {
             color: #ff9b27;
@@ -4316,7 +4333,7 @@ $fontColor: #03040a;
             color: #39c743;
           }
           .order_status_cls2 {
-            color: #fff;
+            color: #000;
           }
           .order_status_cls3 {
             color: #e33b57;
@@ -4364,6 +4381,7 @@ $fontColor: #03040a;
             rgb(255, 255, 255) 0%,
             rgb(217, 223, 255) 100%
           );
+          background: var(--btn-gradient);
           margin: 3px auto 0;
           border: 0.5px solid rgba(255, 255, 255, 0.5);
           box-sizing: border-box;
@@ -4404,9 +4422,9 @@ $fontColor: #03040a;
                 margin: 0;
               }
             }
-            .free_icon {
-              background: linear-gradient(to bottom, #b2f8ff, #ff3636);
-            }
+            // .free_icon {
+            //   background: linear-gradient(to bottom, #b2f8ff, #ff3636);
+            // }
           }
           .subscribe-btn {
             display: grid;
@@ -4421,6 +4439,7 @@ $fontColor: #03040a;
               font-style: normal;
               font-weight: normal;
               color: rgb(0, 0, 0);
+              color: var(--text-color);
               font-size: 14px;
             }
           }
@@ -4489,6 +4508,7 @@ $fontColor: #03040a;
     }
     i {
       color: #fff;
+      color: var(--text-color);
     }
   }
 }
@@ -4509,23 +4529,29 @@ $fontColor: #03040a;
       background: transparent;
       // color: #03040a;
       color: #fff;
+      color: var(--text-color);
+
       // font-weight: bold;
       border-radius: 20px;
     }
     input::-webkit-input-placeholder {
       color: #fff;
+      color: var(--text-color);
     }
     /* 火狐 Mozilla Firefox 4 to 18 */
     input:-moz-placeholder {
       color: #fff;
+      color: var(--text-color);
     }
     /* 火狐 Mozilla Firefox 19+ */
     input::-moz-placeholder {
       color: #fff;
+      color: var(--text-color);
     }
     /* Internet Explorer 10+ */
     input:-ms-input-placeholder {
       color: #fff;
+      color: var(--text-color);
     }
     .el-input-group__append {
       background: transparent;
@@ -4533,6 +4559,8 @@ $fontColor: #03040a;
     .el-icon-search {
       font-size: 18px;
       color: #fff;
+      color: var(--text-color);
+
       &:hover {
         transform: scale(1.1);
       }
@@ -4586,6 +4614,8 @@ $fontColor: #03040a;
     font-size: 17px;
     line-height: 20px;
     color: rgb(255, 255, 255);
+    color: var(--text-color);
+
     transition: all 0.3s ease-in-out 0s;
     text-align: center;
     margin: 0px;
@@ -4602,6 +4632,8 @@ $fontColor: #03040a;
     margin: 0px;
     z-index: 2;
     color: #fff;
+    color: var(--text-color);
+
     width: 120px;
     justify-content: center;
     font {
@@ -4631,6 +4663,7 @@ $fontColor: #03040a;
     height: 35px;
     box-sizing: border-box;
     background: rgb(255, 255, 255);
+
     border-radius: 30px;
     transition: all 0.5s ease-in-out 0s;
   }
@@ -4974,6 +5007,7 @@ $fontColor: #03040a;
   line-height: 30px;
   font-size: 14px;
   color: #fff;
+  color: var(--text-color);
   text-align: center;
 }
 
