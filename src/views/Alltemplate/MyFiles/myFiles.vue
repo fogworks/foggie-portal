@@ -1054,6 +1054,8 @@ const getReomteData = (scroll, prefix) => {
     .then((res) => {
       if (res && res.content) {
         initRemoteData(res);
+      } else {
+        tableLoading.value = true;
       }
     })
     .catch(() => {

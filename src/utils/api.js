@@ -854,6 +854,14 @@ export const files_download = (params) => {
     params,
   });
 }
+export const rename_objects = (data) => {
+  let url = `${baseUrl}/rename_objects`;
+  return request({
+    url: url,
+    method: "POST",
+    data,
+  });
+}
 
 
 

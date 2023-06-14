@@ -1,6 +1,16 @@
 <template>
   <div class="card-box">
     <el-breadcrumb :separator-icon="ArrowRight">
+      <el-switch
+        class="file-source"
+        v-model="fileSource"
+        size="large"
+        active-text="Remote Files"
+        :active-value="remote"
+        inactive-text="Local Files"
+        :inactive-value="local"
+        :before-change="switchReceiveStatus"
+      />
       <el-breadcrumb-item @click="setPrefix(item, true)">
         <div class="flex items-center">
           <!-- <img class="title-img" src="@/assets/my-files.png" alt="" /> -->
@@ -381,23 +391,23 @@
     :copyContent="copyContent"
     v-model:visible="showShareDialog"
   ></ShareDialog> -->
-  <PinDialog
+  <!-- <PinDialog
     v-model:visible="cyfsDialogShow"
     type="cyfs"
     :currentFileItem="pinData"
-    :currentOODItems="currentOODItem"
+    :currentOODItems="deviceData"
     @confirm="cyfsPin"
   ></PinDialog>
   <PinDialog
     v-model:visible="ipfsDialogShow"
     type="ipfs"
     :currentFileItem="pinData"
-    :currentOODItems="currentOODItem"
+    :currentOODItems="deviceData"
     @confirm="ipfsPin"
   ></PinDialog>
   <PinFormDialog
     v-model:visible="syncDialog"
-    :currentOODItem="currentOODItem"
+    :currentOODItem="deviceData"
   ></PinFormDialog>
   <DetailDialog
     v-if="detailShow"
@@ -405,7 +415,7 @@
     :orderId="orderId"
     :detailData="detailData"
     :deviceData="deviceData"
-  ></DetailDialog>
+  ></DetailDialog> -->
 </template>
 
 <script setup>
@@ -432,6 +442,12 @@ import {
   publishPin,
   file_delete,
 } from "@/utils/api.js";
+import {
+  GetFileList,
+  GetFileListAll,
+  InitiateChallenge,
+  fileQuery,
+} from "@/api/myFiles/myfiles";
 import ShareDialog from "./shareDialog";
 import PinDialog from "./pinDialog";
 import PinTaskList from "./pinTaskList";
@@ -441,14 +457,7 @@ import { getfilesize, transferTime, transferUTCTime } from "@/utils/util.js";
 import { useStore } from "vuex";
 import setting from "@/setting";
 import _ from "lodash";
-import {
-  ElCheckbox,
-  ElInput,
-  ElButton,
-  ElDropdown,
-  ElDropdownItem,
-  ElPopover,
-} from "element-plus";
+import { ElCheckbox, ElInput, ElButton, ElMessageBox } from "element-plus";
 const { baseUrl } = setting;
 
 const { proxy } = getCurrentInstance();
@@ -465,6 +474,8 @@ const emits = defineEmits([
 ]);
 const keyWord = ref("");
 const pageNum = ref(1);
+const fileSource = ref(false);
+
 // const tableLoading = ref(false);
 
 const showShareDialog = ref(false);
@@ -472,10 +483,13 @@ const detailShow = ref(false);
 const deviceData = inject("deviceData");
 
 const props = defineProps({
-  currentOODItem: Object,
   orderId: [String, Number],
   checkedData: Array,
   tableLoading: Boolean,
+  merkleState: {
+    type: [String, Number],
+    default: 0,
+  },
 });
 const newFolderName = ref("");
 const syncDialog = ref(false);
@@ -483,6 +497,9 @@ const taskDisplay = ref(false);
 const closeRightUpload = () => {
   taskDisplay.value = false;
 };
+const deviceType = computed(() => deviceData.device_type);
+const order_Id = computed(() => store.getters.orderId);
+
 const { currentOODItem, orderId } = toRefs(props);
 const tableLoading = computed({
   get() {
@@ -519,18 +536,18 @@ const sortList = [
     order: 1,
   },
 ];
-const device_id = computed(() => currentOODItem.value.device_id);
-let device_id_real = computed(() => currentOODItem.value.device_id_real);
-let hasSVC = computed(() => currentOODItem.value.svc_state === "finish");
+const device_id = computed(() => deviceData.device_id);
+let device_id_real = computed(() => deviceData.device_id_real);
+let hasSVC = computed(() => deviceData.svc_state === "finish");
 const hasIPFS = computed(
   () =>
-    currentOODItem.value.ipfs_state === "finish" &&
-    currentOODItem.value.ipfs_service_state === "start"
+    deviceData.ipfs_state === "finish" &&
+    deviceData.ipfs_service_state === "start"
 );
 const hasCYFS = computed(
   () =>
-    currentOODItem.value.cyfs_state === "finish" &&
-    currentOODItem.value.cyfs_service_state === "start"
+    deviceData.cyfs_state === "finish" &&
+    deviceData.cyfs_service_state === "start"
 );
 let shareCopyContent = "";
 let tableData = ref([]);
@@ -634,106 +651,6 @@ const columns = [
               </div>
               {rowData.name}
             </div>
-            {/* <el-popover
-              popper-class="action-popover"
-              offset={-3}
-              hide-after={0}
-              placement="bottom"
-              width={150}
-              trigger="hover"
-              v-slots={{
-                reference: () => {
-                  return (
-                    <div class="color-box table-action">
-                      <svg-icon icon-class="more"></svg-icon>
-                    </div>
-                  );
-                },
-              }}
-            >
-              <ul class="more-dropdown">
-                <li>
-                  <el-button
-                    onClick={() =>
-                      handleCommand({ flag: "share", command: rowData })
-                    }
-                    disabled={
-                      !(!rowData.isDir && currentOODItem.svc_state === "finish")
-                    }
-                  >
-                    share
-                  </el-button>
-                </li>
-                <li>
-                  <el-button
-                    onClick={() =>
-                      handleCommand({ flag: "ipfs", command: rowData })
-                    }
-                    disabled={
-                      !(!rowData.isDir && currentOODItem.svc_state === "finish")
-                    }
-                  >
-                    IPFS PIN
-                  </el-button>
-                </li>
-                <li>
-                  <el-button
-                    onClick={() =>
-                      handleCommand({ flag: "cyfs", command: rowData })
-                    }
-                    disabled={
-                      !(
-                        !rowData.isDir &&
-                        currentOODItem.value.cyfs_state === "finish" &&
-                        currentOODItem.value.cyfs_service_state === "start"
-                      )
-                    }
-                  >
-                    CYFS PIN
-                  </el-button>
-                </li>
-                <li>
-                  <el-button
-                    onClick={() =>
-                      handleCommand({ flag: "download", command: rowData })
-                    }
-                    disabled={!rowData.isDir}
-                  >
-                    Download
-                  </el-button>
-                </li>
-                <li>
-                  <el-button
-                    onClick={() =>
-                      handleCommand({ flag: "rename", command: rowData })
-                    }
-                    disabled={rowData.isDir}
-                  >
-                    Rename
-                  </el-button>
-                </li>
-                <li>
-                  <el-button
-                    onClick={() =>
-                      handleCommand({ flag: "move", command: rowData })
-                    }
-                    disabled={rowData.isDir}
-                  >
-                    Move
-                  </el-button>
-                </li>
-                <li>
-                  <el-button
-                    class="delete-item"
-                    onClick={() =>
-                      handleCommand({ flag: "delete", command: rowData })
-                    }
-                  >
-                    Delete
-                  </el-button>
-                </li>
-              </ul>
-            </el-popover> */}
           </div>
         );
       }
@@ -777,6 +694,47 @@ const columns = [
     align: "left",
   },
 ];
+const switchReceiveStatus = () => {
+  return new Promise((resolve, reject) => {
+    try {
+      if (fileSource.value) {
+        console.log("------------remote");
+        ElMessageBox.confirm("Are you sure to get local data?", "Warning", {
+          confirmButtonText: "OK",
+          cancelButtonText: "Cancel",
+        })
+          .then(() => {
+            // get remote data
+            fileSource.value = !fileSource.value;
+            breadcrumbList.prefix = [];
+            tableData.value = [];
+            // getLocalData();
+          })
+          .catch(() => {
+            reject(false);
+          });
+      } else {
+        console.log("------------local");
+        ElMessageBox.confirm("Are you sure to get remote data?", "Warning", {
+          confirmButtonText: "OK",
+          cancelButtonText: "Cancel",
+        })
+          .then(() => {
+            // get remote data
+            fileSource.value = !fileSource.value;
+            breadcrumbList.prefix = [];
+            tableData.value = [];
+            // getReomteData();
+          })
+          .catch(() => {
+            reject(false);
+          });
+      }
+    } catch (err) {
+      reject(false);
+    }
+  });
+};
 // const tableSort = ({ prop = "", order = 2, key = "" }) => {
 //   const sortOrders = ["ascending", "descending", null];
 //   activeSort.value = key;
@@ -807,6 +765,239 @@ const refresh = () => {
 };
 const email = computed(() => store.getters.userInfo?.email);
 const tokenMap = computed(() => store.getters.tokenMap);
+const token = computed(() => {
+  if (deviceData.device_type == "space") {
+    return deviceData.upload_file_token;
+  } else {
+    return tokenMap.value[deviceData.device_id];
+  }
+});
+const getReomteData = (scroll, prefix) => {
+  let list_prefix = "";
+  tableLoading.value = true;
+  let type = "space";
+  if (prefix?.length) {
+    list_prefix = prefix.join("/");
+  }
+  oodFileList(email.value, type, token.value, deviceData, list_prefix, scroll)
+    .then((res) => {
+      if (res && res.content) {
+        initRemoteData(res);
+      } else {
+        tableLoading.value = false;
+      }
+    })
+    .catch(() => {
+      tableLoading.value = false;
+    });
+};
+
+const getLocalData = () => {
+  let params = {
+    email: email.value,
+    orderId: orderId.value,
+    deviceType: 3,
+  };
+  GetFileListAll(params)
+    .then((res) => {
+      initLocalData(res);
+    })
+    .catch(() => {
+      tableLoading.value = false;
+    });
+};
+const initRemoteData = (data) => {
+  if (!data) {
+    tableLoading.value = false;
+    return;
+  }
+  if (data.err) {
+    proxy.$notify({
+      type: "warning",
+      message: "Failed to fetch data, please try again later",
+      position: "bottom-left",
+    });
+  }
+  let dir = breadcrumbList.prefix.join("/");
+
+  // tableData.value = [];
+  for (let i = 0; i < data.commonPrefixes?.length; i++) {
+    let name = decodeURIComponent(data.commonPrefixes[i]);
+    if (data.prefix) {
+      name = name.split(data.prefix)[1];
+    }
+    let item = {
+      isDir: true,
+      name,
+      fullName: decodeURIComponent(data.commonPrefixes[i]),
+      key: data.commonPrefixes[i],
+      idList: [
+        {
+          name: "IPFS",
+          code: "",
+        },
+        {
+          name: "CYFS",
+          code: "",
+        },
+      ],
+      date: "-",
+      size: "",
+      status: "-",
+      type: "application/x-directory",
+      file_id: "",
+      pubkey: "",
+      cid: "",
+      imgUrl: "",
+      imgUrlLarge: "",
+      share: {},
+      isSystemImg: false,
+      canShare: false,
+    };
+    tableData.value.push(item);
+  }
+
+  for (let j = 0; j < data?.content?.length; j++) {
+    let date = transferTime(data.content[j].lastModified);
+    let isDir = false;
+    const type = data.content[j].key.substring(
+      data.content[j].key.lastIndexOf(".") + 1
+    );
+    let { imgHttpLink: url, isSystemImg } = handleImg(
+      data.content[j],
+      type,
+      isDir
+    );
+    let { imgHttpLink: url_large } = handleImg(data.content[j], type, isDir);
+    let cid = data.content[j].cid;
+    let file_id = data.content[j].fileId;
+
+    let name = decodeURIComponent(data.content[j].key);
+    if (data.prefix) {
+      name = name.split(data.prefix)[1];
+    }
+    let isPersistent = data.content[j].isPersistent;
+
+    let item = {
+      isDir: isDir,
+      name,
+      fullName: decodeURIComponent(data.content[j].key),
+      key: data.content[j].key,
+      idList: [
+        {
+          name: "IPFS",
+          code: data.content[j].isPin ? cid : "",
+        },
+        {
+          name: "CYFS",
+          code: data.content[j].isPinCyfs ? file_id : "",
+        },
+      ],
+      date,
+      size: getfilesize(data.content[j].size),
+      status: cid || file_id ? "Published" : "-",
+      type: data.content[j].contentType,
+      file_id: file_id,
+      pubkey: cid,
+      cid,
+      imgUrl: url,
+      imgUrlLarge: url_large,
+      share: {},
+      isSystemImg,
+      canShare: cid ? true : false,
+      isPersistent,
+    };
+    tableData.value.push(item);
+  }
+
+  if (data.isTruncated) {
+    continuationToken.value = data.continuationToken;
+  } else {
+    continuationToken.value = "";
+  }
+
+  tableLoading.value = false;
+  // if (activeSort.value) {
+  //   const target = sortList.find((el) => el.key == activeSort.value);
+  //   const { prop, order, key } = target;
+  //   nextTick(() => {
+  //     tableSort({ prop, order, key });
+  //   });
+  // }
+
+  // tableSort({ prop: "date", order: 1, key: 1 });
+};
+const initLocalData = (data) => {
+  if (!data) {
+    tableLoading.value = false;
+    return;
+  }
+  if (data.err) {
+    proxy.$notify({
+      type: "warning",
+      message: "Failed to fetch data, please try again later",
+      position: "bottom-left",
+    });
+  }
+
+  tableData.value = [];
+  for (let j = 0; j < data?.data?.length; j++) {
+    let date = data.data[j].update_time;
+    let isDir = false;
+
+    let cid = data.data[j].cid;
+    let file_id = data.data[j].fileId;
+
+    let name = decodeURIComponent(data.data[j].dest_path);
+
+    const type = data.data[j].dest_path.substring(
+      data.data[j].dest_path.lastIndexOf(".") + 1
+    );
+    let { isSystemImg } = handleImg(data.data[j], type, isDir);
+
+    let item = {
+      isDir: isDir,
+      fullName: decodeURIComponent(data.data[j].dest_path),
+      name,
+      key: data.data[j].dest_path,
+      idList: [
+        {
+          name: "IPFS",
+          code: data.data[j].isPin ? cid : "",
+        },
+        {
+          name: "CYFS",
+          code: data.data[j].isPinCyfs ? file_id : "",
+        },
+      ],
+      date,
+      size: getfilesize(data.data[j].file_size),
+      status: cid || file_id ? "Published" : "-",
+      type: data.data[j].contentType || "",
+      file_id: file_id | "",
+      pubkey: cid,
+      cid,
+      imgUrl: "",
+      imgUrlLarge: "",
+      share: {},
+      isSystemImg,
+      canShare: cid ? true : false,
+      isPersistent: true,
+    };
+    tableData.value.push(item);
+  }
+
+  tableLoading.value = false;
+  // if (activeSort.value) {
+  //   const target = sortList.find((el) => el.key == activeSort.value);
+  //   const { prop, order, key } = target;
+  //   nextTick(() => {
+  //     tableSort({ prop, order, key });
+  //   });
+  // }
+
+  // tableSort({ prop: "date", order: 1, key: 1 });
+};
 const getFileList = function (scroll, prefix, reset = false) {
   let list_prefix = "";
   if (prefix?.length) {
@@ -816,15 +1007,22 @@ const getFileList = function (scroll, prefix, reset = false) {
     }
   }
   tableLoading.value = true;
-  let token = tokenMap.value[deviceData.device_id];
-  let type = "foggie";
-  oodFileList(email.value, type, token, deviceData, list_prefix, scroll)
-    .then((res) => {
-      if (res && res.content) {
-        initFileData(res, reset);
-      }
-    })
-    .finally(() => (tableLoading.value = false));
+  if (deviceType.value == "space") {
+    if (fileSource.value) {
+      getReomteData(scroll, prefix);
+    } else {
+      getLocalData();
+    }
+  } else {
+    let type = "foggie";
+    oodFileList(email.value, type, token.value, deviceData, list_prefix, scroll)
+      .then((res) => {
+        if (res && res.content) {
+          initFileData(res, reset);
+        }
+      })
+      .finally(() => (tableLoading.value = false));
+  }
 };
 
 const initFileData = async (data, reset = false) => {
@@ -844,7 +1042,9 @@ const initFileData = async (data, reset = false) => {
     return {
       isDir: true,
       name,
+      fullName: decodeURIComponent(el.key),
       key: el,
+      fileType: 1,
       idList: [
         {
           name: "IPFS",
@@ -897,7 +1097,9 @@ const initFileData = async (data, reset = false) => {
       checked: false,
       isDir: isDir,
       name,
+      fullName: decodeURIComponent(el.key),
       key: el.key,
+      fileType: 2,
       idList: [
         {
           name: "IPFS",
@@ -965,16 +1167,14 @@ const handleImg = (type, ID, cid, key, isDir, ip, port, peerId) => {
     // imgHttpLink = `${location}/d/${ID}/${pubkey}?new_w=200`;
     // imgHttpLink = `${location}/object?pubkey=${pubkey}&new_w=${size}`;
     // let token = store.getters.token;
-    let token = tokenMap.value[deviceData.device_id];
 
-    imgHttpLink = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${ID}&peerId=${peerId}&type=foggie&token=${token}`;
+    imgHttpLink = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${ID}&peerId=${peerId}&type=foggie&token=${token.value}`;
 
     // foggie://peerid/spaceid/cid
   } else if (type === "mp4") {
     type = "video";
-    let token = tokenMap.value[deviceData.device_id];
 
-    imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${ID}&peerId=${peerId}&type=foggie&token=${token}`;
+    imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${ID}&peerId=${peerId}&type=foggie&token=${token.value}`;
   } else {
     isSystemImg = true;
     // imgHttpLink =
@@ -1095,12 +1295,11 @@ const ipfsPin = (checked) => {
   let ip_address = deviceData.rpc.split(":")[0];
   let port = deviceData.rpc.split(":")[1];
   let peerId = deviceData.peer_id;
-  let token = tokenMap.value[deviceData.device_id];
 
   let data = {
     ip_address,
     port,
-    token,
+    token: token.value,
     // peerId: deviceData.value.peer_id,
     peerId,
     Id: deviceData.foggie_id,
@@ -1120,12 +1319,11 @@ const cyfsPin = () => {
   const item = pinData.item;
   let ip_address = deviceData.rpc.split(":")[0];
   let port = deviceData.rpc.split(":")[1];
-  let token = tokenMap.value[deviceData.device_id];
 
   let data = {
     ip_address,
     port,
-    token,
+    token: token.value,
     peerId: deviceData.peer_id,
     Id: deviceData.foggie_id,
     exp: 3 * 24 * 3600,
@@ -1137,74 +1335,6 @@ const cyfsPin = () => {
   publishPin(data).then((res) => {
     if (res) {
       cyfsDialogShow.value = false;
-    }
-  });
-};
-const { ipcRenderer } = window.require("electron");
-const downloadItem = (item) => {
-  // let ID = device_id.value;
-  // let pubkey = item.pubkey;
-  // let downloadUrl = `/fog/${pubkey}?dl=true`;
-  // let cid = "QmNf82AtemgaHu2Sg3wpiaEFmoy6ym6Sv1Ma9eLJg6dHm3";
-  let cid = item.cid;
-  let key = item.key;
-
-  let ip = deviceData.rpc.split(":")[0];
-  // let ip = "154.31.34.194";
-  let port = deviceData.rpc.split(":")[1];
-  // let Id = item.id;
-  let Id = deviceData.foggie_id;
-  let peerId = deviceData.peer_id;
-  // let token = store.getters.token;
-  let token = tokenMap.value[deviceData.device_id];
-
-  let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=foggie&token=${token}`;
-
-  ipcRenderer.send("download", {
-    downloadPath: downloadUrl,
-    fileName: item.name,
-  });
-
-  // var oA = document.createElement("a");
-  // oA.download = item.name;
-  // oA.href = downloadUrl;
-  // document.body.appendChild(oA);
-  // oA.click();
-  // oA.remove();
-};
-const deleteItem = (item) => {
-  tableLoading.value = true;
-  // let token = store.getters.token;
-  let token = tokenMap.value[deviceData.device_id];
-
-  file_delete(token, item, deviceData).then((res) => {
-    if (res && res.data) {
-      proxy.$notify({
-        type: "success",
-        message: "Delete succeeded",
-        position: "bottom-left",
-      });
-      tableLoading.value = false;
-      let arr = [];
-      if (store.getters.uploadFileList && deviceData.device_id) {
-        arr = store.getters.uploadFileList[deviceData.device_id];
-        if (arr && arr.length > 0) {
-          store.getters.uploadFileList[deviceData.device_id] = arr.filter(
-            (val) => {
-              return val.urlFileName !== item.key;
-            }
-          );
-        }
-      }
-
-      doSearch();
-    } else {
-      tableLoading.value = false;
-      proxy.$notify({
-        type: "error",
-        message: "Delete Failed",
-        position: "bottom-left",
-      });
     }
   });
 };
@@ -1226,7 +1356,7 @@ const copyLink = (text) => {
 };
 const detailData = reactive({ data: {} });
 const toDetail = (item) => {
-  localStorage.setItem("currentOODItem", JSON.stringify(currentOODItem.value));
+  localStorage.setItem("currentOODItem", JSON.stringify(deviceData));
   if (item.type === "application/x-directory") {
     let long_name = breadcrumbList.prefix.length
       ? breadcrumbList.prefix?.join("/") + "/" + item.name
@@ -1250,21 +1380,65 @@ const doSearch = async () => {
     tableLoading.value = true;
     breadcrumbList.prefix = [];
     // let token = store.getters.token;
-    let token = tokenMap.value[deviceData.device_id];
-    let type = "foggie";
+    let type = deviceType.value == "space" ? "space" : "foggie";
     isSearch.value = true;
-    let data = await find_objects(
-      email.value,
-      type,
-      token,
-      deviceData,
-      encodeURIComponent(keyWord.value)
-    );
-    isSearch.value = false;
-    if (data.contents) {
-      data.content = data.contents;
+    if (deviceType.value == "space") {
+      if (fileSource.value) {
+        let data = await find_objects(
+          email.value,
+          type,
+          token.value,
+          deviceData.value,
+          encodeURIComponent(keyWord.value)
+        );
+        isSearch.value = false;
+        tableData.value = [];
+        if (data.contents) {
+          data.content = data.contents;
+        }
+        initRemoteData(data);
+      } else {
+        fileQuery({
+          email: email.value,
+          orderId: orderId.value,
+          deviceType: 3,
+          key: encodeURIComponent(keyWord.value),
+        })
+          .then((res) => {
+            isSearch.value = false;
+            if (res.data[0]?.cid) {
+              initLocalData(res);
+            } else {
+              ElNotification({
+                type: "error",
+                message: "Failed to obtain file information",
+                position: "bottom-left",
+              });
+            }
+          })
+          .catch(() => {
+            isSearch.value = false;
+            ElNotification({
+              type: "error",
+              message: "Failed to obtain file information",
+              position: "bottom-left",
+            });
+          });
+      }
+    } else {
+      let data = await find_objects(
+        email.value,
+        type,
+        token.value,
+        deviceData,
+        encodeURIComponent(keyWord.value)
+      );
+      isSearch.value = false;
+      if (data.contents) {
+        data.content = data.contents;
+      }
+      initFileData(data, true);
     }
-    initFileData(data, true);
   }
 };
 const setPrefix = (item, isTop = false) => {
@@ -1286,8 +1460,18 @@ const setPrefix = (item, isTop = false) => {
   // emits("currentPrefix", breadcrumbList.prefix);
 };
 const fileListsInfinite = _.debounce(() => {
-  if (continuationToken.value && tableData.value.length < 5000) {
-    getFileList(continuationToken.value, breadcrumbList.prefix, false);
+  if (deviceType.value == "space") {
+    if (
+      fileSource.value &&
+      continuationToken.value &&
+      tableData.value.length < 5000
+    ) {
+      getReomteData(continuationToken.value, breadcrumbList.prefix);
+    }
+  } else {
+    if (continuationToken.value && tableData.value.length < 5000) {
+      getFileList(continuationToken.value, breadcrumbList.prefix, false);
+    }
   }
 }, 300);
 
@@ -1297,7 +1481,7 @@ watch(breadcrumbList, (val) => {
   }
 });
 watch(
-  () => currentOODItem,
+  () => deviceData,
   () => {
     getFileList("", breadcrumbList.prefix, true);
   },
@@ -1306,7 +1490,6 @@ watch(
     deep: true,
   }
 );
-const order_Id = computed(() => store.getters.orderId);
 const confirmNewFolder = () => {
   console.log(newFolderName.value, 55555555555);
 };

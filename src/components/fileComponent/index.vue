@@ -30,6 +30,7 @@
       v-model:actionType="actionType"
       v-model:singleData="singleData.value"
       v-model:tableLoading="tableLoading"
+      :createdTime="createdTime"
       @setNoSingle="setNoSingle"
       @setNewFolder="setNewFolder"
       @reset="reset"
@@ -83,12 +84,20 @@ import FolderDialog from "./folderDialog.vue";
 import RenameDialog from "./renameDialog.vue";
 import AllFile from "@/views/foggieMax/home/_modules/myFiles";
 import ActionBar from "./actionBar.vue";
+
+const emits = defineEmits(["getUseSize"]);
+const props = defineProps({
+  createdTime: {
+    type: String,
+    default: "",
+  },
+});
+const { createdTime } = toRefs(props);
 const folderVisible = ref(false);
 const renameVisible = ref(false);
 const activeName = ref("All");
 const AllFileRef = ref(null);
 const ImgListRef = ref(null);
-const emits = defineEmits(["getUseSize"]);
 const tableLoading = ref(false);
 const checkedData = ref([]);
 const imgCheckedData = reactive({

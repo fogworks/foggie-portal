@@ -79,7 +79,7 @@ import {
 } from "vue";
 import { useStore } from "vuex";
 import { ArrowRight } from "@element-plus/icons-vue";
-import { oodFileList } from "@/utils/api.js";
+import { oodFileList, rename_objects } from "@/utils/api.js";
 import RippleInk from "@/components/rippleInk";
 const { proxy } = getCurrentInstance();
 const store = useStore();
@@ -203,11 +203,33 @@ const handleConfirm = () => {
   if (activeName.value == "Image") {
     console.log(imgCheckedData.value, "imgCheckedData");
   } else if (activeName.value == "All") {
-    if (isSingle.value) {
-      console.log(singleData.value, "singleDatasingleDatasingleData");
-    } else {
-      console.log(checkedData.value, "checkedDatacheckedDatacheckedData");
-    }
+    // if (isSingle.value) {
+    //   console.log(singleData.value, "singleDatasingleDatasingleData");
+    // } else {
+    //   console.log(checkedData.value, "checkedDatacheckedDatacheckedData");
+    // }
+    const targetObject = () => {
+      if (breadcrumbList.prefix.length) {
+        return (
+          breadcrumbList.prefix.join("/") + "/" + checkedData.value[0].name
+        );
+      } else {
+        return checkedData.value[0].name;
+      }
+    };
+    rename_objects({
+      deviceData,
+      sourceObject: checkedData.value[0].fullName,
+      targetObject: targetObject(),
+      fileType: checkedData.value[0].fileType,
+    }).then((res) => {
+      proxy.$notify({
+        type: "success",
+        message: "Successfully moved",
+        position: "bottom-left",
+      });
+      emits("update:folderVisible", false);
+    });
     // emits("reset");
   }
 };

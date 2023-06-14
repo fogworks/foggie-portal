@@ -25,7 +25,11 @@
         <svg-icon icon-class="rename"></svg-icon>
         <span> Rename </span>
       </div>
-      <div class="action-item" @click="handlerClick('move')">
+      <div
+        class="action-item"
+        v-if="checkedData.length <= 1"
+        @click="handlerClick('move')"
+      >
         <svg-icon icon-class="move"></svg-icon>
         <span> Move </span>
       </div>
@@ -78,6 +82,7 @@ import { file_delete, files_download } from "@/utils/api.js";
 import useShare from "./hooks/useShare.js";
 import useDelete from "./hooks/useDelete.js";
 import { getToken } from "@/utils/auth";
+import { baseUrl } from "@/setting";
 const deviceData = inject("deviceData");
 const props = defineProps({
   checkedData: {
@@ -89,6 +94,10 @@ const props = defineProps({
     default: () => {},
   },
   activeName: {
+    type: String,
+    default: "",
+  },
+  createdTime: {
     type: String,
     default: "",
   },
@@ -124,13 +133,14 @@ const store = useStore();
 
 const tokenMap = computed(() => store.getters.tokenMap);
 const token = computed(() => {
-  if (deviceData.device_type == 3) {
+  if (deviceData.device_type == "space") {
     return getToken();
   } else {
     return tokenMap.value[deviceData.device_id];
   }
 });
-const { checkedData, imgCheckedData, activeName } = toRefs(props);
+
+const { checkedData, imgCheckedData, activeName, createdTime } = toRefs(props);
 const hasChecked = computed(() => {
   if (activeName.value == "Image") {
     return Object.keys(imgCheckedData.value).some((key) => {
@@ -144,6 +154,8 @@ const hasChecked = computed(() => {
     return checkedData.value.length ? true : false;
   }
 });
+const { ipcRenderer } = window.require("electron");
+
 const downLoad = () => {
   const data = checkedData.value.map((el) => {
     return {
@@ -151,19 +163,59 @@ const downLoad = () => {
       key: el.key,
     };
   });
-  JSON.stringify();
-  console.log(data);
-  // imgHttpLink = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&token=${deviceData.value.upload_file_token}`;
-
-  files_download({ file_arr: JSON.stringify(data), token: token.value }).then(
-    (res) => {
-      console.log(res, "resssssssssssss");
-    }
-  );
-  // console.log(imgCheckedData.value, "imgCheckedDataimgCheckedData");
+  let ip = deviceData.rpc.split(":")[0];
+  ip = "218.2.96.99";
+  const type = deviceData.device_type == 3 ? "space" : "foggie";
+  const token2 =
+    deviceData.device_type == 3 ? deviceData.upload_file_token : token.value;
+  const paramsObj = {
+    file_arr: JSON.stringify(data),
+    token: token2,
+    ip,
+    port: deviceData.rpc.split(":")[1],
+    Id: deviceData.foggie_id,
+    peerId: deviceData.peer_id,
+    type,
+  };
+  let downloadUrl = "";
+  if (checkedData.value.length == 1) {
+    downloadUrl = `${baseUrl}/file_download/?cid=${checkedData.value[0].cid}&key=${checkedData.value[0].cid}&ip=${paramsObj.ip}&port=${paramsObj.port}&Id=${paramsObj.Id}&peerId=${paramsObj.peerId}&type=${paramsObj.type}&token=${paramsObj.token}`;
+  } else {
+    downloadUrl = `${baseUrl}/files_download/?file_arr=${paramsObj.file_arr}&ip=${paramsObj.ip}&port=${paramsObj.port}&Id=${paramsObj.Id}&peerId=${paramsObj.peerId}&type=${paramsObj.type}&token=${paramsObj.token}`;
+  }
+  ipcRenderer.send("download", {
+    downloadPath: downloadUrl,
+    fileName:
+      checkedData.value.length == 1
+        ? checkedData.value[0].name
+        : "download.zip",
+  });
 };
+function countDownRun() {
+  let nowTime = new Date().getTime();
+  let endTime = new Date(createdTime.value).getTime() + 1000 * 60 * 3;
+  let time = ((+endTime - +nowTime) / 1000).toFixed(0);
+  if (time > 4 * 60) {
+    time = time - 60 * 60;
+  }
+  if (time > 0) {
+    let content = "Upload files after " + getSecondTime(+time);
+    proxy.$notify({
+      type: "warning",
+      message: content,
+      position: "bottom-left",
+    });
+  } else {
+    store.commit("upload/setUploadOptions", deviceData);
+    // store.commit("upload/openUpload", orderId.value);
+  }
+}
 const upload = () => {
-  store.commit("upload/setUploadOptions", deviceData);
+  if (deviceData.device_type == "space") {
+    countDownRun();
+  } else {
+    store.commit("upload/setUploadOptions", deviceData);
+  }
   // store.commit("upload/openUpload", deviceData.device_id);
 };
 const resetChecked = () => {
