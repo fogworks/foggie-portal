@@ -99,6 +99,7 @@
               :width="width"
               :height="height"
               fixed
+              ref="fileTable"
             />
           </template>
         </el-auto-resizer>
@@ -375,11 +376,11 @@
     :currentOODItems="currentOODItem"
     @closeRightUpload="closeRightUpload"
   ></PinTaskList> -->
-  <ShareDialog
+  <!-- <ShareDialog
     :shareRefContent="shareRefContent"
     :copyContent="copyContent"
     v-model:visible="showShareDialog"
-  ></ShareDialog>
+  ></ShareDialog> -->
   <PinDialog
     v-model:visible="cyfsDialogShow"
     type="cyfs"
@@ -608,8 +609,8 @@ const columns = [
       if (rowData.isNewFolder) {
         return (
           <div class="new-folder">
-            <el-input modelValue={newFolderName}></el-input>
-            <el-button type="primary">
+            <el-input v-model={newFolderName.value}></el-input>
+            <el-button type="primary" onClick={confirmNewFolder}>
               <svg-icon size="20" icon-class="yes2"></svg-icon>
             </el-button>
             <el-button type="primary" onClick={cancelNewFolder}>
@@ -785,14 +786,11 @@ const columns = [
 const handleSelectionChange = (val) => {
   emits("update:checkedData", val);
 };
-const selectChangeEvent = (val) => {
-  if (fileTable?.value) {
-    const records = fileTable?.value.getCheckboxRecords();
-    emits("update:checkedData", records);
-  }
-};
 const resetChecked = () => {
-  fileTable.value?.clearSelection();
+  // fileTable.value?.clearSelection();
+  tableData.value.forEach((el) => {
+    el.checked = false;
+  });
   emits("update:checkedData", []);
 };
 const handleID = (str) => {
@@ -801,9 +799,6 @@ const handleID = (str) => {
   );
 };
 const refresh = () => {
-  console.log("refresh111111111111111111111111111111111");
-  console.log(tableLoading.value, "refresh22222222222222");
-
   keyWord.value = "";
   // tableSort({ prop: "date", order: 1, key: 1 });
   if (tableLoading.value) return;
@@ -836,9 +831,7 @@ const initFileData = async (data, reset = false) => {
   // tableData.value = [];
   // let commonPrefixesItem = [];
   let contentItem = [];
-  tableData.value.forEach((el) => {
-    el.checked = false;
-  });
+
   newFolderName.value = "";
   emits("update:checkedData", []);
   fileTable.value?.clearSelection();
@@ -1314,6 +1307,9 @@ watch(
   }
 );
 const order_Id = computed(() => store.getters.orderId);
+const confirmNewFolder = () => {
+  console.log(newFolderName.value, 55555555555);
+};
 const cancelNewFolder = () => {
   tableData.value.shift();
   newFolderName.value = "";
@@ -1330,7 +1326,7 @@ const setNewFolder = () => {
       date: transferUTCTime(new Date()),
       idList: [],
     });
-    fileTable.value.scrollToTop(0);
+    fileTable?.value?.scrollToTop(0);
   }
 };
 watch(

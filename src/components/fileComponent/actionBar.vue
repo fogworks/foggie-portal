@@ -1,6 +1,14 @@
 <template>
   <div>
     <div v-if="hasChecked" class="action-box">
+      <div
+        class="action-item"
+        @click="handlerClick('share')"
+        v-if="checkedData.length <= 1 && activeName !== 'Image'"
+      >
+        <svg-icon icon-class="share"></svg-icon>
+        <span> Share </span>
+      </div>
       <div class="action-item" @click="handlerClick('download')">
         <svg-icon icon-class="download"></svg-icon>
         <span> Download </span>
@@ -12,7 +20,7 @@
       <div
         class="action-item"
         @click="handlerClick('rename')"
-        v-show="checkedData.length <= 1 && activeName !== 'Image'"
+        v-if="checkedData.length <= 1 && activeName !== 'Image'"
       >
         <svg-icon icon-class="rename"></svg-icon>
         <span> Rename </span>
@@ -47,10 +55,16 @@
         </div>
       </div>
     </template>
+    <ShareDialog
+      :shareRefContent="shareRefContent"
+      :copyContent="copyContent"
+      v-model:visible="showShareDialog"
+    ></ShareDialog>
   </div>
 </template>
 
 <script setup>
+import ShareDialog from "@/views/foggieMax/home/_modules/myFiles/shareDialog";
 import {
   ref,
   toRefs,
@@ -61,6 +75,8 @@ import {
 } from "vue";
 import { useStore } from "vuex";
 import { file_delete } from "@/utils/api.js";
+import useShare from "./hooks/useShare.js";
+import useDelete from "./hooks/useDelete.js";
 const deviceData = inject("deviceData");
 const props = defineProps({
   checkedData: {
@@ -90,7 +106,6 @@ const emits = defineEmits([
   "refreshList",
 ]);
 const { proxy } = getCurrentInstance();
-const store = useStore();
 const tableLoading = computed({
   get() {
     return props.tableLoading || false;
@@ -99,6 +114,13 @@ const tableLoading = computed({
     emits("update:tableLoading", val);
   },
 });
+const refresh = () => {
+  emits("refreshList");
+};
+const { doShare, showShareDialog, shareRefContent, copyContent } = useShare();
+const { deleteItem } = useDelete(tableLoading, refresh);
+const store = useStore();
+
 const tokenMap = computed(() => store.getters.tokenMap);
 const { checkedData, imgCheckedData, activeName } = toRefs(props);
 const hasChecked = computed(() => {
@@ -124,46 +146,8 @@ const upload = () => {
 const resetChecked = () => {
   emits("reset");
 };
-const refresh = () => {
-  emits("refreshList");
-};
-const deleteItem = (item) => {
-  tableLoading.value = true;
-  let token = tokenMap.value[deviceData.device_id];
 
-  file_delete(token, item, deviceData).then((res) => {
-    if (res && res.data) {
-      proxy.$notify({
-        type: "success",
-        message: "Delete succeeded",
-        position: "bottom-left",
-      });
-      tableLoading.value = false;
-      let arr = [];
-      if (store.getters.uploadFileList && deviceData.device_id) {
-        arr = store.getters.uploadFileList[deviceData.device_id];
-        if (arr && arr.length > 0) {
-          store.getters.uploadFileList[deviceData.device_id] = arr.filter(
-            (val) => {
-              return val.urlFileName !== item.key;
-            }
-          );
-        }
-      }
-      nextTick(() => {
-        refresh();
-      });
-    } else {
-      tableLoading.value = false;
-      proxy.$notify({
-        type: "error",
-        message: "Delete Failed",
-        position: "bottom-left",
-      });
-    }
-  });
-};
-const handlerClick = (type) => {
+const handlerClick = async (type) => {
   emits("update:isSingle", false);
   if (type === "move" || type === "copy") {
     emits("update:actionType", type);
@@ -179,7 +163,6 @@ const handlerClick = (type) => {
         })
         .then(async () => {
           await deleteItem(checkedData.value[0]);
-          resetChecked();
         });
     }
   } else if (type === "rename") {
@@ -188,6 +171,14 @@ const handlerClick = (type) => {
   } else if (type === "copy") {
   } else if (type === "newFolder") {
     emits("setNewFolder");
+  } else if (type === "share") {
+    await doShare(checkedData.value[0]);
+    resetChecked();
+    proxy.$notify({
+      type: "success",
+      message: "Share succeeded",
+      position: "bottom-left",
+    });
   }
 };
 </script>
