@@ -65,13 +65,16 @@
             autocomplete="off"
           ></el-input-number>
         </el-form-item>
-        <el-form-item label="Service period (weeks)" prop="expire_on_week">
+        <el-form-item
+          label="Service period (At least 25 weeks)"
+          prop="expire_on_week"
+        >
           <el-input-number
             class="number-input"
             style="width: 100%"
             :controls="false"
             :precision="0"
-            :min="1"
+            :min="25"
             v-model="poolForm.expire_on_week"
             autocomplete="off"
           ></el-input-number>
@@ -140,7 +143,7 @@ const poolForm = reactive({
   space: 1,
   is_pin: false,
   pin_size: 1,
-  expire_on_week: 24,
+  expire_on_week: 25,
   stake_asset: "",
   dmc_account: "",
 });
@@ -175,7 +178,7 @@ const validateDmcAccount = (rule, value, cb) => {
   }
 };
 const validateWeeks = (rule, value, cb) => {
-  const oneWeekTimeStamp = 60 * 60 * 24 * 7;
+  const oneWeekTimeStamp = 60 * 60 * 25 * 7;
   const nowTimeStamp = (new Date().getTime() / 1000).toFixed(0);
   if (+expire.value - nowTimeStamp >= oneWeekTimeStamp * value) {
     cb();
