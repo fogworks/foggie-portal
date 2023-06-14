@@ -18,8 +18,10 @@
             :options="spacePieOption.data"
           ></MyEcharts>
         </div>
-        <div class="use-rate">Use Rate: {{ (spaceUseRate * 100).toFixed(2) }}%</div>
-        <div class="total">Total space {{ spaceTotal }}GB</div>
+        <div class="use-rate">
+          Use Rate: {{ (spaceUseRate * 100).toFixed(2) || 0 }}%
+        </div>
+        <div class="total">Total space {{ spaceTotal || 0 }}GB</div>
       </div>
     </div>
   </div>
@@ -76,11 +78,11 @@ export default {
     //   bandwidthOption.series[0].label.formatter=[`{value|${bandwidthAvailable.value}GB}`,'{title|Available}'].join('\n')
 
     const initDashboaard = async (newVal) => {
-      spaceAvailable.value = +spaceTotal.value - spaceUseSize.value;
+      spaceAvailable.value = +spaceTotal.value - spaceUseSize.value || 0;
       let pipData = JSON.parse(JSON.stringify(pieOption));
       pipData.series[0].data = [
-        { value: +spaceUseRate.value.toFixed(4) },
-        { value: 1 - (+spaceUseRate.value).toFixed(4) },
+        { value: +spaceUseRate.value.toFixed(4) || 0 },
+        { value: 1 - (+spaceUseRate.value).toFixed(4) || 0 },
       ];
       spacePieOption.data = pipData;
       // }

@@ -337,7 +337,7 @@ function blurPrestoreDMC() {
     return false;
   } else if (
     Number(state.formLine.prestoreDMC) <
-    Number(state.orderDetail.total - state.orderDetail.deposit)
+    Number(+state.orderDetail.total - +state.orderDetail.deposit).toFixed(4)
   ) {
     ElMessage({
       message: `The deposit amount cannot be less than ${(
@@ -429,65 +429,65 @@ function returnBG(index) {
 const maxRetry = ref(0);
 async function submit() {
   let flag = await blurPrestoreDMC();
-  if (flag) {
-    loading.value = true;
-    await loadCurReferenceRate();
-    console.log(
-      curReferenceRate.value,
-      "curReferenceRate.valuecurReferenceRate.value"
-    );
-    let params = {
-      chainId: ChainId.value, //chainId
-      email: email.value,
-      billId: state.orderDetail.orderID,
-      period: state.formLine.week,
-      benchmarkPrice: curReferenceRate.value,
-      priceRange: "3",
-      unmatchedAmount: state.formLine.quantity,
-      totalPrice: state.orderDetail.aggregate,
-    };
-    // switch (state.formLine.priceSection) {
-    //   case 0:
-    //     params.priceRange = 3;
-    //     break;
-    //   case "2":
-    //     params.priceRange = 1;
-    //     break;
-    //   case "3":
-    //     params.priceRange = 2;
-    //     break;
-    // }
+  // if (flag) {
+  //   loading.value = true;
+  //   await loadCurReferenceRate();
+  //   console.log(
+  //     curReferenceRate.value,
+  //     "curReferenceRate.valuecurReferenceRate.value"
+  //   );
+  //   let params = {
+  //     chainId: ChainId.value, //chainId
+  //     email: email.value,
+  //     billId: state.orderDetail.orderID,
+  //     period: state.formLine.week,
+  //     benchmarkPrice: curReferenceRate.value,
+  //     priceRange: "3",
+  //     unmatchedAmount: state.formLine.quantity,
+  //     totalPrice: state.orderDetail.aggregate,
+  //   };
+  //   // switch (state.formLine.priceSection) {
+  //   //   case 0:
+  //   //     params.priceRange = 3;
+  //   //     break;
+  //   //   case "2":
+  //   //     params.priceRange = 1;
+  //   //     break;
+  //   //   case "3":
+  //   //     params.priceRange = 2;
+  //   //     break;
+  //   // }
 
-    buyOrder(params)
-      .then(async (res) => {
-        if (res.code == 200) {
-          state.formLine.prestoreDMC = "";
-          dialogIsShow.value = false;
-          loading.value = false;
-          ElMessage({
-            message: `Purchase successful!`,
-            type: "success",
-            grouping: true,
-          });
-          emit("getAssets");
-          filterOrder();
-        } else if (res.code == 20003 || res.code == 20007) {
-          order_sync(res.data);
-        } else {
-          //  ElMessage({
-          //   message: res.msg,
-          //   type: "error",
-          //   grouping: true,
-          // });
-        }
-      })
-      .catch((error) => {
-        loading.value = false;
-      })
-      .finally(() => {
-        loading.value = false;
-      });
-  }
+  //   buyOrder(params)
+  //     .then(async (res) => {
+  //       if (res.code == 200) {
+  //         state.formLine.prestoreDMC = "";
+  //         dialogIsShow.value = false;
+  //         loading.value = false;
+  //         ElMessage({
+  //           message: `Purchase successful!`,
+  //           type: "success",
+  //           grouping: true,
+  //         });
+  //         emit("getAssets");
+  //         filterOrder();
+  //       } else if (res.code == 20003 || res.code == 20007) {
+  //         order_sync(res.data);
+  //       } else {
+  //         //  ElMessage({
+  //         //   message: res.msg,
+  //         //   type: "error",
+  //         //   grouping: true,
+  //         // });
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       loading.value = false;
+  //     })
+  //     .finally(() => {
+  //       loading.value = false;
+  //     });
+  // }
 }
 const order_sync = async (transactionId) => {
   maxRetry.value++;
