@@ -32,7 +32,7 @@
             <i>{{ formatedTimeRemaining }}</i>
           </span>
         </div>
-        <div class="uploader-file-actions" v-if="status !== 'success'">
+        <div class="uploader-file-actions" v-if="status !== 'success' && !loading">
           <span class="uploader-file-pause" v-show="isBigFile" @click="pause()" />
           <span class="uploader-file-resume" v-show="!ISCIDING" @click="resume()" />️
           <span class="uploader-file-retry" @click="retry()" />
@@ -113,6 +113,7 @@ const isPause = ref(false);
 const is_created_succeed = ref(false); // 文件是否创建成功  true 成功 false 失败
 const isBigFile = ref(true);
 const fileMd5 = ref(null);
+const loading = ref(false)
 
 const startUploadTime = ref(0);
 const progressTimer = ref(null);
@@ -143,17 +144,20 @@ const resume = debounce(async function () {
       email: email.value,
       orderId: file.value.orderId,
       deviceType: file.value.deviceType,
-      md5: fileMd5.value,
+      // md5: fileMd5.value,
+      destPath: encodeURIComponent(file.value.urlFileName),
     };
-    resumeUpload_Api(params)
-      .then((res) => {
-        if (res.code == 200) {
-          beginUpload();
-        } else {
-          fileError();
-        }
-      })
+    loading.value = true
+    resumeUpload_Api(params).then((res) => {
+      loading.value = false
+      if (res.code == 200) {
+        beginUpload();
+      } else {
+        fileError();
+      }
+    })
       .catch((error) => {
+        loading.value = false
         fileError();
       });
   } else {
@@ -334,8 +338,10 @@ const fileLoad = async (file) => {
 };
 
 function uploadFile(params, type) {
+  loading.value = true
   fileUploadApi(params)
     .then((res) => {
+      loading.value = false
       if (res.code == 200) {
         is_created_succeed.value = true;
         loadUploadProgress();
@@ -345,6 +351,8 @@ function uploadFile(params, type) {
     })
     .catch((error) => {
       fileError();
+      loading.value = false
+
     });
 }
 
@@ -398,7 +406,9 @@ function loadUploadProgress() {
       } else {
         fileError();
       }
-    });
+    }).catch(error => {
+      fileError()
+    })
   }
 }
 
