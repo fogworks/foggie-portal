@@ -115,9 +115,6 @@ export default {
     const store = useStore();
     const router = useRouter();
     const theme = computed(() => store.getters.theme);
-    // const currentOODItem = JSON.parse(localStorage.getItem("currentOODItem"));
-    const currentOODItem = inject("currentOODItem");
-    // const currentOODItem = computed(() => store.getters.currentOODItem);
     const documentInfo = reactive({
       title: detailData.data.name,
       idList: detailData.data.idList,
@@ -126,8 +123,8 @@ export default {
     console.log(detailData, "detailData");
     const shareRefContent = reactive({});
     const showShareDialog = ref(false);
-    const device_id = currentOODItem.value.data.device_id;
-    const device_id_real = currentOODItem.value.data.device_id_real;
+    const device_id = detailData.device_id;
+    const device_id_real = detailData.device_id_real;
     const initDetail = () => {};
     onMounted(initDetail);
     const beforeClose = () => {
@@ -240,7 +237,6 @@ export default {
       documentInfo,
       detailData,
       device_id,
-      currentOODItem,
       orderId,
       initDetail,
       doShare,

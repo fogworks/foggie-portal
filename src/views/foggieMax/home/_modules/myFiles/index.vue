@@ -789,17 +789,13 @@ const token = computed(() => {
     return tokenMap.value[deviceData.device_id];
   }
 });
-const getReomteData = (scroll, prefix) => {
-  let list_prefix = "";
+const getReomteData = (scroll, prefix, reset = false) => {
   tableLoading.value = true;
   let type = "space";
-  if (prefix?.length) {
-    list_prefix = prefix.join("/");
-  }
-  oodFileList(email.value, type, token.value, deviceData, list_prefix, scroll)
+  oodFileList(email.value, type, token.value, deviceData, prefix, scroll)
     .then((res) => {
       if (res && res.content) {
-        initRemoteData(res);
+        initRemoteData(res, reset);
       } else {
         tableLoading.value = false;
       }
@@ -809,7 +805,7 @@ const getReomteData = (scroll, prefix) => {
     });
 };
 
-const getLocalData = () => {
+const getLocalData = (reset = false) => {
   let params = {
     email: email.value,
     orderId: orderId.value,
@@ -817,13 +813,13 @@ const getLocalData = () => {
   };
   GetFileListAll(params)
     .then((res) => {
-      initLocalData(res);
+      initLocalData(res, reset);
     })
     .catch(() => {
       tableLoading.value = false;
     });
 };
-const initRemoteData = (data) => {
+const initRemoteData = (data, reset = false) => {
   if (!data) {
     tableLoading.value = false;
     return;
@@ -836,8 +832,7 @@ const initRemoteData = (data) => {
     });
   }
   let dir = breadcrumbList.prefix.join("/");
-
-  // tableData.value = [];
+  if (reset) tableData.value = [];
   for (let i = 0; i < data.commonPrefixes?.length; i++) {
     let name = decodeURIComponent(data.commonPrefixes[i]);
     if (data.prefix) {
@@ -944,7 +939,7 @@ const initRemoteData = (data) => {
 
   // tableSort({ prop: "date", order: 1, key: 1 });
 };
-const initLocalData = (data) => {
+const initLocalData = (data, reset = false) => {
   if (!data) {
     tableLoading.value = false;
     return;
@@ -956,8 +951,7 @@ const initLocalData = (data) => {
       position: "bottom-left",
     });
   }
-
-  tableData.value = [];
+  if (reset) tableData.value = [];
   for (let j = 0; j < data?.data?.length; j++) {
     let date = data.data[j].update_time;
     let isDir = false;
@@ -1026,9 +1020,9 @@ const getFileList = function (scroll, prefix, reset = false) {
   tableLoading.value = true;
   if (deviceType.value == "space") {
     if (fileSource.value) {
-      getReomteData(scroll, prefix);
+      getReomteData(scroll, list_prefix, reset);
     } else {
-      getLocalData();
+      getLocalData(reset);
     }
   } else {
     let type = "foggie";
@@ -1485,7 +1479,7 @@ const fileListsInfinite = _.debounce(() => {
       continuationToken.value &&
       tableData.value.length < 5000
     ) {
-      getReomteData(continuationToken.value, breadcrumbList.prefix);
+      getReomteData(continuationToken.value, breadcrumbList.prefixfalse);
     }
   } else {
     if (continuationToken.value && tableData.value.length < 5000) {

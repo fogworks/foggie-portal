@@ -38,7 +38,7 @@
       <div style="display: flex; align-items: center; margin-bottom: 20px">
         <div class="action-box" style="margin-right: 20px; margin-bottom: 0">
           <el-button
-            class="top-btn action-item"
+            class="top-btn action-item upload-btn"
             style="background-color: dodgerblue; color: #fff"
             :disabled="uploadDisable"
             @click="upload"
@@ -140,7 +140,7 @@ const { deleteItem } = useDelete(tableLoading, refresh);
 const store = useStore();
 const uploadDisable = computed(() => {
   if (
-    (deviceType.value == "space" && [4, 5].includes(state.value)) ||
+    (deviceData.deviceType == "space" && [4, 5].includes(state.value)) ||
     !merkleState.value
   ) {
     return true;
@@ -331,6 +331,12 @@ const handlerClick = async (type) => {
     &:last-child {
       border-top-right-radius: 99px;
       border-bottom-right-radius: 99px;
+    }
+  }
+  .upload-btn {
+    background: #29abff !important;
+    &.is-disabled {
+      color: #ccc !important;
     }
   }
   //   :deep {

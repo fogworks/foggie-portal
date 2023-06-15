@@ -862,6 +862,14 @@ export const rename_objects = (data) => {
     data,
   });
 }
+export const get_timeline = (data) => {
+  let url = `${baseUrl}/get_timeline`;
+  return request({
+    url: url,
+    method: "POST",
+    data,
+  });
+}
 
 
 
