@@ -1,5 +1,6 @@
 <template>
-  <div class="img-content">
+  <div class="img-content" v-infinite-scroll="getFileList">
+    <!-- v-loadMore="getFileList" -->
     <div v-for="(item, index) in imgData" class="img-box">
       <p>
         <el-checkbox
@@ -210,6 +211,15 @@ const tableData = ref([]);
 const breadcrumbList = reactive({
   prefix: [],
 });
+const vLoadMore = {
+  mounted(el, binding) {
+    el.addEventListener("scroll", function () {
+      const condition = this.scrollHeight - this.scrollTop <= this.clientHeight;
+      if (condition)
+        binding.value("", [], false, dateTimeLine.value[imgIndex.value]);
+    });
+  },
+};
 const getTimeLine = (date = "") => {
   return new Promise((resolve, reject) => {
     const getMethod = (date) => {
@@ -267,6 +277,8 @@ const getReomteData = (scroll, prefix, reset = false, date = "") => {
   )
     .then((res) => {
       if (res && res.content) {
+        imgIndex.value++;
+
         initRemoteData(res, reset, date);
       } else {
         tableLoading.value = false;
@@ -285,6 +297,8 @@ const getLocalData = (reset = false, date = "") => {
   };
   GetFileListAll(params)
     .then((res) => {
+      imgIndex.value++;
+
       initLocalData(res, reset, date);
     })
     .catch(() => {
@@ -576,6 +590,8 @@ const getFileList = function (scroll, prefix, reset = false, date = "") {
     )
       .then((res) => {
         if (res && res.content) {
+          imgIndex.value++;
+
           initFileData(res, reset, date);
         }
       })
@@ -714,15 +730,20 @@ const init = async () => {
   //   dateTimeLine.value[imgIndex.value]
   // );
 };
-watch(dateTimeLine, async (val) => {
-  await getFileList(
-    "",
-    breadcrumbList.prefix,
-    false,
-    dateTimeLine.value[imgIndex.value]
-  );
-  imgIndex.value++;
-});
+watch(
+  dateTimeLine,
+  async (val) => {
+    await getFileList(
+      "",
+      breadcrumbList.prefix,
+      false,
+      dateTimeLine.value[imgIndex.value]
+    );
+  },
+  {
+    deep: true,
+  }
+);
 const refresh = () => {
   console.log(111);
 };
