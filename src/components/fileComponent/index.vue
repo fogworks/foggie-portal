@@ -45,15 +45,19 @@
       v-model:renameVisible="renameVisible"
       v-model:actionType="actionType"
       v-model:tableLoading="tableLoading"
+      :category="category"
       @setSingle="setSingle"
+      @setFileSource="setFileSource"
       v-bind="$attrs"
       ref="AllFileRef"
     ></AllFile>
     <ImgList
       ref="ImgListRef"
       @setSingle="setSingle"
+      v-bind="$attrs"
       v-else-if="activeName === 'Image'"
       v-model:checkedData="imgCheckedData.value"
+      :fileSource="fileSource"
       v-model:folderVisible="folderVisible"
     ></ImgList>
   </div>
@@ -79,7 +83,7 @@ export default {
 };
 </script>
 <script setup>
-import { ref, toRefs, reactive, watch, provide } from "vue";
+import { ref, toRefs, reactive, watch, provide, computed } from "vue";
 import ImgList from "./imgList";
 import FolderDialog from "./folderDialog.vue";
 import RenameDialog from "./renameDialog.vue";
@@ -106,6 +110,7 @@ const imgCheckedData = reactive({
 });
 const actionType = ref("");
 const isSingle = ref(false);
+const fileSource = ref(false);
 const singleData = reactive({
   value: {},
 });
@@ -116,9 +121,26 @@ const setSingle = (data) => {
 const setNoSingle = () => {
   isSingle.value = false;
 };
+const category = computed(() => {
+  switch (activeName.value) {
+    case "All":
+      return 0;
+    case "Image":
+      return 1;
+    case "Video":
+      return 2;
+    case "Audio":
+      return 3;
+    case "Document":
+      return 4;
+  }
+});
 provide("activeName", activeName);
 provide("checkedData", checkedData);
 provide("imgCheckedData", imgCheckedData);
+const setFileSource = (val) => {
+  fileSource.value = val;
+};
 const reset = () => {
   checkedData.value = [];
   imgCheckedData.value = {};

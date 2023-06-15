@@ -470,6 +470,7 @@ const emits = defineEmits([
   "update:actionType",
   "update:tableLoading",
   "setSingle",
+  "setFileSource",
   // "currentPrefix"
 ]);
 const keyWord = ref("");
@@ -490,6 +491,10 @@ const props = defineProps({
     type: [String, Number],
     default: 0,
   },
+  category: {
+    type: [String, Number],
+    default: 0,
+  },
 });
 const newFolderName = ref("");
 const syncDialog = ref(false);
@@ -500,7 +505,7 @@ const closeRightUpload = () => {
 const deviceType = computed(() => deviceData.device_type);
 const order_Id = computed(() => store.getters.orderId);
 
-const { currentOODItem, orderId } = toRefs(props);
+const { currentOODItem, orderId, category } = toRefs(props);
 const tableLoading = computed({
   get() {
     return props.tableLoading || false;
@@ -723,6 +728,7 @@ const switchReceiveStatus = () => {
           .then(() => {
             // get remote data
             fileSource.value = !fileSource.value;
+            emits("setFileSource", fileSource.value);
             breadcrumbList.prefix = [];
             tableData.value = [];
             // getLocalData();
@@ -739,6 +745,7 @@ const switchReceiveStatus = () => {
           .then(() => {
             // get remote data
             fileSource.value = !fileSource.value;
+            emits("setFileSource", fileSource.value);
             breadcrumbList.prefix = [];
             tableData.value = [];
             // getReomteData();
@@ -792,7 +799,15 @@ const token = computed(() => {
 const getReomteData = (scroll, prefix, reset = false) => {
   tableLoading.value = true;
   let type = "space";
-  oodFileList(email.value, type, token.value, deviceData, prefix, scroll)
+  oodFileList(
+    email.value,
+    type,
+    token.value,
+    deviceData,
+    prefix,
+    scroll,
+    category.value
+  )
     .then((res) => {
       if (res && res.content) {
         initRemoteData(res, reset);
@@ -1026,7 +1041,15 @@ const getFileList = function (scroll, prefix, reset = false) {
     }
   } else {
     let type = "foggie";
-    oodFileList(email.value, type, token.value, deviceData, list_prefix, scroll)
+    oodFileList(
+      email.value,
+      type,
+      token.value,
+      deviceData,
+      list_prefix,
+      scroll,
+      category.value
+    )
       .then((res) => {
         if (res && res.content) {
           initFileData(res, reset);

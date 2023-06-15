@@ -94,7 +94,7 @@ export const refreshToken = () => {
 };
 
 //File LIST
-export const oodFileList = (email, type, token, deviceData, prefix, scroll) => {
+export const oodFileList = (email, type, token, deviceData, prefix, scroll, category = 0, date = '') => {
   let url = `${baseUrl}/list_files`,
     // prefix = "",
     delimiter = "/",
@@ -102,7 +102,9 @@ export const oodFileList = (email, type, token, deviceData, prefix, scroll) => {
     start_after = "",
     continuation_token = scroll || "",
     version_id_marker = "",
-    key_marker = "";
+    key_marker = "",
+    orderby = 'lastmodifiedtimedesc',
+    tags = ''
   let data = {
     prefix,
     delimiter,
@@ -114,7 +116,11 @@ export const oodFileList = (email, type, token, deviceData, prefix, scroll) => {
     deviceData,
     type,
     token,
-    email
+    email,
+    category,
+    orderby,
+    tags,
+    date
   };
 
   return request({
