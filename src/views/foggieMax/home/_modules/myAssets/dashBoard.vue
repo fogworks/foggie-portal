@@ -78,7 +78,8 @@ export default {
     //   bandwidthOption.series[0].label.formatter=[`{value|${bandwidthAvailable.value}GB}`,'{title|Available}'].join('\n')
 
     const initDashboaard = async (newVal) => {
-      spaceAvailable.value = +spaceTotal.value - spaceUseSize.value || 0;
+      spaceAvailable.value =
+        (+spaceTotal.value - +spaceUseSize.value).toFixed(2) || 0;
       let pipData = JSON.parse(JSON.stringify(pieOption));
       pipData.series[0].data = [
         { value: +spaceUseRate.value.toFixed(4) || 0 },

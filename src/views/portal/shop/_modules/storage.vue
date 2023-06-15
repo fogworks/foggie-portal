@@ -89,9 +89,11 @@
                 <p>
                   Deposit：<span
                     >{{
-                      (item.price / 10000) *
-                      item.deposit_ratio *
-                      formLine.quantity
+                      (
+                        (item.price / 10000) *
+                        item.deposit_ratio *
+                        formLine.quantity
+                      ).toFixed(4)
                     }}DMC</span
                   >
                 </p>
