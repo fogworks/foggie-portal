@@ -204,18 +204,28 @@ export const oodFileStatus = (ID, type) => {
 };
 
 export const file_delete = (token, item, deviceData) => {
-  let objects = [
-    { pubkey: item.pubkey ? item.pubkey : encodeURIComponent(item.key) },
-  ];
-  let cids = [item.cid];
-  let object_type = item.type;
+  let objects = [];
+  let prefixes = [];
+  let cids = [];
+  for (let i = 0; i < item.length; i++) {
+    if (item[i].type == "application/x-directory") {
+      prefixes.push(item[i].key);
+    } else {
+      objects.push({
+        pubkey: item[i].pubkey ? item[i].pubkey : encodeURIComponent(item[i].key),
+      });
+      cids.push(item[i].cid);
+    }
+  }
+  let object_type = 'normal';
   let url = `${baseUrl}/file_delete`;
   let data = {
     deviceData,
     cids,
     objects,
     object_type,
-    token
+    token,
+    prefixes
   };
   return request({
     url: url,
