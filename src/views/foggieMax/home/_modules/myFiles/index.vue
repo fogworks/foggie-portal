@@ -1,14 +1,12 @@
 <template>
-  <div class="card-box">
+  <div class="card-box-files">
     <el-breadcrumb :separator-icon="ArrowRight">
       <el-switch
         class="file-source"
         v-model="fileSource"
         size="large"
         active-text="Remote Files"
-        :active-value="remote"
         inactive-text="Local Files"
-        :inactive-value="local"
         :before-change="switchReceiveStatus"
       />
       <el-breadcrumb-item @click="setPrefix(item, true)">
@@ -409,13 +407,15 @@
     v-model:visible="syncDialog"
     :currentOODItem="deviceData"
   ></PinFormDialog>
+   -->
   <DetailDialog
     v-if="detailShow"
     v-model:visible="detailShow"
     :orderId="orderId"
     :detailData="detailData"
     :deviceData="deviceData"
-  ></DetailDialog> -->
+    :email="email"
+  ></DetailDialog>
 </template>
 
 <script setup>
@@ -556,6 +556,7 @@ const activeSort = ref("1");
 let breadcrumbList = reactive({
   prefix: [],
 });
+const canMerkle = ref(true);
 const continuationToken = ref("");
 const fileTable = ref(null);
 const SelectionCell = ({ value, intermediate = false, onChange }) => {
@@ -663,20 +664,35 @@ const columns = [
     width: 180,
     align: "left",
     cellRenderer: ({ rowData }) => {
-      return rowData.idList.map((item) => {
-        return item.code ? (
+      {
+        return deviceType.value == "space" && rowData.cid ? (
           <div class="id-box">
             <div class="copy">
-              <span class="code">{handleID(item.code)}</span>
+              <span class="code">{handleID(rowData.cid)}</span>
               <svg-icon
                 icon-class="copy"
                 class="copy-icon"
-                onClick={() => copyLink(item.code)}
+                onClick={() => copyLink(rowData.cid)}
               ></svg-icon>
             </div>
           </div>
-        ) : null;
-      });
+        ) : (
+          rowData.idList.map((item) => {
+            return item.code ? (
+              <div class="id-box">
+                <div class="copy">
+                  <span class="code">{handleID(item.code)}</span>
+                  <svg-icon
+                    icon-class="copy"
+                    class="copy-icon"
+                    onClick={() => copyLink(item.code)}
+                  ></svg-icon>
+                </div>
+              </div>
+            ) : null;
+          })
+        );
+      }
     },
   },
   {
@@ -694,6 +710,7 @@ const columns = [
     align: "left",
   },
 ];
+
 const switchReceiveStatus = () => {
   return new Promise((resolve, reject) => {
     try {
@@ -856,7 +873,7 @@ const initRemoteData = (data) => {
     };
     tableData.value.push(item);
   }
-
+  console.log(data?.content, "data?.content");
   for (let j = 0; j < data?.content?.length; j++) {
     let date = transferTime(data.content[j].lastModified);
     let isDir = false;
@@ -909,7 +926,7 @@ const initRemoteData = (data) => {
     };
     tableData.value.push(item);
   }
-
+  console.log(tableData.value, "tableDatatableData");
   if (data.isTruncated) {
     continuationToken.value = data.continuationToken;
   } else {
@@ -1074,16 +1091,7 @@ const initFileData = async (data, reset = false) => {
     let date = transferTime(el.lastModified);
     let isDir = false;
     const type = el.key.substring(el.key.lastIndexOf(".") + 1);
-    let { imgHttpLink: url, isSystemImg } = handleImg(
-      type,
-      deviceData.foggie_id,
-      el.cid,
-      el.key,
-      isDir,
-      deviceData.rpc.split(":")[0],
-      deviceData.rpc.split(":")[1],
-      deviceData.peer_id
-    );
+    let { imgHttpLink: url, isSystemImg } = handleImg(el, type, isDir);
 
     let cid = el.cid;
     let file_id = el.fileId;
@@ -1150,10 +1158,17 @@ const initFileData = async (data, reset = false) => {
 };
 
 const theme = computed(() => store.getters.theme);
-const handleImg = (type, ID, cid, key, isDir, ip, port, peerId) => {
+const handleImg = (item, type, isDir) => {
   let imgHttpLink = "";
   type = type.toLowerCase();
   let isSystemImg = false;
+  let cid = item.cid;
+  let key = item.key;
+
+  let ip = deviceData.rpc.split(":")[0];
+  let port = deviceData.rpc.split(":")[1];
+  let Id = deviceData.foggie_id;
+  let peerId = deviceData.peer_id;
   if (
     type === "png" ||
     type === "bmp" ||
@@ -1168,13 +1183,17 @@ const handleImg = (type, ID, cid, key, isDir, ip, port, peerId) => {
     // imgHttpLink = `${location}/object?pubkey=${pubkey}&new_w=${size}`;
     // let token = store.getters.token;
 
-    imgHttpLink = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${ID}&peerId=${peerId}&type=foggie&token=${token.value}`;
+    imgHttpLink = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=${
+      deviceType.value == "space" ? "space" : "foggie"
+    }&token=${token.value}`;
 
     // foggie://peerid/spaceid/cid
   } else if (type === "mp4") {
     type = "video";
 
-    imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${ID}&peerId=${peerId}&type=foggie&token=${token.value}`;
+    imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=${
+      deviceType.value == "space" ? "space" : "foggie"
+    }&token=${token.value}`;
   } else {
     isSystemImg = true;
     // imgHttpLink =
@@ -1388,7 +1407,7 @@ const doSearch = async () => {
           email.value,
           type,
           token.value,
-          deviceData.value,
+          deviceData,
           encodeURIComponent(keyWord.value)
         );
         isSearch.value = false;
@@ -1542,14 +1561,14 @@ const upload = () => {
 .items-center {
   align-items: center;
 }
-.card-box {
+.card-box-files {
   width: 100%;
-  margin: 24px 0 50px 0;
-  // .card-box();
+  // margin: 24px 0 50px 0;
+  // .card-box-files();
   color: #000;
   background: var(--bg-color);
   // border: var(--theme-border);
-  // @include card-box;
+  // @include card-box-files;
 
   :deep {
     .el-breadcrumb {

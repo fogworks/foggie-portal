@@ -8,11 +8,7 @@
       :spaceUseSize="spaceUseSize"
     ></DashBoard>
   </div>
-  <FileComponent
-    :currentOODItem="currentOODItem.data"
-    :orderId="deviceData.order_id"
-    @getUseSize="getUseSize"
-  >
+  <FileComponent :orderId="deviceData.order_id" @getUseSize="getUseSize">
     <!-- <MyFiles
       v-model:checkedData="checkedData"
       :currentOODItem="currentOODItem.data"

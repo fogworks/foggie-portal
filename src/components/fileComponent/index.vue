@@ -31,6 +31,7 @@
       v-model:singleData="singleData.value"
       v-model:tableLoading="tableLoading"
       :createdTime="createdTime"
+      v-bind="$attrs"
       @setNoSingle="setNoSingle"
       @setNewFolder="setNewFolder"
       @reset="reset"

@@ -40,6 +40,7 @@
           <el-button
             class="top-btn action-item"
             style="background-color: dodgerblue; color: #fff"
+            :disabled="uploadDisable"
             @click="upload"
             key="plain"
             type="primary"
@@ -102,6 +103,13 @@ const props = defineProps({
     default: "",
   },
   tableLoading: Boolean,
+  state: {
+    type: [String, Number],
+  },
+  merkleState: {
+    type: [String, Number],
+    default: 0,
+  },
 });
 const emits = defineEmits([
   "update:checkedData",
@@ -130,6 +138,16 @@ const refresh = () => {
 const { doShare, showShareDialog, shareRefContent, copyContent } = useShare();
 const { deleteItem } = useDelete(tableLoading, refresh);
 const store = useStore();
+const uploadDisable = computed(() => {
+  if (
+    (deviceType.value == "space" && [4, 5].includes(state.value)) ||
+    !merkleState.value
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+});
 
 const tokenMap = computed(() => store.getters.tokenMap);
 const token = computed(() => {
@@ -140,7 +158,14 @@ const token = computed(() => {
   }
 });
 
-const { checkedData, imgCheckedData, activeName, createdTime } = toRefs(props);
+const {
+  checkedData,
+  imgCheckedData,
+  activeName,
+  createdTime,
+  state,
+  merkleState,
+} = toRefs(props);
 const hasChecked = computed(() => {
   if (activeName.value == "Image") {
     return Object.keys(imgCheckedData.value).some((key) => {
