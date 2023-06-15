@@ -136,12 +136,21 @@ const refresh = () => {
   emits("refreshList");
 };
 const { doShare, showShareDialog, shareRefContent, copyContent } = useShare();
+const {
+  checkedData,
+  imgCheckedData,
+  activeName,
+  createdTime,
+  state,
+  merkleState,
+} = toRefs(props);
 const { deleteItem } = useDelete(tableLoading, refresh);
 const store = useStore();
 const uploadDisable = computed(() => {
+  console.log(deviceData, "deviceData");
   if (
-    (deviceData.deviceType == "space" && [4, 5].includes(state.value)) ||
-    !merkleState.value
+    deviceData.device_type == "space" &&
+    ([4, 5].includes(state.value) || !merkleState.value)
   ) {
     return true;
   } else {
@@ -158,14 +167,6 @@ const token = computed(() => {
   }
 });
 
-const {
-  checkedData,
-  imgCheckedData,
-  activeName,
-  createdTime,
-  state,
-  merkleState,
-} = toRefs(props);
 const hasChecked = computed(() => {
   if (activeName.value == "Image") {
     return Object.keys(imgCheckedData.value).some((key) => {

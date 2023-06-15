@@ -83,7 +83,7 @@ export default {
 };
 </script>
 <script setup>
-import { ref, toRefs, reactive, watch, provide, computed } from "vue";
+import { ref, toRefs, reactive, watch, provide, computed, useAttrs } from "vue";
 import ImgList from "./imgList";
 import FolderDialog from "./folderDialog.vue";
 import RenameDialog from "./renameDialog.vue";

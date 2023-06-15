@@ -113,7 +113,11 @@
   </div>
   <div class="img-content" v-else></div>
 </template>
-
+<script>
+export default {
+  inheritAttrs: false,
+};
+</script>
 <script setup>
 import ActionDrop from "@/components/actionDrop";
 import { Picture as IconPicture } from "@element-plus/icons-vue";

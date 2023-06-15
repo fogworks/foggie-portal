@@ -378,44 +378,15 @@
         </el-table-column>
       </el-table> -->
     </div>
+    <DetailDialog
+      v-if="detailShow"
+      v-model:visible="detailShow"
+      :orderId="orderId"
+      :detailData="detailData"
+      :deviceData="deviceData"
+      :email="email"
+    ></DetailDialog>
   </div>
-  <!-- <PinTaskList
-    v-model:display="taskDisplay"
-    :currentOODItems="currentOODItem"
-    @closeRightUpload="closeRightUpload"
-  ></PinTaskList> -->
-  <!-- <ShareDialog
-    :shareRefContent="shareRefContent"
-    :copyContent="copyContent"
-    v-model:visible="showShareDialog"
-  ></ShareDialog> -->
-  <!-- <PinDialog
-    v-model:visible="cyfsDialogShow"
-    type="cyfs"
-    :currentFileItem="pinData"
-    :currentOODItems="deviceData"
-    @confirm="cyfsPin"
-  ></PinDialog>
-  <PinDialog
-    v-model:visible="ipfsDialogShow"
-    type="ipfs"
-    :currentFileItem="pinData"
-    :currentOODItems="deviceData"
-    @confirm="ipfsPin"
-  ></PinDialog>
-  <PinFormDialog
-    v-model:visible="syncDialog"
-    :currentOODItem="deviceData"
-  ></PinFormDialog>
-   -->
-  <DetailDialog
-    v-if="detailShow"
-    v-model:visible="detailShow"
-    :orderId="orderId"
-    :detailData="detailData"
-    :deviceData="deviceData"
-    :email="email"
-  ></DetailDialog>
 </template>
 
 <script setup>
