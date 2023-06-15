@@ -262,7 +262,7 @@ const handlerClick = async (type) => {
           cancelButtonText: "NO",
         })
         .then(async () => {
-          await deleteItem(checkedData.value[0]);
+          deleteItem(checkedData.value);
         });
     }
   } else if (type === "rename") {
