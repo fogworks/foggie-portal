@@ -83,7 +83,7 @@ export default {
       let pipData = JSON.parse(JSON.stringify(pieOption));
       pipData.series[0].data = [
         { value: +spaceUseRate.value.toFixed(4) || 0 },
-        { value: 1 - (+spaceUseRate.value).toFixed(4) || 0 },
+        { value: 1 - (+spaceUseRate.value).toFixed(4) || 1 },
       ];
       spacePieOption.data = pipData;
       // }
