@@ -1,5 +1,5 @@
 <template>
-  <div class="img-content" v-infinite-scroll="getFileList">
+  <div class="img-content" v-if="isReady" v-infinite-scroll="getFileList">
     <!-- v-loadMore="getFileList" -->
     <div v-for="(item, index) in imgData" class="img-box">
       <p>
@@ -20,10 +20,10 @@
               <el-checkbox
                 :class="[
                   'mask-checkbox',
-                  itemChecked(img.id, item.dateId) ? 'itemChecked' : '',
+                  itemChecked(img.cid, item.dateId) ? 'itemChecked' : '',
                 ]"
                 :key="index"
-                :label="img.id"
+                :label="img.cid"
               ></el-checkbox>
             </div>
             <ActionDrop class="action-popover">
@@ -81,10 +81,10 @@
               :teleported="true"
               :hide-on-click-modal="true"
               :initial-index="1"
-              :preview-src-list="[img.url]"
+              :preview-src-list="[img.imgUrl]"
               fit="cover"
-              :key="img.id"
-              :src="img.url"
+              :key="img.cid"
+              :src="img.imgUrl"
               lazy
             >
               <template #placeholder>
@@ -111,6 +111,7 @@
       </div>
     </div>
   </div>
+  <div class="img-content" v-else></div>
 </template>
 
 <script setup>
@@ -169,6 +170,7 @@ const state = reactive({
     // },
   ],
 });
+const isReady = ref(false);
 const imgIndex = ref(0);
 const store = useStore();
 const email = computed(() => store.getters.userInfo?.email);
@@ -196,8 +198,8 @@ const isChecking = computed(() => {
     }
   });
 });
-const itemChecked = (id, pid) => {
-  if (imgCheckedData.value?.[pid]?.indexOf(id) > -1) {
+const itemChecked = (cid, pid) => {
+  if (imgCheckedData.value?.[pid]?.indexOf(cid) > -1) {
     return true;
   } else {
     return false;
@@ -262,7 +264,7 @@ const getTimeLine = (date = "") => {
     getMethod();
   });
 };
-const getReomteData = (scroll, prefix, reset = false, date = "") => {
+const getReomteData = (scroll, prefix, reset = false, date = "", target) => {
   tableLoading.value = true;
   let type = "space";
   oodFileList(
@@ -277,9 +279,7 @@ const getReomteData = (scroll, prefix, reset = false, date = "") => {
   )
     .then((res) => {
       if (res && res.content) {
-        imgIndex.value++;
-
-        initRemoteData(res, reset, date);
+        initRemoteData(res, reset, date, target);
       } else {
         tableLoading.value = false;
       }
@@ -289,7 +289,7 @@ const getReomteData = (scroll, prefix, reset = false, date = "") => {
     });
 };
 
-const getLocalData = (reset = false, date = "") => {
+const getLocalData = (reset = false, date = "", target) => {
   let params = {
     email: email.value,
     orderId: orderId.value,
@@ -297,9 +297,7 @@ const getLocalData = (reset = false, date = "") => {
   };
   GetFileListAll(params)
     .then((res) => {
-      imgIndex.value++;
-
-      initLocalData(res, reset, date);
+      initLocalData(res, reset, date, target);
     })
     .catch(() => {
       tableLoading.value = false;
@@ -417,12 +415,9 @@ const initRemoteData = (data, reset = false, date = "") => {
   //   };
   //   tableData.value.push(item);
   // }
-  if (data?.content.length) {
-    imgData.value.push({
-      time: date,
-      dateId: date,
-      list: content,
-    });
+  const target = imgData.value.find((el) => el.time == date);
+  if (target) {
+    target.list = [...target.list, ...content];
   }
   console.log(tableData.value, "tableDatatableData");
   if (data.isTruncated) {
@@ -442,7 +437,7 @@ const initRemoteData = (data, reset = false, date = "") => {
 
   // tableSort({ prop: "date", order: 1, key: 1 });
 };
-const initLocalData = (data, reset = false, date = "") => {
+const initLocalData = (data, reset = false, date = "", target) => {
   if (!data) {
     tableLoading.value = false;
     return;
@@ -543,11 +538,19 @@ const initLocalData = (data, reset = false, date = "") => {
   //   tableData.value.push(item);
   // }
   if (data?.data.length) {
-    imgData.value.push({
-      time: date,
-      dateId: date,
-      list: content,
-    });
+    const target = imgData.value.find((el) => el.time == date);
+    if (target) {
+      target.list = [...target.list, ...content];
+    }
+
+    // const [match] = imgData.value.filter((el) => el.time == date);
+    // if (!match) {
+    //   imgData.value.push({
+    //     time: date,
+    //     dateId: date,
+    //     list: content,
+    //   });
+    // }
   }
 
   tableLoading.value = false;
@@ -562,6 +565,25 @@ const initLocalData = (data, reset = false, date = "") => {
   // tableSort({ prop: "date", order: 1, key: 1 });
 };
 const getFileList = function (scroll, prefix, reset = false, date = "") {
+  console.log(imgIndex.value, "imgIndex.value");
+  console.log(dateTimeLine.value, "dateTimeLine.value");
+  let target = "";
+  target = imgData.value.find((el) => el.time == date);
+  if (target) return false;
+  if (dateTimeLine.value[imgIndex.value]) {
+    date = dateTimeLine.value[imgIndex.value];
+    console.log(date, "datedate");
+    if (!target) {
+      imgData.value.push({
+        time: date,
+        dateId: date,
+        list: [],
+      });
+    }
+    imgIndex.value++;
+  } else {
+    return false;
+  }
   let list_prefix = "";
   if (prefix?.length) {
     list_prefix = prefix.join("/");
@@ -590,8 +612,6 @@ const getFileList = function (scroll, prefix, reset = false, date = "") {
     )
       .then((res) => {
         if (res && res.content) {
-          imgIndex.value++;
-
           initFileData(res, reset, date);
         }
       })
@@ -659,11 +679,17 @@ const initFileData = async (data, reset = false) => {
   } else {
     continuationToken.value = "";
   }
-  if (reset) {
-    tableData.value = [...contentItem];
-  } else {
-    tableData.value = [...tableData.value, ...contentItem];
+  if (data?.data.length) {
+    const target = imgData.value.find((el) => el.time == date);
+    if (target) {
+      target.list = content;
+    }
   }
+  // if (reset) {
+  //   tableData.value = [...contentItem];
+  // } else {
+  //   tableData.value = [...tableData.value, ...contentItem];
+  // }
   tableLoading.value = false;
 };
 
@@ -722,7 +748,7 @@ const handleImg = (item, type, isDir) => {
 };
 const init = async () => {
   await getTimeLine();
-
+  isReady.value = true;
   // getFileList(
   //   "",
   //   breadcrumbList.prefix,
@@ -730,25 +756,25 @@ const init = async () => {
   //   dateTimeLine.value[imgIndex.value]
   // );
 };
-watch(
-  dateTimeLine,
-  async (val) => {
-    await getFileList(
-      "",
-      breadcrumbList.prefix,
-      false,
-      dateTimeLine.value[imgIndex.value]
-    );
-  },
-  {
-    deep: true,
-  }
-);
+// watch(
+//   dateTimeLine,
+//   async (val) => {
+//     await getFileList(
+//       "",
+//       breadcrumbList.prefix,
+//       false,
+//       dateTimeLine.value[imgIndex.value]
+//     );
+//   },
+//   {
+//     deep: true,
+//   }
+// );
 const refresh = () => {
   console.log(111);
 };
 const handleCheckAllChange = (val, item) => {
-  imgCheckedData.value[item.dateId] = val ? item.list.map((el) => el.id) : [];
+  imgCheckedData.value[item.dateId] = val ? item.list.map((el) => el.cid) : [];
 };
 const handleCheckedItemsChange = (val, item) => {
   const checkedCount = val.length;

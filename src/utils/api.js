@@ -103,8 +103,12 @@ export const oodFileList = (email, type, token, deviceData, prefix, scroll, cate
     continuation_token = scroll || "",
     version_id_marker = "",
     key_marker = "",
-    orderby = 'lastmodifiedtimedesc',
+    orderby = 'lastmodifiedtime desc',
     tags = ''
+  if (category == 1) {
+    // imglist
+    delimiter = ''
+  }
   let data = {
     prefix,
     delimiter,

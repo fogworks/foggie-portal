@@ -255,16 +255,14 @@ const handlerClick = async (type) => {
   } else if (type === "download") {
     downLoad();
   } else if (type === "delete") {
-    if (checkedData.value.length == 1) {
-      proxy
-        .$confirm("Are you sure to delete it?", "Warning", {
-          confirmButtonText: "YES",
-          cancelButtonText: "NO",
-        })
-        .then(async () => {
-          deleteItem(checkedData.value);
-        });
-    }
+    proxy
+      .$confirm("Are you sure you want to delete?", "Warning", {
+        confirmButtonText: "YES",
+        cancelButtonText: "NO",
+      })
+      .then(async () => {
+        deleteItem(checkedData.value);
+      });
   } else if (type === "rename") {
     emits("update:singleData", checkedData.value[0]);
     emits("update:renameVisible", true);
