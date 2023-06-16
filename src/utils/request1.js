@@ -27,6 +27,7 @@ service.interceptors.request.use(
     }
 
     config.headers.Authorization = getToken() || "";
+    config.headers["Content-Type"] = "application/json";
     return config;
   },
   (error) => {

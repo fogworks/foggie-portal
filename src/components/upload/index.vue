@@ -201,6 +201,7 @@ const onFileAdded = (file) => {
 };
 
 const onFilesAdded = (files, fileList) => {
+
   let timer = null;
   
   if (files.length > 500) {

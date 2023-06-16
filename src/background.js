@@ -171,7 +171,7 @@ function checkMemory() {
   const totalMemory = os.totalmem(); // 获取系统总内存，单位为字节
   const totalMemoryGB = totalMemory / (1024 * 1024 * 1024); // 将总内存转换为GB
 
-  if (totalMemoryGB < 8) {
+  if (totalMemoryGB < 7.9) {
     dialog.showMessageBox({
       type: "info",
       title: "Info",
@@ -210,13 +210,13 @@ function modifyConfig() {
           try {
             fs.mkdirSync(`${user_path}/AppData/Roaming/foggie/repo`);
             server.repoPath = `${user_path}/AppData/Roaming/foggie/repo`;
-          } catch (error) {}
+          } catch (error) { }
         }
         if (!isExistDb) {
           try {
             fs.mkdirSync(`${user_path}/AppData/Roaming/foggie/db`);
             db.path = `${user_path}/AppData/Roaming/foggie/db`;
-          } catch (error) {}
+          } catch (error) { }
         }
       }
 
@@ -280,15 +280,15 @@ async function createWindow() {
             .then((result) => {
               if (result.response === 0) {
                 closePort(3000)
-                  .then(() => {})
-                  .catch((error) => {});
+                  .then(() => { })
+                  .catch((error) => { });
               } else {
                 return;
               }
             });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
     if (checkMacOS()) {
       closePort(8007)
         .then(() => {

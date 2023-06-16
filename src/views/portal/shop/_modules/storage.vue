@@ -430,7 +430,7 @@ function returnBG(index) {
 }
 const maxRetry = ref(0);
 async function submit() {
-  let flag = await blurPrestoreDMC();
+  let flag = blurPrestoreDMC();
   if (flag) {
     loading.value = true;
     await loadCurReferenceRate();
