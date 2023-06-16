@@ -1,14 +1,15 @@
 <template>
   <div class="card-box-files">
     <el-breadcrumb :separator-icon="ArrowRight">
-      <el-switch
+      <!-- <el-switch
+        v-if="deviceType == 'space'"
         class="file-source"
         v-model="fileSource"
         size="large"
         active-text="Remote Files"
         inactive-text="Local Files"
         :before-change="switchReceiveStatus"
-      />
+      /> -->
       <el-breadcrumb-item @click="setPrefix(item, true)">
         <div class="flex items-center">
           <!-- <img class="title-img" src="@/assets/my-files.png" alt="" /> -->
@@ -446,7 +447,6 @@ const emits = defineEmits([
 ]);
 const keyWord = ref("");
 const pageNum = ref(1);
-const fileSource = ref(false);
 
 // const tableLoading = ref(false);
 
@@ -466,6 +466,7 @@ const props = defineProps({
     type: [String, Number],
     default: 0,
   },
+  fileSource: Boolean,
 });
 const newFolderName = ref("");
 const syncDialog = ref(false);
@@ -476,7 +477,7 @@ const closeRightUpload = () => {
 const deviceType = computed(() => deviceData.device_type);
 const order_Id = computed(() => store.getters.orderId);
 
-const { currentOODItem, orderId, category } = toRefs(props);
+const { currentOODItem, orderId, category, fileSource } = toRefs(props);
 const tableLoading = computed({
   get() {
     return props.tableLoading || false;
@@ -687,49 +688,49 @@ const columns = [
   },
 ];
 
-const switchReceiveStatus = () => {
-  return new Promise((resolve, reject) => {
-    try {
-      if (fileSource.value) {
-        console.log("------------remote");
-        ElMessageBox.confirm("Are you sure to get local data?", "Warning", {
-          confirmButtonText: "OK",
-          cancelButtonText: "Cancel",
-        })
-          .then(() => {
-            // get remote data
-            fileSource.value = !fileSource.value;
-            emits("setFileSource", fileSource.value);
-            breadcrumbList.prefix = [];
-            tableData.value = [];
-            // getLocalData();
-          })
-          .catch(() => {
-            reject(false);
-          });
-      } else {
-        console.log("------------local");
-        ElMessageBox.confirm("Are you sure to get remote data?", "Warning", {
-          confirmButtonText: "OK",
-          cancelButtonText: "Cancel",
-        })
-          .then(() => {
-            // get remote data
-            fileSource.value = !fileSource.value;
-            emits("setFileSource", fileSource.value);
-            breadcrumbList.prefix = [];
-            tableData.value = [];
-            // getReomteData();
-          })
-          .catch(() => {
-            reject(false);
-          });
-      }
-    } catch (err) {
-      reject(false);
-    }
-  });
-};
+// const switchReceiveStatus = () => {
+//   return new Promise((resolve, reject) => {
+//     try {
+//       if (fileSource.value) {
+//         console.log("------------remote");
+//         ElMessageBox.confirm("Are you sure to get local data?", "Warning", {
+//           confirmButtonText: "OK",
+//           cancelButtonText: "Cancel",
+//         })
+//           .then(() => {
+//             // get remote data
+//             fileSource.value = !fileSource.value;
+//             emits("setFileSource", fileSource.value);
+//             breadcrumbList.prefix = [];
+//             tableData.value = [];
+//             // getLocalData();
+//           })
+//           .catch(() => {
+//             reject(false);
+//           });
+//       } else {
+//         console.log("------------local");
+//         ElMessageBox.confirm("Are you sure to get remote data?", "Warning", {
+//           confirmButtonText: "OK",
+//           cancelButtonText: "Cancel",
+//         })
+//           .then(() => {
+//             // get remote data
+//             fileSource.value = !fileSource.value;
+//             emits("setFileSource", fileSource.value);
+//             breadcrumbList.prefix = [];
+//             tableData.value = [];
+//             // getReomteData();
+//           })
+//           .catch(() => {
+//             reject(false);
+//           });
+//       }
+//     } catch (err) {
+//       reject(false);
+//     }
+//   });
+// };
 // const tableSort = ({ prop = "", order = 2, key = "" }) => {
 //   const sortOrders = ["ascending", "descending", null];
 //   activeSort.value = key;
@@ -755,7 +756,7 @@ const refresh = () => {
   keyWord.value = "";
   // tableSort({ prop: "date", order: 1, key: 1 });
   if (tableLoading.value) return;
-
+  tableData.value = [];
   getFileList("", breadcrumbList.prefix, true);
 };
 const email = computed(() => store.getters.userInfo?.email);
@@ -826,7 +827,10 @@ const initRemoteData = (data, reset = false) => {
     }
     let item = {
       isDir: true,
+      checked: false,
+
       name,
+      fileType: 1,
       fullName: decodeURIComponent(data.commonPrefixes[i]),
       key: data.commonPrefixes[i],
       idList: [
@@ -878,7 +882,10 @@ const initRemoteData = (data, reset = false) => {
 
     let item = {
       isDir: isDir,
+      checked: false,
+
       name,
+      fileType: 2,
       fullName: decodeURIComponent(data.content[j].key),
       key: data.content[j].key,
       idList: [
@@ -953,7 +960,10 @@ const initLocalData = (data, reset = false) => {
     let { isSystemImg } = handleImg(data.data[j], type, isDir);
 
     let item = {
+      checked: false,
+
       isDir: isDir,
+      fileType: 2,
       fullName: decodeURIComponent(data.data[j].dest_path),
       name,
       key: data.data[j].dest_path,
@@ -1046,6 +1056,7 @@ const initFileData = async (data, reset = false) => {
     }
     return {
       isDir: true,
+      checked: false,
       name,
       fullName: decodeURIComponent(el.key),
       key: el,
@@ -1484,6 +1495,7 @@ const fileListsInfinite = _.debounce(() => {
 
 watch(breadcrumbList, (val) => {
   if (!isSearch.value) {
+    emits("update:checkedData", []);
     getFileList("", val.prefix, true);
   }
 });
@@ -1497,6 +1509,19 @@ watch(
     deep: true,
   }
 );
+watch(
+  fileSource,
+  (val) => {
+    getFileList("", breadcrumbList.prefix, true);
+  },
+  {
+    // immediate: true,
+    deep: true,
+  }
+);
+watch(category, (val) => {
+  refresh();
+});
 const confirmNewFolder = () => {
   console.log(newFolderName.value, 55555555555);
 };

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="action-content">
     <div v-if="hasChecked" class="action-box">
       <div
         class="action-item"
@@ -35,7 +35,7 @@
       </div>
     </div>
     <template v-else>
-      <div style="display: flex; align-items: center; margin-bottom: 20px">
+      <div style="display: flex; align-items: center">
         <div class="action-box" style="margin-right: 20px; margin-bottom: 0">
           <el-button
             class="top-btn action-item upload-btn"
@@ -60,6 +60,15 @@
         </div>
       </div>
     </template>
+    <el-switch
+      v-if="deviceType == 'space'"
+      class="file-source"
+      v-model="fileSource"
+      size="large"
+      active-text="Remote Files"
+      inactive-text="Local Files"
+      :before-change="switchReceiveStatus"
+    />
     <ShareDialog
       :shareRefContent="shareRefContent"
       :copyContent="copyContent"
@@ -85,6 +94,8 @@ import useDelete from "./hooks/useDelete.js";
 import { getToken } from "@/utils/auth";
 import { baseUrl } from "@/setting";
 const deviceData = inject("deviceData");
+import { ElMessageBox } from "element-plus";
+const deviceType = computed(() => deviceData.device_type);
 const props = defineProps({
   checkedData: {
     type: Array,
@@ -110,6 +121,9 @@ const props = defineProps({
     type: [String, Number],
     default: 0,
   },
+  fileSource: {
+    type: Boolean,
+  },
 });
 const emits = defineEmits([
   "update:checkedData",
@@ -119,6 +133,7 @@ const emits = defineEmits([
   "update:imgCheckedData",
   "update:actionType",
   "update:singleData",
+  "update:fileSource",
   "reset",
   "setNewFolder",
   "refreshList",
@@ -143,6 +158,7 @@ const {
   createdTime,
   state,
   merkleState,
+  fileSource,
 } = toRefs(props);
 const { deleteItem } = useDelete(tableLoading, refresh);
 const store = useStore();
@@ -247,7 +263,43 @@ const upload = () => {
 const resetChecked = () => {
   emits("reset");
 };
-
+const switchReceiveStatus = () => {
+  return new Promise((resolve, reject) => {
+    try {
+      if (fileSource.value) {
+        console.log("------------remote");
+        ElMessageBox.confirm("Are you sure to get local data?", "Warning", {
+          confirmButtonText: "OK",
+          cancelButtonText: "Cancel",
+        })
+          .then(() => {
+            // get remote data
+            emits("update:fileSource", !fileSource.value);
+            // getLocalData();
+          })
+          .catch(() => {
+            reject(false);
+          });
+      } else {
+        console.log("------------local");
+        ElMessageBox.confirm("Are you sure to get remote data?", "Warning", {
+          confirmButtonText: "OK",
+          cancelButtonText: "Cancel",
+        })
+          .then(() => {
+            // get remote data
+            emits("update:fileSource", !fileSource.value);
+            // getReomteData();
+          })
+          .catch(() => {
+            reject(false);
+          });
+      }
+    } catch (err) {
+      reject(false);
+    }
+  });
+};
 const handlerClick = async (type) => {
   emits("update:isSingle", false);
   if (type === "move" || type === "copy") {
@@ -283,11 +335,16 @@ const handlerClick = async (type) => {
 </script>
 
 <style lang="scss" scoped>
+.action-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
 .action-box {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  margin-bottom: 20px;
   border-radius: 99px;
   transition: all 0.3s;
   .top-btn {

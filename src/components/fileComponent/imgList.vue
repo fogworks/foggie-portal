@@ -1,8 +1,7 @@
 <template>
   <div class="img-content" v-if="isReady" v-infinite-scroll="getFileList">
-    <!-- v-loadMore="getFileList" -->
     <div v-for="(item, index) in imgData" class="img-box">
-      <p>
+      <p v-if="item.list.length">
         <el-checkbox
           v-model="item.checkAll"
           @change="(val) => handleCheckAllChange(val, item)"
@@ -111,7 +110,9 @@
       </div>
     </div>
   </div>
-  <div class="img-content" v-else></div>
+  <div class="img-content" v-else>
+    <el-empty :image-size="200" />
+  </div>
 </template>
 <script>
 export default {
@@ -325,8 +326,11 @@ const initRemoteData = (data, reset = false, date = "") => {
     let date = transferTime(el.lastModified);
     let isDir = false;
     const type = el.key.substring(el.key.lastIndexOf(".") + 1);
-    let { imgHttpLink: url, isSystemImg } = handleImg(el, type, isDir);
-    let { imgHttpLink: url_large } = handleImg(el, type, isDir);
+    let {
+      imgHttpLink: url,
+      isSystemImg,
+      imgHttpLarge: url_large,
+    } = handleImg(el, type, isDir);
     let cid = el.cid;
     let file_id = el.fileId;
 
@@ -337,6 +341,7 @@ const initRemoteData = (data, reset = false, date = "") => {
     let isPersistent = el.isPersistent;
 
     let item = {
+      fileType: 2,
       isDir: isDir,
       name,
       fullName: decodeURIComponent(el.key),
@@ -367,58 +372,7 @@ const initRemoteData = (data, reset = false, date = "") => {
     };
     return item;
   });
-  // for (let j = 0; j < data?.content?.length; j++) {
-  //   let date = transferTime(data.content[j].lastModified);
-  //   let isDir = false;
-  //   const type = data.content[j].key.substring(
-  //     data.content[j].key.lastIndexOf(".") + 1
-  //   );
-  //   let { imgHttpLink: url, isSystemImg } = handleImg(
-  //     data.content[j],
-  //     type,
-  //     isDir
-  //   );
-  //   let { imgHttpLink: url_large } = handleImg(data.content[j], type, isDir);
-  //   let cid = data.content[j].cid;
-  //   let file_id = data.content[j].fileId;
 
-  //   let name = decodeURIComponent(data.content[j].key);
-  //   if (data.prefix) {
-  //     name = name.split(data.prefix)[1];
-  //   }
-  //   let isPersistent = data.content[j].isPersistent;
-
-  //   let item = {
-  //     isDir: isDir,
-  //     name,
-  //     fullName: decodeURIComponent(data.content[j].key),
-  //     key: data.content[j].key,
-  //     idList: [
-  //       {
-  //         name: "IPFS",
-  //         code: data.content[j].isPin ? cid : "",
-  //       },
-  //       {
-  //         name: "CYFS",
-  //         code: data.content[j].isPinCyfs ? file_id : "",
-  //       },
-  //     ],
-  //     date,
-  //     size: getfilesize(data.content[j].size),
-  //     status: cid || file_id ? "Published" : "-",
-  //     type: data.content[j].contentType,
-  //     file_id: file_id,
-  //     pubkey: cid,
-  //     cid,
-  //     imgUrl: url,
-  //     imgUrlLarge: url_large,
-  //     share: {},
-  //     isSystemImg,
-  //     canShare: cid ? true : false,
-  //     isPersistent,
-  //   };
-  //   tableData.value.push(item);
-  // }
   const target = imgData.value.find((el) => el.time == date);
   if (target) {
     target.list = [...target.list, ...content];
@@ -464,9 +418,10 @@ const initLocalData = (data, reset = false, date = "", target) => {
     let name = decodeURIComponent(el.dest_path);
 
     const type = el.dest_path.substring(el.dest_path.lastIndexOf(".") + 1);
-    let { isSystemImg } = handleImg(el, type, isDir);
+    let { isSystemImg, imgHttpLarge: url_large } = handleImg(el, type, isDir);
 
     let item = {
+      fileType: 2,
       isDir: isDir,
       fullName: decodeURIComponent(el.dest_path),
       name,
@@ -489,72 +444,19 @@ const initLocalData = (data, reset = false, date = "", target) => {
       pubkey: cid,
       cid,
       imgUrl: "",
-      imgUrlLarge: "",
+      imgUrlLarge: url_large,
       share: {},
       isSystemImg,
       canShare: cid ? true : false,
       isPersistent: true,
     };
   });
-  // for (let j = 0; j < data?.data?.length; j++) {
-  //   let date = data.data[j].update_time;
-  //   let isDir = false;
 
-  //   let cid = data.data[j].cid;
-  //   let file_id = data.data[j].fileId;
-
-  //   let name = decodeURIComponent(data.data[j].dest_path);
-
-  //   const type = data.data[j].dest_path.substring(
-  //     data.data[j].dest_path.lastIndexOf(".") + 1
-  //   );
-  //   let { isSystemImg } = handleImg(data.data[j], type, isDir);
-
-  //   let item = {
-  //     isDir: isDir,
-  //     fullName: decodeURIComponent(data.data[j].dest_path),
-  //     name,
-  //     key: data.data[j].dest_path,
-  //     idList: [
-  //       {
-  //         name: "IPFS",
-  //         code: data.data[j].isPin ? cid : "",
-  //       },
-  //       {
-  //         name: "CYFS",
-  //         code: data.data[j].isPinCyfs ? file_id : "",
-  //       },
-  //     ],
-  //     date,
-  //     size: getfilesize(data.data[j].file_size),
-  //     status: cid || file_id ? "Published" : "-",
-  //     type: data.data[j].contentType || "",
-  //     file_id: file_id | "",
-  //     pubkey: cid,
-  //     cid,
-  //     imgUrl: "",
-  //     imgUrlLarge: "",
-  //     share: {},
-  //     isSystemImg,
-  //     canShare: cid ? true : false,
-  //     isPersistent: true,
-  //   };
-  //   tableData.value.push(item);
-  // }
   if (data?.data.length) {
     const target = imgData.value.find((el) => el.time == date);
     if (target) {
       target.list = [...target.list, ...content];
     }
-
-    // const [match] = imgData.value.filter((el) => el.time == date);
-    // if (!match) {
-    //   imgData.value.push({
-    //     time: date,
-    //     dateId: date,
-    //     list: content,
-    //   });
-    // }
   }
 
   tableLoading.value = false;
@@ -634,7 +536,11 @@ const initFileData = async (data, reset = false) => {
     let date = transferTime(el.lastModified);
     let isDir = false;
     const type = el.key.substring(el.key.lastIndexOf(".") + 1);
-    let { imgHttpLink: url, isSystemImg } = handleImg(el, type, isDir);
+    let {
+      imgHttpLink: url,
+      isSystemImg,
+      imgHttpLarge: url_large,
+    } = handleImg(el, type, isDir);
 
     let cid = el.cid;
     let file_id = el.fileId;
@@ -645,6 +551,7 @@ const initFileData = async (data, reset = false) => {
     }
 
     return {
+      fileType: 2,
       checked: false,
       isDir: isDir,
       name,
@@ -700,6 +607,7 @@ const initFileData = async (data, reset = false) => {
 const theme = computed(() => store.getters.theme);
 const handleImg = (item, type, isDir) => {
   let imgHttpLink = "";
+  let imgHttpLarge = "";
   type = type.toLowerCase();
   let isSystemImg = false;
   let cid = item.cid;
@@ -726,6 +634,9 @@ const handleImg = (item, type, isDir) => {
     imgHttpLink = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=${
       deviceType.value == "space" ? "space" : "foggie"
     }&token=${token.value}&thumb=true`;
+    imgHttpLarge = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=${
+      deviceType.value == "space" ? "space" : "foggie"
+    }&token=${token.value}`;
 
     // foggie://peerid/spaceid/cid
   } else if (type === "mp4") {
@@ -748,7 +659,7 @@ const handleImg = (item, type, isDir) => {
     //     ? require(`@/assets/logo-dog.svg`)
     //     : require(`@/assets/logo-dog-black.svg`);
   }
-  return { imgHttpLink, isSystemImg };
+  return { imgHttpLink, isSystemImg, imgHttpLarge };
 };
 const init = async () => {
   await getTimeLine();
@@ -810,6 +721,28 @@ watch(
     deep: true,
   }
 );
+watch(
+  fileSource,
+  async () => {
+    timeLine.value = [];
+    dateTimeLine.value = [];
+    imgData.value = [];
+    isReady.value = false;
+    imgIndex.value = 0;
+    await init();
+    nextTick(() => {
+      isReady.value = true;
+    });
+  },
+  { deep: true }
+);
+watch(
+  imgData,
+  () => {
+    console.log(imgData.value, "imgDataimgData");
+  },
+  { deep: true }
+);
 onMounted(() => {
   init();
   // nextTick(() => {
@@ -852,6 +785,7 @@ defineExpose({ resetChecked });
       width: 128px;
       height: 128px;
       margin: 0 10px 10px 0;
+      border: 1px solid #dfdfdf;
       .mask {
         display: none;
         position: absolute;
@@ -978,7 +912,7 @@ defineExpose({ resetChecked });
       .el-image {
         width: 128px;
         height: 128px;
-        img {
+        padding: 15px img {
           // object-fit: cover;
           // vertical-align: middle;
         }

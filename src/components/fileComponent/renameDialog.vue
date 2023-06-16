@@ -9,12 +9,15 @@
       :close-on-click-modal="false"
       :before-close="beforeClose"
     >
-      <el-form-item style="margin-top: 20px" label="Name">
-        <el-input disabled :model-value="singleData.name"></el-input>
-      </el-form-item>
-      <el-form-item style="margin-top: 20px" label="New Name">
-        <el-input v-model="newName"></el-input>
-      </el-form-item>
+      <el-form label-width="100px">
+        <el-form-item style="margin-top: 20px" label="Name">
+          <el-input disabled :model-value="checkedData[0].name"></el-input>
+        </el-form-item>
+        <el-form-item style="margin-top: 20px" label="New Name">
+          <el-input v-model.trim="newName"></el-input>
+        </el-form-item>
+      </el-form>
+
       <div slot="footer" class="dialog-footer">
         <el-button @click="beforeClose">Cancel</el-button>
         <div class="color-box">
@@ -30,8 +33,6 @@
 
 <script setup>
 import {
-  defineProps,
-  defineEmits,
   toRefs,
   ref,
   getCurrentInstance,
@@ -43,22 +44,15 @@ import {
 } from "vue";
 import { useStore } from "vuex";
 import { ArrowRight } from "@element-plus/icons-vue";
-import { oodFileList } from "@/utils/api.js";
+import { rename_objects } from "@/utils/api.js";
 import RippleInk from "@/components/rippleInk";
 const { proxy } = getCurrentInstance();
 const store = useStore();
+
 const props = defineProps({
   renameVisible: {
     type: Boolean,
     default: false,
-  },
-  actionType: {
-    type: String,
-    default: "copy",
-  },
-  singleData: {
-    type: Object,
-    default: () => {},
   },
 });
 const { renameVisible, actionType, singleData } = toRefs(props);
@@ -67,13 +61,63 @@ const checkedData = inject("checkedData");
 
 const deviceData = inject("deviceData");
 const newName = ref("");
-
-const emits = defineEmits(["update:renameVisible", "reset"]);
+const tokenMap = computed(() => store.getters.tokenMap);
+const token = computed(() => {
+  if (deviceData.device_type == "space") {
+    return deviceData.upload_file_token;
+  } else {
+    return tokenMap.value[deviceData.device_id];
+  }
+});
+const emits = defineEmits(["update:renameVisible", "reset", "refreshList"]);
 const beforeClose = () => {
   emits("update:renameVisible", false);
 };
 const handleConfirm = () => {
-  console.log(checkedData.value, "564894984984191984198419841981");
+  if (activeName.value == "Image") {
+    console.log(imgCheckedData.value, "imgCheckedData");
+  } else if (activeName.value == "All") {
+    // if (isSingle.value) {
+    //   console.log(singleData.value, "singleDatasingleDatasingleData");
+    // } else {
+    //   console.log(checkedData.value, "checkedDatacheckedDatacheckedData");
+    // }
+    const targetObject = () => {
+      const arr = checkedData.value?.[0]?.fullName.split("/");
+
+      if (checkedData.value?.[0]?.type == "application/x-directory") {
+        if (newName.value[newName.value.length - 1] == "/") {
+          const newData = newName.value.slice(0, newName.value.length - 1);
+          console.log(newData, "newDatanewData");
+          arr.splice(arr.length - 2, 1, newData);
+        } else {
+          arr.splice(arr.length - 2, 1, newName.value);
+        }
+      } else {
+        arr.splice(arr.length - 1, 1, newName.value);
+      }
+      return arr.join("/");
+    };
+    rename_objects({
+      deviceData,
+      sourceObject: checkedData.value[0].fullName,
+      targetObject: targetObject(),
+      token: token.value,
+      fileType: checkedData.value[0].fileType,
+    }).then((res) => {
+      if (res) {
+        proxy.$notify({
+          type: "success",
+          message: "Rename successful",
+          position: "bottom-left",
+        });
+        emits("refreshList");
+        emits("reset");
+        emits("update:renameVisible", false);
+      }
+    });
+    // emits("reset");
+  }
 };
 </script>
 

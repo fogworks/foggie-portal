@@ -19,6 +19,18 @@
           Video
         </template>
       </el-tab-pane>
+      <el-tab-pane label="Audio" name="Audio">
+        <template #label>
+          <svg-icon icon-class="audio"></svg-icon>
+          Audio
+        </template>
+      </el-tab-pane>
+      <el-tab-pane label="Document" name="Document">
+        <template #label>
+          <svg-icon icon-class="document"></svg-icon>
+          Document
+        </template>
+      </el-tab-pane>
     </el-tabs>
     <ActionBar
       :activeName="activeName"
@@ -30,6 +42,7 @@
       v-model:actionType="actionType"
       v-model:singleData="singleData.value"
       v-model:tableLoading="tableLoading"
+      v-model:fileSource="fileSource"
       :createdTime="createdTime"
       v-bind="$attrs"
       @setNoSingle="setNoSingle"
@@ -38,7 +51,7 @@
       @refreshList="refreshList"
     ></ActionBar>
     <AllFile
-      v-if="activeName === 'All'"
+      v-if="activeName !== 'Image'"
       v-model:checkedData="checkedData"
       v-model:folderVisible="folderVisible"
       v-model:isSingle="isSingle"
@@ -46,6 +59,7 @@
       v-model:actionType="actionType"
       v-model:tableLoading="tableLoading"
       :category="category"
+      :fileSource="fileSource"
       @setSingle="setSingle"
       @setFileSource="setFileSource"
       v-bind="$attrs"
@@ -65,15 +79,16 @@
   <FolderDialog
     v-if="folderVisible"
     v-model:folderVisible="folderVisible"
-    :isSingle="isSingle"
-    :singleData="singleData.value"
+    v-bind="$attrs"
+    :fileSource="fileSource"
     @reset="reset"
+    @refreshList="refreshList"
   ></FolderDialog>
   <RenameDialog
     v-if="renameVisible"
     v-model:renameVisible="renameVisible"
-    :singleData="singleData.value"
     @reset="reset"
+    @refreshList="refreshList"
   ></RenameDialog>
 </template>
 
@@ -144,17 +159,17 @@ const setFileSource = (val) => {
 const reset = () => {
   checkedData.value = [];
   imgCheckedData.value = {};
-  if (activeName.value === "All") {
-    AllFileRef.value.resetChecked();
-  } else if (activeName.value === "Image") {
+  if (activeName.value === "Image") {
     ImgListRef.value.resetChecked();
+  } else {
+    AllFileRef.value.resetChecked();
   }
 };
 const refreshList = () => {
-  if (activeName.value === "All") {
-    AllFileRef.value.refresh();
-  } else if (activeName.value === "Image") {
+  if (activeName.value === "Image") {
     ImgListRef.value.refresh();
+  } else {
+    AllFileRef.value.refresh();
   }
 };
 const handleClick = (tab, event) => {
@@ -164,6 +179,7 @@ const setNewFolder = () => {
   AllFileRef.value.setNewFolder();
 };
 watch(activeName, () => {
+  tableLoading.value = false;
   checkedData.value = [];
   imgCheckedData.value = {};
 });
