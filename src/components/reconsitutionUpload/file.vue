@@ -299,6 +299,7 @@ const resume = debounce(async function () {
       deviceType: file.value.deviceType,
       destPath: file.value.urlFileName,
       md5: fileMd5.value,
+      foggieToken: file.value.foggieToken,
     };
 
 

@@ -352,6 +352,7 @@ function updaFileListByState(type) {
 }
 
 provide('StateType', computed(() => requestFileList[orderId.value].isErrorOrWaiting))
+
 function loadFileListByState(type = 3) {
   let params = {
     email: email.value,
@@ -389,8 +390,6 @@ function loadFileListByState(type = 3) {
     }
   })
 }
-
-
 
 /* 在上传过程中 每当有新的文件进行上传操作待上传列表中就删除对应的文件 */
 const newQueueID = (id, fileOrderID) => {
