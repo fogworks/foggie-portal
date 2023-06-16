@@ -110,12 +110,27 @@
     >
       <div class="BoxContent">
         <el-row class="BoxContent_header">
-          <el-col :span="3" style="line-height: 80px; text-align: center">
-            <span
-              style="margin-right: 10px; font-size: 40px; font-weight: 600"
-              >{{ item.miner_lock_pst_amount }}</span
-            >
-            <span style="font-size: 24px; font-weight: 600">GB</span>
+          <el-col
+            :span="3"
+            style="
+              line-height: 80px;
+              text-align: center;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            "
+          >
+            <el-tooltip :content="getfilesize2(item.miner_lock_pst_amount)">
+              <span
+                style="margin-right: 10px; font-size: 40px; font-weight: 600"
+              >
+                {{ getfilesize2(item.miner_lock_pst_amount).split(" ")[0] }}
+                <span style="font-size: 24px; font-weight: 600">
+                  {{
+                    getfilesize2(item.miner_lock_pst_amount).split(" ")[1]
+                  }}</span
+                >
+              </span>
+            </el-tooltip>
           </el-col>
           <el-col :span="11" class="tow_col">
             <div>
@@ -578,7 +593,7 @@ import {
 import { getToken } from "@/utils/auth";
 
 import AssetsRecords from "./assetsRecords";
-import { getfilesize, transferUTCTime } from "@/utils/util.js";
+import { getfilesize, transferUTCTime, getfilesize2 } from "@/utils/util.js";
 import { getSummary } from "@/utils/api";
 const $state = useStore();
 const emits = defineEmits(["setState", "setTime"]);
@@ -824,7 +839,7 @@ const challengeMiner = (item) => {
             message: `Successfully initiated the challenge`,
             position: "bottom-left",
           });
-          refresh();
+          // refresh();
           if (timeLineShow.value) {
             setTimeout(() => {
               timeLineRef.value.loadChallengeList();

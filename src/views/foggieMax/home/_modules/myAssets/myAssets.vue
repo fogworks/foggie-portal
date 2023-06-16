@@ -122,7 +122,16 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted, watchEffect, toRefs, inject } from "vue";
+import {
+  ref,
+  reactive,
+  onMounted,
+  watchEffect,
+  toRefs,
+  inject,
+  nextTick,
+  watch,
+} from "vue";
 import ReNew from "./reNew";
 import AddPoolDialog from "./addPoolDialog";
 import MinerRecords from "./minerRecords";
@@ -191,6 +200,13 @@ export default {
         adminCategoriesListInit();
       }, 3000);
     };
+    watch(PoolDialogVisible, (val) => {
+      if (!val) {
+        nextTick(() => {
+          checkJoinMp();
+        });
+      }
+    });
     onMounted(adminCategoriesListInit);
     return {
       totalNum,

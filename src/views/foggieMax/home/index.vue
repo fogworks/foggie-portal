@@ -73,19 +73,16 @@ export default {
         deviceData.value,
         tokenMap.value[deviceData.value.device_id]
       ).then((res) => {
-        spaceUseSize.value = +(
-          +res.contents[0]?.total /
-          1024 /
-          1024 /
-          1024
-        ).toFixed(2);
-        spaceUseRate.value = +(
-          +res.contents[0]?.total /
-          1024 /
-          1024 /
-          1024 /
-          spaceTotal.value
-        ).toFixed(4);
+        spaceUseSize.value =
+          +(+res.contents?.[0]?.total / 1024 / 1024 / 1024).toFixed(2) || 0;
+        spaceUseRate.value =
+          +(
+            +res.contents?.[0]?.total /
+            1024 /
+            1024 /
+            1024 /
+            spaceTotal.value
+          ).toFixed(4) || 0;
       });
     };
     const requestTarget = inject("requestTarget");

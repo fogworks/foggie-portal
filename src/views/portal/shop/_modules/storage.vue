@@ -89,9 +89,11 @@
                 <p>
                   Deposit：<span
                     >{{
-                      (item.price / 10000) *
-                      item.deposit_ratio *
-                      formLine.quantity
+                      (
+                        (item.price / 10000) *
+                        item.deposit_ratio *
+                        formLine.quantity
+                      ).toFixed(4)
                     }}DMC</span
                   >
                 </p>
@@ -345,7 +347,7 @@ function blurPrestoreDMC() {
     return false;
   } else if (
     Number(state.formLine.prestoreDMC) <
-    Number(state.orderDetail.total - state.orderDetail.deposit)
+    Number(+state.orderDetail.total - +state.orderDetail.deposit).toFixed(4)
   ) {
     ElMessage({
       message: `The deposit amount cannot be less than ${(

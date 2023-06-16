@@ -1,79 +1,58 @@
 <template>
   <div>
     <div class="upload_dialog" @click="closeUploadBox" v-show="uploadIsShow">
-      <!-- my_top_upload -->
       <div class="upload_dialog_wrap vood_dialog_wrap" @click.stop="">
         <div>
-          <!-- my_top_uploadText my_top_uploadTitle -->
           <div class="upload_dialog_title">Publish</div>
           <div class="my_top_uploadText">
             Support single file and directory upload. The maximum upload size of
             a single file is 2GB. If there are large files, you can choose to
             slice them with tools before uploading
           </div>
-          <!-- <div class="my_top_uploadText">The OOD you have chosen is: 456</div> -->
           <div class="today-right">
             <div class="color-box">
-              <el-button @click="allFileListDrawer = true">
+              <el-button @click="select">
                 File List
               </el-button>
             </div>
           </div>
         </div>
-        <uploader
-          style="position: relative"
-          ref="uploader"
-          class="uploader-app"
-          :multiple="true"
-          :options="options"
-          :auto-start="false"
-          :file-status-text="fileStatusText"
-          @files-added="onFilesAdded"
-          @file-added="onFileAdded"
-        >
+        <uploader style="position: relative" ref="uploader" class="uploader-app" :multiple="true" :options="options"
+          :auto-start="false" :file-status-text="fileStatusText" @files-added="onFilesAdded" @file-added="onFileAdded">
           <uploader-unsupport />
           <uploader-drop>
-            <uploader-btn class="uploader-btn" :single="false"
-              >Select File</uploader-btn
-            >
-            <uploader-btn class="uploader-btn" :directory="true" :single="false"
-              >Select a folder</uploader-btn
-            >
+            <uploader-btn class="uploader-btn" :single="true">Select File</uploader-btn>
+            <uploader-btn class="uploader-btn" :directory="true" :single="false">Select a folder</uploader-btn>
           </uploader-drop>
         </uploader>
 
-        <template
-          v-for="(uploadList, key) in uploadFileList"
-          :key="key"
-          style="height: 100%"
-        >
-          <fileList
-            @fileShare="fileShare"
-            @newQueueID="newQueueID"
-            :orderID="key"
-            :ref="`fileListRef_${key}`"
-            v-model:uploadLists="uploadFileList[key]"
-            v-show="key == orderId"
-            :deviceType="deviceType"
-          >
+        <template v-for="(uploadList, key) in uploadFileList" :key="key" style="height: 100%">
+          <fileList @fileShare="fileShare" @newQueueID="newQueueID" :orderID="key" :ref="`fileListRef_${key}`"
+            v-model:uploadLists="uploadFileList[key]" v-show="key == orderId" :deviceType="deviceType">
           </fileList>
         </template>
       </div>
     </div>
 
-    <el-drawer
-      v-model="allFileListDrawer"
-      title="To be completed File list"
-      direction="rtl"
-      size="50%"
-    >
+    <el-drawer v-model="allFileListDrawer" title="To be completed File list" direction="rtl" size="50%"
+      :show-close="false">
       <template #header="{ close, titleId, titleClass }">
-        <p  :class="titleClass">
+        <p :class="titleClass">
           <span>To be completed File list</span>
-        <div class="fs20"> List length # {{(allFileList[orderId] ?? []).length}}</div>
-
+        <div class="fs20"> List length # {{ (allFileList[orderId] ?? []).length }}</div>
         </p>
+        <div class="color-box">
+          <el-button @click="allFileListDrawer = true">
+            Waiting
+          </el-button>
+        </div>
+        <div class="color-box">
+          <el-button @click="allFileListDrawer = true" style="background: #EF6666;">
+            Error
+          </el-button>
+        </div>
       </template>
+
 
       <div class="uploader-list">
         <div class="uploader-file-info head-info">
@@ -84,15 +63,8 @@
         </div>
 
         <div class="TobeCompletedBox">
-          <template
-            v-for="(curFile, index) in (allFileList[orderId] ?? []).slice(0, 800)"
-            :key="curFile.id"
-          >
-            <TobeCompleted
-              @deleteAllFileList="deleteAllFileList"
-              :curFile="curFile"
-              :orderID="orderId"
-            >
+          <template v-for="(curFile, index) in (allFileList[orderId] ?? []).slice(0, 800)" :key="curFile.id">
+            <TobeCompleted @deleteAllFileList="deleteAllFileList" :curFile="curFile" :orderID="orderId">
             </TobeCompleted>
           </template>
         </div>
@@ -102,21 +74,67 @@
 </template>
 
 <script setup>
+import { uploadFolder } from "@/api/upload";
 import {
   ref,
   reactive,
   onMounted,
-  toRefs,
   readonly,
-  provide,
   computed,
   getCurrentInstance,
 } from "vue";
-import fileList from "../upload/fileList.vue";
+const fs = window.require('fs');
+const { dialog } = window.require("electron").remote;
+/* dialog.showOpenDialog 的配置项包括：
+
+title：对话框的标题。
+defaultPath：默认打开的路径。
+buttonLabel：按钮的文本标签。
+filters：可选择的文件类型，可以是一个数组，每个元素包含一个名称和一个文件扩展名的对象。
+
+properties：对话框的属性，可以是一个数组，包含以下选项：
+openFile：允许选择文件。
+openDirectory：允许选择文件夹。
+multiSelections：允许选择多个文件。
+showHiddenFiles：显示隐藏文件。
+createDirectory：允许创建新文件夹。
+promptToCreate：提示用户是否创建新文件夹。
+message：对话框的消息文本。
+securityScopedBookmarks：是否启用安全范围书签。 */
+
+
+
+
+// 选择文件的对话框Dialog
+function select() {
+  dialog.showOpenDialog({
+    // properties: ["openFile"], // 选择文件
+    properties: ["openDirectory"], // 选择目录
+    filters: [
+      { name: 'Images', extensions: ['jpg', 'png', 'gif'] },
+      { name: 'Movies', extensions: ['mkv', 'avi', 'mp4'] },
+      { name: 'Custom File Type', extensions: ['as'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  }).then(result => {
+    console.log(result);
+    if (result.canceled) {
+    } else {
+
+      // const file = result.filePaths[0]
+
+    }
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
+
+
+import fileList from "./fileList.vue";
 import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
-import TobeCompleted from "@/components/upload/TobeCompleted.vue";
-import _ from "lodash";
+import TobeCompleted from "@/components/newUpload/TobeCompleted.vue";
 const _this = getCurrentInstance();
 const emit = defineEmits(["fileShare"]);
 const currentPath = ref("");
@@ -144,6 +162,7 @@ const fileStatusText = ref({
 let uploadIsShow = computed(() => store.getters.uploadIsShow);
 const FILE_SIZE = readonly(1024 * 1024 * 1024 * 2);
 const store = useStore();
+const email = computed(() => store.getters.userInfo?.email);
 const orderId = computed(() => store.getters.orderId);
 const deviceData = computed(() => store.getters.deviceData);
 const deviceType = computed(() => store.getters.deviceType);
@@ -151,120 +170,99 @@ const deviceType = computed(() => store.getters.deviceType);
 const uploadFileList = computed(() => store.state.upload.uploadFileList);
 const allFileList = reactive({});
 
-// const allFileList = computed(() => {
-//   let fileListArray = _this.refs[`fileListRef_${orderId.value}`] || [];
-//   let executeLsit =
-//     fileListArray.filter((item) => item.orderID == orderId.value)[0]
-//       ?.curFileList || [];
-//   let list = [];
-//   for (const item of store.state.upload.uploadFileList[orderId.value] || []) {
-//     if (!executeLsit.some((element) => element.id == item.id)) {
-//       list.push(item);
-//     }
-//   }
-//   return list;
-// });
+
 
 const tokenMap = computed(() => store.getters.tokenMap);
 
 let fileCache = [];
 const onFileAdded = (file) => {
-  // if (file.size === 0) return;
-  // if (file.size > FILE_SIZE) {
-  //   ElMessage({
-  //     message:
-  //       "The maximum upload size of a single file should not exceed 2GB.",
-  //     type: "warning",
-  //     duration: 3000,
-  //   });
-  //   return;
-  // }
-  // let list = store.state.upload.uploadFileList[orderId.value] ?? [];
-  // if (list.length > 1000) {
-  //   fileCache.push(file);
-  //   if (fileCache.length % 1000 == 0) {
-  //     list = list.concat(fileCache);
-  //     allFileList[orderId.value] = allFileList[orderId.value].concat(fileCache);
-  //     store.commit("upload/setFileList", list);
-  //     fileCache = [];
-  //   }
-  // } else {
-  //   list.push(file);
-  //   store.commit("upload/setFileList", list);
-  //   if (allFileList[orderId.value]) {
-  //     allFileList[orderId.value].push(file);
-  //   } else {
-  //     allFileList[orderId.value] = [];
-  //     allFileList[orderId.value].push(file);
-  //   }
-  // }
+  // select()
 };
 
 const onFilesAdded = (files, fileList) => {
 
-  let timer = null;
-  
-  if (files.length > 500) {
-    ElMessageBox.alert(
-      `The folder you are currently uploading contains ${files.length} small files. The number of files is too large, which may cause severe page lag during the upload process. Are you sure you want to upload it`,
-      "warning",
-      {
-        confirmButtonText: "OK",
-        callback: (type) => {
-          if (type == "confirm") {
-            for (const file of files) {
-              inituploadList(file);
-            }
-          }
-        },
-      }
-    );
-  } else {
-    for (const file of files) {
-      inituploadList(file);
-    }
-  }
 
-  function inituploadList(file) {
-    if (file.size === 0) return;
-    if (file.size > FILE_SIZE) {
-      ElMessage({
-        message:
-          "The maximum upload size of a single file should not exceed 2GB.",
-        type: "warning",
-        duration: 3000,
-      });
-      return;
-    }
+  debugger
+  // let pathkey = '\\' + files[0].relativePath.split('/')[0]
+  // let absoluteuniqueIdentifier = files[0].uniqueIdentifier
+  // let absolutePath = absoluteuniqueIdentifier.split(pathkey)[0] + pathkey
 
-    let list = store.state.upload.uploadFileList[orderId.value] ?? [];
+  // debugger
 
-    if (list.length > 200) {
- 
-      fileCache.push(file);
-      if (timer) {
-        clearTimeout(timer);
-        timer = null;
-      }
-      timer = setTimeout(() => {
-        list = list.concat(fileCache);
-        allFileList[orderId.value] =
-          allFileList[orderId.value].concat(fileCache);
-        store.commit("upload/setFileList", list);
-        fileCache = [];
-      }, 10);
-    } else {
-      list.push(file);
-      store.commit("upload/setFileList", list);
 
-      if (allFileList[orderId.value]) {
-        allFileList[orderId.value].push(file);
-      } else {
-        allFileList[orderId.value] = [];
-        allFileList[orderId.value].push(file);
-      }
-    }
-  }
+  // let params ={
+  //   email:email.value,
+  //   orderId:orderId.value,
+  //   deviceType:deviceType.value,
+  //   sourcePath:absolutePath,
+  // }
+  // uploadFolder(params).then(res =>{
+  //   console.log(res);
+  // })
+
+
+
+  // let timer = null;
+  // if (files.length > 500) {
+  //   ElMessageBox.alert(
+  //     `The folder you are currently uploading contains ${files.length} small files. The number of files is too large, which may cause severe page lag during the upload process. Are you sure you want to upload it`,
+  //     "warning",
+  //     {
+  //       confirmButtonText: "OK",
+  //       callback: (type) => {
+  //         if (type == "confirm") {
+  //           for (const file of files) {
+  //             inituploadList(file);
+  //           }
+  //         }
+  //       },
+  //     }
+  //   );
+  // } else {
+  //   for (const file of files) {
+  //     inituploadList(file);
+  //   }
+  // }
+
+  // function inituploadList(file) {
+  //   if (file.size === 0) return;
+  //   if (file.size > FILE_SIZE) {
+  //     ElMessage({
+  //       message:
+  //         "The maximum upload size of a single file should not exceed 2GB.",
+  //       type: "warning",
+  //       duration: 3000,
+  //     });
+  //     return;
+  //   }
+
+  //   let list = store.state.upload.uploadFileList[orderId.value] ?? [];
+
+  //   if (list.length > 200) {
+
+  //     fileCache.push(file);
+  //     if (timer) {
+  //       clearTimeout(timer);
+  //       timer = null;
+  //     }
+  //     timer = setTimeout(() => {
+  //       list = list.concat(fileCache);
+  //       allFileList[orderId.value] = allFileList[orderId.value].concat(fileCache);
+  //       store.commit("upload/setFileList", list);
+  //       fileCache = [];
+  //     }, 10);
+  //   } else {
+  //     list.push(file);
+  //     store.commit("upload/setFileList", list);
+
+  //     if (allFileList[orderId.value]) {
+  //       allFileList[orderId.value].push(file);
+  //     } else {
+  //       allFileList[orderId.value] = [];
+  //       allFileList[orderId.value].push(file);
+  //     }
+  //   }
+  // }
 };
 
 const fileShare = (item) => {
@@ -291,17 +289,15 @@ function initFileFn(file) {
   file.paused = false;
   file.deviceType = deviceType.value;
   file.fileUploading = false; // 代表文件是否正在上传
+  file.urlPrefix = file.file.path
+  // let directory = file.file.webkitRelativePath;
+  // let directoryPath = directory.substr(0, directory.lastIndexOf("/") + 1);
+  // file.urlFileName = directoryPath
+  //   ? currentPath.value + directoryPath + file.name
+  //   : currentPath.value + file.name; 
 
-  file.rootPath = currentPath.value;
-  let directory = file.file.webkitRelativePath;
-  let directoryPath = directory.substr(0, directory.lastIndexOf("/") + 1);
 
-  // file.urlPrefix = directoryPath ? currentPath.value + directoryPath : currentPath.value || "/";
-  file.urlPrefix = file.file.path.substr(0, file.file.path.lastIndexOf("\\"));
-
-  file.urlFileName = directoryPath
-    ? currentPath.value + directoryPath + file.name
-    : currentPath.value + file.name;
+  file.urlFileName = currentPath.value ? currentPath.value : file.name;
 
   file.orderId = orderId.value;
   if (deviceType.value == 1 || deviceType.value == 2) {
@@ -313,7 +309,7 @@ function initFileFn(file) {
 const closeUploadBox = () => {
   store.commit("upload/closeUpload");
 };
-onMounted(() => {});
+onMounted(() => { });
 </script>
 
 <style lang="scss" scoped>
@@ -323,11 +319,8 @@ onMounted(() => {});
   height: 100%;
   top: 0;
   left: 0;
-  // background: #272735e3;
   z-index: 2000;
   background-color: rgba(0, 0, 0, 0.4);
-  // -webkit-backdrop-filter: blur(20px) saturate(100%);
-  // backdrop-filter: blur(20px) saturate(100%);
 
   .upload_dialog_wrap {
     position: fixed;
@@ -360,9 +353,7 @@ onMounted(() => {});
 
     .upload_dialog_tips {
       font-size: 12px;
-      // transform: scale(0.8);
       text-align: left;
-      // text-indent: 20px;
     }
 
     .upload_dialog_currentood {
@@ -380,7 +371,6 @@ onMounted(() => {});
       background: rgba(255, 255, 255, 0.1);
       border: solid;
       border-image: url(@/assets/dashed-border.png) 2 round;
-      // border: 3px dashed #ccc;
       border-radius: 0.625rem;
       text-align: center;
       margin-top: 20px;
@@ -397,11 +387,9 @@ onMounted(() => {});
         height: 36px;
         -webkit-box-pack: center;
         place-content: center;
-        background: linear-gradient(
-          1turn,
-          rgba(99, 106, 150, 0.4),
-          rgba(182, 186, 214, 0.5)
-        );
+        background: linear-gradient(1turn,
+            rgba(99, 106, 150, 0.4),
+            rgba(182, 186, 214, 0.5));
         box-sizing: border-box;
         box-shadow: 0 20px 40px rgb(0 0 0 / 15%),
           inset 0 0 0 0.5px hsl(0deg 0% 100% / 30%);
@@ -439,7 +427,7 @@ onMounted(() => {});
         .head-info {
           font-size: 18px;
 
-          > div {
+          >div {
             color: #000;
           }
         }
@@ -458,13 +446,11 @@ onMounted(() => {});
     flex-wrap: wrap;
     background: transparent;
     border: 1px dashed #4f4f4f;
-    // margin-bottom: 10px;
     padding: 10px 0;
     border-radius: 16px;
     text-align: center;
 
-    .drop-title {
-    }
+    .drop-title {}
   }
 
   .uploader-btn {
@@ -473,7 +459,6 @@ onMounted(() => {});
     line-height: 30px;
     text-align: center;
     font-size: 16px;
-    // background: var(--btn-gradient);
     color: #004aff;
     border: none;
     transition: all 1s;
@@ -483,9 +468,7 @@ onMounted(() => {});
     }
   }
 
-  .uploader-file-progress {
-    // background: #7378e24f;
-  }
+
 
   .el-table,
   .el-table tr,
@@ -503,7 +486,7 @@ onMounted(() => {});
     border-color: #494646;
   }
 
-  .el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
+  .el-table--enable-row-hover .el-table__body tr:hover>td.el-table__cell {
     background-color: #4b525c;
     background-color: #4b525c;
     background: #f8f8f8;
@@ -513,15 +496,11 @@ onMounted(() => {});
     color: #000;
   }
 
-  .el-table--enable-row-hover
-    .el-table__body
-    tr:hover
-    > td.el-table__cell
-    .cell {
+  .el-table--enable-row-hover .el-table__body tr:hover>td.el-table__cell .cell {
     color: #000;
   }
 
-  .el-table th.el-table__cell > .cell,
+  .el-table th.el-table__cell>.cell,
   .el-table__body-wrapper .cell {
     color: #03040a;
     color: #fff;
@@ -534,13 +513,10 @@ onMounted(() => {});
 }
 
 .uploader-app {
-  /* width: 780px; */
   box-sizing: border-box;
   padding: 15px;
-  /* margin: 10px auto 0; */
   margin-top: 10px;
   font-size: 12px;
-  // box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
   margin-left: 20px;
   margin-right: 20px;
 }
@@ -652,14 +628,14 @@ onMounted(() => {});
   line-height: 50px;
 }
 
-.my_top_uploadText > label {
+.my_top_uploadText>label {
   font-size: 16px;
   position: absolute;
   left: 0;
   color: #fff;
 }
 
-.my_top_uploadText > label .el-checkbox__input {
+.my_top_uploadText>label .el-checkbox__input {
   padding: 0;
   position: relative;
   display: inline-block;
@@ -671,30 +647,6 @@ onMounted(() => {});
   position: absolute;
   right: 30px;
   top: 20px;
-
-  .color-box {
-    @include color-box;
-
-    .ripple-ink {
-      border-radius: 45px;
-    }
-  }
-
-  .el-button {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 20px;
-    width: auto;
-    height: auto;
-
-    color: #fff;
-    border: none;
-    border-radius: 45px;
-    box-shadow: 0px 2px 5px 0px rgb(0 0 0 / 20%);
-    background: var(--btn-gradient);
-  }
 }
 
 .el-drawer {
@@ -713,7 +665,7 @@ onMounted(() => {});
     margin-left: 20px;
     margin-right: 20px;
 
-    & > div {
+    &>div {
       margin: 0;
       padding: 0;
     }
@@ -727,7 +679,7 @@ onMounted(() => {});
       border-bottom: 1px solid #7e7e7e;
       text-align: left;
 
-      & > div {
+      &>div {
         color: #000;
       }
     }
@@ -742,11 +694,31 @@ onMounted(() => {});
       overflow-y: auto;
       overflow-x: hidden;
 
-      & > .uploader-file {
+      &>.uploader-file {
         content-visibility: auto;
         contain-intrinsic-size: 50px;
       }
     }
   }
+}
+
+.color-box {
+  @include color-box;
+}
+
+.el-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  width: auto;
+  height: auto;
+
+  color: #fff;
+  border: none;
+  border-radius: 45px;
+  box-shadow: 0px 2px 5px 0px rgb(0 0 0 / 20%);
+  background: var(--btn-gradient);
 }
 </style>
