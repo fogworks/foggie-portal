@@ -24,8 +24,8 @@
           </div>
         </div>
         <template v-for="(uploadList, key) in uploadFileList" :key="key" style="height: 100%">
-          <fileList @fileShare="fileShare" @newQueueID="newQueueID" :orderID="key" :ref="`fileListRef_${key}`"
-            :uploadLists="uploadFileList[key]" v-show="key == orderId">
+          <fileList @fileShare="fileShare" @newQueueID="newQueueID" @updaFileListByState="updaFileListByState"
+            :orderID="key" :ref="`fileListRef_${key}`" :uploadLists="uploadFileList[key]" v-show="key == orderId">
           </fileList>
         </template>
       </div>
@@ -39,7 +39,11 @@
           <span v-if="requestFileList[orderId].isErrorOrWaiting == 'Waiting'">To be completed File list</span>
           <span v-else>Error File list</span>
 
-        <div class="fs20"> List length # {{ total }}</div>
+        <div class="fs20"> List length # {{ total }}
+          <!-- <span v-if="selectFilelist[orderId] && selectFilelist[orderId].length > 0"
+            class="btn btn-light-success">Upload</span> -->
+        </div>
+
         </p>
         <div class="color-box">
           <el-button @click="[requestFileList[orderId].isErrorOrWaiting = 'Waiting', loadFileListByState(3)]">
@@ -52,23 +56,78 @@
             Error
           </el-button>
         </div>
+
       </template>
 
 
+
+
+
+
       <div class="uploader-list">
-        <div class="uploader-file-info head-info">
+
+        <el-table ref="multipleTable" class="TobeCompletedBox" :data="allFileList ?? []" :cell-style="{
+          backgroundColor: 'transparent',
+        }" :header-cell-style="{
+  backgroundColor: 'transparent',
+}" style="width: 100%;--el-table-border-color: none;" :show-overflow-tooltip="true"
+          @selection-change="handleSelectionChange" :row-key="item => item.id">
+          <el-table-column type="selection" width="55" :reserve-selection="true" :selectable='selectEnable' />
+          <el-table-column prop="fileName" label="File Name" min-width="160">
+            <template #default="{ row }">
+              <el-tooltip placement="top">
+                <template #content>
+                  <div>{{ row.fileName }}</div>
+                </template>
+                <span>
+                  <img :src="getFileType(row.fileName)" alt="" srcset="" style="width: 15px;height: 30px;" />
+                  <span class="ml-8">{{ row.fileName }}</span>
+                </span>
+              </el-tooltip>
+            </template>
+          </el-table-column>
+          <el-table-column prop="urlPrefix" label="Upload Path" min-width="240" align="center">
+            <template #default="{ row }">
+              <el-tooltip placement="top">
+                <template #content>
+                  <div>{{ row.urlPrefix }}</div>
+                </template>
+                <a href="javascript:;">{{ row.urlPrefix }} </a>
+              </el-tooltip>
+            </template>
+          </el-table-column>
+          <el-table-column label="File Size" align="center">
+            <template #default="{ row }">{{ formatSize(row.size) }}</template>
+          </el-table-column>
+          <el-table-column label="Operate" width="120" align="center">
+            <template #default="{ row }">
+              <el-link class="link" :underline="false" v-if="requestFileList[orderId].isErrorOrWaiting == 'error'">
+                <svg-icon icon-class="refresh"></svg-icon>
+              </el-link>
+              <el-link class="link" :underline="false" @click="remove(row)">
+                <el-icon size="25">
+                  <CloseBold />
+                </el-icon>
+              </el-link>
+            </template>
+          </el-table-column>
+        </el-table>
+
+
+
+        <!-- <div class="uploader-file-info head-info">
           <div class="uploader-file-name" style="width: 30%">File Name</div>
           <div class="uploader-file-prefix" style="width: 35%">Upload Path</div>
           <div class="uploader-file-size" style="width: 25%">File Size</div>
           <div class="uploader-file-actions">Operate</div>
-        </div>
+        </div> -->
 
-        <div class="TobeCompletedBox">
+        <!-- <div class="TobeCompletedBox">
           <template v-for="(curFile, index) in (allFileList ?? [])" :key="curFile.id">
             <TobeCompleted @deleteAllFileList="deleteAllFileList" :curFile="curFile" :orderID="orderId">
             </TobeCompleted>
           </template>
-        </div>
+        </div> -->
         <el-pagination v-if="total > 0" @size-change="handleSizeChange" prev-icon="DArrowLeft" next-icon="DArrowRight"
           @current-change="handleCurrentChange" :page-sizes="[50, 100, 500, 1000]" background :page-size="pageSize"
           :current-page="pageNo" :pager-count="5" layout="prev, pager, next,sizes,jumper," :total="total"
@@ -85,16 +144,21 @@ import {
   reactive,
   onMounted,
   readonly,
+  provide,
   watch,
   watchEffect,
   computed,
   getCurrentInstance,
 } from "vue";
 import { getfileListByState, uploadFolder } from "@/api/upload";
-import TobeCompleted from "@/components/reconsitutionUpload/TobeCompleted.vue";
+import { getFileType } from "@/utils/getFileType";
+import {
+  deleteUploadFile_Api,
+} from "@/api/upload";
+// import TobeCompleted from "@/components/reconsitutionUpload/TobeCompleted.vue";
 import fileList from "./fileList.vue";
-import { debounce, set } from "lodash";
-import { generateUniqueId } from "./utils";
+import { debounce } from "lodash";
+import { generateUniqueId, formatSize } from "./utils";
 const path = require('path');
 const fs = window.require('fs');
 const { dialog } = window.require("electron").remote;
@@ -118,6 +182,7 @@ securityScopedBookmarks：是否启用安全范围书签。 */
 
 import { useStore } from "vuex";
 const _this = getCurrentInstance();
+const multipleTable = ref()
 const emit = defineEmits(["fileShare"]);
 const currentPath = ref("");
 const allFileListDrawer = ref(false);
@@ -130,8 +195,8 @@ const deviceData = computed(() => store.getters.deviceData);
 const deviceType = computed(() => store.getters.deviceType);
 
 const customFileList = reactive({});  // 当前自己点击上传的文件
-const uploadFileList = reactive({})   // 实际上传的文件
-
+const uploadFileList = reactive({});  // 当前队列中的文件
+const selectFilelist = reactive({})  // 当前选择上传的文件
 
 
 const requestFileList = reactive({})  // 接收数据库中的文件列表信息
@@ -180,16 +245,13 @@ const total = computed(() => {
 
 
 
-
 const allFileList = computed({
   get() {
     let customList = customFileList[orderId.value] || []
     let requestList = []
-    if (requestFileList[orderId.value]) {
-      let type = requestFileList[orderId.value].isErrorOrWaiting
-      requestList = requestFileList[orderId.value][type].fileList || []
-    }
-    return customList.concat(requestList)
+    let type = requestFileList[orderId.value].isErrorOrWaiting
+    requestList = requestFileList[orderId.value][type].fileList || []
+    return type == 'Waiting' ? customList.concat(requestList) : requestList
   }
 })
 const tokenMap = computed(() => store.getters.tokenMap);
@@ -258,10 +320,12 @@ function initFile(filePath) {
       customFileList[orderId.value] = [];
       customFileList[orderId.value].push(file);
     }
+    if (!selectFilelist[orderId.value]) {
+      selectFilelist[orderId.value] = []
+    }
 
+    uploadFileList[orderId.value] = customFileList[orderId.value].concat(selectFilelist[orderId.value])
 
-    uploadFileList[orderId.value] = customFileList[orderId.value].concat(requestFileList[orderId.value].Waiting.fileList)
-    console.log(uploadFileList[orderId.value]);
   }
 
 }
@@ -283,8 +347,12 @@ function initDirectory(filePath) {
   }
 }
 
-function loadFileListByState(type = 3) {
+function updaFileListByState(type) {
+  loadFileListByState(type)
+}
 
+provide('StateType', computed(() => requestFileList[orderId.value].isErrorOrWaiting))
+function loadFileListByState(type = 3) {
   let params = {
     email: email.value,
     orderId: orderId.value,
@@ -308,7 +376,7 @@ function loadFileListByState(type = 3) {
           isErrorFile: type == 3 ? false : true,
           md5: item.md5,
           fileName: item.dest_path,
-          fileDirectoryName: item.file_path ? item.file_path.replace(/\\/g, path.sep).replace(`${path.sep}${item.dest_path}`, '') : '' ,
+          fileDirectoryName: item.file_path ? item.file_path.replace(/\\/g, path.sep).replace(`${path.sep}${item.dest_path}`, '') : '',
           deviceType: deviceType.value,
           urlPrefix: item.file_path,
           urlFileName: item.dest_path,
@@ -318,47 +386,74 @@ function loadFileListByState(type = 3) {
         }
         return file
       })
-      if (!uploadFileList[orderId.value] || uploadFileList[orderId.value].length == 0) {
-        uploadFileList[orderId.value] = customFileList[orderId.value].concat(requestFileList[orderId.value].Waiting.fileList)
-      }
     }
   })
 }
 
 
 
-
-
-const fileShare = (item) => {
-  emit("fileShare", item);
-};
-
 /* 在上传过程中 每当有新的文件进行上传操作待上传列表中就删除对应的文件 */
 const newQueueID = (id, fileOrderID) => {
-  
   let customFileListIndex = customFileList[fileOrderID].findIndex((file) => file.id == id);
   let requestFileListIndex = requestFileList[fileOrderID].Waiting.fileList.findIndex((file) => file.id == id);
+  if (selectFilelist[fileOrderID]) {
+    let row = selectFilelist[fileOrderID].filter(item => item.id)[0]
+    if (row) {
+      multipleTable.value.toggleRowSelection(row, false)
 
-  if(customFileListIndex > -1){
+    }
+  }
+
+
+  if (customFileListIndex > -1) {
     customFileList[fileOrderID].splice(customFileListIndex, 1);
   }
-  if(requestFileListIndex > -1){
+  if (requestFileListIndex > -1) {
     requestFileList[fileOrderID].Waiting.fileList.splice(requestFileListIndex, 1);
-  }
-
-
- 
-  if (allFileList.value.length == 0) {
-    loadFileListByState()
   }
 };
 
 /* 在待上传列表中删除指定文件 */
-function deleteAllFileList(id) {
-  // let index = customFileList[orderId.value].findIndex((file) => file.id == id);
-  // index > -1 ? customFileList[orderId.value].splice(index, 1) : "";
+function remove(row) {
+  const { id, isFolder, orderId, urlFileName, deviceType } = row
+  let deleteType = requestFileList[orderId].isErrorOrWaiting == 'Waiting' ? 3 : 2
+  if (isFolder) {
+    //数据库文件
+    let params = {
+      email: email.value,
+      orderId: orderId,
+      deviceType: deviceType,
+      destPath: urlFileName,
+    };
+
+    deleteUploadFile_Api(params).then(res => {
+      if (res.code == 200) {
+        loadFileListByState(deleteType)
+      }
+    })
+  } else {
+    // 手动上传文件
+    let customFileListIndex = customFileList[orderId].findIndex((file) => file.id == id);
+    if (customFileListIndex > -1) {
+      customFileList[fileOrderID].splice(customFileListIndex, 1);
+    }
+  }
 }
 
+
+function handleSelectionChange(selection) {
+  selectFilelist[orderId.value] = selection
+  uploadFileList[orderId.value] = customFileList[orderId.value].concat(selectFilelist[orderId.value])
+
+}
+
+function selectEnable(row) {
+  if (!row.isFolder) {
+    return false
+  } else {
+    return true
+  }
+}
 
 /* 每页多少条 */
 function handleSizeChange(val) {
@@ -389,7 +484,9 @@ function handleCurrentChange(val) {
 const closeUploadBox = () => {
   store.commit("upload/closeUpload");
 };
-
+const fileShare = (item) => {
+  emit("fileShare", item);
+};
 
 onMounted(() => {
 
@@ -596,6 +693,7 @@ onMounted(() => {
   }
 }
 
+
 .uploader-app {
   box-sizing: border-box;
   padding: 15px;
@@ -740,14 +838,11 @@ onMounted(() => {
 
   .uploader-list {
     height: 100% !important;
-
     overflow: hidden;
-
     position: relative;
-
     padding: 20px 0px;
-    margin-left: 20px;
-    margin-right: 20px;
+    margin-left: 5px;
+    margin-right: 5px;
 
     &>div {
       margin: 0;
@@ -777,16 +872,65 @@ onMounted(() => {
       height: calc(100% - 140px);
       overflow-y: auto;
       overflow-x: hidden;
+      // &>.uploader-file {
+      //   content-visibility: auto;
+      //   contain-intrinsic-size: 50px;
+      // }
+    }
 
+    .link {
+      margin: 0px 10px;
 
+      svg {
+        font-size: 22px;
+        margin-right: 5px;
+      }
 
-      &>.uploader-file {
-        content-visibility: auto;
-        contain-intrinsic-size: 50px;
+      &:hover {
+        color: #409eff;
       }
     }
 
     ::v-deep {
+
+      .el-table,
+      .el-table tr {
+        background-color: transparent;
+      }
+
+      .el-table td.el-table__cell {
+        border-color: #363637;
+      }
+
+      .el-table tbody {
+        border-bottom: 0px;
+      }
+
+      .el-table__body-wrapper .el-table__body tbody tr td {
+        font-size: 14px;
+        height: 60px;
+        font-weight: 600;
+        color: #c0bebe;
+      }
+
+      .el-table__inner-wrapper::before {
+        background-color: transparent;
+      }
+
+      .el-checkbox__input .el-checkbox__inner {
+        background: #999aa1 !important;
+      }
+
+      .el-checkbox__input.is-disabled .el-checkbox__inner {
+        background-color: #0BB783 !important;
+        border-color: #0BB783 !important;
+      }
+
+      .el-checkbox__input.is-checked .el-checkbox__inner {
+        background-color: #0BB783 !important;
+        border-color: #0BB783 !important;
+      }
+
       .el-pagination.is-background .el-pager li:not(.disabled).is-active {
         color: #FFFFFF !important;
         background-color: #0BB783 !important;

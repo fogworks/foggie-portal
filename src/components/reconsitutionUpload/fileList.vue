@@ -11,15 +11,8 @@
         </div>
       </li>
       <li v-for="file in curFileList" :key="file.id">
-        <upFile
-          :file="file"
-
-          :curFileList="curFileList"
-          :MAX_UPLOAD_NUM="MAX_UPLOAD_NUM"
-          @chanStatus="chanStatus"
-          @remove="remove"
-          @fileShare="fileShare"
-        />
+        <upFile :file="file" :curFileList="curFileList" :MAX_UPLOAD_NUM="MAX_UPLOAD_NUM" @chanStatus="chanStatus"
+          @remove="remove" @fileShare="fileShare" @updaLoadFileListByState="updaLoadFileListByState" />
       </li>
     </ul>
   </div>
@@ -46,7 +39,7 @@ const deviceType = computed(() => store.getters.deviceType);
 const MAX_UPLOAD_NUM = deviceType.value == 3 ? 1 : 4;
 const props = defineProps({
   orderID: {
-    type: [String , Number],
+    type: [String, Number],
     default: "",
   },
   uploadLists: {
@@ -63,7 +56,7 @@ const props = defineProps({
 
 const Max_CurFileListLength = 20;
 
-const emits = defineEmits(["fileShare", "newQueueID",]);
+const emits = defineEmits(["fileShare", "newQueueID", 'updaFileListByState']);
 
 const fileList = reactive({
   uploadLists: [],
@@ -72,7 +65,7 @@ const fileList = reactive({
 const curFileList = ref([]);
 
 watch(
-  
+
   () => fileList.uploadLists.length,
   (newVal, oldVal) => {
     let oldLength = oldVal ?? 0;
@@ -94,6 +87,7 @@ watch(
 );
 
 watchEffect(() => {
+
   fileList.uploadLists = props.uploadLists;
 });
 
@@ -117,7 +111,7 @@ const chanStatus = (item) => {
   curFileList.value.unshift(pushItem);
   fileList.uploadLists.shift();
   if (curFileListLength >= Max_CurFileListLength) {
-    let deleteIndex =  findLastIndex(curFileList.value,(lastItem) => lastItem.fileUploading == false ) 
+    let deleteIndex = findLastIndex(curFileList.value, (lastItem) => lastItem.fileUploading == false)
     curFileList.value.splice(deleteIndex, 1);
   }
   emits("newQueueID", pushItem.id, pushItem.orderId);
@@ -129,11 +123,14 @@ const remove = (id, fileOrderId) => {
   chanStatus();
 };
 
+function updaLoadFileListByState(type) {
+  emits("updaFileListByState", type);
+}
 const fileShare = (file) => {
   emits("fileShare", file);
 };
 
-onMounted(() => {});
+onMounted(() => { });
 
 // defineExpose({
 //   curFileList,
@@ -154,7 +151,7 @@ onMounted(() => {});
   margin-right: 20px;
 }
 
-.uploader-list > ul {
+.uploader-list>ul {
   list-style: none;
   margin: 0;
   padding: 0;

@@ -17,4 +17,20 @@ html.dark {
     position: relative;
     color: #fff;
   }
+
+  .btn.btn-light-success {
+    color: #1bc5bd;
+    background-color: rgba(27, 197, 189, 0.1);
+    border-color: transparent;
+  }
+  .btn.btn-light-success:hover:not(.btn-text):not(:disabled):not(.disabled) {
+    color: #ffffff;
+    background-color: #1bc5bd;
+    border-color: transparent;
+  }
+  .btn:hover:not(.btn-text) {
+    transition: color 0.15s ease, background-color 0.15s ease,
+      border-color 0.15s ease, box-shadow 0.15s ease,
+      -webkit-box-shadow 0.15s ease;
+  }
 }

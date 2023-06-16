@@ -4,7 +4,10 @@ html.light {
   --bg-color: #f2f6ff;
   --text-color: #000;
   --btn-text-color: #fff;
-  --btn-gradient: linear-gradient( 180deg, #{$light_blue} 0%,rgb(158, 236, 217) 100%
+  --btn-gradient: linear-gradient(
+    180deg,
+    #{$light_blue} 0%,
+    rgb(158, 236, 217) 100%
   );
   --liner-gradient: linear-gradient(180deg, #3913b8 0%, #75e0e6 100%);
   --box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 0px 0.5px inset;
@@ -128,5 +131,21 @@ html.light {
 
   .BoxContent_header {
     color: var(--el-border-color);
+  }
+
+  .btn.btn-light-success {
+    color: #1bc5bd;
+    background-color: #c9f7f5;
+    border-color: transparent;
+  }
+  .btn.btn-light-success:hover:not(.btn-text):not(:disabled):not(.disabled) {
+    color: #ffffff;
+    background-color: #1bc5bd;
+    border-color: transparent;
+  }
+  .btn:hover:not(.btn-text) {
+    transition: color 0.15s ease, background-color 0.15s ease,
+      border-color 0.15s ease, box-shadow 0.15s ease,
+      -webkit-box-shadow 0.15s ease;
   }
 }

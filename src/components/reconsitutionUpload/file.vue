@@ -48,7 +48,7 @@
 import { formatSize } from "./utils";
 import SparkMD5 from "spark-md5";
 import { useStore } from "vuex";
-import { ref, watch, onMounted, onUnmounted, toRefs, computed } from "vue";
+import { ref, watch, onMounted, onUnmounted, toRefs, computed, inject } from "vue";
 import { debounce } from "lodash";
 import fileHook from "./fileHook.js";
 import {
@@ -63,7 +63,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 
 const FILE_SIZE = 10 * 1024 * 1024;
 
-const emits = defineEmits(["fileShare", "chanStatus", "remove"]);
+const emits = defineEmits(["fileShare", "chanStatus", "remove", 'updaLoadFileListByState']);
 const props = defineProps({
   file: {
     type: Object,
@@ -82,6 +82,7 @@ const props = defineProps({
     },
   },
 });
+
 const store = useStore();
 const { file, MAX_UPLOAD_NUM, curFileList } = toRefs(props);
 const isFirst = ref(true);
@@ -95,16 +96,14 @@ const formatedSize = ref(""); // 文件大小
 
 const progress = ref(0); // 上传进度
 const timeRemaining = ref(0); // 剩余大小
-
+const StateType = ref('')
 const is_created_succeed = ref(false); // 文件是否创建成功  true 成功 false 失败
 const isBigFile = ref(true);
 const fileMd5 = ref(null);
 const loading = ref(false);
-
 const startUploadTime = ref(0);
 const progressTimer = ref(null);
 const email = computed(() => store.getters.userInfo?.email);
-
 async function beginUpload() {
   isFirst.value = false;
 
@@ -144,9 +143,9 @@ function uploadFile(params) {
         file_paused(false)
         file_fileUploading(true)
         loadUploadProgress();
-      }else if(res.code == 30032){
+      } else if (res.code == 30032) {
         remove()
-      }else {
+      } else {
         fileError();
       }
     })
@@ -160,6 +159,7 @@ function loadUploadProgress() {
   let params = {
     email: email.value,
     orderId: file.value.orderId,
+    destPath: file.value.urlFileName,
     deviceType: file.value.deviceType,
     md5: fileMd5.value,
   };
@@ -213,7 +213,16 @@ function loadUploadProgress() {
             let data = { id: file.value.id, error: true, type: "completed" };
             emits("chanStatus", data);
           } else if (response.state == 2) {
-            fileError();
+
+            if (response.error_msg) {
+              let type = StateType.value == 'error' ? 2 : 3
+
+              emits('updaLoadFileListByState', type)
+
+              remove()
+            } else {
+              fileError();
+            }
           }
         } else {
           fileError();
@@ -395,9 +404,13 @@ const initFile = async () => {
   if (file.value.isErrorFile) {
     is_created_succeed.value = true;
     fileMd5.value = file.value.md5;
+    resume()
+    return
   } else {
     is_created_succeed.value = false;
   }
+
+
 
   if (!is_created_succeed.value) {
     if (file.value.isFolder) {
@@ -461,6 +474,7 @@ function file_completed(value) {
 }
 
 onMounted(() => {
+  StateType.value = inject('StateType')
   initFile();
 });
 onUnmounted(() => {
