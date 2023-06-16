@@ -25,7 +25,7 @@
           <span v-show="status === 'uploading'">
             <span>{{ progressStyle.progress }}</span>
             <em style="margin-left: 10px">{{ formatedAverageSpeed }}</em>
-            <i class="ml-5">{{ formatedTimeRemaining }}</i>
+            <i class="ml-15">{{ formatedTimeRemaining }}</i>
           </span>
         </div>
         <div class="uploader-file-actions" v-if="status !== 'success' && !loading">
@@ -183,16 +183,16 @@ function loadUploadProgress() {
 
         if (res.code == 200) {
           let response = res.data[0];
-
-          if (isFirst) {
-            startUploadSize = response.uploaded_size;
-          }
-          isFirst = false;
-
           if (response.state == 0) {
+            let uploaded_size = response.uploaded_size - startUploadSize;
+
+            if (isFirst) {
+              startUploadSize = response.uploaded_size;
+            }
+            isFirst = false;
             file_fileUploading(true)
 
-            let uploaded_size = response.uploaded_size - startUploadSize;
+
             let time = (endTime - startUploadTime.value) / 1000;
             progress.value = (response.uploaded_size / file.value.size).toFixed(4) * 100;
             averageSpeed.value = uploaded_size / time;
