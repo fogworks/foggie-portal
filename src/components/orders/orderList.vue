@@ -824,7 +824,7 @@ const challengeMiner = (item) => {
             message: `Successfully initiated the challenge`,
             position: "bottom-left",
           });
-          refresh();
+          // refresh();
           if (timeLineShow.value) {
             setTimeout(() => {
               timeLineRef.value.loadChallengeList();
