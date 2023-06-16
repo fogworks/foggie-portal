@@ -166,7 +166,13 @@ function getfilesize(size, type) {
     return (size / Math.pow(num, 4)).toFixed(2) + " TB"; //T
   }
 }
-
+function getfilesize2(size) {
+  if (!size && size !== 0) return "";
+  var num = 1024.0; //byte
+  size = Number(size).toFixed(2);
+  if (size < num) return size + " GB"; //G
+  return (size / Math.pow(num, 1)).toFixed(2) + " TB"; //T
+}
 function b64EncodeUnicode(str) {
   return btoa(
     encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
@@ -184,5 +190,6 @@ export {
   decrypt,
   getQueryString,
   getfilesize,
+  getfilesize2,
   b64EncodeUnicode,
 };
