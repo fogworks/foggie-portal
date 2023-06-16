@@ -203,6 +203,9 @@ watch(activeName, () => {
     .el-tabs__header {
       .el-tabs__item {
         font-size: 24px;
+        svg {
+          margin-right: 5px;
+        }
       }
       .is-active {
         color: $light_blue2;

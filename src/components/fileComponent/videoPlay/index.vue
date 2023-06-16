@@ -1,20 +1,16 @@
 <template>
   <div>
     <video id="myVideo" class="video-js vjs-big-play-centered vjs-fluid">
-      <p class="vjs-no-js">
-        To view this video please enable JavaScript, and consider upgrading to a
-        web browser that
-
-        <a href="https://videojs.com/html5-video-support/" target="_blank">
-          supports HTML5 video
-        </a>
-      </p>
+      This file format is currently not supported
     </video>
+    <!-- <video :src="url2" autoplay controls></video> -->
   </div>
 </template>
 
 <script setup>
-import { ref, toRefs, onMounted, watch } from "vue";
+import { ref, toRefs, onMounted, computed, watch, inject } from "vue";
+import { useStore } from "vuex";
+import { baseUrl } from "@/setting";
 const props = defineProps({
   srcData: {
     type: Object,
@@ -26,9 +22,31 @@ const props = defineProps({
   },
 });
 const { srcData, visible } = toRefs(props);
+const store = useStore();
 const player = ref("");
-
+const deviceData = inject("deviceData");
+const deviceType = computed(() => deviceData.device_type);
+const tokenMap = computed(() => store.getters.tokenMap);
+const token = computed(() => {
+  if (deviceData.device_type == "space") {
+    return deviceData.upload_file_token;
+  } else {
+    return tokenMap.value[deviceData.device_id];
+  }
+});
 const init = () => {
+  console.dir(srcData.value);
+  console.log("srcData.value");
+  let cid = srcData.value.cid;
+  let key = srcData.value.key;
+
+  let ip = deviceData.rpc.split(":")[0];
+  let port = deviceData.rpc.split(":")[1];
+  let Id = deviceData.foggie_id;
+  let peerId = deviceData.peer_id;
+  const url = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=${
+    deviceType.value == "space" ? "space" : "foggie"
+  }&token=${token.value}`;
   player.value = videojs(
     document.getElementById("myVideo"),
     {
@@ -49,6 +67,7 @@ const init = () => {
 
       inactivityTimeout: false,
       playbackRates: [2.0, 1.5, 1.2, 1.0, 0.7],
+      notSupportedMessage: "This file format is currently not supported",
       controlBar: {
         currentTimeDisplay: true,
 
@@ -91,25 +110,41 @@ const init = () => {
       sources: [
         {
           // src: srcData.value.url,
-          src: require("@/assets/Vue3-video-play.mp4"),
-          type: "video/mp4",
+          src: url,
+          type: srcData.value.type,
         },
       ],
     },
-    function () {}
+    function onPlayerReady() {
+      player.value.on("seeking", function (val) {
+        console.log(
+          document.getElementById("myVideo").buffered,
+          "bufferedbufferedbuffered "
+        );
+        const time =
+          document.getElementsByClassName("vjs-time-tooltip")[0].innerText;
+        console.log(time, "time");
+
+        // url = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=${
+        //   deviceType.value == "space" ? "space" : "foggie"
+        // }&token=${token.value}`;
+        // changeSrc(url);
+      });
+    }
   );
 };
-const changeSrc = (data) => {
-  player.value.pause();
+function changeSrc(data) {
+  // player.value.pause();
 
-  player.value.src(data);
+  // player.value.src(data);
 
-  player.value.load(data);
+  // player.value.load(data);
 
-  player.value.posterImage.setSrc(data.src);
-
+  // player.value.play();
+  player.value.changeVideoSrc(src);
+  player.value.load();
   player.value.play();
-};
+}
 onMounted(() => {
   init();
 });

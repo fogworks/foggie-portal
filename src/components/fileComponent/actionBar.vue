@@ -13,6 +13,8 @@
         <svg-icon icon-class="download"></svg-icon>
         <span> Download </span>
       </div>
+      <!-- v-if="deviceType !== 'space'" -->
+
       <div class="action-item" @click="handlerClick('delete')">
         <svg-icon icon-class="delete"></svg-icon>
         <span> Delete </span>
@@ -91,7 +93,6 @@ import { useStore } from "vuex";
 import { file_delete, files_download } from "@/utils/api.js";
 import useShare from "./hooks/useShare.js";
 import useDelete from "./hooks/useDelete.js";
-import { getToken } from "@/utils/auth";
 import { baseUrl } from "@/setting";
 const deviceData = inject("deviceData");
 import { ElMessageBox } from "element-plus";
@@ -177,7 +178,7 @@ const uploadDisable = computed(() => {
 const tokenMap = computed(() => store.getters.tokenMap);
 const token = computed(() => {
   if (deviceData.device_type == "space") {
-    return getToken();
+    return deviceData.upload_file_token;
   } else {
     return tokenMap.value[deviceData.device_id];
   }
@@ -197,9 +198,21 @@ const hasChecked = computed(() => {
   }
 });
 const { ipcRenderer } = window.require("electron");
-
+const imgData = computed(() => {
+  let data = [];
+  if (activeName.value == "Image") {
+    Object.keys(imgCheckedData.value).forEach((el) => {
+      imgCheckedData.value[el].forEach((item) => {
+        data.push(item);
+      });
+    });
+    return data;
+  } else {
+    return checkedData.value;
+  }
+});
 const downLoad = () => {
-  const data = checkedData.value.map((el) => {
+  const data = imgData.value.map((el) => {
     return {
       cid: el.cid,
       key: el.key,
@@ -207,7 +220,7 @@ const downLoad = () => {
   });
   let ip = deviceData.rpc.split(":")[0];
   ip = "218.2.96.99";
-  const type = deviceData.device_type == 3 ? "space" : "foggie";
+  const type = deviceData.device_type == "space" ? "space" : "foggie";
   const token2 =
     deviceData.device_type == 3 ? deviceData.upload_file_token : token.value;
   const paramsObj = {
@@ -220,17 +233,16 @@ const downLoad = () => {
     type,
   };
   let downloadUrl = "";
-  if (checkedData.value.length == 1) {
-    downloadUrl = `${baseUrl}/file_download/?cid=${checkedData.value[0].cid}&key=${checkedData.value[0].cid}&ip=${paramsObj.ip}&port=${paramsObj.port}&Id=${paramsObj.Id}&peerId=${paramsObj.peerId}&type=${paramsObj.type}&token=${paramsObj.token}`;
+  if (imgData.value.length == 1) {
+    downloadUrl = `${baseUrl}/file_download/?cid=${imgData.value[0].cid}&key=${imgData.value[0].cid}&ip=${paramsObj.ip}&port=${paramsObj.port}&Id=${paramsObj.Id}&peerId=${paramsObj.peerId}&type=${paramsObj.type}&token=${paramsObj.token}`;
   } else {
     downloadUrl = `${baseUrl}/files_download/?file_arr=${paramsObj.file_arr}&ip=${paramsObj.ip}&port=${paramsObj.port}&Id=${paramsObj.Id}&peerId=${paramsObj.peerId}&type=${paramsObj.type}&token=${paramsObj.token}`;
   }
+  console.log(downloadUrl, "downloadUrl");
   ipcRenderer.send("download", {
     downloadPath: downloadUrl,
     fileName:
-      checkedData.value.length == 1
-        ? checkedData.value[0].name
-        : "download.zip",
+      imgData.value.length == 1 ? imgData.value[0].name : "download.zip",
   });
 };
 function countDownRun() {
@@ -302,7 +314,7 @@ const switchReceiveStatus = () => {
 };
 const handlerClick = async (type) => {
   emits("update:isSingle", false);
-  if (type === "move" || type === "copy") {
+  if (type === "move") {
     emits("update:actionType", type);
     emits("update:folderVisible", true);
   } else if (type === "download") {
@@ -314,12 +326,11 @@ const handlerClick = async (type) => {
         cancelButtonText: "NO",
       })
       .then(async () => {
-        deleteItem(checkedData.value);
+        deleteItem(imgData.value);
       });
   } else if (type === "rename") {
     emits("update:singleData", checkedData.value[0]);
     emits("update:renameVisible", true);
-  } else if (type === "copy") {
   } else if (type === "newFolder") {
     emits("setNewFolder");
   } else if (type === "share") {

@@ -1,5 +1,5 @@
 import useVariable from './useVariable'
-import { ref, toRefs, inject, nextTick } from 'vue'
+import { ref, toRefs, inject, nextTick, computed } from 'vue'
 import {
     file_delete,
 } from "@/utils/api.js";
@@ -8,9 +8,14 @@ export default function useDelete(tableLoading, refresh) {
     const deviceData = inject('deviceData')
     const deleteItem = (item) => {
         tableLoading.value = true;
-        let token = tokenMap.value[deviceData.device_id];
-
-        file_delete(token, item, deviceData).then((res) => {
+        const token = computed(() => {
+            if (deviceData.device_type == "space") {
+                return deviceData.upload_file_token;
+            } else {
+                return tokenMap.value[deviceData.device_id];
+            }
+        });
+        file_delete(token.value, item, deviceData).then((res) => {
             if (res && res.data) {
                 proxy.$notify({
                     type: "success",

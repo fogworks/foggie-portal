@@ -471,14 +471,11 @@ const initLocalData = (data, reset = false, date = "", target) => {
   // tableSort({ prop: "date", order: 1, key: 1 });
 };
 const getFileList = function (scroll, prefix, reset = false, date = "") {
-  console.log(imgIndex.value, "imgIndex.value");
-  console.log(dateTimeLine.value, "dateTimeLine.value");
   let target = "";
   target = imgData.value.find((el) => el.time == date);
   if (target) return false;
   if (dateTimeLine.value[imgIndex.value]) {
     date = dateTimeLine.value[imgIndex.value];
-    console.log(date, "datedate");
     if (!target) {
       imgData.value.push({
         time: date,

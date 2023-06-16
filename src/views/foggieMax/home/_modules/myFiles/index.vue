@@ -413,6 +413,7 @@ import {
   find_objects,
   publishPin,
   file_delete,
+  rename_objects,
 } from "@/utils/api.js";
 import {
   GetFileList,
@@ -624,7 +625,9 @@ const columns = [
               <div class="name-img">
                 {rowData.type === "application/x-directory" ? (
                   <img src={require("@/assets/folder.png")} alt="" />
-                ) : null}
+                ) : (
+                  <img src={rowData.imgUrl} alt="" />
+                )}
                 {rowData.isSystemImg ? themeShow() : null}
               </div>
               {rowData.name}
@@ -828,7 +831,6 @@ const initRemoteData = (data, reset = false) => {
     let item = {
       isDir: true,
       checked: false,
-
       name,
       fileType: 1,
       fullName: decodeURIComponent(data.commonPrefixes[i]),
@@ -858,7 +860,6 @@ const initRemoteData = (data, reset = false) => {
     };
     tableData.value.push(item);
   }
-  console.log(data?.content, "data?.content");
   for (let j = 0; j < data?.content?.length; j++) {
     let date = transferTime(data.content[j].lastModified);
     let isDir = false;
@@ -883,7 +884,6 @@ const initRemoteData = (data, reset = false) => {
     let item = {
       isDir: isDir,
       checked: false,
-
       name,
       fileType: 2,
       fullName: decodeURIComponent(data.content[j].key),
@@ -1006,6 +1006,7 @@ const initLocalData = (data, reset = false) => {
   // tableSort({ prop: "date", order: 1, key: 1 });
 };
 const getFileList = function (scroll, prefix, reset = false) {
+  newFolderName.value = "";
   let list_prefix = "";
   if (prefix?.length) {
     list_prefix = prefix.join("/");
@@ -1184,15 +1185,15 @@ const handleImg = (item, type, isDir) => {
 
     imgHttpLink = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=${
       deviceType.value == "space" ? "space" : "foggie"
-    }&token=${token.value}`;
+    }&token=${token.value}&thumb=true`;
 
     // foggie://peerid/spaceid/cid
   } else if (type === "mp4") {
     type = "video";
 
-    imgHttpLink = `/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=${
+    imgHttpLink = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=${
       deviceType.value == "space" ? "space" : "foggie"
-    }&token=${token.value}`;
+    }&token=${token.value}&thumb=true`;
   } else {
     isSystemImg = true;
     // imgHttpLink =
@@ -1523,6 +1524,14 @@ watch(category, (val) => {
   refresh();
 });
 const confirmNewFolder = () => {
+  const targetObject = () => {
+    console.log(breadcrumbList.prefix, "breadcrumbList.prefix");
+
+    // arr.splice(arr.length - 1, 1, newName.value);
+    // return arr.join("/");
+  };
+  targetObject();
+  // rename_objects()
   console.log(newFolderName.value, 55555555555);
 };
 const cancelNewFolder = () => {

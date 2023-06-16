@@ -28,7 +28,10 @@
       </div>
       <VideoPlay
         style="width: 100%; margin-top: 20px"
-        v-if="documentInfo.url && detailData.data.type == 'video/mp4'"
+        v-if="
+          detailData.data.type == 'video/mp4' ||
+          detailData.data.type == 'audio/mpeg'
+        "
         :srcData="detailData.data"
       ></VideoPlay>
       <div v-else class="preview-box">
@@ -120,7 +123,6 @@ export default {
       idList: detailData.data.idList,
       url: detailData.data.imgUrl,
     });
-    console.log(detailData, "detailData");
     const shareRefContent = reactive({});
     const showShareDialog = ref(false);
     const device_id = detailData.device_id;
