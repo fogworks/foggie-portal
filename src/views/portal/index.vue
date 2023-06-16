@@ -68,7 +68,9 @@
 </template>
 
 <script setup>
-import upload from "@/components/newUpload";
+import upload from "@/components/reconsitutionUpload/index.vue";
+
+// import upload from "@/components/newUpload/index.vue";
 // import upload from "@/components/upload";
 
 

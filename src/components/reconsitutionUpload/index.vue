@@ -11,47 +11,49 @@
           </div>
           <div class="today-right">
             <div class="color-box">
-              <el-button @click="openAllFileListDrawer">
+              <el-button @click="[allFileListDrawer = true, loadFileListByState(3)]">
                 File List
               </el-button>
             </div>
           </div>
         </div>
-        <uploader style="position: relative" ref="uploader" class="uploader-app" :multiple="true" :options="options"
-          :auto-start="false" :file-status-text="fileStatusText" @files-added="onFilesAdded" @file-added="onFileAdded">
-          <uploader-unsupport />
-          <uploader-drop>
-            <uploader-btn class="uploader-btn" :single="false">Select File</uploader-btn>
-            <uploader-btn class="uploader-btn" :directory="true" :single="false">Select a folder</uploader-btn>
-          </uploader-drop>
-        </uploader>
-
+        <div style="position: relative" class="uploader-app">
+          <div class="uploader-drop">
+            <label class="uploader-btn" @click="openDialog('multiSelections')">Select File</label>
+            <label class="uploader-btn" @click="openDialog('openDirectory')">Select a folder</label>
+          </div>
+        </div>
         <template v-for="(uploadList, key) in uploadFileList" :key="key" style="height: 100%">
           <fileList @fileShare="fileShare" @newQueueID="newQueueID" :orderID="key" :ref="`fileListRef_${key}`"
-            v-model:uploadLists="uploadFileList[key]" v-show="key == orderId" :deviceType="deviceType">
+            :uploadLists="uploadFileList[key]" v-show="key == orderId">
           </fileList>
         </template>
       </div>
     </div>
 
+
     <el-drawer v-model="allFileListDrawer" title="To be completed File list" direction="rtl" size="50%"
       :show-close="false">
       <template #header="{ close, titleId, titleClass }">
         <p :class="titleClass">
-          <span>To be completed File list</span>
-        <div class="fs20"> List length # {{ (allFileList[orderId] ?? []).length }}</div>
+          <span v-if="requestFileList[orderId].isErrorOrWaiting == 'Waiting'">To be completed File list</span>
+          <span v-else>Error File list</span>
+
+        <div class="fs20"> List length # {{ total }}</div>
         </p>
         <div class="color-box">
-          <el-button @click="allFileListDrawer = true">
+          <el-button @click="[requestFileList[orderId].isErrorOrWaiting = 'Waiting', loadFileListByState(3)]">
             Waiting
           </el-button>
         </div>
         <div class="color-box">
-          <el-button @click="allFileListDrawer = true" style="background: #EF6666;">
+          <el-button @click="[requestFileList[orderId].isErrorOrWaiting = 'error', loadFileListByState(2)]"
+            style="background: #EF6666;">
             Error
           </el-button>
         </div>
       </template>
+
 
       <div class="uploader-list">
         <div class="uploader-file-info head-info">
@@ -62,11 +64,16 @@
         </div>
 
         <div class="TobeCompletedBox">
-          <template v-for="(curFile, index) in (allFileList[orderId] ?? []).slice(0, 800)" :key="curFile.id">
+          <template v-for="(curFile, index) in (allFileList ?? [])" :key="curFile.id">
             <TobeCompleted @deleteAllFileList="deleteAllFileList" :curFile="curFile" :orderID="orderId">
             </TobeCompleted>
           </template>
         </div>
+        <el-pagination v-if="total > 0" @size-change="handleSizeChange" prev-icon="DArrowLeft" next-icon="DArrowRight"
+          @current-change="handleCurrentChange" :page-sizes="[50, 100, 500, 1000]" background :page-size="pageSize"
+          :current-page="pageNo" :pager-count="5" layout="prev, pager, next,sizes,jumper," :total="total"
+          style="margin: 40px 60px 20px 0px; justify-content: end">
+        </el-pagination>
       </div>
     </el-drawer>
   </div>
@@ -78,165 +85,249 @@ import {
   reactive,
   onMounted,
   readonly,
+  watch,
+  watchEffect,
   computed,
   getCurrentInstance,
 } from "vue";
+import { getfileListByState, uploadFolder } from "@/api/upload";
+import TobeCompleted from "@/components/reconsitutionUpload/TobeCompleted.vue";
 import fileList from "./fileList.vue";
+import { debounce, set } from "lodash";
+import { generateUniqueId } from "./utils";
+const path = require('path');
+const fs = window.require('fs');
+const { dialog } = window.require("electron").remote;
+
+/* dialog.showOpenDialog 的配置项包括：
+title：对话框的标题。
+defaultPath：默认打开的路径。
+buttonLabel：按钮的文本标签。
+filters：可选择的文件类型，可以是一个数组，每个元素包含一个名称和一个文件扩展名的对象。
+
+properties：对话框的属性，可以是一个数组，包含以下选项：
+openFile：允许选择文件。
+openDirectory：允许选择文件夹。
+multiSelections：允许选择多个文件。
+showHiddenFiles：显示隐藏文件。
+createDirectory：允许创建新文件夹。
+promptToCreate：提示用户是否创建新文件夹。
+message：对话框的消息文本。  
+securityScopedBookmarks：是否启用安全范围书签。 */
+
+
 import { useStore } from "vuex";
-import { ElMessage, ElMessageBox } from "element-plus";
-import TobeCompleted from "@/components/newUpload/TobeCompleted.vue";
 const _this = getCurrentInstance();
 const emit = defineEmits(["fileShare"]);
 const currentPath = ref("");
 const allFileListDrawer = ref(false);
-const options = ref({
-  simultaneousUploads: 5,
-  singleFile: false,
-  chunkSize: 1024 * 1024 * 8, // 分片大小
-  forceChunkSize: true, // 每块分片大小是否 一定要小于 chunkSize
-  allowDuplicateUploads: true, // 是否可以 重复上传
-  generateUniqueIdentifier: generateUniqueIdentifier, //自定义生成文件唯一标识
-  initFileFn: initFileFn, //初始化文件对象
-});
-
-const fileStatusText = ref({
-  success: () => "Upload Success",
-  error: () => "Upload Error",
-  uploading: () => "Uploading...",
-  paused: () => "Paused...",
-  waiting: () => "Waiting...",
-  md5: () => "Calculating file hash value...",
-  CID: () => "Calculate CID...",
-});
 
 let uploadIsShow = computed(() => store.getters.uploadIsShow);
-const FILE_SIZE = readonly(1024 * 1024 * 1024 * 2);
 const store = useStore();
+const email = computed(() => store.getters.userInfo?.email);
 const orderId = computed(() => store.getters.orderId);
 const deviceData = computed(() => store.getters.deviceData);
 const deviceType = computed(() => store.getters.deviceType);
 
-const uploadFileList = computed(() => store.state.upload.uploadFileList);
-const allFileList = reactive({
-  fileWaiting: {
-    pageNo: 1,
-    pageSize: 10,
-    dataList: []
-  },
-  fileError: {
-    pageNo: 1,
-    pageSize: 10,
-    dataList: []
+const customFileList = reactive({});  // 当前自己点击上传的文件
+const uploadFileList = reactive({})   // 实际上传的文件
+
+
+
+const requestFileList = reactive({})  // 接收数据库中的文件列表信息
+
+watch(() => orderId.value, (newVal, oldVal) => {
+  if (!requestFileList[newVal]) {
+    requestFileList[newVal] = {
+      isErrorOrWaiting: 'Waiting',
+      error: {
+        fileList: [],
+        pageNo: 1,
+        pageSize: 50,
+        total: 0
+      },
+      Waiting: {
+        fileList: [],
+        pageNo: 1,
+        pageSize: 50,
+        total: 0
+      }
+    }
   }
-});
+  if (!customFileList[newVal]) {
+    customFileList[newVal] = []
+  }
+
+}, { immediate: true })
 
 
 
 
+const pageNo = computed(() => {
+  let type = requestFileList[orderId.value].isErrorOrWaiting
+  return requestFileList[orderId.value][type].pageNo
+})
 
+const pageSize = computed(() => {
+  let type = requestFileList[orderId.value].isErrorOrWaiting
+  return requestFileList[orderId.value][type].pageSize
+})
+
+const total = computed(() => {
+  let type = requestFileList[orderId.value].isErrorOrWaiting
+  return requestFileList[orderId.value][type].total
+})
+
+
+
+
+const allFileList = computed({
+  get() {
+    let customList = customFileList[orderId.value] || []
+    let requestList = []
+    if (requestFileList[orderId.value]) {
+      let type = requestFileList[orderId.value].isErrorOrWaiting
+      requestList = requestFileList[orderId.value][type].fileList || []
+    }
+    return customList.concat(requestList)
+  }
+})
 const tokenMap = computed(() => store.getters.tokenMap);
 
-let fileCache = [];
-const onFileAdded = (file) => {
 
-};
+// 选择文件的对话框Dialog
+const openDialog = debounce(async function (type) {
+  dialog.showOpenDialog({
+    properties: [type],
+    // filters: [
+    //   { name: 'Images', extensions: ['jpg', 'png', 'gif'] },
+    //   { name: 'Movies', extensions: ['mkv', 'avi', 'mp4'] },
+    //   { name: 'Custom File Type', extensions: ['as'] },
+    //   { name: 'All Files', extensions: ['*'] }
+    // ]
+  }).then(result => {
+    if (!result.canceled) {
+      for (const filePath of result.filePaths) {
+        if (type == 'openDirectory') {
+          // 文件夹
+          initDirectory(filePath)
+        } else {
+          // 文件
+          initFile(filePath)
+        }
+      }
+    }
+  }).catch(err => {
+    console.log(err)
+  })
+}, 500)
 
-const onFilesAdded = (files, fileList) => {
+function initFile(filePath) {
+  if (filePath) {
+    const normalized_path = filePath.replace(/\\/g, path.sep);
+    const file_name = path.basename(normalized_path);
+    const fileDirectoryName = path.dirname(normalized_path);
 
-  if (fileList.length == 0) {
-    return
-  } else {
-    let fileInstantiation = fileList[0]
-
-    if(fileInstantiation.isFolder){
-
+    let file = {
+      size: fs.statSync(filePath).size,
+      paused: false,
+      error: false,
+      fileUploading: false,
+      completed: false,
+      id: generateUniqueId(),
+      isFolder: false,
+      isErrorFile: false,
+      fileName: file_name,
+      fileDirectoryName: fileDirectoryName,
+      deviceType: deviceType.value,
+      urlPrefix: filePath,
+      urlFileName: currentPath.value ? currentPath.value : file_name,
+      orderId: orderId.value,
+      deviceData: deviceData.value,
+      foggieToken: deviceType.value == 1 || deviceType.value == 2 ? tokenMap.value[orderId.value] ?? "" : ''
     }
 
-  } 
 
-  // debugger
-  // let pathkey = '\\' + files[0].relativePath.split('/')[0]
-  // let absoluteuniqueIdentifier = files[0].uniqueIdentifier
-  // let absolutePath = absoluteuniqueIdentifier.split(pathkey)[0] + pathkey
-
-  // debugger
-
-
-  // let params ={
-  //   email:email.value,
-  //   orderId:orderId.value,
-  //   deviceType:deviceType.value,
-  //   sourcePath:absolutePath,
-  // }
-  // uploadFolder(params).then(res =>{
-  //   console.log(res);
-  // })
+    if (customFileList[orderId.value]) {
+      if (customFileList[orderId.value].some(item => item.urlPrefix == filePath)) {
+        return
+      } else {
+        customFileList[orderId.value].push(file);
+      }
+    } else {
+      customFileList[orderId.value] = [];
+      customFileList[orderId.value].push(file);
+    }
 
 
+    uploadFileList[orderId.value] = customFileList[orderId.value].concat(requestFileList[orderId.value].Waiting.fileList)
+    console.log(uploadFileList[orderId.value]);
+  }
 
-  // let timer = null;
+}
 
-  // if (files.length > 500) {
-  //   ElMessageBox.alert(
-  //     `The folder you are currently uploading contains ${files.length} small files. The number of files is too large, which may cause severe page lag during the upload process. Are you sure you want to upload it`,
-  //     "warning",
-  //     {
-  //       confirmButtonText: "OK",
-  //       callback: (type) => {
-  //         if (type == "confirm") {
-  //           for (const file of files) {
-  //             inituploadList(file);
-  //           }
-  //         }
-  //       },
-  //     }
-  //   );
-  // } else {
-  //   for (const file of files) {
-  //     inituploadList(file);
-  //   }
-  // }
+function initDirectory(filePath) {
+  if (filePath) {
+    let params = {
+      orderId: orderId.value,
+      deviceType: deviceType.value,
+      sourcePath: filePath,
+      destPath: currentPath.value ? currentPath.value : '',
+      email: email.value
+    }
+    uploadFolder(params).then(res => {
+      if (res.code == 200) {
+        loadFileListByState(3)
+      }
+    })
+  }
+}
 
-  // function inituploadList(file) {
-  //   if (file.size === 0) return;
-  //   if (file.size > FILE_SIZE) {
-  //     ElMessage({
-  //       message:
-  //         "The maximum upload size of a single file should not exceed 2GB.",
-  //       type: "warning",
-  //       duration: 3000,
-  //     });
-  //     return;
-  //   }
+function loadFileListByState(type = 3) {
 
-  //   let list = store.state.upload.uploadFileList[orderId.value] ?? [];
+  let params = {
+    email: email.value,
+    orderId: orderId.value,
+    deviceType: deviceType.value,
+    state: type,
+    pageNo: requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].pageNo,
+    pageSize: requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].pageSize
+  }
+  getfileListByState(params).then(res => {
+    if (res.code == 200) {
+      requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].total = res.data.count
+      requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].fileList = res.data.list.map(item => {
+        let file = {
+          size: item.file_size,
+          paused: false,
+          error: false,
+          fileUploading: false,
+          completed: false,
+          id: item._id,
+          isFolder: true,
+          isErrorFile: type == 3 ? false : true,
+          md5: item.md5,
+          fileName: item.dest_path,
+          fileDirectoryName: item.file_path ? item.file_path.replace(/\\/g, path.sep).replace(`${path.sep}${item.dest_path}`, '') : '' ,
+          deviceType: deviceType.value,
+          urlPrefix: item.file_path,
+          urlFileName: item.dest_path,
+          orderId: item.order_id,
+          deviceData: deviceData.value,
+          foggieToken: deviceType.value == 1 || deviceType.value == 2 ? tokenMap.value[orderId.value] ?? "" : ''
+        }
+        return file
+      })
+      if (!uploadFileList[orderId.value] || uploadFileList[orderId.value].length == 0) {
+        uploadFileList[orderId.value] = customFileList[orderId.value].concat(requestFileList[orderId.value].Waiting.fileList)
+      }
+    }
+  })
+}
 
-  //   if (list.length > 200) {
 
-  //     fileCache.push(file);
-  //     if (timer) {
-  //       clearTimeout(timer);
-  //       timer = null;
-  //     }
-  //     timer = setTimeout(() => {
-  //       list = list.concat(fileCache);
-  //       // allFileList[orderId.value] = allFileList[orderId.value].concat(fileCache);
-  //       store.commit("upload/setFileList", list);
-  //       fileCache = [];
-  //     }, 10);
-  //   } else {
-  //     list.push(file);
-  //     store.commit("upload/setFileList", list);
 
-  //     // if (allFileList[orderId.value]) {
-  //     //   allFileList[orderId.value].push(file);
-  //     // } else {
-  //     //   allFileList[orderId.value] = [];
-  //     //   allFileList[orderId.value].push(file);
-  //     // }
-  //   }
-  // }
-};
+
 
 const fileShare = (item) => {
   emit("fileShare", item);
@@ -244,61 +335,65 @@ const fileShare = (item) => {
 
 /* 在上传过程中 每当有新的文件进行上传操作待上传列表中就删除对应的文件 */
 const newQueueID = (id, fileOrderID) => {
-  // let index = allFileList[fileOrderID].findIndex((file) => file.id == id);
-  // allFileList[fileOrderID].splice(index, 1);
+  
+  let customFileListIndex = customFileList[fileOrderID].findIndex((file) => file.id == id);
+  let requestFileListIndex = requestFileList[fileOrderID].Waiting.fileList.findIndex((file) => file.id == id);
+
+  if(customFileListIndex > -1){
+    customFileList[fileOrderID].splice(customFileListIndex, 1);
+  }
+  if(requestFileListIndex > -1){
+    requestFileList[fileOrderID].Waiting.fileList.splice(requestFileListIndex, 1);
+  }
+
+
+ 
+  if (allFileList.value.length == 0) {
+    loadFileListByState()
+  }
 };
 
 /* 在待上传列表中删除指定文件 */
 function deleteAllFileList(id) {
-  // let index = allFileList[orderId.value].findIndex((file) => file.id == id);
-  // index > -1 ? allFileList[orderId.value].splice(index, 1) : "";
-}
-function openAllFileListDrawer() {
-  allFileListDrawer = true
-
-
+  // let index = customFileList[orderId.value].findIndex((file) => file.id == id);
+  // index > -1 ? customFileList[orderId.value].splice(index, 1) : "";
 }
 
 
-
-
-
-
-
-
-/* 生成文件唯一标识 */
-function generateUniqueIdentifier(file) {
-  return file.path;
-}
-/*  初始化文件对象 */
-function initFileFn(file) {
-  file.paused = false;
-  file.deviceType = deviceType.value;
-  file.fileUploading = false; // 代表文件是否正在上传
-
-  file.rootPath = currentPath.value;
-
-  file.urlPrefix = file.file.path
-  let directory = file.file.webkitRelativePath;
-
-
-  // let directoryPath = directory.substr(0, directory.lastIndexOf("/") + 1);
-  // file.urlFileName = directoryPath
-  //   ? currentPath.value + directoryPath + file.name
-  //   : currentPath.value + file.name;
-  file.urlFileName = currentPath.value ? currentPath.value + '/' + file.name : file.name;
-
-  file.orderId = orderId.value;
-  if (deviceType.value == 1 || deviceType.value == 2) {
-    file.foggieToken = tokenMap.value[orderId.value] || "";
+/* 每页多少条 */
+function handleSizeChange(val) {
+  let type = requestFileList[orderId.value].isErrorOrWaiting
+  requestFileList[orderId.value][type].pageSize = val
+  if (type == 'Waiting') {
+    loadFileListByState(3)
+  } else {
+    loadFileListByState(2)
   }
-  file.deviceData = deviceData.value;
+
 }
+/* 当前页 */
+function handleCurrentChange(val) {
+  let type = requestFileList[orderId.value].isErrorOrWaiting
+  requestFileList[orderId.value][type].pageNo = val
+
+  if (type == 'Waiting') {
+    loadFileListByState(3)
+
+  } else {
+    loadFileListByState(2)
+  }
+}
+
+
 
 const closeUploadBox = () => {
   store.commit("upload/closeUpload");
 };
-onMounted(() => { });
+
+
+onMounted(() => {
+
+});
 </script>
 
 <style lang="scss" scoped>
@@ -679,15 +774,58 @@ onMounted(() => { });
     }
 
     .TobeCompletedBox {
-      height: calc(100% - 50px);
+      height: calc(100% - 140px);
       overflow-y: auto;
       overflow-x: hidden;
+
+
 
       &>.uploader-file {
         content-visibility: auto;
         contain-intrinsic-size: 50px;
       }
     }
+
+    ::v-deep {
+      .el-pagination.is-background .el-pager li:not(.disabled).is-active {
+        color: #FFFFFF !important;
+        background-color: #0BB783 !important;
+        border-color: #0BB783 !important;
+        font-weight: 600;
+      }
+
+      .el-pagination.is-background .el-pager li {
+        color: #7E8299;
+        background-color: #E4E6EF;
+        border: 1px solid #D9D9D9;
+        border-color: #E4E6EF;
+        border-radius: 4px 4px 4px 4px;
+
+        font-size: 14px;
+        font-family: HelveticaNeue-, HelveticaNeue;
+        font-weight: normal;
+        color: rgba(0, 0, 0, 0.65);
+      }
+
+      .el-table__empty-text {
+        font-size: 18px;
+        color: var(--el-border-color-lighter);
+
+      }
+
+      .el-pagination.is-background .btn-prev:disabled,
+      .el-pagination.is-background .btn-next:disabled {
+        background-color: rgb(255 255 255 / 30%);
+      }
+
+      .el-pagination__sizes .el-input__wrapper,
+      .el-pagination__jump .el-input__wrapper {
+        background-color: #E4E6EF;
+
+
+      }
+    }
+
   }
 }
 

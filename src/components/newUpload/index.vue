@@ -11,7 +11,7 @@
           </div>
           <div class="today-right">
             <div class="color-box">
-              <el-button @click="allFileListDrawer = true">
+              <el-button @click="select">
                 File List
               </el-button>
             </div>
@@ -53,6 +53,7 @@
         </div>
       </template>
 
+
       <div class="uploader-list">
         <div class="uploader-file-info head-info">
           <div class="uploader-file-name" style="width: 30%">File Name</div>
@@ -82,6 +83,54 @@ import {
   computed,
   getCurrentInstance,
 } from "vue";
+const fs = window.require('fs');
+const { dialog } = window.require("electron").remote;
+/* dialog.showOpenDialog 的配置项包括：
+
+title：对话框的标题。
+defaultPath：默认打开的路径。
+buttonLabel：按钮的文本标签。
+filters：可选择的文件类型，可以是一个数组，每个元素包含一个名称和一个文件扩展名的对象。
+
+properties：对话框的属性，可以是一个数组，包含以下选项：
+openFile：允许选择文件。
+openDirectory：允许选择文件夹。
+multiSelections：允许选择多个文件。
+showHiddenFiles：显示隐藏文件。
+createDirectory：允许创建新文件夹。
+promptToCreate：提示用户是否创建新文件夹。
+message：对话框的消息文本。
+securityScopedBookmarks：是否启用安全范围书签。 */
+
+
+
+
+// 选择文件的对话框Dialog
+function select() {
+  dialog.showOpenDialog({
+    // properties: ["openFile"], // 选择文件
+    properties: ["openDirectory"], // 选择目录
+    filters: [
+      { name: 'Images', extensions: ['jpg', 'png', 'gif'] },
+      { name: 'Movies', extensions: ['mkv', 'avi', 'mp4'] },
+      { name: 'Custom File Type', extensions: ['as'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  }).then(result => {
+    console.log(result);
+    if (result.canceled) {
+    } else {
+
+      // const file = result.filePaths[0]
+
+    }
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
+
+
 import fileList from "./fileList.vue";
 import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -127,92 +176,93 @@ const tokenMap = computed(() => store.getters.tokenMap);
 
 let fileCache = [];
 const onFileAdded = (file) => {
+  // select()
 };
 
 const onFilesAdded = (files, fileList) => {
 
 
+  debugger
+  // let pathkey = '\\' + files[0].relativePath.split('/')[0]
+  // let absoluteuniqueIdentifier = files[0].uniqueIdentifier
+  // let absolutePath = absoluteuniqueIdentifier.split(pathkey)[0] + pathkey
+
   // debugger
-// let pathkey = '\\' + files[0].relativePath.split('/')[0]
-// let absoluteuniqueIdentifier = files[0].uniqueIdentifier
-// let absolutePath = absoluteuniqueIdentifier.split(pathkey)[0] + pathkey
-
-// debugger
 
 
-// let params ={
-//   email:email.value,
-//   orderId:orderId.value,
-//   deviceType:deviceType.value,
-//   sourcePath:absolutePath,
-// }
-// uploadFolder(params).then(res =>{
-//   console.log(res);
-// })
+  // let params ={
+  //   email:email.value,
+  //   orderId:orderId.value,
+  //   deviceType:deviceType.value,
+  //   sourcePath:absolutePath,
+  // }
+  // uploadFolder(params).then(res =>{
+  //   console.log(res);
+  // })
 
 
 
-  let timer = null;
-  if (files.length > 500) {
-    ElMessageBox.alert(
-      `The folder you are currently uploading contains ${files.length} small files. The number of files is too large, which may cause severe page lag during the upload process. Are you sure you want to upload it`,
-      "warning",
-      {
-        confirmButtonText: "OK",
-        callback: (type) => {
-          if (type == "confirm") {
-            for (const file of files) {
-              inituploadList(file);
-            }
-          }
-        },
-      }
-    );
-  } else {
-    for (const file of files) {
-      inituploadList(file);
-    }
-  }
+  // let timer = null;
+  // if (files.length > 500) {
+  //   ElMessageBox.alert(
+  //     `The folder you are currently uploading contains ${files.length} small files. The number of files is too large, which may cause severe page lag during the upload process. Are you sure you want to upload it`,
+  //     "warning",
+  //     {
+  //       confirmButtonText: "OK",
+  //       callback: (type) => {
+  //         if (type == "confirm") {
+  //           for (const file of files) {
+  //             inituploadList(file);
+  //           }
+  //         }
+  //       },
+  //     }
+  //   );
+  // } else {
+  //   for (const file of files) {
+  //     inituploadList(file);
+  //   }
+  // }
 
-  function inituploadList(file) {
-    if (file.size === 0) return;
-    if (file.size > FILE_SIZE) {
-      ElMessage({
-        message:
-          "The maximum upload size of a single file should not exceed 2GB.",
-        type: "warning",
-        duration: 3000,
-      });
-      return;
-    }
+  // function inituploadList(file) {
+  //   if (file.size === 0) return;
+  //   if (file.size > FILE_SIZE) {
+  //     ElMessage({
+  //       message:
+  //         "The maximum upload size of a single file should not exceed 2GB.",
+  //       type: "warning",
+  //       duration: 3000,
+  //     });
+  //     return;
+  //   }
 
-    let list = store.state.upload.uploadFileList[orderId.value] ?? [];
+  //   let list = store.state.upload.uploadFileList[orderId.value] ?? [];
 
-    if (list.length > 200) {
+  //   if (list.length > 200) {
 
-      fileCache.push(file);
-      if (timer) {
-        clearTimeout(timer);
-        timer = null;
-      }
-      timer = setTimeout(() => {
-        list = list.concat(fileCache);
-        allFileList[orderId.value] = allFileList[orderId.value].concat(fileCache);
-        store.commit("upload/setFileList", list);
-        fileCache = [];
-      }, 10);
-    } else {
-      list.push(file);
-      store.commit("upload/setFileList", list);
+  //     fileCache.push(file);
+  //     if (timer) {
+  //       clearTimeout(timer);
+  //       timer = null;
+  //     }
+  //     timer = setTimeout(() => {
+  //       list = list.concat(fileCache);
+  //       allFileList[orderId.value] = allFileList[orderId.value].concat(fileCache);
+  //       store.commit("upload/setFileList", list);
+  //       fileCache = [];
+  //     }, 10);
+  //   } else {
+  //     list.push(file);
+  //     store.commit("upload/setFileList", list);
 
-      if (allFileList[orderId.value]) {
-        allFileList[orderId.value].push(file);
-      } else {
-        allFileList[orderId.value] = [];
-        allFileList[orderId.value].push(file);
-      }
-    }
-  }
+  //     if (allFileList[orderId.value]) {
+  //       allFileList[orderId.value].push(file);
+  //     } else {
+  //       allFileList[orderId.value] = [];
+  //       allFileList[orderId.value].push(file);
+  //     }
+  //   }
+  // }
 };
 
 const fileShare = (item) => {
@@ -246,7 +296,7 @@ function initFileFn(file) {
   //   ? currentPath.value + directoryPath + file.name
   //   : currentPath.value + file.name; 
 
-  
+
   file.urlFileName = currentPath.value ? currentPath.value : file.name;
 
   file.orderId = orderId.value;

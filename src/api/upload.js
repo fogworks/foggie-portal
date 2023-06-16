@@ -51,6 +51,15 @@ export function SaveFile(data) {
   });
 }
 
+
+
+
+
+
+
+/* ------------------- */
+
+
 export function isCanUpload_Api(data) {
   return request({
     url: baseUrl + "/file/upload_valid",
@@ -58,10 +67,6 @@ export function isCanUpload_Api(data) {
     data,
   });
 }
-
-
-
-
 
 
 
@@ -123,6 +128,13 @@ export function getFileListByState_Api(data) {
 export function uploadFolder(data) {
   return request({
     url: baseUrl + "/file/upload_dir_valid",
+    method: "post",
+    data,
+  });
+}
+export function getfileListByState(data) {
+  return request({
+    url: baseUrl + "/file/list_by_state",
     method: "post",
     data,
   });

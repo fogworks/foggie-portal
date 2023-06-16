@@ -1,4 +1,5 @@
 export function secondsToStr(temp) {
+
   const years = Math.floor(temp / 31536000);
   if (years) {
     return Number(years).toFixed(0) + " year" + numberEnding(years);
@@ -20,11 +21,26 @@ export function secondsToStr(temp) {
   function numberEnding(number) {
     return number > 1 ? "s" : "";
   }
-
-
 }
 
 export function kebabCase(s) {
   return s.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`);
 }
 
+export function formatSize(size) {
+  if (size < 1024) {
+    return size.toFixed(0) + ' bytes'
+  } else if (size < 1024 * 1024) {
+    return (size / 1024.0).toFixed(0) + ' KB'
+  } else if (size < 1024 * 1024 * 1024) {
+    return (size / 1024.0 / 1024.0).toFixed(1) + ' MB'
+  } else {
+    return (size / 1024.0 / 1024.0 / 1024.0).toFixed(1) + ' GB'
+  }
+}
+
+export function generateUniqueId() {
+  const timestamp = (new Date()).getTime().toString(16);
+  const random = Math.random().toString(16).substring(2);
+  return `${timestamp}-${random}`;
+}
