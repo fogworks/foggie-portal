@@ -150,6 +150,8 @@ import {
   computed,
   getCurrentInstance,
 } from "vue";
+import { ElMessage } from "element-plus";
+
 import { getfileListByState, uploadFolder } from "@/api/upload";
 import { getFileType } from "@/utils/getFileType";
 import {
@@ -226,8 +228,6 @@ watch(() => orderId.value, (newVal, oldVal) => {
 }, { immediate: true })
 
 
-
-
 const pageNo = computed(() => {
   let type = requestFileList[orderId.value].isErrorOrWaiting
   return requestFileList[orderId.value][type].pageNo
@@ -289,7 +289,7 @@ function initFile(filePath) {
     const normalized_path = filePath.replace(/\\/g, path.sep);
     const file_name = path.basename(normalized_path);
     const fileDirectoryName = path.dirname(normalized_path);
-
+ 
     let file = {
       size: fs.statSync(filePath).size,
       paused: false,
@@ -332,16 +332,30 @@ function initFile(filePath) {
 
 function initDirectory(filePath) {
   if (filePath) {
+    const normalized_path = filePath.replace(/\\/g, path.sep);
+    const fileDirectoryName = path.dirname(normalized_path);
+    if(fileDirectoryName == '.'){
+      ElMessage({
+        message:
+          "The current path does not allow uploading",
+        type: "warning",
+        duration: 3000,
+      });
+      return 
+    }
+    const dest_Path =  fileDirectoryName.slice(fileDirectoryName.lastIndexOf(path.sep) + 1)
+
     let params = {
       orderId: orderId.value,
       deviceType: deviceType.value,
       sourcePath: filePath,
-      destPath: currentPath.value ? currentPath.value : '',
+      destPath: currentPath.value ? currentPath.value : dest_Path,
       email: email.value
     }
     uploadFolder(params).then(res => {
       if (res.code == 200) {
         loadFileListByState(3)
+        allFileListDrawer.value = true
       }
     })
   }

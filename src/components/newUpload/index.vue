@@ -182,7 +182,7 @@ const onFileAdded = (file) => {
 const onFilesAdded = (files, fileList) => {
 
 
-  debugger
+ 
   // let pathkey = '\\' + files[0].relativePath.split('/')[0]
   // let absoluteuniqueIdentifier = files[0].uniqueIdentifier
   // let absolutePath = absoluteuniqueIdentifier.split(pathkey)[0] + pathkey
