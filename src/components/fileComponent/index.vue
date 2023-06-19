@@ -70,7 +70,7 @@
       @setSingle="setSingle"
       v-bind="$attrs"
       v-else-if="activeName === 'Image'"
-      v-model:checkedData="imgCheckedData.value"
+      v-model:checkedData="checkedData"
       :fileSource="fileSource"
       v-model:folderVisible="folderVisible"
     ></ImgList>
@@ -167,9 +167,9 @@ const reset = () => {
 };
 const refreshList = () => {
   if (activeName.value === "Image") {
-    ImgListRef.value.refresh();
+    ImgListRef?.value?.refresh();
   } else {
-    AllFileRef.value.refresh();
+    AllFileRef?.value?.refresh();
   }
 };
 const handleClick = (tab, event) => {

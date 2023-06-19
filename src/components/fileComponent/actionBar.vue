@@ -185,33 +185,34 @@ const token = computed(() => {
 });
 
 const hasChecked = computed(() => {
-  if (activeName.value == "Image") {
-    return Object.keys(imgCheckedData.value).some((key) => {
-      if (imgCheckedData.value[key].length) {
-        return true;
-      } else {
-        return false;
-      }
-    });
-  } else {
-    return checkedData.value.length ? true : false;
-  }
+  // if (activeName.value == "Image") {
+  //   return Object.keys(imgCheckedData.value).some((key) => {
+  //     if (imgCheckedData.value[key].length) {
+  //       return true;
+  //     } else {
+  //       return false;
+  //     }
+  //   });
+  // } else {
+  return checkedData.value.length ? true : false;
+  // }
 });
 const { ipcRenderer } = window.require("electron");
 const imgData = computed(() => {
-  let data = [];
-  if (activeName.value == "Image") {
-    Object.keys(imgCheckedData.value).forEach((el) => {
-      imgCheckedData.value[el].forEach((item) => {
-        data.push(item);
-      });
-    });
-    return data;
-  } else {
-    return checkedData.value;
-  }
+  // let data = [];
+  // if (activeName.value == "Image") {
+  //   Object.keys(imgCheckedData.value).forEach((el) => {
+  //     imgCheckedData.value[el].forEach((item) => {
+  //       data.push(item);
+  //     });
+  //   });
+  //   return data;
+  // } else {
+  return checkedData.value;
+  // }
 });
 const downLoad = () => {
+  console.log(imgData.value, "imgData.value");
   const data = imgData.value.map((el) => {
     return {
       cid: el.cid,
@@ -234,7 +235,7 @@ const downLoad = () => {
   };
   let downloadUrl = "";
   if (imgData.value.length == 1) {
-    downloadUrl = `${baseUrl}/file_download/?cid=${imgData.value[0].cid}&key=${imgData.value[0].cid}&ip=${paramsObj.ip}&port=${paramsObj.port}&Id=${paramsObj.Id}&peerId=${paramsObj.peerId}&type=${paramsObj.type}&token=${paramsObj.token}`;
+    downloadUrl = `${baseUrl}/file_download/?cid=${imgData.value[0].cid}&key=${imgData.value[0].key}&ip=${paramsObj.ip}&port=${paramsObj.port}&Id=${paramsObj.Id}&peerId=${paramsObj.peerId}&type=${paramsObj.type}&token=${paramsObj.token}`;
   } else {
     downloadUrl = `${baseUrl}/files_download/?file_arr=${paramsObj.file_arr}&ip=${paramsObj.ip}&port=${paramsObj.port}&Id=${paramsObj.Id}&peerId=${paramsObj.peerId}&type=${paramsObj.type}&token=${paramsObj.token}`;
   }
@@ -278,6 +279,7 @@ const resetChecked = () => {
 const switchReceiveStatus = () => {
   return new Promise((resolve, reject) => {
     try {
+      emits("update:checkedData", []);
       if (fileSource.value) {
         console.log("------------remote");
         ElMessageBox.confirm("Are you sure to get local data?", "Warning", {

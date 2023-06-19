@@ -249,17 +249,28 @@ const getTimeLine = (date = "") => {
         .then((res) => {
           if (res.contents) {
             const content = res.contents;
-            content.forEach((el) => {
-              if (el.count) {
-                timeLine.value.push(el.date);
-                if (el.date.length !== 10) {
-                  getMethod(el.date);
+            for (let k = content.length - 1; k >= 0; k--) {
+              if (content[k].count) {
+                timeLine.value.push(content[k].date);
+                if (content[k].date.length !== 10) {
+                  getMethod(content[k].date);
                 } else {
-                  dateTimeLine.value.push(el.date);
+                  dateTimeLine.value.push(content[k].date);
                   resolve();
                 }
               }
-            });
+            }
+            // content.forEach((el) => {
+            //   if (el.count) {
+            //     timeLine.value.push(el.date);
+            //     if (el.date.length !== 10) {
+            //       getMethod(el.date);
+            //     } else {
+            //       dateTimeLine.value.push(el.date);
+            //       resolve();
+            //     }
+            //   }
+            // });
           }
         })
         .catch(() => {
@@ -308,7 +319,7 @@ const getLocalData = (reset = false, date = "", target) => {
       tableLoading.value = false;
     });
 };
-const initRemoteData = (data, reset = false, date = "") => {
+const initRemoteData = (data, reset = false, dateKey = "") => {
   if (!data) {
     tableLoading.value = false;
     return;
@@ -335,8 +346,8 @@ const initRemoteData = (data, reset = false, date = "") => {
     let file_id = el.fileId;
 
     let name = decodeURIComponent(el.key);
-    if (data.prefix) {
-      name = name.split(data.prefix)[1];
+    if (name.indexOf("/") > -1) {
+      name = name.split("/")[name.split("/").length - 1];
     }
     let isPersistent = el.isPersistent;
 
@@ -345,7 +356,7 @@ const initRemoteData = (data, reset = false, date = "") => {
       isDir: isDir,
       name,
       fullName: decodeURIComponent(el.key),
-      key: el.key,
+      key: name,
       idList: [
         {
           name: "IPFS",
@@ -373,9 +384,10 @@ const initRemoteData = (data, reset = false, date = "") => {
     return item;
   });
 
-  const target = imgData.value.find((el) => el.time == date);
+  const target = imgData.value.find((el) => el.time == dateKey);
   if (target) {
     target.list = [...target.list, ...content];
+    tableData.value = [...tableData.value, ...content];
   }
   console.log(tableData.value, "tableDatatableData");
   if (data.isTruncated) {
@@ -395,7 +407,7 @@ const initRemoteData = (data, reset = false, date = "") => {
 
   // tableSort({ prop: "date", order: 1, key: 1 });
 };
-const initLocalData = (data, reset = false, date = "", target) => {
+const initLocalData = (data, reset = false, dateKey = "", target) => {
   if (!data) {
     tableLoading.value = false;
     return;
@@ -416,6 +428,9 @@ const initLocalData = (data, reset = false, date = "", target) => {
     let file_id = el.fileId;
 
     let name = decodeURIComponent(el.dest_path);
+    if (name.indexOf("/") > -1) {
+      name = name.split("/")[name.split("/").length - 1];
+    }
 
     const type = el.dest_path.substring(el.dest_path.lastIndexOf(".") + 1);
     let { isSystemImg, imgHttpLarge: url_large } = handleImg(el, type, isDir);
@@ -453,9 +468,12 @@ const initLocalData = (data, reset = false, date = "", target) => {
   });
 
   if (data?.data.length) {
-    const target = imgData.value.find((el) => el.time == date);
+    const target = imgData.value.find((el) => el.time == dateKey);
+    console.log(target, "target");
+    console.log(content, "content");
     if (target) {
       target.list = [...target.list, ...content];
+      tableData.value = [...tableData.value, ...content];
     }
   }
 
@@ -543,8 +561,11 @@ const initFileData = async (data, reset = false) => {
     let file_id = el.fileId;
 
     let name = decodeURIComponent(el.key);
-    if (data.prefix) {
-      name = name.split(data.prefix)[1];
+    // if (data.prefix) {
+    //   name = name.split(data.prefix)[1];
+    // }
+    if (name.indexOf("/") > -1) {
+      name = name.split("/")[name.split("/").length - 1];
     }
 
     return {
@@ -590,7 +611,8 @@ const initFileData = async (data, reset = false) => {
   if (data?.data.length) {
     const target = imgData.value.find((el) => el.time == date);
     if (target) {
-      target.list = content;
+      target.list = contentItem;
+      tableData.value = [...tableData.value, ...contentItem];
     }
   }
   // if (reset) {
@@ -682,8 +704,17 @@ const init = async () => {
 //     deep: true,
 //   }
 // );
-const refresh = () => {
-  console.log(111);
+const refresh = async () => {
+  timeLine.value = [];
+  dateTimeLine.value = [];
+  imgData.value = [];
+  imgCheckedData.value = {};
+  isReady.value = false;
+  imgIndex.value = 0;
+  await init();
+  nextTick(() => {
+    isReady.value = true;
+  });
 };
 const handleCheckAllChange = (val, item) => {
   imgCheckedData.value[item.dateId] = val ? item.list.map((el) => el.cid) : [];
@@ -711,10 +742,27 @@ const handleCommand = ({ flag, data, pid }) => {
 watch(
   imgCheckedData,
   (val) => {
-    emits("update:checkedData", val.value);
+    let data = [];
+    Object.keys(val.value).forEach((key) => {
+      val.value[key].forEach((el) => {
+        let target = tableData.value.find((item) => item.cid == el);
+        target && data.push(target);
+      });
+    });
+    console.log(data, "data");
+    emits("update:checkedData", data);
   },
   {
     immediate: true,
+    deep: true,
+  }
+);
+watch(
+  () => store.getters.uploadIsShow,
+  () => {
+    refresh();
+  },
+  {
     deep: true,
   }
 );
@@ -747,7 +795,7 @@ onMounted(() => {
   // });
   // scrollContainer.value = imgContentRef.value;
 });
-defineExpose({ resetChecked });
+defineExpose({ resetChecked, refresh });
 </script>
 
 <style lang="scss" scoped>
@@ -909,10 +957,7 @@ defineExpose({ resetChecked });
       .el-image {
         width: 128px;
         height: 128px;
-        padding: 15px img {
-          // object-fit: cover;
-          // vertical-align: middle;
-        }
+        padding: 15px;
       }
     }
   }

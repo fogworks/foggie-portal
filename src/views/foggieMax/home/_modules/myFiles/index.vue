@@ -787,10 +787,12 @@ const getReomteData = (scroll, prefix, reset = false) => {
       if (res && res.content) {
         initRemoteData(res, reset);
       } else {
+        tableData.value = [];
         tableLoading.value = false;
       }
     })
     .catch(() => {
+      tableData.value = [];
       tableLoading.value = false;
     });
 };
@@ -806,6 +808,7 @@ const getLocalData = (reset = false) => {
       initLocalData(res, reset);
     })
     .catch(() => {
+      tableData.value = [];
       tableLoading.value = false;
     });
 };
@@ -866,12 +869,11 @@ const initRemoteData = (data, reset = false) => {
     const type = data.content[j].key.substring(
       data.content[j].key.lastIndexOf(".") + 1
     );
-    let { imgHttpLink: url, isSystemImg } = handleImg(
-      data.content[j],
-      type,
-      isDir
-    );
-    let { imgHttpLink: url_large } = handleImg(data.content[j], type, isDir);
+    let {
+      imgHttpLink: url,
+      isSystemImg,
+      imgHttpLarge: url_large,
+    } = handleImg(data.content[j], type, isDir);
     let cid = data.content[j].cid;
     let file_id = data.content[j].fileId;
 
@@ -914,7 +916,6 @@ const initRemoteData = (data, reset = false) => {
     };
     tableData.value.push(item);
   }
-  console.log(tableData.value, "tableDatatableData");
   if (data.isTruncated) {
     continuationToken.value = data.continuationToken;
   } else {

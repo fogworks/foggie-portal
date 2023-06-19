@@ -858,12 +858,20 @@ export const get_vood_refresh_token = (params) => {
     params,
   });
 };
+//todo
 export const get_miner_reward = (data, pageSize = 10, pageNumber = 1) => {
   let url = `${centerPoolUrl}/api/v1/minerManage/get_miner_reward?pageSize=${pageSize}&pageNumber=${pageNumber}`;
   return request({
     url: url,
     method: "post",
     data,
+  });
+};
+export const get_mp = (ps = 100, pn = 1) => {
+  let url = `${apiUrl}/api/miner_pool/get_mp?ps=${ps}&pn=${pn}`;
+  return request({
+    url: url,
+    method: "get",
   });
 };
 export const files_download = (params) => {

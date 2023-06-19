@@ -475,44 +475,39 @@ const setPrefix = (item, isTop = false) => {
   // emits("currentPrefix", breadcrumbList.prefix);
 };
 const handleConfirm = () => {
-  let fetchMethod;
-  if (activeName.value == "Image") {
-    console.log(imgCheckedData.value, "imgCheckedData");
-  } else if (activeName.value == "All") {
-    // if (isSingle.value) {
-    //   console.log(singleData.value, "singleDatasingleDatasingleData");
-    // } else {
-    //   console.log(checkedData.value, "checkedDatacheckedDatacheckedData");
-    // }
-    const targetObject = () => {
-      if (breadcrumbList.prefix.length) {
-        return (
-          breadcrumbList.prefix.join("/") + "/" + checkedData.value[0].name
-        );
-      } else {
-        return checkedData.value[0].name;
-      }
-    };
-    rename_objects({
-      deviceData,
-      sourceObject: checkedData.value[0].fullName,
-      targetObject: targetObject(),
-      token: token.value,
-      fileType: checkedData.value[0].fileType,
-    }).then((res) => {
-      if (res) {
-        proxy.$notify({
-          type: "success",
-          message: "Successfully moved",
-          position: "bottom-left",
-        });
-        emits("refreshList");
-        emits("reset");
-        emits("update:folderVisible", false);
-      }
-    });
-    // emits("reset");
-  }
+  // if (isSingle.value) {
+  //   console.log(singleData.value, "singleDatasingleDatasingleData");
+  // } else {
+  //   console.log(checkedData.value, "checkedDatacheckedDatacheckedData");
+  // }
+  const targetObject = () => {
+    if (breadcrumbList.prefix.length) {
+      return breadcrumbList.prefix.join("/") + "/" + checkedData.value[0].name;
+    } else {
+      return checkedData.value[0].name;
+    }
+  };
+  console.log(targetObject(), "targetObject");
+  console.log(checkedData.value[0], "checkedData.value[0]");
+  rename_objects({
+    deviceData,
+    sourceObject: checkedData.value[0].fullName,
+    targetObject: targetObject(),
+    token: token.value,
+    fileType: checkedData.value[0].fileType,
+  }).then((res) => {
+    if (res) {
+      proxy.$notify({
+        type: "success",
+        message: "Successfully moved",
+        position: "bottom-left",
+      });
+      emits("refreshList");
+      emits("reset");
+      emits("update:folderVisible", false);
+    }
+  });
+  emits("reset");
 };
 watch(breadcrumbList, (val) => {
   getFileList("", val.prefix, true);

@@ -74,50 +74,46 @@ const beforeClose = () => {
   emits("update:renameVisible", false);
 };
 const handleConfirm = () => {
-  if (activeName.value == "Image") {
-    console.log(imgCheckedData.value, "imgCheckedData");
-  } else if (activeName.value == "All") {
-    // if (isSingle.value) {
-    //   console.log(singleData.value, "singleDatasingleDatasingleData");
-    // } else {
-    //   console.log(checkedData.value, "checkedDatacheckedDatacheckedData");
-    // }
-    const targetObject = () => {
-      const arr = checkedData.value?.[0]?.fullName.split("/");
+  // if (isSingle.value) {
+  //   console.log(singleData.value, "singleDatasingleDatasingleData");
+  // } else {
+  //   console.log(checkedData.value, "checkedDatacheckedDatacheckedData");
+  // }
+  const targetObject = () => {
+    const arr = checkedData.value?.[0]?.fullName.split("/");
 
-      if (checkedData.value?.[0]?.type == "application/x-directory") {
-        if (newName.value[newName.value.length - 1] == "/") {
-          const newData = newName.value.slice(0, newName.value.length - 1);
-          console.log(newData, "newDatanewData");
-          arr.splice(arr.length - 2, 1, newData);
-        } else {
-          arr.splice(arr.length - 2, 1, newName.value);
-        }
+    if (checkedData.value?.[0]?.type == "application/x-directory") {
+      if (newName.value[newName.value.length - 1] == "/") {
+        const newData = newName.value.slice(0, newName.value.length - 1);
+        console.log(newData, "newDatanewData");
+        arr.splice(arr.length - 2, 1, newData);
       } else {
-        arr.splice(arr.length - 1, 1, newName.value);
+        arr.splice(arr.length - 2, 1, newName.value);
       }
-      return arr.join("/");
-    };
-    rename_objects({
-      deviceData,
-      sourceObject: checkedData.value[0].fullName,
-      targetObject: targetObject(),
-      token: token.value,
-      fileType: checkedData.value[0].fileType,
-    }).then((res) => {
-      if (res) {
-        proxy.$notify({
-          type: "success",
-          message: "Rename successful",
-          position: "bottom-left",
-        });
-        emits("refreshList");
-        emits("reset");
-        emits("update:renameVisible", false);
-      }
-    });
-    // emits("reset");
-  }
+    } else {
+      arr.splice(arr.length - 1, 1, newName.value);
+    }
+    return arr.join("/");
+  };
+  rename_objects({
+    deviceData,
+    sourceObject: checkedData.value[0].fullName,
+    targetObject: targetObject(),
+    token: token.value,
+    fileType: checkedData.value[0].fileType,
+  }).then((res) => {
+    if (res) {
+      proxy.$notify({
+        type: "success",
+        message: "Rename successful",
+        position: "bottom-left",
+      });
+      emits("refreshList");
+      emits("reset");
+      emits("update:renameVisible", false);
+    }
+  });
+  // emits("reset");
 };
 </script>
 
