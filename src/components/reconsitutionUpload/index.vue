@@ -129,7 +129,7 @@
           </template>
         </div> -->
         <el-pagination v-if="total > 0" @size-change="handleSizeChange" prev-icon="DArrowLeft" next-icon="DArrowRight"
-          @current-change="handleCurrentChange" :page-sizes="[50, 100, 500, 1000]" background :page-size="pageSize"
+          @current-change="handleCurrentChange" :page-sizes="[20, 50, 100]" background :page-size="pageSize"
           :current-page="pageNo" :pager-count="5" layout="prev, pager, next,sizes,jumper," :total="total"
           style="margin: 40px 60px 20px 0px; justify-content: end">
         </el-pagination>
@@ -147,6 +147,7 @@ import {
   provide,
   watch,
   watchEffect,
+  nextTick,
   computed,
   getCurrentInstance,
 } from "vue";
@@ -289,7 +290,7 @@ function initFile(filePath) {
     const normalized_path = filePath.replace(/\\/g, path.sep);
     const file_name = path.basename(normalized_path);
     const fileDirectoryName = path.dirname(normalized_path);
- 
+
     let file = {
       size: fs.statSync(filePath).size,
       paused: false,
@@ -320,12 +321,12 @@ function initFile(filePath) {
       customFileList[orderId.value] = [];
       customFileList[orderId.value].push(file);
     }
+
+
     if (!selectFilelist[orderId.value]) {
       selectFilelist[orderId.value] = []
     }
-
     uploadFileList[orderId.value] = customFileList[orderId.value].concat(selectFilelist[orderId.value])
-
   }
 
 }
@@ -333,17 +334,18 @@ function initFile(filePath) {
 function initDirectory(filePath) {
   if (filePath) {
     const normalized_path = filePath.replace(/\\/g, path.sep);
-    const fileDirectoryName = path.dirname(normalized_path);
-    if(fileDirectoryName == '.'){
+    // const fileDirectoryName = path.dirname(normalized_path);
+    const fileDirectoryName = path.basename(normalized_path);
+    if (fileDirectoryName == '.') {
       ElMessage({
         message:
           "The current path does not allow uploading",
         type: "warning",
         duration: 3000,
       });
-      return 
+      return
     }
-    const dest_Path =  fileDirectoryName.slice(fileDirectoryName.lastIndexOf(path.sep) + 1)
+    const dest_Path = fileDirectoryName.slice(fileDirectoryName.lastIndexOf(path.sep) + 1)
 
     let params = {
       orderId: orderId.value,
@@ -354,8 +356,33 @@ function initDirectory(filePath) {
     }
     uploadFolder(params).then(res => {
       if (res.code == 200) {
-        loadFileListByState(3)
-        allFileListDrawer.value = true
+        let params = {
+          email: email.value,
+          orderId: orderId.value,
+          deviceType: deviceType.value,
+          state: 3,
+          pageNo: 1,
+          pageSize: 1000,
+        }
+        getfileListByState(params).then(res => {
+          if (res.code == 200) {
+            requestFileList[orderId.value].Waiting.fileList = res.data.list.map(item => initDirectoryItem(item, 3))
+            // allFileListDrawer.value = true
+            nextTick(() => {
+              for (const item of requestFileList[orderId.value].Waiting.fileList) {
+                if (item) {
+                  multipleTable.value.toggleRowSelection(item, true)
+                }
+              }
+              uploadFileList[orderId.value] = customFileList[orderId.value].concat(selectFilelist[orderId.value])
+            })
+
+          }
+        })
+
+
+
+
       }
     })
   }
@@ -366,6 +393,8 @@ function updaFileListByState(type) {
 }
 
 provide('StateType', computed(() => requestFileList[orderId.value].isErrorOrWaiting))
+
+
 
 function loadFileListByState(type = 3) {
   let params = {
@@ -379,31 +408,35 @@ function loadFileListByState(type = 3) {
   getfileListByState(params).then(res => {
     if (res.code == 200) {
       requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].total = res.data.count
-      requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].fileList = res.data.list.map(item => {
-        let file = {
-          size: item.file_size,
-          paused: false,
-          error: false,
-          fileUploading: false,
-          completed: false,
-          id: item._id,
-          isFolder: true,
-          isErrorFile: type == 3 ? false : true,
-          md5: item.md5,
-          fileName: item.dest_path,
-          fileDirectoryName: item.file_path ? item.file_path.replace(/\\/g, path.sep).replace(`${path.sep}${item.dest_path}`, '') : '',
-          deviceType: deviceType.value,
-          urlPrefix: item.file_path,
-          urlFileName: item.dest_path,
-          orderId: item.order_id,
-          deviceData: deviceData.value,
-          foggieToken: deviceType.value == 1 || deviceType.value == 2 ? tokenMap.value[orderId.value] ?? "" : ''
-        }
-        return file
-      })
+      requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].fileList = res.data.list.map(item => initDirectoryItem(item, type))
     }
   })
 }
+
+function initDirectoryItem(item, type) {
+  let file = {
+    size: item.file_size,
+    paused: false,
+    error: false,
+    fileUploading: false,
+    completed: false,
+    id: item._id,
+    isFolder: true,
+    isErrorFile: type == 3 ? false : true,
+    md5: item.md5,
+    fileName: item.dest_path,
+    fileDirectoryName: item.file_path ? item.file_path.replace(/\\/g, path.sep).replace(`${path.sep}${item.dest_path}`, '') : '',
+    deviceType: deviceType.value,
+    urlPrefix: item.file_path,
+    urlFileName: item.dest_path,
+    orderId: item.order_id,
+    deviceData: deviceData.value,
+    foggieToken: deviceType.value == 1 || deviceType.value == 2 ? tokenMap.value[orderId.value] ?? "" : ''
+  }
+  return file
+}
+
+
 
 /* 在上传过程中 每当有新的文件进行上传操作待上传列表中就删除对应的文件 */
 const newQueueID = (id, fileOrderID) => {
@@ -413,14 +446,12 @@ const newQueueID = (id, fileOrderID) => {
     let row = selectFilelist[fileOrderID].filter(item => item.id)[0]
     if (row) {
       multipleTable.value.toggleRowSelection(row, false)
-
     }
   }
-
-
   if (customFileListIndex > -1) {
     customFileList[fileOrderID].splice(customFileListIndex, 1);
   }
+  debugger
   if (requestFileListIndex > -1) {
     requestFileList[fileOrderID].Waiting.fileList.splice(requestFileListIndex, 1);
   }
@@ -442,6 +473,12 @@ function remove(row) {
     deleteUploadFile_Api(params).then(res => {
       if (res.code == 200) {
         loadFileListByState(deleteType)
+        if (uploadFileList[orderId]) {
+          let uploadFileList = uploadFileList[orderId].findIndex((file) => file.id == id);
+          if (uploadFileList > -1) {
+            uploadFileList[fileOrderID].splice(customFileListIndex, 1);
+          }
+        }
       }
     })
   } else {
