@@ -19,7 +19,7 @@
         </div>
         <div style="position: relative" class="uploader-app">
           <div class="uploader-drop">
-            <label class="uploader-btn" @click="openDialog('multiSelections')">Select File</label>
+            <label class="uploader-btn" @click="openDialog('openFile')">Select File</label>
             <label class="uploader-btn" @click="openDialog('openDirectory')">Select a folder</label>
           </div>
         </div>
