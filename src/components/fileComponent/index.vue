@@ -7,7 +7,7 @@
           All
         </template>
       </el-tab-pane>
-      <el-tab-pane label="Image" name="Image">
+      <el-tab-pane label="Image" name="Image" v-if="fileSource">
         <template #label>
           <svg-icon icon-class="picture"></svg-icon>
           Picture
@@ -98,13 +98,22 @@ export default {
 };
 </script>
 <script setup>
-import { ref, toRefs, reactive, watch, provide, computed, useAttrs } from "vue";
+import {
+  ref,
+  toRefs,
+  reactive,
+  watch,
+  provide,
+  computed,
+  useAttrs,
+  inject,
+} from "vue";
 import ImgList from "./imgList";
 import FolderDialog from "./folderDialog.vue";
 import RenameDialog from "./renameDialog.vue";
 import AllFile from "@/views/foggieMax/home/_modules/myFiles";
 import ActionBar from "./actionBar.vue";
-
+const deviceData = inject("deviceData");
 const emits = defineEmits(["getUseSize"]);
 const props = defineProps({
   createdTime: {
@@ -125,7 +134,7 @@ const imgCheckedData = reactive({
 });
 const actionType = ref("");
 const isSingle = ref(false);
-const fileSource = ref(false);
+const fileSource = ref(true);
 const singleData = reactive({
   value: {},
 });

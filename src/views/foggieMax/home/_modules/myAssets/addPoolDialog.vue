@@ -74,7 +74,7 @@
             style="width: 100%"
             :controls="false"
             :precision="0"
-            :min="25"
+            :min="1"
             v-model="poolForm.expire_on_week"
             autocomplete="off"
           ></el-input-number>
@@ -200,7 +200,8 @@ const validateWeeks = (rule, value, cb) => {
   if (+expire.value - nowTimeStamp >= oneWeekTimeStamp * value) {
     cb();
   } else {
-    cb(new Error(`You have less than ${value} weeks left`));
+    // cb(new Error(`You have less than ${value} weeks left`));
+    cb();
   }
 };
 const poolrules = {

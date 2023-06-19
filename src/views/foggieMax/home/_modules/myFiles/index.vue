@@ -1092,7 +1092,11 @@ const initFileData = async (data, reset = false) => {
     let date = transferTime(el.lastModified);
     let isDir = false;
     const type = el.key.substring(el.key.lastIndexOf(".") + 1);
-    let { imgHttpLink: url, isSystemImg } = handleImg(el, type, isDir);
+    let {
+      imgHttpLink: url,
+      isSystemImg,
+      imgHttpLarge: url_large,
+    } = handleImg(el, type, isDir);
 
     let cid = el.cid;
     let file_id = el.fileId;
@@ -1128,7 +1132,7 @@ const initFileData = async (data, reset = false) => {
       pubkey: cid,
       cid,
       imgUrl: url,
-      // imgUrlLarge: url_large,
+      imgUrlLarge: url_large,
       // share: getShareOptions(),
       share: {},
       isSystemImg,
@@ -1376,6 +1380,14 @@ const copyLink = (text) => {
 };
 const detailData = reactive({ data: {} });
 const toDetail = (item) => {
+  if (!fileSource.value) {
+    proxy.$notify({
+      type: "info",
+      message: "Local data cannot be previewed",
+      position: "bottom-left",
+    });
+    return false;
+  }
   localStorage.setItem("currentOODItem", JSON.stringify(deviceData));
   if (item.type === "application/x-directory") {
     let long_name = breadcrumbList.prefix.length

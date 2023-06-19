@@ -1,11 +1,15 @@
 <template>
   <div class="top-between" v-if="haveNet">
-    <MyAssets :currentOODItem="currentOODItem.data"></MyAssets>
+    <MyAssets
+      :currentOODItem="currentOODItem.data"
+      v-model:poolSpace="poolSpace"
+    ></MyAssets>
     <DashBoard
       :currentOODItem="currentOODItem.data"
       :spaceTotal="spaceTotal"
       :spaceUseRate="spaceUseRate"
       :spaceUseSize="spaceUseSize"
+      :poolSpace="poolSpace"
     ></DashBoard>
   </div>
   <FileComponent :orderId="deviceData.order_id" @getUseSize="getUseSize">
@@ -63,24 +67,23 @@ export default {
         device_id: "",
       },
     });
+    const poolSpace = ref(0);
     // const checkedData = ref([]);
     const tokenMap = computed(() => store.getters.tokenMap);
     provide("currentOODItem", currentOODItem);
     spaceTotal.value = +deviceData.value.total_disk_size;
-
+    const total = ref(0);
     const getUseSize = () => {
       getSummary(
         deviceData.value,
         tokenMap.value[deviceData.value.device_id]
       ).then((res) => {
+        total.value = +res.contents?.[0]?.total;
         spaceUseSize.value =
           +(+res.contents?.[0]?.total / 1024 / 1024 / 1024).toFixed(2) || 0;
         spaceUseRate.value =
           +(
-            +res.contents?.[0]?.total /
-            1024 /
-            1024 /
-            1024 /
+            (+res.contents?.[0]?.total / 1024 / 1024 / 1024 + poolSpace.value) /
             spaceTotal.value
           ).toFixed(4) || 0;
       });
@@ -100,6 +103,7 @@ export default {
       initFoggieDate();
       getUseSize();
     });
+
     return {
       currentOODItem,
       haveNet,
@@ -108,6 +112,7 @@ export default {
       spaceUseSize,
       // checkedData,
       getUseSize,
+      poolSpace,
     };
   },
 };

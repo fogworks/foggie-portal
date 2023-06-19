@@ -4,7 +4,7 @@
       <div
         class="action-item"
         @click="handlerClick('share')"
-        v-if="checkedData.length <= 1 && activeName !== 'Image'"
+        v-if="checkedData.length <= 1"
       >
         <svg-icon icon-class="share"></svg-icon>
         <span> Share </span>
@@ -13,23 +13,27 @@
         <svg-icon icon-class="download"></svg-icon>
         <span> Download </span>
       </div>
-      <!-- v-if="deviceType !== 'space'" -->
-
-      <div class="action-item" @click="handlerClick('delete')">
+      <div
+        class="action-item"
+        v-if="deviceType !== 'space'"
+        @click="handlerClick('delete')"
+      >
         <svg-icon icon-class="delete"></svg-icon>
         <span> Delete </span>
       </div>
       <div
         class="action-item"
         @click="handlerClick('rename')"
-        v-if="checkedData.length <= 1 && activeName !== 'Image'"
+        v-if="
+          checkedData.length <= 1 && activeName !== 'Image' && showActionBool
+        "
       >
         <svg-icon icon-class="rename"></svg-icon>
         <span> Rename </span>
       </div>
       <div
         class="action-item"
-        v-if="checkedData.length <= 1"
+        v-if="checkedData.length <= 1 && showActionBool"
         @click="handlerClick('move')"
       >
         <svg-icon icon-class="move"></svg-icon>
@@ -50,10 +54,11 @@
             >Upload +</el-button
           >
         </div>
+        <!-- && deviceType !== 'space' -->
         <div
           class="action-box"
           style="margin-right: 20px; margin-bottom: 0"
-          v-if="activeName == 'All'"
+          v-if="activeName == 'All' && showActionBool"
         >
           <div class="action-item" @click="handlerClick('newFolder')">
             <svg-icon icon-class="new_folder"></svg-icon>
@@ -140,6 +145,7 @@ const emits = defineEmits([
   "refreshList",
 ]);
 const { proxy } = getCurrentInstance();
+
 const tableLoading = computed({
   get() {
     return props.tableLoading || false;
@@ -162,6 +168,17 @@ const {
   fileSource,
 } = toRefs(props);
 const { deleteItem } = useDelete(tableLoading, refresh);
+const showActionBool = computed(() => {
+  if (deviceData.type !== "space") {
+    if (fileSource.value) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    return true;
+  }
+});
 const store = useStore();
 const uploadDisable = computed(() => {
   console.log(deviceData, "deviceData");

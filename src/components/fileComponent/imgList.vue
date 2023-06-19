@@ -14,18 +14,18 @@
           v-model="imgCheckedData.value[item.dateId]"
           @change="(val) => handleCheckedItemsChange(val, item)"
         >
-          <div :class="['img-item']" v-for="(img, index) in item.list">
+          <div :class="['img-item']" v-for="(img, index2) in item.list">
             <div :class="['mask', isChecking ? 'isChecking' : '']">
               <el-checkbox
                 :class="[
                   'mask-checkbox',
                   itemChecked(img.cid, item.dateId) ? 'itemChecked' : '',
                 ]"
-                :key="index"
+                :key="img.cid"
                 :label="img.cid"
               ></el-checkbox>
             </div>
-            <ActionDrop class="action-popover">
+            <!-- <ActionDrop class="action-popover">
               <div class="more-box">
                 <svg-icon icon-class="more"></svg-icon>
               </div>
@@ -73,14 +73,14 @@
                   </li>
                 </ul>
               </template>
-            </ActionDrop>
+            </ActionDrop> -->
             <el-image
               scroll-container=".img-content"
               :preview-teleported="true"
               :teleported="true"
               :hide-on-click-modal="true"
-              :initial-index="1"
-              :preview-src-list="[img.imgUrl]"
+              :initial-index="index2"
+              :preview-src-list="getPreviewList(item)"
               fit="cover"
               :key="img.cid"
               :src="img.imgUrl"
@@ -226,6 +226,9 @@ const vLoadMore = {
         binding.value("", [], false, dateTimeLine.value[imgIndex.value]);
     });
   },
+};
+const getPreviewList = (data) => {
+  return data.list.map((el) => el.imgUrl);
 };
 const getTimeLine = (date = "") => {
   return new Promise((resolve, reject) => {
@@ -968,5 +971,8 @@ defineExpose({ resetChecked, refresh });
   .el-dropdown-menu__item {
     justify-content: flex-start !important;
   }
+}
+.el-image-viewer__mask {
+  opacity: 0.8;
 }
 </style>
