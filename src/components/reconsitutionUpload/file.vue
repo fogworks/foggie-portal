@@ -194,7 +194,12 @@ function loadUploadProgress() {
 
 
             let time = (endTime - startUploadTime.value) / 1000;
+
+
             progress.value = (response.uploaded_size / file.value.size).toFixed(4) * 100;
+            if (progress.value > 100) {
+              progress.value = 100
+            }
             averageSpeed.value = uploaded_size / time;
             timeRemaining.value = (file.value.size - response.uploaded_size) / (averageSpeed.value == 0 ? 1 : averageSpeed.value);
             if (response.uploaded_size == file.value.size) {

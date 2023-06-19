@@ -451,7 +451,6 @@ const newQueueID = (id, fileOrderID) => {
   if (customFileListIndex > -1) {
     customFileList[fileOrderID].splice(customFileListIndex, 1);
   }
-  debugger
   if (requestFileListIndex > -1) {
     requestFileList[fileOrderID].Waiting.fileList.splice(requestFileListIndex, 1);
   }
