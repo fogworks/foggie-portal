@@ -121,7 +121,7 @@
           >
             <el-tooltip :content="getfilesize2(item.miner_lock_pst_amount)">
               <span
-                style="margin-right: 10px; font-size: 40px; font-weight: 600;width:100%;overflow:hidden:white-space:nowrap"
+                style="margin-right: 10px; font-size: 40px; font-weight: 600;width:100%;overflow:hidden;white-space:nowrap"
               >
                 {{ getfilesize2(item.miner_lock_pst_amount).split(" ")[0] }}
                 <span style="font-size: 24px; font-weight: 600">

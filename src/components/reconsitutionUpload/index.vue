@@ -23,9 +23,9 @@
             <label class="uploader-btn" @click="openDialog('openDirectory')">Select a folder</label>
           </div>
         </div>
-        <template v-for="(uploadList, key) in uploadFileList" :key="key" style="height: 100%">
+        <template v-for="(uploadList, key) in requestFileList" :key="key" style="height: 100%">
           <fileList @fileShare="fileShare" @newQueueID="newQueueID" @updaFileListByState="updaFileListByState"
-            :orderID="key" :ref="`fileListRef_${key}`" :uploadLists="uploadFileList[key]" v-show="key == orderId">
+            :orderID="key" :ref="`fileListRef_${key}`" :uploadLists="requestFileList[key].Waiting.fileList" v-show="key == orderId">
           </fileList>
         </template>
       </div>
@@ -112,22 +112,6 @@
             </template>
           </el-table-column>
         </el-table>
-
-
-
-        <!-- <div class="uploader-file-info head-info">
-          <div class="uploader-file-name" style="width: 30%">File Name</div>
-          <div class="uploader-file-prefix" style="width: 35%">Upload Path</div>
-          <div class="uploader-file-size" style="width: 25%">File Size</div>
-          <div class="uploader-file-actions">Operate</div>
-        </div> -->
-
-        <!-- <div class="TobeCompletedBox">
-          <template v-for="(curFile, index) in (allFileList ?? [])" :key="curFile.id">
-            <TobeCompleted @deleteAllFileList="deleteAllFileList" :curFile="curFile" :orderID="orderId">
-            </TobeCompleted>
-          </template>
-        </div> -->
         <el-pagination v-if="total > 0" @size-change="handleSizeChange" prev-icon="DArrowLeft" next-icon="DArrowRight"
           @current-change="handleCurrentChange" :page-sizes="[20, 50, 100]" background :page-size="pageSize"
           :current-page="pageNo" :pager-count="5" layout="prev, pager, next,sizes,jumper," :total="total"
@@ -151,9 +135,9 @@ import {
   computed,
   getCurrentInstance,
 } from "vue";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 
-import { getfileListByState, uploadFolder } from "@/api/upload";
+import { getfileListByState, uploadFolder, isCanUpload_Api } from "@/api/upload";
 import { getFileType } from "@/utils/getFileType";
 import {
   deleteUploadFile_Api,
@@ -197,10 +181,6 @@ const orderId = computed(() => store.getters.orderId);
 const deviceData = computed(() => store.getters.deviceData);
 const deviceType = computed(() => store.getters.deviceType);
 
-const customFileList = reactive({});  // 当前自己点击上传的文件
-const uploadFileList = reactive({});  // 当前队列中的文件
-const selectFilelist = reactive({})  // 当前选择上传的文件
-
 
 const requestFileList = reactive({})  // 接收数据库中的文件列表信息
 
@@ -222,9 +202,7 @@ watch(() => orderId.value, (newVal, oldVal) => {
       }
     }
   }
-  if (!customFileList[newVal]) {
-    customFileList[newVal] = []
-  }
+
 
 }, { immediate: true })
 
@@ -248,11 +226,10 @@ const total = computed(() => {
 
 const allFileList = computed({
   get() {
-    let customList = customFileList[orderId.value] || []
     let requestList = []
     let type = requestFileList[orderId.value].isErrorOrWaiting
     requestList = requestFileList[orderId.value][type].fileList || []
-    return type == 'Waiting' ? customList.concat(requestList) : requestList
+    return requestList
   }
 })
 const tokenMap = computed(() => store.getters.tokenMap);
@@ -289,44 +266,21 @@ function initFile(filePath) {
   if (filePath) {
     const normalized_path = filePath.replace(/\\/g, path.sep);
     const file_name = path.basename(normalized_path);
-    const fileDirectoryName = path.dirname(normalized_path);
-
-    let file = {
-      size: fs.statSync(filePath).size,
-      paused: false,
-      error: false,
-      fileUploading: false,
-      completed: false,
-      id: generateUniqueId(),
-      isFolder: false,
-      isErrorFile: false,
-      fileName: file_name,
-      fileDirectoryName: fileDirectoryName,
-      deviceType: deviceType.value,
-      urlPrefix: filePath,
-      urlFileName: currentPath.value ? currentPath.value : file_name,
+    // const fileDirectoryName = path.dirname(normalized_path);
+    let params = {
       orderId: orderId.value,
-      deviceData: deviceData.value,
-      foggieToken: deviceType.value == 1 || deviceType.value == 2 ? tokenMap.value[orderId.value] ?? "" : ''
+      deviceType: deviceType.value,
+      sourcePath: filePath,
+      destPath: currentPath.value ? currentPath.value : file_name,
+      email: email.value
     }
 
-
-    if (customFileList[orderId.value]) {
-      if (customFileList[orderId.value].some(item => item.urlPrefix == filePath)) {
-        return
-      } else {
-        customFileList[orderId.value].push(file);
+    isCanUpload_Api(params).then(res => {
+      if (res.code == 200 && res.data) {
+        loadFileListByState(3)
       }
-    } else {
-      customFileList[orderId.value] = [];
-      customFileList[orderId.value].push(file);
-    }
+    })
 
-
-    if (!selectFilelist[orderId.value]) {
-      selectFilelist[orderId.value] = []
-    }
-    uploadFileList[orderId.value] = customFileList[orderId.value].concat(selectFilelist[orderId.value])
   }
 
 }
@@ -356,59 +310,35 @@ function initDirectory(filePath) {
     }
     uploadFolder(params).then(res => {
       if (res.code == 200) {
-        let params = {
-          email: email.value,
-          orderId: orderId.value,
-          deviceType: deviceType.value,
-          state: 3,
-          pageNo: 1,
-          pageSize: 1000,
-        }
-        getfileListByState(params).then(res => {
-          if (res.code == 200) {
-            requestFileList[orderId.value].Waiting.fileList = res.data.list.map(item => initDirectoryItem(item, 3))
-            // allFileListDrawer.value = true
-            nextTick(() => {
-              for (const item of requestFileList[orderId.value].Waiting.fileList) {
-                if (item) {
-                  multipleTable.value.toggleRowSelection(item, true)
-                }
-              }
-              uploadFileList[orderId.value] = customFileList[orderId.value].concat(selectFilelist[orderId.value])
-            })
-
-          }
-        })
-
-
-
-
+        loadFileListByState(3)
       }
     })
   }
 }
 
 function updaFileListByState(type) {
-  loadFileListByState(type)
+  // loadFileListByState(type)
 }
 
 provide('StateType', computed(() => requestFileList[orderId.value].isErrorOrWaiting))
 
 
 
-function loadFileListByState(type = 3) {
+function loadFileListByState(type = 3, isPaging = true) {
   let params = {
     email: email.value,
     orderId: orderId.value,
     deviceType: deviceType.value,
     state: type,
-    pageNo: requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].pageNo,
-    pageSize: requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].pageSize
+    pageNo:requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].pageNo,
+    pageSize:requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].pageSize
   }
+
   getfileListByState(params).then(res => {
     if (res.code == 200) {
       requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].total = res.data.count
       requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].fileList = res.data.list.map(item => initDirectoryItem(item, type))
+    
     }
   })
 }
@@ -421,7 +351,6 @@ function initDirectoryItem(item, type) {
     fileUploading: false,
     completed: false,
     id: item._id,
-    isFolder: true,
     isErrorFile: type == 3 ? false : true,
     md5: item.md5,
     fileName: item.dest_path,
@@ -440,61 +369,37 @@ function initDirectoryItem(item, type) {
 
 /* 在上传过程中 每当有新的文件进行上传操作待上传列表中就删除对应的文件 */
 const newQueueID = (id, fileOrderID) => {
-  let customFileListIndex = customFileList[fileOrderID].findIndex((file) => file.id == id);
-  let requestFileListIndex = requestFileList[fileOrderID].Waiting.fileList.findIndex((file) => file.id == id);
-  if (selectFilelist[fileOrderID]) {
-    let row = selectFilelist[fileOrderID].filter(item => item.id)[0]
-    if (row) {
-      multipleTable.value.toggleRowSelection(row, false)
-    }
-  }
-  if (customFileListIndex > -1) {
-    customFileList[fileOrderID].splice(customFileListIndex, 1);
-  }
-  if (requestFileListIndex > -1) {
-    requestFileList[fileOrderID].Waiting.fileList.splice(requestFileListIndex, 1);
+  if (orderId.value == fileOrderID) {
+    loadFileListByState(3)
   }
 };
 
 /* 在待上传列表中删除指定文件 */
 function remove(row) {
-  const { id, isFolder, orderId, urlFileName, deviceType } = row
+  const { id, orderId, urlFileName, deviceType } = row
   let deleteType = requestFileList[orderId].isErrorOrWaiting == 'Waiting' ? 3 : 2
-  if (isFolder) {
-    //数据库文件
-    let params = {
-      email: email.value,
-      orderId: orderId,
-      deviceType: deviceType,
-      destPath: urlFileName,
-    };
 
-    deleteUploadFile_Api(params).then(res => {
-      if (res.code == 200) {
-        loadFileListByState(deleteType)
-        if (uploadFileList[orderId]) {
-          let uploadFileList = uploadFileList[orderId].findIndex((file) => file.id == id);
-          if (uploadFileList > -1) {
-            uploadFileList[fileOrderID].splice(customFileListIndex, 1);
-          }
-        }
-      }
-    })
-  } else {
-    // 手动上传文件
-    let customFileListIndex = customFileList[orderId].findIndex((file) => file.id == id);
-    if (customFileListIndex > -1) {
-      customFileList[fileOrderID].splice(customFileListIndex, 1);
+  //数据库文件
+  let params = {
+    email: email.value,
+    orderId: orderId,
+    deviceType: deviceType,
+    destPath: urlFileName,
+  };
+
+  deleteUploadFile_Api(params).then(res => {
+    if (res.code == 200) {
+      loadFileListByState(deleteType)
+      
     }
-  }
+  })
 }
 
 
-function handleSelectionChange(selection) {
-  selectFilelist[orderId.value] = selection
-  uploadFileList[orderId.value] = customFileList[orderId.value].concat(selectFilelist[orderId.value])
-
-}
+// function handleSelectionChange(selection) {
+//   selectFilelist[orderId.value] = selection
+//   uploadFileList[orderId.value] = selectFilelist[orderId.value]
+// }
 
 function selectEnable(row) {
   if (!row.isFolder) {
@@ -680,7 +585,6 @@ onMounted(() => {
     border-radius: 16px;
     text-align: center;
 
-    .drop-title {}
   }
 
   .uploader-btn {
@@ -817,14 +721,7 @@ onMounted(() => {
   border: 1px solid #e2e2e2; */
 }
 
-.uploader-file-progress {
-  /* background: linear-gradient(
-    171deg,
-    #272eef 0%,
-    #207ee4 42%,
-    #e392ff 100%
-  ) !important; */
-}
+
 
 .uploader-file-info {
   /* background: #3591f2 !important; */

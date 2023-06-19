@@ -1,6 +1,4 @@
 export function secondsToStr(seconds) {
-
-
   let hours = Math.floor(seconds / 3600).toFixed(0);
   let minutes = Math.floor((seconds % 3600) / 60).toFixed(0);
   let remainingSeconds = (seconds % 60).toFixed(0)

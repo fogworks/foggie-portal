@@ -11,15 +11,8 @@
         </div>
       </li>
       <li v-for="file in curFileList" :key="file.id">
-        <upFile
-          :file="file"
-          :curFileList="curFileList"
-          :MAX_UPLOAD_NUM="MAX_UPLOAD_NUM"
-          @chanStatus="chanStatus"
-          @remove="remove"
-          @fileShare="fileShare"
-          @updaLoadFileListByState="updaLoadFileListByState"
-        />
+        <upFile :file="file" :curFileList="curFileList" :MAX_UPLOAD_NUM="MAX_UPLOAD_NUM" @chanStatus="chanStatus"
+          @remove="remove" @fileShare="fileShare" @updaLoadFileListByState="updaLoadFileListByState" />
       </li>
     </ul>
   </div>
@@ -40,10 +33,11 @@ import {
   computed,
 } from "vue";
 import { useStore } from "vuex";
-
+import { cloneDeep } from "lodash";
 const store = useStore();
 const deviceType = computed(() => store.getters.deviceType);
-const MAX_UPLOAD_NUM = deviceType.value == 3 ? 1 : 4;
+// const MAX_UPLOAD_NUM = deviceType.value == 3 ? 1 : 4;
+const MAX_UPLOAD_NUM = 1;
 const props = defineProps({
   orderID: {
     type: [String, Number],
@@ -109,34 +103,34 @@ const chanStatus = (item) => {
   if (fileList.uploadLists.length == 0) {
     return;
   }
-  let pushItem = fileList.uploadLists[0];
+  let pushItem = cloneDeep(fileList.uploadLists[0]);
   pushItem.fileUploading = true;
   curFileList.value.unshift(pushItem);
   fileList.uploadLists.shift();
   if (curFileListLength >= Max_CurFileListLength) {
-    let deleteIndex = findLastIndex(
-      curFileList.value,
-      (lastItem) => lastItem.fileUploading == false
-    );
+    let deleteIndex = findLastIndex(curFileList.value, (lastItem) => lastItem.fileUploading == false);
     curFileList.value.splice(deleteIndex, 1);
   }
-  emits("newQueueID", pushItem.id, pushItem.orderId);
+  if (item) {
+    emits("newQueueID", pushItem.id, pushItem.orderId);
+  }
+
+
 };
 
 const remove = (id, fileOrderId) => {
   curFileList.value = curFileList.value.filter((item) => item.id !== id);
-  fileList.uploadLists = fileList.uploadLists.filter((item) => item.id !== id);
   chanStatus();
 };
 
 function updaLoadFileListByState(type) {
-  emits("updaFileListByState", type);
+  // emits("updaFileListByState", type);
 }
 const fileShare = (file) => {
   emits("fileShare", file);
 };
 
-onMounted(() => {});
+onMounted(() => { });
 
 // defineExpose({
 //   curFileList,
@@ -157,7 +151,7 @@ onMounted(() => {});
   margin-right: 20px;
 }
 
-.uploader-list > ul {
+.uploader-list>ul {
   list-style: none;
   margin: 0;
   padding: 0;

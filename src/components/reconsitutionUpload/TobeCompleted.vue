@@ -18,7 +18,6 @@
         <div class="uploader-file-actions">
           <span class="uploader-file-remove" @click="remove()" />
         </div>
-
       </div>
     </div>
   </div>
@@ -28,22 +27,22 @@
 import { getfilesize } from "@/utils/util.js";
 import { ref, reactive, computed, toRefs, onMounted } from "vue";
 import { useStore } from "vuex";
-const formatedSize = ref()
-const store = useStore()
-const emits = defineEmits(['deleteAllFileList'])
+const formatedSize = ref();
+const store = useStore();
+const emits = defineEmits(["deleteAllFileList"]);
 const props = defineProps({
   curFile: {
     type: Object,
     default() {
-      return {}
-    }
+      return {};
+    },
   },
   orderID: {
     type: String,
-    default: ''
-  }
-})
-const { curFile } = toRefs(props)
+    default: "",
+  },
+});
+const { curFile } = toRefs(props);
 
 formatedSize.value = getfilesize(curFile.value.size);
 const fileIconArr = ref({
@@ -115,14 +114,14 @@ let fileIcon = computed(() => {
 });
 
 function remove() {
-  emits('deleteAllFileList', curFile.value.id)
-  let uploadFileList = store.state.upload.uploadFileList[props.orderID]
-  store.state.upload.uploadFileList[props.orderID] = uploadFileList.filter(item => item.id != curFile.value.id)
+  emits("deleteAllFileList", curFile.value.id);
+  let uploadFileList = store.state.upload.uploadFileList[props.orderID];
+  store.state.upload.uploadFileList[props.orderID] = uploadFileList.filter(
+    (item) => item.id != curFile.value.id
+  );
 }
 
-onMounted(() => {
-
-})
+onMounted(() => {});
 </script>
 
 <style lang="scss" scoped>
@@ -133,8 +132,6 @@ onMounted(() => {
   overflow: hidden;
   border-bottom: 1px solid #7e7e7e;
 }
-
-
 
 .uploader-file-info {
   position: relative;
@@ -245,14 +242,12 @@ onMounted(() => {
   width: 1%;
 }
 
-
-
 .uploader-file-actions {
   width: 10%;
   text-align: center;
 }
 
-.uploader-file-actions>span {
+.uploader-file-actions > span {
   display: none;
   float: left;
   width: 16px;
@@ -264,11 +259,9 @@ onMounted(() => {
   background-position: 0 0;
 }
 
-.uploader-file-actions>span:hover {
+.uploader-file-actions > span:hover {
   background-position-x: -21px;
 }
-
-
 
 .uploader-file-actions .uploader-file-remove {
   cursor: pointer;
