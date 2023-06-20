@@ -159,8 +159,8 @@ const fileIconArr = ref({
 const upload_id = ref("");
 const blobFileArray = [];
 const multipartFileArray = ref([]);
-const curUploadList = ref([]); // 当前正在上传的 分片的数组
-let uploadSucceedNumber = ref(0); //当前上传分片 成功的个数
+const curUploadList = ref([]);
+let uploadSucceedNumber = ref(0);
 const isBigFile = ref(true);
 const timer = ref(null);
 const abortController = ref(null);
@@ -364,7 +364,6 @@ const resume = () => {
 
       if (res.code == 200 && res.data) {
         beginUpload()
-        // 可以上传
       } else if (res.code == 30039) {
         ElMessageBox.confirm(
           "duplicate file name, are you sure to overwrite?",
@@ -480,7 +479,6 @@ const toPath = () => {
 
   // const folderPath = "/path/to/folder";
 
-  // // 使用remote模块调用操作系统的文件管理器打开文件夹
   // remote.shell.openItem(folderPath);
   // emits("fileDetail", file.value);
 };
@@ -543,7 +541,7 @@ function getFileMd5(file, type) {
 }
 
 /**
- * @param fileResult  文件切片后 onload 回调中的 e.target.result
+ * @param fileResult
  *  */
 async function initParams(params, fileResult) {
   let blobSlice =
@@ -684,8 +682,8 @@ const fileLoad = async (file) => {
               partId: item.offset + 1,
               start: item.startByte,
               end: item.endByte,
-              complete: false, // 当前分片是否已经上传过(上传成功)
-              uploading: false, // 当前分片是否正在上传中  true 上传中  false 没有再上传
+              complete: false,
+              uploading: false,
             };
             blobFileArray.push(params);
             ArrayProgress.value.push(0);
@@ -722,7 +720,6 @@ const multipartUpload = () => {
     File.prototype.mozSlice ||
     File.prototype.webkitSlice;
   for (const item of blobFileArray) {
-    // 当前分片没有上传过 并且 没有在上传  并且 当前上传个数要小于 simultaneousUploads
     if (
       !item.complete &&
       !item.uploading &&
@@ -755,15 +752,14 @@ const multipartUpload = () => {
 
   if (uploadSucceedNumber.value == blobFileArray.length) {
     if (blobFileArray.every((item) => item.complete == true)) {
-      console.log("上传完了");
       fileCompletes();
     }
   }
 };
 
 const BigUploadFile = async (params, fileResult) => {
-  let retrNum = 0; // 第一条线 重试次数
-  let retrNumber = 0; //  第二条线重试次数
+  let retrNum = 0;
+  let retrNumber = 0;
 
   let fileUploadParams = await initParams(params, fileResult);
   fileUpload(fileUploadParams, abortController.value, UploadProgress)
@@ -773,18 +769,17 @@ const BigUploadFile = async (params, fileResult) => {
           etag: res.data,
           partNumber: params.partId,
         });
-        blobFileArray[params.partId - 1].uploading = false; // 上传成功 当前分片上传状态为 未上传
-        blobFileArray[params.partId - 1].complete = true; // 上传成功 当前分片上传成功状态为 true  上传成功
+        blobFileArray[params.partId - 1].uploading = false;
+        blobFileArray[params.partId - 1].complete = true;
         curUploadList.value = curUploadList.value.filter(
           (item) => item.partId != params.partId
-        ); // 上传成功 正在上传的分片的数组去除当前分片
-        uploadSucceedNumber.value++; // 当前分片上传成功数 加一
+        );
+        uploadSucceedNumber.value++;
         multipartUpload();
       } else {
         if (abortController.value.signal.aborted) return;
         let isPass = await retrLoadNext(params.partId, false, fileUploadParams);
         if (typeof isPass === "string") {
-          // 取消上传了
         } else {
           if (isPass) {
             multipartUpload();
@@ -801,7 +796,7 @@ const BigUploadFile = async (params, fileResult) => {
     });
 
   /**
-   * @param {Boolean} isSecond  是否使用第二条线路
+   * @param {Boolean} isSecond
    *
    *  */
   async function retrLoadNext(
@@ -809,7 +804,7 @@ const BigUploadFile = async (params, fileResult) => {
     isSecond = false,
     fileUploadParams
   ) {
-    let isPass = false; // 是否成功
+    let isPass = false;
 
     isPass = await retryUpload(errorUploadPartId, isSecond, fileUploadParams);
 
@@ -853,12 +848,12 @@ const BigUploadFile = async (params, fileResult) => {
               etag: res.data,
               partNumber: errorUploadPartId,
             });
-            blobFileArray[errorUploadPartId - 1].uploading = false; // 上传成功 当前分片上传状态为 未上传
-            blobFileArray[errorUploadPartId - 1].complete = true; // 上传成功 当前分片上传成功状态为 true  上传成功
+            blobFileArray[errorUploadPartId - 1].uploading = false;
+            blobFileArray[errorUploadPartId - 1].complete = true;
             curUploadList.value = curUploadList.value.filter(
               (item) => item.partId != params.partId
-            ); // 上传成功 正在上传的分片的数组去除当前分片
-            uploadSucceedNumber.value++; // 当前分片上传成功数 加一
+            );
+            uploadSucceedNumber.value++;
             resolve(true);
           } else {
             if (abortController.value.signal.aborted) {
@@ -878,7 +873,6 @@ const BigUploadFile = async (params, fileResult) => {
     });
   }
 };
-/* 提交文件 */
 function fileCompletes() {
   if (NUMBER_timer.value)
     clearInterval(NUMBER_timer.value), (NUMBER_timer.value = null);

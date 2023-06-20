@@ -356,7 +356,6 @@ const resume = debounce(async function () {
 
     if (res.code == 200 && res.data) {
       beginUpload();
-      // 可以上传
     } else if (res.code == 30039) {
       ElMessageBox.confirm(
         "duplicate file name, are you sure to overwrite?",
@@ -522,7 +521,6 @@ const fileShare = () => {
 const toPath = () => {
   // console.log(file.value);
   // const folderPath = "/path/to/folder";
-  // // 使用remote模块调用操作系统的文件管理器打开文件夹
   // remote.shell.openItem(folderPath);
 };
 const actionCheck = () => {

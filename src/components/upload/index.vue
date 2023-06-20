@@ -124,11 +124,11 @@ const allFileListDrawer = ref(false);
 const options = ref({
   simultaneousUploads: 5,
   singleFile: false,
-  chunkSize: 1024 * 1024 * 8, // 分片大小
-  forceChunkSize: true, // 每块分片大小是否 一定要小于 chunkSize
-  allowDuplicateUploads: true, // 是否可以 重复上传
-  generateUniqueIdentifier: generateUniqueIdentifier, //自定义生成文件唯一标识
-  initFileFn: initFileFn, //初始化文件对象
+  chunkSize: 1024 * 1024 * 8, 
+  forceChunkSize: true, 
+  allowDuplicateUploads: true,
+  generateUniqueIdentifier: generateUniqueIdentifier,
+  initFileFn: initFileFn,
 });
 
 const fileStatusText = ref({
@@ -271,26 +271,22 @@ const fileShare = (item) => {
   emit("fileShare", item);
 };
 
-/* 在上传过程中 每当有新的文件进行上传操作待上传列表中就删除对应的文件 */
 const newQueueID = (id, fileOrderID) => {
   let index = allFileList[fileOrderID].findIndex((file) => file.id == id);
   allFileList[fileOrderID].splice(index, 1);
 };
 
-/* 在待上传列表中删除指定文件 */
 function deleteAllFileList(id) {
   let index = allFileList[orderId.value].findIndex((file) => file.id == id);
   index > -1 ? allFileList[orderId.value].splice(index, 1) : "";
 }
-/* 生成文件唯一标识 */
 function generateUniqueIdentifier(file) {
   return file.path;
 }
-/*  初始化文件对象 */
 function initFileFn(file) {
   file.paused = false;
   file.deviceType = deviceType.value;
-  file.fileUploading = false; // 代表文件是否正在上传
+  file.fileUploading = false;
 
   file.rootPath = currentPath.value;
   let directory = file.file.webkitRelativePath;

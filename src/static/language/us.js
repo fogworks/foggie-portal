@@ -10,16 +10,16 @@ export default {
     Register: "Register",
     passwordTitle: "Forget Password?",
     resetPassword: "Reset Password.",
-    nameRequired: "Please enter username or email address", //请输入用户名
+    nameRequired: "Please enter username or email address",
     nameEmail: "Username or Email address",
-    passowdRequired: "Please enter password", //请输入密码
-    comfirmpassowdRequired: "Please confirm the password!", //请填写确认密码！
-    notsame: "Those passwords didn't match!", //密码与确认密码不一致！
-    emailRequired: "Please enter email address!", //请填写邮件！
-    captchaRequired: "Please enter verification code!", //请输入验证码
-    emailVaildate: "Please enter the correct email address!", //请输入正确的邮件地址！
-    mobilelRequired: "Please enter phone number", //请填写邮件！
-    mobileVaildate: "Please enter a correct phone number!", //请输入正确的邮件地址！
+    passowdRequired: "Please enter password",
+    comfirmpassowdRequired: "Please confirm the password!",
+    notsame: "Those passwords didn't match!",
+    emailRequired: "Please enter email address!",
+    captchaRequired: "Please enter verification code!",
+    emailVaildate: "Please enter the correct email address!",
+    mobilelRequired: "Please enter phone number",
+    mobileVaildate: "Please enter a correct phone number!",
     haveAccount: "Existing account?",
     gotoLogin: "Login",
     emailInput: "Please enter email address",
@@ -119,24 +119,23 @@ export default {
     footer_line5_1: "Need support? ",
     footer_line5_2: "Join our Discord community ",
     footer_line5_3: " to get help！ ",
-    month: "Month", //月
-    year: "Year", //年
-    semiannual: "Half Year", //半年
+    month: "Month",
+    year: "Year",
+    semiannual: "Half Year",
     discounts: "You can save {total} in one year ", //About one year saving
-    monthrent: "Monthly Rent", //月租
+    monthrent: "Monthly Rent",
     semiannualrent: "Semi-annual Rent",
     yearrent: "Annual Rent",
     monthly: "Monthly",
     annual: "Annual",
     freeBtn: "Free trial",
     subscribe: "Subscribe",
-    userDigital: "Use Digital Currency", //使用数字货币
+    userDigital: "Use Digital Currency",
     free: "Trial Version",
     freeTips:
       "You can try it for a month and it will expire automatically after a month. If you don't renew it, you can't continue to try it.",
     bProvider: "Exchange Rate Provider",
     pending_payment: "To Be Paid",
-    // "pending_start": "To be opened", （( 批注 建议改成To Be Opened, 非句子词组类的表达统一词首大写保持一致
     pending_start: "To be Provisioned",
     paying: "In Payment",
     paid_failed: "Payment Failed",
@@ -155,35 +154,35 @@ export default {
     originPrice: "Original Price",
     discount: "Price After Discount",
     finalPrice: "Final Price",
-    cancelBtn: "Cancel", //取消订单
-    dialogStr: "This order has expired, please create a new order!", //该笔订单已失效，请重新新建订单
+    cancelBtn: "Cancel",
+    dialogStr: "This order has expired, please create a new order!",
     dialogTips: "Tips",
-    confirm: "Confirm", //确定
-    cancel: "Cancel", //取消
+    confirm: "Confirm",
+    cancel: "Cancel",
     openBtn: "Payment completed, go to Provision",
     notPay:
-      "You haven't paid yet. Please confirm your payment before provisioning", //您还没有付款，请确认付款后再开通（
+      "You haven't paid yet. Please confirm your payment before provisioning",
     freeopenBtn: "Trial Provisioning",
     gotoOpening: "Creating Provisioning Task......",
     gotoOrder: "Visit Order List",
     openWait:
       "The provisioning process could take 10 minutes, please wait patiently. The provisioning progress can be checked in order list",
     openSuccess: "Provisioned Successfully",
-    toboOpening: "To be provisioned", //待开通
-    Opening: "Provisioning", //开通中
+    toboOpening: "To be provisioned",
+    Opening: "Provisioning",
     paidNotOpen: "Payment completed, to be provisioned",
-    standard: "Standard Version", //标准版
-    restart: "Restart VPS", //VPS 重启
-    Active: "Obtain Foggie Activation Code", //OOD 激活
-    Alarm: "Alarm", //异常告警
-    Recharge: "Renewal", //订单续费
-    Ticket: "Ticket Feedback", //工单反馈
-    logs: "Operation Logs", //操作日志
+    standard: "Standard Version", 
+    restart: "Restart VPS",
+    Active: "Obtain Foggie Activation Code",
+    Alarm: "Alarm",
+    Recharge: "Renewal",
+    Ticket: "Ticket Feedback",
+    logs: "Operation Logs",
     monitor: "Monitor",
     vpsNotActive: "VPS is temporarily offline, please operate it later",
     activeLoding: "Obtaining Confirmation Code.....",
     restartLoding: "VPS Restarting......",
-    voodTip: "Please save image and activate in Cyber Chat", //请保存图片后去Cyber Chat 页面进行激活操作
+    voodTip: "Please save image and activate in Cyber Chat",
     savePic: "Save Image",
     listSearch: "Data Querying.....",
     add_order: "Add Order",
@@ -236,9 +235,9 @@ export default {
     remark: "Memo",
     password: "Password",
     ConfirmPassword: "Confirm Password",
-    updateInfo: "Update Information", //更新信息
+    updateInfo: "Update Information",
     Reset: "Reset",
-    updateUserTip: "User Setting updated successfully", // 更新用户成功
+    updateUserTip: "User Setting updated successfully",
     addNote: "Add Memo",
     editTicket: "Edit",
     noteMessage: "Memo:",
@@ -268,15 +267,14 @@ export default {
     cancelTips: "Are you sure you want to cancel this order?",
     cancelOrderBtn: "Cancel",
     seeOpenProgress: "Provisioning Progress",
-    payBtn: "Pay", //去付款
+    payBtn: "Pay",
     continue_to_pay: "Continue To Pay",
     order_recharge: "Renew",
     openStartIng: "Starting Provisioning Task......",
     googleLoading: "Accessing Google Pay......",
     appleLoading: "Accessing Apple Pay......",
 
-    paid: "To be Provisioned", //Payment Successfully，To Be Provisioning（批注： Payment successful, to be provisioned,理由： 修饰名词用形容词，句中单词不用大写）
-    // inputOrderID: "Please Enter Order ID / VPS IP",（批注：Please enter order ID / VPS IP",理由： 句中单词不用大写）
+    paid: "To be Provisioned",
 
     inputOrderID: "Please enter Foggie IP / Order ID",
     newTips:
@@ -617,13 +615,13 @@ export default {
     pinSuccessTips: "Pin by CID In operation!",
     uploadSuccessTips: "IPFS Join queue!",
     pinIPNSuccTip: "IPNS Published Join Queue!!",
-    pending_deploy: "To Be Initializing", //待部署
-    deploying: "Initializing", //部署中
-    pending_init: "To Be Initializing", //待部署(批注: ，理由，pending是形容词，deploy是动词)
-    initializing: "Initializing", //部署中（批注： ，单词首字母大写保持一致）
-    finish: "Finished", // 部署完成( 批注，单词首字母大写保持一致）
-    upgrading: "Upgrading", //升级中（ 批注： ，单词首字母大写保持一致）
-    upgrade_finish: "Upgrade Finished", //升级完成（批注：，单词首字母大写保持一致,完成了用过去式）
+    pending_deploy: "To Be Initializing",
+    deploying: "Initializing",
+    pending_init: "To Be Initializing",
+    initializing: "Initializing",
+    finish: "Finished",
+    upgrading: "Upgrading",
+    upgrade_finish: "Upgrade Finished",
     EstimatedDividend: "Earnings Estimate(DMC):",
     Notice: "Notice",
     UploadIPFS: "Upload to IPFS",
