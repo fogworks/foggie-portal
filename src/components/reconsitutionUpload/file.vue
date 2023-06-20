@@ -1,7 +1,11 @@
 <template>
   <div class="uploader-file" :status="status">
     <div>
-      <div class="uploader-file-progress" :class="progressingClass" :style="progressStyle" />
+      <div
+        class="uploader-file-progress"
+        :class="progressingClass"
+        :style="progressStyle"
+      />
       <div class="uploader-file-info">
         <div class="uploader-file-name" :title="file.fileName">
           <img class="iconfont-uploadType" :src="fileIcon" />
@@ -15,7 +19,6 @@
             <a href="javascript:;">{{ fileErrorMesage }} </a>
           </el-tooltip>
           <a href="javascript:;" v-else>{{ fileErrorMesage }} </a>
-
         </div>
         <div class="uploader-file-size">{{ formatedSize }}</div>
         <div class="uploader-file-status">
@@ -30,14 +33,35 @@
             <i class="ml-15">{{ formatedTimeRemaining }}</i>
           </span>
         </div>
-        <div class="uploader-file-actions" v-if="status !== 'success' && !loading">
-          <span class="uploader-file-pause" v-show="isBigFile" @click="pause()" />
-          <span class="uploader-file-resume" v-show="!ISCIDING" @click="resume()" />️
+        <div
+          class="uploader-file-actions"
+          v-if="status !== 'success' && !loading"
+        >
+          <span
+            class="uploader-file-pause"
+            v-show="isBigFile"
+            @click="pause()"
+          />
+          <span
+            class="uploader-file-resume"
+            v-show="!ISCIDING"
+            @click="resume()"
+          />️
           <span class="uploader-file-retry" @click="retry()" />
-          <span class="uploader-file-remove" v-if="!fileUploading" @click="remove()" />
+          <span
+            class="uploader-file-remove"
+            v-if="!fileUploading"
+            @click="remove()"
+          />
         </div>
-        <div class="uploader-file-actions" v-if="status === 'success'" @click="fileShare">
-          <div style="color: #3f2dec; text-decoration: underline; cursor: pointer">
+        <div
+          class="uploader-file-actions"
+          v-if="status === 'success'"
+          @click="fileShare"
+        >
+          <div
+            style="color: #3f2dec; text-decoration: underline; cursor: pointer"
+          >
             Share
           </div>
         </div>
@@ -115,8 +139,9 @@ const StateType = ref("");
 const is_created_succeed = ref(false); // 文件是否创建成功  true 成功 false 失败
 const isBigFile = ref(true);
 const fileMd5 = ref(null);
-const fileErrorMesage = ref('- -')
+const fileErrorMesage = ref("- -");
 const loading = ref(false);
+const awaitTimer = ref(null);
 const startUploadTime = ref(0);
 const progressTimer = ref(null);
 const email = computed(() => store.getters.userInfo?.email);
@@ -221,25 +246,36 @@ function loadUploadProgress() {
             if (response.uploaded_size == file.value.size) {
               ISCIDING.value == true;
               file_paused(true);
+              file_fileUploading(false);
             }
           } else if (response.state == 1) {
             progress.value = 100;
             ISCIDING.value == false;
-            file_paused(false);
+            file_paused(true);
             file_completed(true);
             file_fileUploading(false);
 
             clearInterval(progressTimer.value);
             progressTimer.value = null;
-            let data = { id: file.value.id, completed: true, type: "completed" };
+
+            if (awaitTimer.value) {
+              clearInterval(awaitTimer.value);
+              awaitTimer.value = null;
+            }
+
+            let data = {
+              id: file.value.id,
+              completed: true,
+              type: "completed",
+            };
             emits("chanStatus", data);
           } else if (response.state == 2) {
             if (response.error_msg) {
-              fileErrorMesage.value = response.error_msg
+              fileErrorMesage.value = response.error_msg;
 
-              let type = StateType.value == "error" ? 2 : 3;
-              emits("updaLoadFileListByState", type);
-              
+              // let type = StateType.value == "error" ? 2 : 3;
+              // emits("updaLoadFileListByState", type);
+
               fileError();
               // remove();
             } else {
@@ -307,13 +343,24 @@ const resume = debounce(async function () {
       }
     }
   }
-  error.value = false
-  file.value.error = false
+  error.value = false;
+  file.value.error = false;
   file_paused(false);
   file_fileUploading(true);
   file_completed(false);
   loading.value = true;
-  fileErrorMesage.value = '- -'
+  let timeNumer = 0;
+  awaitTimer.value = setInterval(() => {
+    loading.value = true;
+    timeNumer++;
+    if (timeNumer >= 5) {
+      loading.value = false;
+      clearInterval(awaitTimer.value);
+      awaitTimer.value = null;
+    }
+  }, 1000);
+
+  fileErrorMesage.value = "- -";
   // 文件创建成功 调用重传
   if (is_created_succeed.value && isBigFile.value) {
     let params = {
@@ -401,7 +448,7 @@ const fileError = () => {
   progress.value = 0;
   let data = {
     id: file.value.id,
-    orderId:file.value.orderId,
+    orderId: file.value.orderId,
     error: true,
     type: "error",
   };
@@ -491,10 +538,12 @@ onUnmounted(() => {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: linear-gradient(171deg,
-      #8388fe 0%,
-      #519ff4 42%,
-      #b783c9 100%) !important;
+  background: linear-gradient(
+    171deg,
+    #8388fe 0%,
+    #519ff4 42%,
+    #b783c9 100%
+  ) !important;
   transform: translateX(-100%);
   overflow: hidden;
 }
@@ -626,7 +675,7 @@ onUnmounted(() => {
   width: 10%;
 }
 
-.uploader-file-actions>span {
+.uploader-file-actions > span {
   display: none;
   float: left;
   width: 16px;
@@ -638,7 +687,7 @@ onUnmounted(() => {
   background-position: 0 0;
 }
 
-.uploader-file-actions>span:hover {
+.uploader-file-actions > span:hover {
   background-position-x: -21px;
 }
 
