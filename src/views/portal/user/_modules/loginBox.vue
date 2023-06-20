@@ -4,7 +4,7 @@
       <div class="my_login_div">
         <div class="my_login_right">
           <h1 class="my_login_right_title stagger1">
-            Sign In
+            {{ haveUser ? "Sign In" : "Register" }}
             <!-- <el-tooltip
               class="item"
               content="A new account will be registered during the first login, please enter the verification code to log in your account."
