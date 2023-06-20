@@ -168,8 +168,8 @@ function initFoggieProcess() {
 }
 
 function checkMemory() {
-  const totalMemory = os.totalmem(); // 获取系统总内存，单位为字节
-  const totalMemoryGB = totalMemory / (1024 * 1024 * 1024); // 将总内存转换为GB
+  const totalMemory = os.totalmem();
+  const totalMemoryGB = totalMemory / (1024 * 1024 * 1024);
 
   if (totalMemoryGB < 7.9) {
     dialog.showMessageBox({
@@ -265,7 +265,6 @@ async function createWindow() {
   });
 
   if (!isDevelopment) {
-    // 使用示例
     checkMemory();
     isPortInUse(3000)
       .then((inUse) => {
@@ -292,10 +291,8 @@ async function createWindow() {
     if (checkMacOS()) {
       closePort(8007)
         .then(() => {
-          // console.log('端口关闭成功');
         })
         .catch((error) => {
-          // console.error('发生错误', error);
         });
       let user_path = os.homedir();
 

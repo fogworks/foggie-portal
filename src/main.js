@@ -8,7 +8,7 @@ import 'element-plus/theme-chalk/dark/css-vars.css'
 import router from "./router";
 import store from "./store";
 import uploader from "vue-simple-uploader";
-import i18n from "@/static/language/index.js"; //引入语言配置
+import i18n from "@/static/language/index.js";
 
 
 import 'normalize.css/normalize.css'

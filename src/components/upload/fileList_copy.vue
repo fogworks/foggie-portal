@@ -57,109 +57,17 @@ const fileList = reactive({
 
 const curFileList = ref([]);
 const timer = ref(null);
-
-// watch(
-//   () => fileList.uploadLists,
-//   (newVal, oldVal) => {
-//     let oldLength = oldVal?.length ?? 0;
-//     if (newVal.length >= oldLength) {
-//       // 新增文件 或者 当前上传列表中 有文件 上传成功 暂停 或者 上传失败
-//       if (newVal.length >= MAX_UPLOAD_NUM) {
-//         if (curFileList.value.length == 0) {
-//           let startInde =
-//             newVal.length -
-//             (MAX_UPLOAD_NUM > newVal.length ? newVal.length : MAX_UPLOAD_NUM);
-//           let endInde = newVal.length + 1;
-//           curFileList.value = newVal.slice(startInde, endInde);
-//           emits(
-//             "newQueueID",
-//             curFileList.value.map((fileItem) => fileItem.id)
-//           );
-//         } else {
-//           if (timer.value) clearTimeout(timer.value), (timer.value = null);
-//           timer.value = setTimeout(() => {
-//             let pushNumber = JSON.parse(JSON.stringify(MAX_UPLOAD_NUM));
-//             for (const item of curFileList.value) {
-//               if (!item.completed) {
-//                 if (pushNumber <= 0) {
-//                   return;
-//                 } else {
-//                   if (item.error || item.paused) {
-//                   } else {
-//                     pushNumber--;
-//                   }
-//                 }
-//               }
-//             }
-//             if (pushNumber <= 0) return;
-
-//             let startInde =
-//               newVal.length - curFileList.value.length > MAX_UPLOAD_NUM
-//                 ? newVal.length - curFileList.value.length - MAX_UPLOAD_NUM
-//                 : 0;
-//             let endInde = newVal.length - curFileList.value.length;
-//             for (const item of newVal.slice(startInde, endInde).reverse()) {
-//               if (
-//                 pushNumber > 0 &&
-//                 !curFileList.value.some((element) => element.id == item.id)
-//               ) {
-//                 emits("newQueueID", item.id);
-//                 curFileList.value.unshift(item);
-//                 pushNumber--;
-//               }
-//             }
-//           }, 100);
-//         }
-//       } else {
-//         curFileList.value = newVal;
-//         emits(
-//           "newQueueID",
-//           curFileList.value.map((fileItem) => fileItem.id)
-//         );
-//       }
-//     } else {
-//       if (newVal.length == curFileList.value.length) {
-//         return;
-//       } else if (newVal.length > curFileList.value.length) {
-//         // 待上传列表中仍有数据等待上传
-//         if (timer.value) clearTimeout(timer.value), (timer.value = null);
-//         timer.value = setTimeout(() => {
-//           let pushNumber = JSON.parse(JSON.stringify(MAX_UPLOAD_NUM));
-//           for (const item of curFileList.value) {
-//             if (!item.completed) {
-//               if (pushNumber <= 0) {
-//                 return;
-//               } else {
-//                 if (item.error || item.paused) {
-//                 } else {
-//                   pushNumber--;
-//                 }
-//               }
-//             }
-//           }
-//           if (pushNumber <= 0) return;
-//           let index = newVal.length - curFileList.value.length - 1;
-//           curFileList.value.unshift(newVal[index]);
-//         }, 100);
-//       }
-//     }
-//   },
-//   { deep: true }
-// );
 watchEffect(() => {
   fileList.uploadLists = props.uploadLists;
   if (fileList.uploadLists.length == 0) {
-    //删除当前设备下上传列表中所有文件 当前上传列表也需要清除
     curFileList.value = [];
   }
-  /* 删除文件 */
   for (let index = 0; index < curFileList.value.length; index++) {
     if (
       !fileList.uploadLists.some(
         (item) => item.id == curFileList.value[index].id
       )
     ) {
-      //删除的是已经上传成功的文件
       curFileList.value.splice(index, 1);
       break;
     }

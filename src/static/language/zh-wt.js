@@ -18,9 +18,9 @@ export default {
     notsame: "密碼與確認密碼不一致！", //
     emailRequired: "請填寫郵件！", //
     captchaRequired: "請輸入驗證碼", //
-    emailVaildate: "請輸入正確的郵件地址！", //請輸入正確的郵件地址！
-    mobilelRequired: "請輸入手機號碼", //請填寫郵件！
-    mobileVaildate: "請輸入正確的手機號碼!", //請輸入正確的郵件地址！
+    emailVaildate: "請輸入正確的郵件地址！",
+    mobilelRequired: "請輸入手機號碼", 
+    mobileVaildate: "請輸入正確的手機號碼!",
     haveAccount: "已有賬戶",
     gotoLogin: "去登錄",
     emailInput: "請輸入郵箱地址",
@@ -205,7 +205,7 @@ export default {
     cpu_system_as_percentage: "CPU系統",
     cpu_idle_as_percentage: "CPU空閑",
     cpu_total: "CPU總計",
-    mem_used_bytes: "內存使用字節", //、CPU使用字節
+    mem_used_bytes: "內存使用字節",
     mem_free_bytes: "內存可用字節",
     disk_allocated_space: "磁盤分配空間",
     disk_free_space: "磁盤可用空間",
@@ -234,7 +234,7 @@ export default {
     ConfirmPassword: "確認密碼",
     updateInfo: "更新信息",
     Reset: "重置",
-    updateUserTip: "更新用戶成功", // 更新用戶成功
+    updateUserTip: "更新用戶成功",
     addNote: "添加備註",
     editTicket: "編輯",
     noteMessage: "備註內容:",
@@ -587,13 +587,13 @@ export default {
     pinSuccessTips: "通過CID鎖定操作中!",
     uploadSuccessTips: "IPFS操作加入隊列中!",
     pinIPNSuccTip: "已加入發布IPNS隊列中!",
-    pending_deploy: "待部署", //待部署
-    deploying: "初始化中", //部署中
-    pending_init: "待部署", //待部署(批注: ，理由，pending是形容词，deploy是动词)
-    initializing: "初始化中", //部署中
-    finish: "初始化完成", // 部署完成
-    upgrading: "升級中", //升級中
-    upgrade_finish: "升級完成", //升級完成
+    pending_deploy: "待部署",
+    deploying: "初始化中",
+    pending_init: "待部署",
+    initializing: "初始化中",
+    finish: "初始化完成",
+    upgrading: "升級中",
+    upgrade_finish: "升級完成",
     EstimatedDividend: "收益估算(DMC):",
     Notice: "提示",
     UploadIPFS: "IPFS 文件上傳",

@@ -449,13 +449,13 @@ function couponChange(text) {
   console.log("verify coupon", text);
   const reg = /^[a-zA-Z\d]{12}$/;
   if (!reg.test(text)) {
-    // 提示不匹配
+    // 
     is_coupon_error_pay.value = true;
     return;
   } else {
     is_coupon_error_pay.value = false;
   }
-  // ajax 匹配是否被使用
+  // ajax 
   check_coupon_number(text).then((res) => {
     console.log("verify coupon", res);
     if (res.code !== 200) {
