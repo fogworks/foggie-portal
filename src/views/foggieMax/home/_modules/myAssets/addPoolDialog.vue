@@ -269,7 +269,7 @@ const handleRegister = () => {
         .then((res) => {
           if (res) {
             proxy.$notify({
-              type: "success",
+              customClass: "notify-success",
               message: "Successfully joined the central mining pool!",
               position: "bottom-left",
             });

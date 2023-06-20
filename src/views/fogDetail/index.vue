@@ -87,7 +87,7 @@ export default {
       document.execCommand("Copy");
       document.body.removeChild(input);
       ElNotification({
-        type: "success",
+        customClass: "notify-success",
         message: "Copy succeeded",
         position: "bottom-left",
       });

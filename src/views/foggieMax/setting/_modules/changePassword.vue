@@ -131,7 +131,7 @@ const submit = () => {
       };
       modify_access_password(data, requestTarget).then((res) => {
         proxy.$notify({
-          type: "success",
+          customClass: "notify-success",
           message: "Successfully modified",
           position: "bottom-left",
         });
@@ -146,7 +146,7 @@ const submit = () => {
             result.token_type + " " + result.token
           );
           proxy.$notify({
-            type: "success",
+            customClass: "notify-success",
             message: "Logged in again",
             position: "bottom-left",
           });

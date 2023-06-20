@@ -18,7 +18,7 @@ export default function useDelete(tableLoading, refresh) {
         file_delete(token.value, item, deviceData).then((res) => {
             if (res && res.data) {
                 proxy.$notify({
-                    type: "success",
+                    customClass: "notify-success",
                     message: "Delete succeeded",
                     position: "bottom-left",
                 });
@@ -40,7 +40,7 @@ export default function useDelete(tableLoading, refresh) {
             } else {
                 tableLoading.value = false;
                 proxy.$notify({
-                    type: "error",
+                    customClass: "notify-error",
                     message: "Delete Failed",
                     position: "bottom-left",
                 });

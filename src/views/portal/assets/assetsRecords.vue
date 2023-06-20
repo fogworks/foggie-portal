@@ -8,9 +8,9 @@
     @close="close"
   >
     <div class="card-box">
-      <div class="flex justify-between">
+      <div class="flex justify-between" style="margin-bottom: 10px">
         <div class="flex items-center">
-          <div class="title">DMC asset records</div>
+          <div class="title">Transaction records</div>
         </div>
       </div>
       <!-- <el-tabs v-model="activeName" class="assetsRecord-tabs">
@@ -21,16 +21,27 @@
         ></el-tab-pane>
       </el-tabs> -->
       <div>
-        <el-table class="table-box" :data="tableData" style="width: 100%">
+        <el-table
+          class="table-box"
+          v-loading="loading"
+          :data="tableData"
+          style="width: 100%"
+        >
           <el-table-column prop="action" label="Type" width="240" />
           <el-table-column label="Time" width="320">
             <template #default="scope">
               {{ transferUTCTime(scope.row.created_at) }}
             </template>
           </el-table-column>
-          <el-table-column prop="amount" label="Amount" width="200">
+          <el-table-column prop="amount" label="Amount(DMC)" width="200">
             <template #default="scope">
-              {{ scope.row.quantity }}{{ scope.row.token }}
+              <span
+                :class="[
+                  Number(scope.row.quantity) > 0 ? 'income' : 'expenditure',
+                ]"
+              >
+                {{ scope.row.quantity }}
+              </span>
             </template>
           </el-table-column>
         </el-table>
@@ -38,7 +49,7 @@
           v-model:current-page="currentPage"
           :background="false"
           :page-size="10"
-          layout="prev, pager, next, jumper"
+          layout="total, prev, pager, next, jumper"
           :total="total"
           @current-change="handleCurrentChange"
         />
@@ -71,6 +82,7 @@ export default {
         label: "Withdraw",
       },
     ]);
+    const loading = ref(false);
     const tableData = ref([]);
     const withdrawData = reactive([]);
     const handleCommand = () => {};
@@ -89,328 +101,330 @@ export default {
     const email = computed(() => store.getters["token/currentUser"]);
     const dmc = computed(() => store.getters["global/userInfo"].dmc);
     const getUserAssetsList = () => {
+      loading.value = true;
       userAssetsList({
         email: email.value,
         limit: 10,
         pageNum: currentPage.value,
-      }).then((res) => {
-        if (res.code == 200) {
-          total.value = res.data.count;
-          tableData.value = res.data.list.map((t) => {
-            var a = t.contract_action.split("/")[1];
-            if ("mint" === a) {
-              var n = t.action.rawData.act.data.asset.quantity.split(" ")[0];
-              return {
-                token: "PST",
-                action: "Mint",
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-                quantity: "+".concat(n),
-              };
-            }
-            if ("incentiverec" === a) {
-              var c = t.action.rawData.act.data.inc.quantity.split(" ")[0];
-              return {
-                token: "DMC",
-                action: ""
-                  .concat("Over Dividend", "(")
-                  .concat("Bill ID", ":")
-                  .concat(t.action.rawData.act.data.bill_id, ")"),
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-                quantity: "+".concat(c),
-              };
-            }
-            if ("incentiverec1" === a)
-              return {
-                token: t.action.rawData.act.data.inc.quantity.split(" ")[1],
-                quantity: "+".concat(
-                  t.action.rawData.act.data.inc.quantity.split(" ")[0]
-                ),
-                action: ""
-                  .concat("Delivery Dividend", "(")
-                  .concat("Order ID", ":")
-                  .concat(t.action.rawData.act.data.order_id, ")"),
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-              };
-            if ("increase" === a) {
-              var o = t.action.rawData.act.data.asset.quantity.split(" ")[0];
-              return {
-                token: "DMC",
-                action:
-                  t.action.rawData.act.data.miner ===
-                  t.action.rawData.act.data.owner
-                    ? "Stake"
-                    : "Invest",
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-                quantity: "-".concat(o),
-              };
-            }
-            if ("transfer" === a || "extransfer" === a) {
-              var r,
-                i,
-                l,
-                s,
-                u = t.action.rawData.act.data.from === dmc.value ? "-" : "+",
-                d = t.action.rawData.act.data;
-              return {
-                token:
-                  (null === (r = t.action.rawData.act.data.quantity) ||
-                  void 0 === r ||
-                  null === (i = r.quantity) ||
-                  void 0 === i
-                    ? void 0
-                    : i.split(" ")[1]) ||
-                  t.action.rawData.act.data.quantity.split(" ")[1],
-                quantity: ""
-                  .concat(u)
-                  .concat(
-                    (null === (l = t.action.rawData.act.data.quantity) ||
-                    void 0 === l ||
-                    null === (s = l.quantity) ||
-                    void 0 === s
-                      ? void 0
-                      : s.split(" ")[0]) ||
-                      t.action.rawData.act.data.quantity.split(" ")[0]
+      })
+        .then((res) => {
+          if (res.code == 200) {
+            total.value = res.data.count;
+            tableData.value = res.data.list.map((t) => {
+              var a = t.contract_action.split("/")[1];
+              if ("mint" === a) {
+                var n = t.action.rawData.act.data.asset.quantity.split(" ")[0];
+                return {
+                  token: "PST",
+                  action: "Mint",
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                  quantity: "+".concat(n),
+                };
+              }
+              if ("incentiverec" === a) {
+                var c = t.action.rawData.act.data.inc.quantity.split(" ")[0];
+                return {
+                  token: "DMC",
+                  action: ""
+                    .concat("Over Dividend", "(")
+                    .concat("Bill ID", ":")
+                    .concat(t.action.rawData.act.data.bill_id, ")"),
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                  quantity: "+".concat(c),
+                };
+              }
+              if ("incentiverec1" === a)
+                return {
+                  token: t.action.rawData.act.data.inc.quantity.split(" ")[1],
+                  quantity: "+".concat(
+                    t.action.rawData.act.data.inc.quantity.split(" ")[0]
                   ),
-                action:
-                  d.from === dmc.value
-                    ? "dmc.ramfee" === d.to
-                      ? "ram fee" === d.memo
-                        ? "Buy ram" + " " + "Ram fee"
-                        : "Sell ram" + " " + "Ram fee"
-                      : "Transfer payment"
-                    : d.to === dmc.value && "dmc.ram" === d.from
-                    ? "Sell ram"
-                    : "Transfer Receive",
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-              };
-            }
-            if ("exlocktrans" === a) {
-              var m = t.action.rawData.act.data.from === dmc.value ? "-" : "+";
-              return {
-                token:
-                  t.action.rawData.act.data.quantity.quantity.split(" ")[1],
-                quantity: ""
-                  .concat(m)
-                  .concat(
+                  action: ""
+                    .concat("Delivery Dividend", "(")
+                    .concat("Order ID", ":")
+                    .concat(t.action.rawData.act.data.order_id, ")"),
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              if ("increase" === a) {
+                var o = t.action.rawData.act.data.asset.quantity.split(" ")[0];
+                return {
+                  token: "DMC",
+                  action:
+                    t.action.rawData.act.data.miner ===
+                    t.action.rawData.act.data.owner
+                      ? "Stake"
+                      : "Invest",
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                  quantity: "-".concat(o),
+                };
+              }
+              if ("transfer" === a || "extransfer" === a) {
+                var r,
+                  i,
+                  l,
+                  s,
+                  u = t.action.rawData.act.data.from === dmc.value ? "-" : "+",
+                  d = t.action.rawData.act.data;
+                return {
+                  token:
+                    (null === (r = t.action.rawData.act.data.quantity) ||
+                    void 0 === r ||
+                    null === (i = r.quantity) ||
+                    void 0 === i
+                      ? void 0
+                      : i.split(" ")[1]) ||
+                    t.action.rawData.act.data.quantity.split(" ")[1],
+                  quantity: ""
+                    .concat(u)
+                    .concat(
+                      (null === (l = t.action.rawData.act.data.quantity) ||
+                      void 0 === l ||
+                      null === (s = l.quantity) ||
+                      void 0 === s
+                        ? void 0
+                        : s.split(" ")[0]) ||
+                        t.action.rawData.act.data.quantity.split(" ")[0]
+                    ),
+                  action:
+                    d.from === dmc.value
+                      ? "dmc.ramfee" === d.to
+                        ? "ram fee" === d.memo
+                          ? "Buy ram" + " " + "Ram fee"
+                          : "Sell ram" + " " + "Ram fee"
+                        : "Transfer payment"
+                      : d.to === dmc.value && "dmc.ram" === d.from
+                      ? "Sell ram"
+                      : "Transfer Receive",
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              }
+              if ("exlocktrans" === a) {
+                var m =
+                  t.action.rawData.act.data.from === dmc.value ? "-" : "+";
+                return {
+                  token:
+                    t.action.rawData.act.data.quantity.quantity.split(" ")[1],
+                  quantity: ""
+                    .concat(m)
+                    .concat(
+                      t.action.rawData.act.data.quantity.quantity.split(" ")[0]
+                    ),
+                  action: "Transfer Locking",
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              }
+              if ("exretire" === a)
+                return {
+                  token: t.action.rawData.act.data.value.quantity.split(" ")[1],
+                  quantity: "-".concat(
+                    t.action.rawData.act.data.value.quantity.split(" ")[0]
+                  ),
+                  action: "Burn",
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              if ("exunlock" === a)
+                return {
+                  token:
+                    t.action.rawData.act.data.quantity.quantity.split(" ")[1],
+                  quantity: "+".concat(
                     t.action.rawData.act.data.quantity.quantity.split(" ")[0]
                   ),
-                action: "Transfer Locking",
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-              };
-            }
-            if ("exretire" === a)
-              return {
-                token: t.action.rawData.act.data.value.quantity.split(" ")[1],
-                quantity: "-".concat(
-                  t.action.rawData.act.data.value.quantity.split(" ")[0]
-                ),
-                action: "Burn",
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-              };
-            if ("exunlock" === a)
-              return {
-                token:
-                  t.action.rawData.act.data.quantity.quantity.split(" ")[1],
-                quantity: "+".concat(
-                  t.action.rawData.act.data.quantity.quantity.split(" ")[0]
-                ),
-                action: "Unlock",
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-              };
-            if ("orderclarec" === a)
-              return {
-                token:
-                  t.action.rawData.act.data.quantity.quantity.split(" ")[1],
-                quantity: "+".concat(
-                  t.action.rawData.act.data.quantity.quantity.split(" ")[0]
-                ),
-                action: ""
-                  .concat("Delivery Dividend", "(")
-                  .concat("Order ID", ":")
-                  .concat(t.action.rawData.act.data.order_id, ")"),
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-              };
-            if ("addordasset" === a)
-              return {
-                token:
-                  t.action.rawData.act.data.quantity.quantity.split(" ")[1],
-                quantity: "-".concat(
-                  t.action.rawData.act.data.quantity.quantity.split(" ")[0]
-                ),
-                action: "Prestore",
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-              };
-            if ("subordasset" === a)
-              return {
-                token:
-                  t.action.rawData.act.data.quantity.quantity.split(" ")[1],
-                quantity: "+".concat(
-                  t.action.rawData.act.data.quantity.quantity.split(" ")[0]
-                ),
-                action: "Pick",
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-              };
-            if ("redeemrec" === a)
-              return {
-                token: t.action.rawData.act.data.asset.quantity.split(" ")[1],
-                quantity: "+".concat(
-                  t.action.rawData.act.data.asset.quantity.split(" ")[0]
-                ),
-                action: "Claim",
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-              };
-            if ("exchange" === a)
-              return {
-                token:
-                  t.action.rawData.act.data.quantity.quantity.split(" ")[1],
-                quantity: "-".concat(
-                  t.action.rawData.act.data.quantity.quantity.split(" ")[0]
-                ),
-                action: "Swap",
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-              };
-            if ("traderecord" === a)
-              return {
-                token: t.action.rawData.act.data.to.quantity.split(" ")[1],
-                quantity: "+".concat(
-                  t.action.rawData.act.data.to.quantity.split(" ")[0]
-                ),
-                action: "Swap",
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-              };
-            if ("addreserves" === a) {
-              var b = t.action.rawData.act.data;
-              return {
-                token: "DMC RSI",
-                quantity: "+"
-                  .concat(b.tokenx.quantity, " +")
-                  .concat(b.tokeny.quantity),
-                action: "Add Liquidity",
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-              };
-            }
-            if ("outreceipt" === a) {
-              var E = t.action.rawData.act.data;
-              return {
-                token: "DMC RSI",
-                quantity: "-".concat(E.x.quantity, " -").concat(E.y.quantity),
-                action: "Remove Liquidity",
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-              };
-            }
-            if ("undelegatebw" === a) {
-              var p = t.action.rawData.act.data;
-              return {
-                token:
-                  p.unstake_cpu_quantity.split(" ")[1] ||
-                  p.unstake_net_quantity.split(" ")[1],
-                quantity:
-                  p.receiver === dmc.value
-                    ? "+".concat(
-                        new (p.unstake_cpu_quantity.split(" ")[0])() +
-                          p.unstake_net_quantity.split(" ")[0].toFixed(4)
-                      )
-                    : "+0.0000",
-                action: "Claim Resources",
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-              };
-            }
-            if ("liqrec" === a) {
-              var v = t.action.rawData.act.data;
-              return {
-                token:
-                  "datamall" === dmc.value
-                    ? v.dmc_asset.quantity.split(" ")[1]
-                    : ""
-                        .concat(v.dmc_asset.quantity.split(" ")[1], " ")
-                        .concat(v.pst_asset.quantity.split(" ")[1]),
-                quantity:
-                  "datamall" === dmc.value
-                    ? "+".concat(v.dmc_asset.quantity.split(" ")[0])
-                    : "-"
-                        .concat(v.dmc_asset.quantity.split(" ")[0], " -")
-                        .concat(v.pst_asset.quantity.split(" ")[0]),
-                action: "Liquidation",
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-              };
-            }
-            if ("orderrec1" === a) {
-              var f = t.action.rawData.act.data;
-              return {
-                token: f.order_info.miner_lock_pst.quantity.split(" ")[1],
-                quantity: "-".concat(
-                  f.order_info.miner_lock_pst.quantity.split(" ")[0]
-                ),
-                action: "".concat(j("order_retire")),
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-              };
-            }
-            if ("assetcharec" === a) {
-              var _ = t.action.rawData.act.data;
-              return {
-                token: _.changed.quantity.split(" ")[1],
-                quantity: "+".concat(_.changed.quantity.split(" ")[0]),
-                action: "Compensation",
-                created_at: "".concat(t.action.rawData.block_time, "Z"),
-              };
-            }
-            if ("assetrec" === a) {
-              var O = t.action.rawData.act.data,
-                g = O.changed[0].quantity.split(" ")[0];
-              return {
-                token: O.changed[0].quantity.split(" ")[1],
-                quantity: ""
-                  .concat(
-                    "1" === O.rec_type
-                      ? "-"
-                      : "2" === O.rec_type ||
-                        "3" === O.rec_type ||
-                        "6" === O.rec_type ||
-                        "4" === O.rec_type ||
-                        "5" === O.rec_type ||
-                        "7" === O.rec_type
-                      ? "+"
+                  action: "Unlock",
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              if ("orderclarec" === a)
+                return {
+                  token:
+                    t.action.rawData.act.data.quantity.quantity.split(" ")[1],
+                  quantity: "+".concat(
+                    t.action.rawData.act.data.quantity.quantity.split(" ")[0]
+                  ),
+                  action: ""
+                    .concat("Delivery Dividend", "(")
+                    .concat("Order ID", ":")
+                    .concat(t.action.rawData.act.data.order_id, ")"),
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              if ("addordasset" === a)
+                return {
+                  token:
+                    t.action.rawData.act.data.quantity.quantity.split(" ")[1],
+                  quantity: "-".concat(
+                    t.action.rawData.act.data.quantity.quantity.split(" ")[0]
+                  ),
+                  action: "Prestore",
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              if ("subordasset" === a)
+                return {
+                  token:
+                    t.action.rawData.act.data.quantity.quantity.split(" ")[1],
+                  quantity: "+".concat(
+                    t.action.rawData.act.data.quantity.quantity.split(" ")[0]
+                  ),
+                  action: "Pick",
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              if ("redeemrec" === a)
+                return {
+                  token: t.action.rawData.act.data.asset.quantity.split(" ")[1],
+                  quantity: "+".concat(
+                    t.action.rawData.act.data.asset.quantity.split(" ")[0]
+                  ),
+                  action: "Claim",
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              if ("exchange" === a)
+                return {
+                  token:
+                    t.action.rawData.act.data.quantity.quantity.split(" ")[1],
+                  quantity: "-".concat(
+                    t.action.rawData.act.data.quantity.quantity.split(" ")[0]
+                  ),
+                  action: "Swap",
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              if ("traderecord" === a)
+                return {
+                  token: t.action.rawData.act.data.to.quantity.split(" ")[1],
+                  quantity: "+".concat(
+                    t.action.rawData.act.data.to.quantity.split(" ")[0]
+                  ),
+                  action: "Swap",
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              if ("addreserves" === a) {
+                var b = t.action.rawData.act.data;
+                return {
+                  token: "DMC RSI",
+                  quantity: "+"
+                    .concat(b.tokenx.quantity, " +")
+                    .concat(b.tokeny.quantity),
+                  action: "Add Liquidity",
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              }
+              if ("outreceipt" === a) {
+                var E = t.action.rawData.act.data;
+                return {
+                  token: "DMC RSI",
+                  quantity: "-".concat(E.x.quantity, " -").concat(E.y.quantity),
+                  action: "Remove Liquidity",
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              }
+              if ("undelegatebw" === a) {
+                var p = t.action.rawData.act.data;
+                return {
+                  token:
+                    p.unstake_cpu_quantity.split(" ")[1] ||
+                    p.unstake_net_quantity.split(" ")[1],
+                  quantity:
+                    p.receiver === dmc.value
+                      ? "+".concat(
+                          new (p.unstake_cpu_quantity.split(" ")[0])() +
+                            p.unstake_net_quantity.split(" ")[0].toFixed(4)
+                        )
+                      : "+0.0000",
+                  action: "Claim Resources",
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              }
+              if ("liqrec" === a) {
+                var v = t.action.rawData.act.data;
+                return {
+                  token:
+                    "datamall" === dmc.value
+                      ? v.dmc_asset.quantity.split(" ")[1]
                       : ""
-                  )
-                  .concat(g),
-                action:
-                  "1" === O.rec_type
-                    ? "First Save"
-                    : "2" === O.rec_type
-                    ? "Remaining Ret"
-                    : "3" === O.rec_type
-                    ? "User Deposit"
-                    : "6" === O.rec_type
-                    ? "Over time fine"
-                    : "4" === O.rec_type
-                    ? "Delivery Income"
-                    : "5" === O.rec_type
-                    ? "Delivery Dividend"
-                    : "7" === O.rec_type
-                    ? "Cancel Return"
-                    : O.rec_type,
+                          .concat(v.dmc_asset.quantity.split(" ")[1], " ")
+                          .concat(v.pst_asset.quantity.split(" ")[1]),
+                  quantity:
+                    "datamall" === dmc.value
+                      ? "+".concat(v.dmc_asset.quantity.split(" ")[0])
+                      : "-"
+                          .concat(v.dmc_asset.quantity.split(" ")[0], " -")
+                          .concat(v.pst_asset.quantity.split(" ")[0]),
+                  action: "Liquidation",
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              }
+              if ("orderrec1" === a) {
+                var f = t.action.rawData.act.data;
+                return {
+                  token: f.order_info.miner_lock_pst.quantity.split(" ")[1],
+                  quantity: "-".concat(
+                    f.order_info.miner_lock_pst.quantity.split(" ")[0]
+                  ),
+                  action: "".concat(j("order_retire")),
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              }
+              if ("assetcharec" === a) {
+                var _ = t.action.rawData.act.data;
+                return {
+                  token: _.changed.quantity.split(" ")[1],
+                  quantity: "+".concat(_.changed.quantity.split(" ")[0]),
+                  action: "Compensation",
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              }
+              if ("assetrec" === a) {
+                var O = t.action.rawData.act.data,
+                  g = O.changed[0].quantity.split(" ")[0];
+                return {
+                  token: O.changed[0].quantity.split(" ")[1],
+                  quantity: ""
+                    .concat(
+                      "1" === O.rec_type
+                        ? "-"
+                        : "2" === O.rec_type ||
+                          "3" === O.rec_type ||
+                          "6" === O.rec_type ||
+                          "4" === O.rec_type ||
+                          "5" === O.rec_type ||
+                          "7" === O.rec_type
+                        ? "+"
+                        : ""
+                    )
+                    .concat(g),
+                  action:
+                    "1" === O.rec_type
+                      ? "First Save"
+                      : "2" === O.rec_type
+                      ? "Remaining Ret"
+                      : "3" === O.rec_type
+                      ? "User Deposit"
+                      : "6" === O.rec_type
+                      ? "Over time fine"
+                      : "4" === O.rec_type
+                      ? "Delivery Income"
+                      : "5" === O.rec_type
+                      ? "Delivery Dividend"
+                      : "7" === O.rec_type
+                      ? "Cancel Return"
+                      : O.rec_type,
+                  created_at: "".concat(t.action.rawData.block_time, "Z"),
+                };
+              }
+              return {
+                action: a,
                 created_at: "".concat(t.action.rawData.block_time, "Z"),
+                token: "--",
+                quantity: "--",
               };
-            }
-            return {
-              action: a,
-              created_at: "".concat(t.action.rawData.block_time, "Z"),
-              token: "--",
-              quantity: "--",
-            };
-          });
-        }
+            });
+          }
 
-        console.log(res);
-      });
+          console.log(res);
+        })
+        .finally(() => {
+          loading.value = false;
+        });
     };
     const initRecords = async () => {
       getUserAssetsList();
     };
-    watch(activeName, () => {
-      // currentPage.value = 1;
-      // total.value = 0;
-    });
     watch(
       email,
       (data) => {
@@ -424,6 +438,7 @@ export default {
     onMounted(initRecords);
     return {
       email,
+      loading,
       activeName,
       tabList,
       tableData,
@@ -502,6 +517,12 @@ export default {
 }
 </style>
 <style lang="scss">
+.income {
+  color: rgb(21 147 89);
+}
+.expenditure {
+  color: rgb(186, 29, 29);
+}
 .withdraw-dialog {
   position: relative;
   backdrop-filter: blur(40px);

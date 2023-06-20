@@ -111,8 +111,8 @@ const copyLink = (text) => {
   // let str = `Copying  ${type} successful!`;
   // this.$message.success(str);
   proxy.$notify({
+    customClass: "notify-success",
     message: "Copy succeeded",
-    type: "success",
     position: "bottom-left",
   });
 };

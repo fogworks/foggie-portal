@@ -85,7 +85,7 @@ const resetMethod = async () => {
       .then(async () => {
         loading.value = false;
         proxy.$notify({
-          type: "success",
+          customClass: "notify-success",
           message: "Reset successful",
           position: "bottom-left",
         });
@@ -111,7 +111,7 @@ const change = (item, val) => {
   fetchMethod({ op_type: val }, requestTarget)
     .then((res) => {
       proxy.$notify({
-        type: "success",
+        customClass: "notify-success",
         message: "Successfully set",
         position: "bottom-left",
       });
@@ -119,7 +119,7 @@ const change = (item, val) => {
     .catch((err) => {
       item.status = item.status === "start" ? "stop" : "start";
       proxy.$notify({
-        type: "error",
+        customClass: "notify-error",
         message: "Setting failed",
         position: "bottom-left",
       });

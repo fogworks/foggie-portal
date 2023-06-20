@@ -33,7 +33,7 @@
       </div>
       <div
         class="action-item"
-        v-if="checkedData.length <= 1 && showActionBool"
+        v-if="showActionBool"
         @click="handlerClick('move')"
       >
         <svg-icon icon-class="move"></svg-icon>
@@ -273,7 +273,7 @@ function countDownRun() {
   if (time > 0) {
     let content = "Upload files after " + getSecondTime(+time);
     proxy.$notify({
-      type: "warning",
+      customClass: "notify-warning",
       message: content,
       position: "bottom-left",
     });
@@ -356,7 +356,7 @@ const handlerClick = async (type) => {
     await doShare(checkedData.value[0]);
     resetChecked();
     proxy.$notify({
-      type: "success",
+      customClass: "notify-success",
       message: "Share succeeded",
       position: "bottom-left",
     });

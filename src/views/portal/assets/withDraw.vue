@@ -481,7 +481,7 @@ export default {
         if (data.code !== 200 || data.error === "Invalid OTP token!") {
           loading.value = false;
           ElNotification({
-            type: "error",
+            customClass: "notify-error",
             title: "Verification code error",
             message: "Please enter Google verification code in 6-digit format",
             position: "bottom-left",
@@ -531,7 +531,7 @@ export default {
                 message:
                   "The account does not exist. Please enter the correct account address",
                 position: "bottom-left",
-                type: "error",
+                customClass: "notify-error",
               });
               return;
             }
@@ -556,7 +556,7 @@ export default {
                     title: "Withdrawal succeeded",
                     message: "Withdrawal succeeded",
                     position: "bottom-left",
-                    type: "success",
+                    customClass: "notify-success",
                   });
                 } else {
                   loading.value = false;
@@ -565,7 +565,7 @@ export default {
                     title: "Withdrawal failed",
                     message: res.error,
                     position: "bottom-left",
-                    type: "error",
+                    customClass: "notify-error",
                   });
                 }
               })
@@ -580,7 +580,7 @@ export default {
               message:
                 "The account does not exist. Please enter the correct account address",
               position: "bottom-left",
-              type: "error",
+              customClass: "notify-error",
             });
             return;
           }
@@ -596,7 +596,7 @@ export default {
       document.execCommand("Copy");
       document.body.removeChild(input);
       ElNotification({
-        type: "success",
+        customClass: "notify-success",
         message: "Copy succeeded",
         position: "bottom-left",
       });

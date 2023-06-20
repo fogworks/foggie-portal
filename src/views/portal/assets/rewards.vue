@@ -4,11 +4,16 @@
       class="withdraw-dialog"
       :model-value="visible"
       :title="title"
-      width="1000px"
+      width="900px"
       @close="close"
     >
       <div class="card-box">
-        <el-table class="table-box" :data="rowList" style="width: 100%">
+        <el-table
+          class="table-box"
+          v-loading="loading"
+          :data="rowList"
+          style="width: 100%"
+        >
           <el-table-column width="200" label="Time">
             <template #default="{ row }">
               {{ transferUTCTime(row.latest_settlement_date) }}
@@ -21,27 +26,24 @@
             label="Order ID"
           >
           </el-table-column>
-          <el-table-column width="200" label="Account">
-            <template #default="{ row }">
-              {{ row.user.id }}
-            </template>
-          </el-table-column>
+
           <el-table-column
-            width="200"
+            width="300"
             prop="estimated"
-            label="Estimated Income"
+            label="Estimated Income(DMC)"
+            align="center"
           >
-            <template #default="{ row }"> {{ row.estimated }} DMC </template>
+            <template #default="{ row }"
+              ><span class="income"> {{ row.estimated }}</span>
+            </template>
           </el-table-column>
           <el-table-column width="180" label="Action">
             <template #default="{ row }">
               <el-button
-                :loading="btnLoading"
                 class="collect-btn"
                 :disabled="!+row.settlement_pledge_amount > 0"
                 style="width: unset; height: unset; border-radius: 99px"
                 type="primary"
-                link
                 @click="collect(row)"
                 >Collect</el-button
               >
@@ -52,7 +54,7 @@
           v-model:current-page="pageNo"
           :background="false"
           :page-size="10"
-          layout="prev, pager, next, jumper"
+          layout="total, prev, pager, next, jumper"
           :total="total"
           @current-change="dividendList"
         />
@@ -75,7 +77,7 @@ import { useStore } from "vuex";
 import { dividend_list, claim_order } from "@/api/common.js";
 const emits = defineEmits(["update:visible", "reload"]);
 const store = useStore();
-const btnLoading = ref(false);
+const loading = ref(false);
 const props = defineProps({
   title: {
     type: String,
@@ -98,19 +100,20 @@ const chainId = computed(() => store.getters.ChainId);
 const total = ref(0);
 const pageNo = ref(1);
 const dividendList = () => {
+  loading.value = true;
   dividend_list({
     email: email.value,
     pageNo: pageNo.value,
     pageSize: 10,
   }).then((res) => {
     rowList.value = res.data.list;
-    btnLoading.value = false;
+    loading.value = false;
     total.value = res.data.count;
     console.log(res, "res");
   });
 };
 const collect = (row) => {
-  btnLoading.value = true;
+  loading.value = true;
   claim_order({
     email: email.value,
     chainId: chainId.value,
@@ -119,7 +122,7 @@ const collect = (row) => {
     .then((res) => {
       if (res.code == 200) {
         proxy.$notify({
-          type: "success",
+          customClass: "notify-success",
           message: "Collect successfully",
           position: "bottom-left",
         });
@@ -130,11 +133,11 @@ const collect = (row) => {
         //   dividendList();
         // }, 1000);
       } else {
-        btnLoading.value = false;
+        loading.value = false;
       }
     })
     .catch(() => {
-      btnLoading.value = false;
+      loading.value = false;
     });
 };
 watch(
@@ -207,6 +210,11 @@ watch(
           background-color: transparent;
         }
       }
+    }
+  }
+  .collect-btn {
+    &.is-disabled {
+      color: unset;
     }
   }
 }

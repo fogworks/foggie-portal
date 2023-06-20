@@ -406,6 +406,7 @@ const state = reactive({
   payment_cloud_show: false,
   payment_cloud_amount: "",
   blockChainData: {},
+  payModel: "card",
 });
 const {
   buyType,
@@ -434,6 +435,7 @@ const {
   payment_cloud_show,
   payment_cloud_amount,
   blockChainData,
+  payModel,
 } = toRefs(state);
 function typeChoose(type) {
   if (type === "monthly") {
@@ -449,13 +451,13 @@ function couponChange(text) {
   console.log("verify coupon", text);
   const reg = /^[a-zA-Z\d]{12}$/;
   if (!reg.test(text)) {
-    // 
+    //
     is_coupon_error_pay.value = true;
     return;
   } else {
     is_coupon_error_pay.value = false;
   }
-  // ajax 
+  // ajax
   check_coupon_number(text).then((res) => {
     console.log("verify coupon", res);
     if (res.code !== 200) {

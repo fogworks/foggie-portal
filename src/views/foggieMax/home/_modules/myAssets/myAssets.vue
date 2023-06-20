@@ -10,14 +10,21 @@
             <img class="title-img" src="@/assets/assets-title.png" alt="" />
             <span class="title">Assets</span>
           </div>
-
-          <svg-icon
-            v-if="!isJoin"
-            class="join-pool"
-            size="32"
-            @click="joinPool"
-            icon-class="joinPool"
-          ></svg-icon>
+          <el-tooltip content="Join the central mining pool" v-if="!isJoin">
+            <svg-icon
+              class="join-pool"
+              size="32"
+              @click="joinPool"
+              icon-class="joinPool"
+            ></svg-icon>
+          </el-tooltip>
+          <el-tooltip v-else content="Joined the central mining pool">
+            <svg-icon
+              class="join-pool"
+              size="32"
+              icon-class="isJoin"
+            ></svg-icon>
+          </el-tooltip>
         </div>
         <!-- <a
           class="flex items-center records"

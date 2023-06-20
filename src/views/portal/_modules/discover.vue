@@ -160,8 +160,8 @@ const copyLink = (text) => {
   // let str = `Copying  ${type} successful!`;
   // this.$message.success(str);
   proxy.$notify({
+    customClass: "notify-success",
     message: "Copy succeeded",
-    type: "success",
     position: "bottom-left",
   });
 };
@@ -193,14 +193,14 @@ const getMax = (data) => {
   if (flag) {
     deviceList.list.push(data);
     proxy.$notify({
+      customClass: "notify-success",
       message: "The device is added successfully",
-      type: "success",
       position: "bottom-left",
     });
   } else {
     proxy.$notify({
+      customClass: "notify-warning",
       message: "Device already exists",
-      type: "warning",
       position: "bottom-left",
     });
   }

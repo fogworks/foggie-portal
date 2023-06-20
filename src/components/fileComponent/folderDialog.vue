@@ -3,6 +3,8 @@
     <el-dialog
       append-to-body
       title="MOVE TO"
+      v-loading="loading"
+      :show-close="!loading"
       :model-value="folderVisible"
       class="folder-dialog"
       width="600px"
@@ -52,9 +54,9 @@
         </el-table-column>
       </el-table>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="beforeClose">Cancel</el-button>
+        <el-button :disabled="loading" @click="beforeClose">Cancel</el-button>
         <div class="color-box">
-          <el-button @click="handleConfirm">
+          <el-button :loading="loading" @click="handleConfirm">
             <RippleInk></RippleInk>
             Move Here</el-button
           >
@@ -106,6 +108,7 @@ const props = defineProps({
 
 const emits = defineEmits(["reset", "refreshList", "update:folderVisible"]);
 const { folderVisible, fileSource } = toRefs(props);
+const loading = ref(false);
 const activeName = inject("activeName");
 const checkedData = inject("checkedData");
 const imgCheckedData = inject("imgCheckedData");
@@ -142,20 +145,6 @@ const getReomteData = (scroll, prefix, reset = false) => {
     });
 };
 
-const getLocalData = (reset = false) => {
-  let params = {
-    email: email.value,
-    orderId: orderId.value,
-    deviceType: 3,
-  };
-  GetFileListAll(params)
-    .then((res) => {
-      initLocalData(res, reset);
-    })
-    .catch(() => {
-      tableLoading.value = false;
-    });
-};
 const initRemoteData = (data, reset = false) => {
   if (!data) {
     tableLoading.value = false;
@@ -163,7 +152,7 @@ const initRemoteData = (data, reset = false) => {
   }
   if (data.err) {
     proxy.$notify({
-      type: "warning",
+      customClass: "notify-warning",
       message: "Failed to fetch data, please try again later",
       position: "bottom-left",
     });
@@ -213,85 +202,6 @@ const initRemoteData = (data, reset = false) => {
   }
 
   tableLoading.value = false;
-  // if (activeSort.value) {
-  //   const target = sortList.find((el) => el.key == activeSort.value);
-  //   const { prop, order, key } = target;
-  //   nextTick(() => {
-  //     tableSort({ prop, order, key });
-  //   });
-  // }
-
-  // tableSort({ prop: "date", order: 1, key: 1 });
-};
-const initLocalData = (data, reset = false) => {
-  if (!data) {
-    tableLoading.value = false;
-    return;
-  }
-  if (data.err) {
-    proxy.$notify({
-      type: "warning",
-      message: "Failed to fetch data, please try again later",
-      position: "bottom-left",
-    });
-  }
-  if (reset) tableData.value = [];
-  // for (let j = 0; j < data?.data?.length; j++) {
-  //   let date = data.data[j].update_time;
-  //   let isDir = false;
-
-  //   let cid = data.data[j].cid;
-  //   let file_id = data.data[j].fileId;
-
-  //   let name = decodeURIComponent(data.data[j].dest_path);
-
-  //   const type = data.data[j].dest_path.substring(
-  //     data.data[j].dest_path.lastIndexOf(".") + 1
-  //   );
-  //   let { isSystemImg } = handleImg(data.data[j], type, isDir);
-
-  //   let item = {
-  //     isDir: isDir,
-  //     fullName: decodeURIComponent(data.data[j].dest_path),
-  //     name,
-  //     key: data.data[j].dest_path,
-  //     idList: [
-  //       {
-  //         name: "IPFS",
-  //         code: data.data[j].isPin ? cid : "",
-  //       },
-  //       {
-  //         name: "CYFS",
-  //         code: data.data[j].isPinCyfs ? file_id : "",
-  //       },
-  //     ],
-  //     date,
-  //     size: getfilesize(data.data[j].file_size),
-  //     status: cid || file_id ? "Published" : "-",
-  //     type: data.data[j].contentType || "",
-  //     file_id: file_id | "",
-  //     pubkey: cid,
-  //     cid,
-  //     imgUrl: "",
-  //     imgUrlLarge: "",
-  //     share: {},
-  //     isSystemImg,
-  //     canShare: cid ? true : false,
-  //     isPersistent: true,
-  //   };
-  //   tableData.value.push(item);
-  // }
-
-  tableLoading.value = false;
-  // if (activeSort.value) {
-  //   const target = sortList.find((el) => el.key == activeSort.value);
-  //   const { prop, order, key } = target;
-  //   nextTick(() => {
-  //     tableSort({ prop, order, key });
-  //   });
-  // }
-
-  // tableSort({ prop: "date", order: 1, key: 1 });
 };
 const getFileList = function (scroll, prefix, reset = false) {
   let list_prefix = "";
@@ -303,11 +213,7 @@ const getFileList = function (scroll, prefix, reset = false) {
   }
   tableLoading.value = true;
   if (deviceType.value == "space") {
-    if (fileSource.value) {
-      getReomteData(scroll, list_prefix, reset);
-    } else {
-      getLocalData(reset);
-    }
+    getReomteData(scroll, list_prefix, reset);
   } else {
     let type = "foggie";
     oodFileList(
@@ -474,40 +380,62 @@ const setPrefix = (item, isTop = false) => {
   }
   // emits("currentPrefix", breadcrumbList.prefix);
 };
-const handleConfirm = () => {
-  // if (isSingle.value) {
-  //   console.log(singleData.value, "singleDatasingleDatasingleData");
-  // } else {
-  //   console.log(checkedData.value, "checkedDatacheckedDatacheckedData");
-  // }
-  const targetObject = () => {
+const startRename = (data) => {
+  const targetObject = (val) => {
     if (breadcrumbList.prefix.length) {
-      return breadcrumbList.prefix.join("/") + "/" + checkedData.value[0].name;
+      return breadcrumbList.prefix.join("/") + "/" + val.name;
     } else {
-      return checkedData.value[0].name;
+      return val.name;
     }
   };
-  console.log(targetObject(), "targetObject");
-  console.log(checkedData.value[0], "checkedData.value[0]");
-  rename_objects({
-    deviceData,
-    sourceObject: checkedData.value[0].fullName,
-    targetObject: targetObject(),
-    token: token.value,
-    fileType: checkedData.value[0].fileType,
-  }).then((res) => {
-    if (res) {
-      proxy.$notify({
-        type: "success",
-        message: "Successfully moved",
-        position: "bottom-left",
+  let index = 0;
+  const length = data.length - 1;
+  const rename = function (resolve, reject) {
+    rename_objects({
+      deviceData,
+      sourceObject: data[index].fullName,
+      targetObject: targetObject(data[index]),
+      token: token.value,
+      fileType: data[index].fileType,
+    })
+      .then((res) => {
+        if (res) {
+          if (index === length) {
+            resolve(true);
+          } else {
+            index++;
+            rename(resolve, reject);
+          }
+        }
+      })
+      .catch(() => {
+        proxy.$notify({
+          customClass: "notify-error",
+          message: "Move failed",
+          position: "bottom-left",
+        });
+        reject(false);
       });
-      emits("refreshList");
-      emits("reset");
-      emits("update:folderVisible", false);
-    }
+  };
+  return new Promise((resolve, reject) => {
+    rename(resolve, reject);
   });
+};
+const handleConfirm = async () => {
+  loading.value = true;
+  const res = await startRename(checkedData.value);
+  loading.value = false;
+  if (res) {
+    proxy.$notify({
+      customClass: "notify-success",
+      message: "Successfully moved",
+      position: "bottom-left",
+    });
+  }
+
+  emits("refreshList");
   emits("reset");
+  emits("update:folderVisible", false);
 };
 watch(breadcrumbList, (val) => {
   getFileList("", val.prefix, true);

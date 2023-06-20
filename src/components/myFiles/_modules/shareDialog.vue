@@ -91,7 +91,7 @@ const handleID = (str) => {
   );
 };
 const copyLink = (text) => {
-  var input = document.createElement("input"); 
+  var input = document.createElement("input");
   input.value = text;
   document.body.appendChild(input);
   input.select();
@@ -100,10 +100,9 @@ const copyLink = (text) => {
   // let str = `Copying  ${type} successful!`;
   // this.$message.success(str);
   proxy.$notify({
+    customClass: "notify-success",
     message: "Copy succeeded",
-    type: "success",
     position: "bottom-left",
   });
 };
 </script>
-

@@ -47,8 +47,25 @@
   display: flex;
   height: 44px;
 }
-
-
+.el-notification {
+  .el-notification__content {
+    p {
+      color: #fff;
+    }
+  }
+  .el-notification__closeBtn {
+    color: #fff;
+  }
+}
+.notify-success {
+  background-color: #5bc6a8;
+}
+.notify-warning {
+  background-color: #e6a23c;
+}
+.notify-error {
+  background-color: #f56064;
+}
 .el-popper.tabsPopover,
 .customInput {
   .el-input {
@@ -120,12 +137,14 @@
 
   &::before {
     content: "";
-    background: linear-gradient(65deg,
-        #d726d7,
-        #3064e0,
-        #31e7ea,
-        #714cdd,
-        #d726d7);
+    background: linear-gradient(
+      65deg,
+      #d726d7,
+      #3064e0,
+      #31e7ea,
+      #714cdd,
+      #d726d7
+    );
     position: absolute;
     top: -0.125rem;
     left: -0.125rem;
@@ -169,4 +188,3 @@
     }
   }
 }
-

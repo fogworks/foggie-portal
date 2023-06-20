@@ -150,7 +150,7 @@ service.interceptors.response.use(
     }
     if (code && code !== 200) {
       ElNotification({
-        type: 'error',
+        customClass: "notify-error",
         message: res.error || res.mag || 'error',
         position: 'bottom-left'
       })
@@ -247,7 +247,7 @@ service.interceptors.response.use(
               return res.data.data;
             } else {
               ElNotification({
-                type: 'error',
+                customClass: "notify-error",
                 message: res.data.data.message || 'error',
                 position: 'bottom-left'
               })
@@ -258,7 +258,7 @@ service.interceptors.response.use(
           }
         } else {
           ElNotification({
-            type: 'error',
+            customClass: "notify-error",
             message: res.data.msg || 'error',
             position: 'bottom-left'
           })

@@ -49,7 +49,7 @@ service.interceptors.response.use(
     } else {
       if (_response.code !== 200) {
         ElNotification({
-          type: 'error',
+          customClass: "notify-error",
           message: _response.msg,
           // grouping: true,
           // type: "error",
@@ -76,7 +76,7 @@ service.interceptors.response.use(
       duration = 0
     }
     ElNotification({
-      type: 'error',
+      customClass: "notify-error",
       message: error?.response?.data.msg || error.msg || error.message || 'network error',
       duration,
       // grouping: true,

@@ -105,8 +105,8 @@ export default function useOrderList() {
         // let str = `Copying  ${type} successful!`;
         // this.$message.success(str);
         proxy.$notify({
+            customClass: "notify-success",
             message: "Copy succeeded",
-            type: "success",
             position: "bottom-left",
         });
     };
@@ -122,6 +122,8 @@ export default function useOrderList() {
         spaceList,
         deviceList,
         list,
+        orderNum,
+        foggieNum,
         assetsOrderNum,
         getSpaceList,
         search,

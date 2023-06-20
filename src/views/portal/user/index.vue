@@ -2,62 +2,11 @@
   <div class="box" v-loading="loading">
     <div v-if="!userId" class="login-box">
       <img src="@/assets/login-left.png" alt="" />
-      <!-- <el-form
-        class="account-form"
-        :model="form"
-        label-position="top"
-        ref="formRef"
-        :rules="rules"
-      >
-        <p class="top-title">
-          <span v-if="isLogin" @click="isLogin = !isLogin"
-            >No account, go register!</span
-          >
-          <span v-else @click="isLogin = !isLogin">Go log in</span>
-        </p>
-        <el-form-item label="Foggie Email" prop="email">
-          <el-input v-model="form.email"></el-input>
-        </el-form-item>
-        <el-form-item label="Password" prop="password">
-          <el-input
-            type="password"
-            v-model="form.password"
-            show-password
-          ></el-input>
-        </el-form-item>
-        <el-form-item
-          v-if="!isLogin"
-          label="Confirm Password"
-          prop="confirmPassword"
-        >
-          <el-input
-            type="password"
-            v-model="form.confirmPassword"
-            show-password
-          ></el-input>
-        </el-form-item>
-        <div class="foot-btn">
-          <el-button
-            v-if="isLogin"
-            :loading="loading"
-            type="primary"
-            @click="submit"
-          >
-            {{ "Login" }}
-          </el-button>
-          <el-button v-else :loading="loading" @click="handleRegister">
-            {{ "Register" }}
-          </el-button>
-        </div>
-      </el-form> -->
       <LoginBox></LoginBox>
     </div>
     <div class="info-box" v-if="userId">
       <div class="info-content" v-if="userId">
         <div class="foot-btn">
-          <!-- <el-button type="danger" @click="unbindVisible = true"
-            >Unbind</el-button
-          > -->
           <div
             class="theme"
             @click="
@@ -68,18 +17,11 @@
               )
             "
           >
-            <!-- <el-icon
-              class="light"
-              color="#fff"
-              v-if="currentTheme === 'light' || ''"
-              ><Sunny
-            /></el-icon> -->
             <svg-icon
               icon-class="sun"
               v-if="currentTheme === 'light' || ''"
             ></svg-icon>
             <svg-icon icon-class="moon" v-else></svg-icon>
-            <!-- <el-icon class="dark" color="#000" v-else><Moon /></el-icon> -->
           </div>
           <el-button type="primary" @click="logout"
             ><svg-icon icon-class="switch"></svg-icon> Switch
@@ -92,28 +34,11 @@
     </div>
     <div v-if="userId && !isLogin" class="login-box">
       <img src="@/assets/login-left.png" alt="" />
-      <!-- <el-form
-        class="account-form"
-        :model="form"
-        label-position="top"
-        ref="formRef2"
-        :rules="rules"
-      >
-        <el-form-item label="DMC Account" prop="dmcAccount">
-          <el-input v-model="form.dmcAccount"></el-input>
-        </el-form-item>
-        <div class="foot-btn">
-          <el-button :loading="loading" type="primary" @click="bindDmc">
-            Bind
-          </el-button>
-        </div>
-      </el-form> -->
       <LoginPrivate
         class="loginPrivate"
         :userInfo="userInfo"
         @login="emitLogin"
       ></LoginPrivate>
-      <!-- <LoginBox></LoginBox> -->
     </div>
 
     <!-- <div v-if="!isLogin" class="story-content">
@@ -133,6 +58,129 @@
         </span>
       </div>
     </div> -->
+  </div>
+  <div class="index-foot">
+    <div class="product-foot">
+      <div class="product-foot-content2">
+        <img
+          src="@/assets/system/logo.png"
+          style="width: 150px; margin-left: 40px; object-fit: contain"
+          alt=""
+        />
+        <div class="foot-content-right">
+          <div class="foot-content-right-top">
+            <p>CONTACT</p>
+            <p class="line"></p>
+            <p style="font-size: 14px">Get in Touch</p>
+          </div>
+          <div class="foot-content-right-bottom">
+            <a href="https://twitter.com/fogworksinc" target="_blank">
+              <img src="@/assets/index/twitter.svg" alt="" />
+            </a>
+            <a href="https://discord.com/invite/fogworks" target="_blank">
+              <img src="@/assets/index/discord.png" alt="" />
+            </a>
+            <a href="https://www.facebook.com/fogworksinc" target="_blank">
+              <img src="@/assets/index/facebook.svg" alt="" />
+            </a>
+            <a href="https://www.youtube.com/@fogworksinc.2753" target="_blank">
+              <img src="@/assets/index/youtube.png" alt="" />
+            </a>
+            <a href="https://www.instagram.com/fog_works/" target="_blank">
+              <img src="@/assets/index/camera.png" alt="" />
+            </a>
+            <a
+              href="https://www.linkedin.com/company/fog-works/"
+              target="_blank"
+            >
+              <img src="@/assets/index/linkedin.png" alt="" />
+            </a>
+            <a href="https://medium.com/fog-works-inc" target="_blank">
+              <img
+                style="width: 40px"
+                src="@/assets/index/3radius.png"
+                alt=""
+              />
+            </a>
+            <a href="mailto:support@fogworks.io" target="_blank">
+              <img src="@/assets/index/email.svg" alt="" />
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 支付底部说明 -->
+    <div class="product-foot" style="padding-top: 20px">
+      <div class="product-foot-content2 product-foot-content3">
+        <!-- <a href="payment-policy" style="text-decoration: none"> -->
+        <div class="product-foot-content-logo" @click="gotoPayment('Terms')">
+          <div class="product-foot-content-icon">
+            <p class="eTYfuI">{{ $t("vood.Terms") }}</p>
+          </div>
+        </div>
+        <div
+          class="product-foot-content-logo"
+          @click="gotoPayment('paymentPolicy')"
+        >
+          <div class="product-foot-content-icon">
+            <p class="eTYfuI">
+              {{ $t("vood.paymentPolicy") }}
+            </p>
+          </div>
+        </div>
+        <!-- </a > -->
+        <!-- <a href="#terms-and-conditions" style="text-decoration: none"> -->
+
+        <!-- </a> -->
+        <!-- <a
+          aria-current="page"
+          class=""
+          href="#privacy-policy"
+          style="text-decoration: none"
+        > -->
+        <div
+          class="product-foot-content-logo"
+          @click="gotoPayment('PrivacyPolicy')"
+        >
+          <div class="product-foot-content-icon">
+            <p class="eTYfuI">{{ $t("vood.PrivacyPolicy") }}</p>
+          </div>
+        </div>
+        <div class="product-foot-content-logo">
+          <div class="product-foot-content-icon">
+            <a href="https://fogworks.io/">
+              <p class="eTYfuI">© 2023 Fog Works,Inc.</p>
+            </a>
+          </div>
+        </div>
+        <!-- </a> -->
+        <!-- <div class="product-foot-content-logo">
+          <div class="product-foot-content-icon">
+            <img
+              src="@/assets/system/visa.svg"
+              alt="icon"
+              class="product-foot-content-img"
+            />
+            <img
+              src="@/assets/system/master.svg"
+              alt="icon"
+              class="product-foot-content-img"
+            />
+            <img
+              src="@/assets/system/discover.svg"
+              alt="icon"
+              class="product-foot-content-img"
+            />
+            <img
+              src="@/assets/system/amex.svg"
+              alt="icon"
+              class="product-foot-content-img"
+            />
+          </div>
+        </div> -->
+      </div>
+    </div>
   </div>
 </template>
 
@@ -287,7 +335,7 @@ const submit = () => {
             store.dispatch("token/login", userInfo);
             formRef.value.resetFields();
             proxy.$notify({
-              type: "success",
+              customClass: "notify-success",
               message: "Successfully Login",
               position: "bottom-left",
             });
@@ -342,7 +390,8 @@ function getChainId() {
 .box {
   position: relative;
   width: 100%;
-  height: 100%;
+  height: calc(100% - 210px);
+  min-height: 500px;
   :deep {
     .el-loading-mask {
       background: transparent;
@@ -359,7 +408,7 @@ function getChainId() {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -70%);
+  transform: translate(-50%, -50%);
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -370,8 +419,8 @@ function getChainId() {
   background: rgba(255, 255, 255, 0.6);
 
   img {
-    width: 300px;
-    margin: 0 50px;
+    width: 380px;
+    margin: 0 30px;
   }
   .top-title {
     cursor: pointer;
@@ -515,5 +564,109 @@ function getChainId() {
   .el-dialog__body {
     margin: 20px 0;
   }
+}
+.index-foot {
+}
+.product-foot {
+  font-family: Yahei;
+  // background: linear-gradient(to right, #7964e3 0%, #334ab3 50%, #013690 100%);
+}
+
+.product-foot-content2 {
+  width: 1160px;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+.foot-content-right {
+  width: 350px;
+  margin-left: 100px;
+}
+.line {
+  width: 250px;
+  height: 2px;
+  box-shadow: 0 0 3px 2px #29abff;
+  background: #fff;
+}
+.foot-content-right-top p {
+  margin: 15px 0;
+  color: #fff;
+  font-weight: 600;
+  font-size: 25px;
+  text-align: left;
+}
+
+.foot-content-right-bottom {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.foot-content-right-bottom img {
+  width: 30px;
+  object-fit: contain;
+}
+.product-foot-content3 {
+  width: 1160px;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 20px;
+}
+.product-foot-content-logo {
+  height: 44px;
+  transition: all 0.3s ease-in-out 0s;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.foot-word {
+  margin-left: 50px;
+  width: 280px;
+  color: rgba(255, 255, 255, 0.7);
+  /* padding: 64px 0px; */
+  font-size: 13px;
+}
+.ceQOIN {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 13px;
+  line-height: 130%;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 20px 0px;
+}
+.foot-word a {
+  font-style: normal;
+  font-weight: bold;
+  line-height: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0px;
+  text-decoration: none;
+}
+.product-foot-content-logo {
+  height: 44px;
+  transition: all 0.3s ease-in-out 0s;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.product-foot-content-icon {
+  display: inline-flex;
+}
+.product-foot-content-img {
+  width: 30px;
+  /* height: 30px; */
+  margin: auto;
+}
+.eTYfuI {
+  font-style: normal;
+  font-size: 15px;
+  font-weight: normal;
+  line-height: 130%;
+  color: rgb(255, 255, 255);
+  text-align: center;
+  margin: auto auto auto 10px;
+  text-decoration: underline;
 }
 </style>

@@ -104,7 +104,7 @@ const handleSync = () => {
         .then((res) => {
           if (res) {
             proxy.$notify({
-              type: "success",
+              customClass: "notify-success",
               message: "Pin by CID In operation!",
               position: "bottom-left",
             });
@@ -113,7 +113,7 @@ const handleSync = () => {
         })
         .catch(() => {
           proxy.$notify({
-            type: "error",
+            customClass: "notify-error",
             message: "error submit!!",
             position: "bottom-left",
           });

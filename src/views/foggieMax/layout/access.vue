@@ -183,7 +183,7 @@ const submit = () => {
         access_pass(data, requestTarget)
           .then((res) => {
             proxy.$notify({
-              type: "success",
+              customClass: "notify-success",
               message: "Created successfully",
               position: "bottom-left",
             });

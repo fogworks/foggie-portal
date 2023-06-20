@@ -307,14 +307,14 @@ async function importPrivateKey() {
           });
         } else {
           ElNotification({
-            type: "error",
+            customClass: "notify-error",
             message: "Incorrect private key filling",
             position: "bottom-left",
           });
         }
       } else {
         ElNotification({
-          type: "error",
+          customClass: "notify-error",
           message: "Incorrect private key filling",
           position: "bottom-left",
         });

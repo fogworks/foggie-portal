@@ -102,7 +102,10 @@ export default {
           name: "Proportion of mining pool",
           value: (+poolSpace.value / spaceTotal.value).toFixed(4) || 0,
         },
-        { name: "Available proportion", value: (1 - spaceUseRate.value).toFixed(4) || 1 },
+        {
+          name: "Available proportion",
+          value: (1 - spaceUseRate.value).toFixed(4) || 1,
+        },
       ];
       spacePieOption.data = pipData;
       // }

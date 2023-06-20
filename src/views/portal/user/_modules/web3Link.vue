@@ -1,10 +1,10 @@
 <template>
   <div>
-    <h1 class="title">
+    <!-- <h1 class="title">
       <img style="width: 45px" src="@/assets/logo-dog-black.svg" alt="" />
       Foggie
-    </h1>
-    <div style="margin: 0 auto">
+    </h1> -->
+    <div style="margin: 0 auto; margin-bottom: 15px">
       <img style="height: 50px" src="@/assets/foggie.jpg" alt="" />
     </div>
     <h2 style="margin-bottom: 20px">
@@ -14,7 +14,7 @@
       Read data available on the public IPFS network with Foggie (at
       <a
         target="_blank"
-        style="color: #2419d3"
+        style="color: #00c4ff"
         href="https://foggie.fogworks.io"
         >https://foggie.fogworks.io</a
       >),Add your content ID (CID) below to try it out.
@@ -153,7 +153,7 @@ const downloadItem = () => {
         // oA.click();
         // oA.remove();
         proxy.$notify({
-          type: "success",
+          customClass: "notify-success",
           message: "Downloading",
           position: "bottom-left",
         });
@@ -188,7 +188,9 @@ onMounted(search);
 </script>
 
 <style lang="scss" scoped>
-.title {
+h2,
+p {
+  color: #eee;
 }
 .search-input {
   width: 900px;

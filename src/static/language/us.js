@@ -171,7 +171,7 @@ export default {
     toboOpening: "To be provisioned",
     Opening: "Provisioning",
     paidNotOpen: "Payment completed, to be provisioned",
-    standard: "Standard Version", 
+    standard: "Standard Version",
     restart: "Restart VPS",
     Active: "Obtain Foggie Activation Code",
     Alarm: "Alarm",
@@ -817,7 +817,7 @@ export default {
     GoogleTitle1: "Google Dual Authentication",
     googltTips1:
       "You have enabled dual authentication. Please check the dynamic verification code of Google Authenticator on your mobile phone and enter",
-    GoogltInput: "Please enter Google Author",
+    GoogltInput: "Please enter Google Authenticator",
     withdrawSuccess: "Withdrawal succeeded",
     cause: "cause",
     inner_account: "inner account",

@@ -413,6 +413,7 @@ import {
   find_objects,
   publishPin,
   file_delete,
+  touch_file,
   rename_objects,
 } from "@/utils/api.js";
 import {
@@ -557,8 +558,9 @@ const columns = [
         // .map((el) => el.cid);
         emits("update:checkedData", checkedIdList);
       };
-
-      return <SelectionCell value={rowData.checked} onChange={onChange} />;
+      return rowData.isNewFolder ? null : (
+        <SelectionCell value={rowData.checked} onChange={onChange} />
+      );
     },
 
     headerCellRenderer: () => {
@@ -819,7 +821,7 @@ const initRemoteData = (data, reset = false) => {
   }
   if (data.err) {
     proxy.$notify({
-      type: "warning",
+      customClass: "notify-warning",
       message: "Failed to fetch data, please try again later",
       position: "bottom-left",
     });
@@ -940,7 +942,7 @@ const initLocalData = (data, reset = false) => {
   }
   if (data.err) {
     proxy.$notify({
-      type: "warning",
+      customClass: "notify-warning",
       message: "Failed to fetch data, please try again later",
       position: "bottom-left",
     });
@@ -1226,7 +1228,7 @@ const handleCommand = async (val) => {
     case "share":
       await doShare(item);
       proxy.$notify({
-        type: "success",
+        customClass: "notify-success",
         message: "Share succeeded",
         position: "bottom-left",
       });
@@ -1374,7 +1376,7 @@ const copyLink = (text) => {
   // this.$message.success(str);
   proxy.$notify({
     message: "Copy succeeded",
-    type: "success",
+    customClass: "notify-success",
     position: "bottom-left",
   });
 };
@@ -1442,7 +1444,7 @@ const doSearch = async () => {
               initLocalData(res);
             } else {
               ElNotification({
-                type: "error",
+                customClass: "notify-error",
                 message: "Failed to obtain file information",
                 position: "bottom-left",
               });
@@ -1451,7 +1453,7 @@ const doSearch = async () => {
           .catch(() => {
             isSearch.value = false;
             ElNotification({
-              type: "error",
+              customClass: "notify-error",
               message: "Failed to obtain file information",
               position: "bottom-left",
             });
@@ -1538,12 +1540,29 @@ watch(category, (val) => {
 });
 const confirmNewFolder = () => {
   const targetObject = () => {
-    console.log(breadcrumbList.prefix, "breadcrumbList.prefix");
-
-    // arr.splice(arr.length - 1, 1, newName.value);
-    // return arr.join("/");
+    if (breadcrumbList.prefix.length) {
+      return breadcrumbList.prefix.join("/") + "/" + newFolderName.value + "/";
+    } else {
+      return newFolderName.value + "/";
+    }
   };
-  targetObject();
+
+  touch_file({
+    deviceData,
+    token: token.value,
+    type: deviceType.value == "space" ? "space" : "foggie",
+    key: targetObject(),
+    size: 0,
+    contentType: "application/x-directory",
+  }).then((res) => {
+    proxy.$notify({
+      customClass: "notify-success",
+      message: "Created successfully",
+      position: "bottom-left",
+    });
+    getFileList("", breadcrumbList.prefix, true);
+  });
+
   // rename_objects()
   console.log(newFolderName.value, 55555555555);
 };

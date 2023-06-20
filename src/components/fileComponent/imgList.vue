@@ -329,7 +329,7 @@ const initRemoteData = (data, reset = false, dateKey = "") => {
   }
   if (data.err) {
     proxy.$notify({
-      type: "warning",
+      customClass: "notify-warning",
       message: "Failed to fetch data, please try again later",
       position: "bottom-left",
     });
@@ -417,7 +417,7 @@ const initLocalData = (data, reset = false, dateKey = "", target) => {
   }
   if (data.err) {
     proxy.$notify({
-      type: "warning",
+      customClass: "notify-warning",
       message: "Failed to fetch data, please try again later",
       position: "bottom-left",
     });

@@ -49,7 +49,11 @@
       </el-menu>
     </div>
     <teleport to="body">
-      <upload ref="uploadRef" @fileShare="fileShare" v-show="uploadIsShow"></upload>
+      <upload
+        ref="uploadRef"
+        @fileShare="fileShare"
+        v-show="uploadIsShow"
+      ></upload>
     </teleport>
     <div class="main" id="main">
       <router-view v-slot="{ Component }">
@@ -73,10 +77,17 @@ import upload from "@/components/reconsitutionUpload/index.vue";
 // import upload from "@/components/newUpload/index.vue";
 // import upload from "@/components/upload";
 
-
 // import upload from "@/components/upload";
 import ShareDialog from "@/views/foggieMax/home/_modules/myFiles/shareDialog";
-import { ref, reactive, computed, watch, watchEffect, onMounted,provide } from "vue";
+import {
+  ref,
+  reactive,
+  computed,
+  watch,
+  watchEffect,
+  onMounted,
+  provide,
+} from "vue";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
 import { getUserLoginStatus, heartbeat } from "@/api/common";
@@ -85,10 +96,7 @@ import { publishPin, user, find_objects } from "@/utils/api";
 import { fileQuery } from "@/api/myFiles/myfiles";
 import { ElNotification } from "element-plus";
 
-const uploadRef = ref()
-
-
-
+const uploadRef = ref();
 
 const store = useStore();
 
@@ -137,7 +145,7 @@ const getCid = (item) => {
           resolve(res.data[0]?.cid);
         } else {
           ElNotification({
-            type: "error",
+            customClass: "notify-error",
             message: "Failed to obtain file information",
             position: "bottom-left",
           });
@@ -146,7 +154,7 @@ const getCid = (item) => {
       })
       .catch(() => {
         ElNotification({
-          type: "error",
+          customClass: "notify-error",
           message: "Failed to obtain file information",
           position: "bottom-left",
         });
@@ -169,7 +177,7 @@ const foggieGetCid = async (item) => {
       resolve(data.contents[0]?.cid);
     } else {
       ElNotification({
-        type: "error",
+        customClass: "notify-error",
         message: "Failed to obtain file information",
         position: "bottom-left",
       });
@@ -293,7 +301,8 @@ onMounted(() => {
   display: flex;
   height: 100%;
   // background: var(--main-background-image);
-  background: url("../../assets/cool-background.png") no-repeat;
+  // background: url("../../assets/cool-background.png") no-repeat;
+  background: linear-gradient(90deg, #7964e3 0, #334ab3 50%, #7964e3);
   background-size: cover;
 
   .left-box {

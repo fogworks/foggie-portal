@@ -100,8 +100,8 @@ export default {
       type: String,
     },
     email: {
-      type: String
-    }
+      type: String,
+    },
   },
   setup(props, { emit }) {
     const device_id = "";
@@ -180,7 +180,9 @@ export default {
         let peer_id = deviceData.peer_id;
         // let httpStr = `${location.origin}/#/detailFog?pubkey=${meta.pubkey}&name=${item.key}&isFolder=${isFolder}`;
         let foggieStr = `foggie://${peer_id}/${orderId}/${item.cid}`;
-        let httpStr = `http://${deviceData.rpc.split(':')[0]}/fog/${deviceData.foggie_id}/${item.cid}`;
+        let httpStr = `http://${deviceData.rpc.split(":")[0]}/fog/${
+          deviceData.foggie_id
+        }/${item.cid}`;
         let cyfsStr = item.file_id
           ? `cyfs://o/${ood_id_cyfs}/${item.file_id}`
           : "";
@@ -196,7 +198,6 @@ export default {
         shareCopyContent = shareCopyContent + " " + " \n ";
         shareRefContent.foggieStr = foggieStr;
         shareRefContent.httpStr = httpStr;
-        
 
         // shareCopyContent = shareCopyContent + ipfsStr + " \n";
         // shareCopyContent = shareCopyContent + " " + " \n ";
@@ -250,7 +251,7 @@ export default {
       oA.click();
       oA.remove();
       proxy.$notify({
-        type: "success",
+        customClass: "notify-success",
         message: "Downloading",
         position: "bottom-left",
       });
@@ -263,7 +264,7 @@ export default {
       document.execCommand("Copy");
       document.body.removeChild(input);
       ElNotification({
-        type: "success",
+        customClass: "notify-success",
         message: "Copy succeeded",
         position: "bottom-left",
       });

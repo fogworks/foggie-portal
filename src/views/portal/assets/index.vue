@@ -18,6 +18,7 @@
       <div class="today-grid" style="border: none; padding: 0">
         <div class="sub-title">Space</div>
         <div class="sub-title last-week">Order</div>
+        <div class="sub-title last-week">Foggie</div>
         <div></div>
       </div>
       <div class="today-grid">
@@ -51,14 +52,13 @@
           class="flex items-center"
           style="justify-content: center; font-size: 26px"
         >
-          <!-- <div class="plus-icon">+</div> -->
-          <!-- <MyEcharts
-            style="width: 100%; height: 50px"
-            :options="lastWeekOptions"
-          ></MyEcharts> -->
-          {{ assetsOrderNum }}
-          <!-- {{  lastweekCount }} -->
-          <!-- <div class="dmc">DMC</div> -->
+          {{ orderNum }}
+        </div>
+        <div
+          class="flex items-center"
+          style="justify-content: center; font-size: 26px"
+        >
+          {{ foggieNum }}
         </div>
         <div class="flex today-right">
           <div @click="rewardsVisible = true">Earn More &nbsp;></div>
@@ -175,7 +175,8 @@ export default {
       () => store.getters["global/currentOODItem"]
     );
     const email = computed(() => store.getters["token/currentUser"]);
-    const { assetsOrderNum, getAssetsOrderNum } = useOrderList();
+    const { orderNum, foggieNum, assetsOrderNum, getAssetsOrderNum } =
+      useOrderList();
     const getUserAssets = () => {
       userAssets({ email: email.value }).then((res) => {
         if (res.code == 200) {
@@ -287,6 +288,9 @@ export default {
       // lastweekCount,
       // lastWeekOptions,
       currentOODItem,
+      orderNum,
+      foggieNum,
+
       assetsOrderNum,
       // nftLink,
       openNoVoodDialog,
@@ -381,7 +385,7 @@ export default {
   .today-grid {
     display: grid;
     align-items: center;
-    grid-template-columns: 2fr 1fr 2fr;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
     padding-bottom: 15px;
     border-bottom: 1px solid #fff3;
 
@@ -436,7 +440,7 @@ export default {
   }
   .Balance-grid {
     border-bottom: none;
-    // grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: 2fr 1fr 2fr;
   }
 }
 </style>

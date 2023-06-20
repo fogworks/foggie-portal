@@ -607,7 +607,7 @@ function countDownRun(timestamp) {
   if (time > 0) {
     let content = "Upload files after " + getSecondTime(+time);
     proxy.$notify({
-      type: "warning",
+      customClass: "notify-warning",
       message: content,
       position: "bottom-left",
     });
@@ -661,7 +661,7 @@ const initFileData = async (data) => {
   }
   if (data.err) {
     proxy.$notify({
-      type: "warning",
+      customClass: "notify-warning",
       message: "Failed to fetch data, please try again later",
       position: "bottom-left",
     });
@@ -845,7 +845,7 @@ const handleCommand = async (val) => {
     case "share":
       await doShare(item);
       proxy.$notify({
-        type: "success",
+        customClass: "notify-success",
         message: "Share succeeded",
         position: "bottom-left",
       });
@@ -1015,8 +1015,8 @@ const copyLink = (text) => {
   // let str = `Copying  ${type} successful!`;
   // this.$message.success(str);
   proxy.$notify({
+    customClass: "notify-success",
     message: "Copy succeeded",
-    type: "success",
     position: "bottom-left",
   });
 };
@@ -1079,7 +1079,7 @@ const initRemoteData = (data) => {
   }
   if (data.err) {
     proxy.$notify({
-      type: "warning",
+      customClass: "notify-warning",
       message: "Failed to fetch data, please try again later",
       position: "bottom-left",
     });
@@ -1197,7 +1197,7 @@ const initLocalData = (data) => {
   }
   if (data.err) {
     proxy.$notify({
-      type: "warning",
+      customClass: "notify-warning",
       message: "Failed to fetch data, please try again later",
       position: "bottom-left",
     });
@@ -1298,7 +1298,7 @@ const doSearch = async () => {
             initLocalData(res);
           } else {
             ElNotification({
-              type: "error",
+              customClass: "notify-error",
               message: "Failed to obtain file information",
               position: "bottom-left",
             });
@@ -1307,7 +1307,7 @@ const doSearch = async () => {
         .catch(() => {
           isSearch.value = false;
           ElNotification({
-            type: "error",
+            customClass: "notify-error",
             message: "Failed to obtain file information",
             position: "bottom-left",
           });
@@ -1363,10 +1363,14 @@ const switchReceiveStatus = () => {
     try {
       if (fileSource.value) {
         console.log("------------remote");
-        ElMessageBox.confirm("Are you sure to get local upload record?", "Warning", {
-          confirmButtonText: "OK",
-          cancelButtonText: "Cancel",
-        })
+        ElMessageBox.confirm(
+          "Are you sure to get local upload record?",
+          "Warning",
+          {
+            confirmButtonText: "OK",
+            cancelButtonText: "Cancel",
+          }
+        )
           .then(() => {
             // get remote data
             fileSource.value = !fileSource.value;

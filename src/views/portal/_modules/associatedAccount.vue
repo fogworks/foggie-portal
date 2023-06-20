@@ -192,7 +192,7 @@ const submit = () => {
         })
           .then((res) => {
             proxy.$notify({
-              type: "success",
+              customClass: "notify-success",
               message: "Successfully Associated",
               position: "bottom-left",
             });
@@ -217,7 +217,7 @@ const submit = () => {
                 formRef.value.resetFields();
                 emit("update:visible", false);
                 proxy.$notify({
-                  type: "success",
+                  customClass: "notify-success",
                   message: "Login succeeded",
                   position: "bottom-left",
                 });
@@ -226,7 +226,7 @@ const submit = () => {
           })
           .catch(() => {
             proxy.$notify({
-              type: "error",
+              customClass: "notify-error",
               message: "Association failed",
               position: "bottom-left",
             });
@@ -280,7 +280,7 @@ const submit = () => {
                 })
                 .catch((err) => {
                   proxy.$notify({
-                    type: "error",
+                    customClass: "notify-error",
                     message: "Information acquisition failed",
                     position: "bottom-left",
                   });

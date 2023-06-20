@@ -717,7 +717,7 @@ function openUpload(item) {
   if (time > 0) {
     let content = "Upload files after " + getSecondTime(+time);
     ElNotification({
-      type: "warning",
+      customClass: "notify-warning",
       message: content,
       position: "bottom-left",
     });
@@ -740,7 +740,7 @@ function handlerOver() {
       overShow.value = false;
       refresh();
       ElNotification({
-        type: "success",
+        customClass: "notify-success",
         message: `Operation successful`,
         position: "bottom-left",
       });
@@ -763,7 +763,7 @@ function popoverClick(type, item) {
   if (uploadLine > used_space) {
     let needSpace = getfilesize(uploadLine - used_space);
     ElNotification({
-      type: "warning",
+      customClass: "notify-warning",
       message: `At least ${needSpace} of files need to be uploaded to upload Merkle`,
       position: "bottom-left",
     });
@@ -771,7 +771,7 @@ function popoverClick(type, item) {
   }
   if (cantUpload) {
     ElNotification({
-      type: "warning",
+      customClass: "notify-warning",
       message:
         "Please wait for the file upload to finish before uploading Merkle",
       position: "bottom-left",
@@ -842,7 +842,7 @@ const challengeMiner = (item) => {
       InitiateChallenge(params).then((res) => {
         if (res.code == 200) {
           ElNotification({
-            type: "success",
+            customClass: "notify-success",
             message: `Successfully initiated the challenge`,
             position: "bottom-left",
           });
@@ -873,7 +873,7 @@ const handlerDMC = (type) => {
     +amount.value > +orderList.value[0].user_pledge_amount
   ) {
     ElNotification({
-      type: "error",
+      customClass: "notify-error",
       message: "Cannot exceed the Balance",
       position: "bottom-left",
     });
@@ -888,7 +888,7 @@ const handlerDMC = (type) => {
   }).then((res) => {
     if (res.code == 200) {
       ElNotification({
-        type: "success",
+        customClass: "notify-success",
         message: "Operation successful",
         position: "bottom-left",
       });
@@ -913,7 +913,7 @@ const cancelOrder = (item) => {
     }).then((res) => {
       if (res.code == 200) {
         ElNotification({
-          type: "success",
+          customClass: "notify-success",
           message: "Cancel completed",
           position: "bottom-left",
         });

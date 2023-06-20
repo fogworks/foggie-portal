@@ -189,7 +189,7 @@ const cancelItem = (data) => {
     });
     if (cantCancel) {
       proxy.$notify({
-        type: "warning",
+        customClass: "notify-warning",
         message:
           "There are files being uploaded. Please wait for the upload to complete before proceeding with the operation",
         position: "bottom-left",

@@ -898,6 +898,14 @@ export const get_timeline = (data) => {
     data,
   });
 }
+export const touch_file = (data) => {
+  let url = `${baseUrl}/touch_file`;
+  return request({
+    url: url,
+    method: "POST",
+    data,
+  });
+}
 
 
 

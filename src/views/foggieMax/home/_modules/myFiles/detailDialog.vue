@@ -215,7 +215,7 @@ export default {
       oA.click();
       oA.remove();
       proxy.$notify({
-        type: "success",
+        customClass: "notify-success",
         message: "Downloading",
         position: "bottom-left",
       });
@@ -228,7 +228,7 @@ export default {
       document.execCommand("Copy");
       document.body.removeChild(input);
       ElNotification({
-        type: "success",
+        customClass: "notify-success",
         message: "Copy succeeded",
         position: "bottom-left",
       });

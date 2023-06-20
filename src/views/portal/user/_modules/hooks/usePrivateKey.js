@@ -56,7 +56,8 @@ export default function usePrivateKey() {
                                     }).then((res) => {
                                         if (res.code == 200) {
                                             ElNotification({
-                                                type: "success",
+                                                customClass: "notify-success",
+
                                                 message: "Successfully imported private key",
                                                 position: "bottom-left",
                                             });
@@ -78,7 +79,7 @@ export default function usePrivateKey() {
                                             }).then((res) => {
                                                 if (res.code == 200) {
                                                     ElNotification({
-                                                        type: "success",
+                                                        customClass: "notify-success",
                                                         message: "Successfully imported private key",
                                                         position: "bottom-left",
                                                     });
@@ -91,14 +92,14 @@ export default function usePrivateKey() {
                                     });
                                 } else {
                                     ElNotification({
-                                        type: "error",
+                                        customClass: "notify-error",
                                         message: "Incorrect private key filling",
                                         position: "bottom-left",
                                     });
                                 }
                             } else {
                                 ElNotification({
-                                    type: "error",
+                                    customClass: "notify-error",
                                     message: "Incorrect private key filling",
                                     position: "bottom-left",
                                 });
@@ -139,7 +140,7 @@ export default function usePrivateKey() {
                             if (res && res.data && res.data.dmc) {
                                 await initFoggieDate();
                                 ElNotification({
-                                    type: 'success',
+                                    customClass: "notify-success",
                                     message: 'Successfully bound DMC account',
                                     position: 'bottom-left'
                                 })
@@ -147,7 +148,7 @@ export default function usePrivateKey() {
                                 done();
                             } else {
                                 ElNotification({
-                                    type: 'error',
+                                    customClass: "notify-error",
                                     message: 'Binding failed, please try again',
                                     position: 'bottom-left'
                                 })

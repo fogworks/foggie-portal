@@ -104,7 +104,7 @@ const handleConfirm = () => {
   }).then((res) => {
     if (res) {
       proxy.$notify({
-        type: "success",
+        customClass: "notify-success",
         message: "Rename successful",
         position: "bottom-left",
       });
