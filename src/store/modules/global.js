@@ -1,26 +1,30 @@
 import { savePassword } from "@/api/common";
-// 全局
 export default {
   namespaced: true,
   state: {
     theme: window.localStorage.getItem("theme") || "",
     userInfo: {},
     detected_net: false,
-    Password: "",
-    activeIndex: "",
-    theme: "",
-    ChainId: "",
     deviceList: [],
-    currentOODItem: {
-      data: {
-        device_id: "",
-      },
-    },
+    currentOODItem:
+      window.localStorage.currentOODItem &&
+        window.localStorage.currentOODItem !== "undefined"
+        ? { data: JSON.parse(window.localStorage.getItem("currentOODItem")) }
+        : {
+          data: {
+            device_id: "",
+          },
+        },
+    discoverData: {},
+    hasReady: false
   },
   mutations: {
     SET_THEME: (state, theme) => {
       state.theme = theme;
       window.localStorage.setItem("theme", theme);
+    },
+    SET_hasReady: (state, bool) => {
+      state.hasReady = bool;
     },
     SET_currentOODItem: (state, data) => {
       state.currentOODItem = data;
@@ -31,24 +35,22 @@ export default {
     SET_Detected_net: (state, bool) => {
       state.detected_net = bool;
     },
-    SAVE_ChainId: (state, chainID) => {
-      state.ChainId = chainID;
-    },
+
     setSystemTheme: (state, theme) => {
       state.theme = theme;
     },
-    SAVE_PASSWORD: (state, encryptionPassword) => {
-      state.Password = encryptionPassword;
-    },
-    setActiveIndex: (state, data) => {
-      state.activeIndex = data;
-    },
+
     SET_DeviceList: (state, data) => {
       state.deviceList = data;
     },
-
+    SET_DiscoverData: (state, data) => {
+      state.discoverData = data;
+    },
   },
   actions: {
+    setHasReady({ commit }, bool) {
+      commit("SET_hasReady", bool);
+    },
     setTheme({ commit }, theme) {
       commit("SET_THEME", theme);
     },
@@ -58,16 +60,15 @@ export default {
     setDetected_net({ commit }, bool) {
       commit("SET_Detected_net", bool);
     },
-    /* 保存密码 */
-    async setSavePassword({ commit }, password) {
-      const res = await savePassword({ password: password });
-      commit("SAVE_PASSWORD", res.data);
-    },
+
     setDeviceList({ commit }, data) {
       commit("SET_DeviceList", data);
     },
     setCurrentOODItem({ commit }, data) {
       commit("SET_currentOODItem", data);
+    },
+    setDiscoverData({ commit }, data) {
+      commit("SET_DiscoverData", data);
     },
   },
   getters: {
@@ -79,5 +80,6 @@ export default {
     Password: (state) => state.Password,
     deviceList: (state) => state.deviceList,
     currentOODItem: (state) => state.currentOODItem,
+    discoverData: (state) => state.discoverData,
   },
 };

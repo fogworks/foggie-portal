@@ -3,19 +3,16 @@
     <div class="reset">
       <svg-icon @click="resetMethod" icon-class="reset2"></svg-icon>
       <div>
-        <p>Service one click reset</p>
-        <p>After resetting, it needs to be reinitialized before entering</p>
+        <p>Click to reset</p>
+        <p>After resetting, the device needs to be reinitialized</p>
       </div>
     </div>
-    <div class="content">
+    <!-- <div class="content">
       <div class="item-box" v-for="item in kitsList">
         <div class="name">
           {{ item.label }}
         </div>
         <div class="action">
-          <!-- <span> Reset </span> -->
-          <!-- <span> Open </span>
-          <span> Close </span> -->
           <el-switch
             v-model="item.status"
             size="large"
@@ -29,7 +26,7 @@
           />
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -48,6 +45,7 @@ import { useStore } from "vuex";
 const { proxy } = getCurrentInstance();
 const $attrs = useAttrs();
 const reset = inject("reset");
+const requestTarget = inject("requestTarget");
 const kitsList = reactive([
   {
     label: "ipfs",
@@ -83,11 +81,11 @@ const count = ref(0);
 const resetMethod = async () => {
   const rest = () => {
     loading.value = true;
-    reset_vood()
+    reset_vood(requestTarget)
       .then(async () => {
         loading.value = false;
         proxy.$notify({
-          type: "success",
+          customClass: "notify-success",
           message: "Reset successful",
           position: "bottom-left",
         });
@@ -108,13 +106,12 @@ const resetMethod = async () => {
   rest();
 };
 const change = (item, val) => {
-  console.log(item, val);
   item.loading = true;
   let fetchMethod = item.label === "ipfs" ? op_ipfs : op_cyfs;
-  fetchMethod({ op_type: val })
+  fetchMethod({ op_type: val }, requestTarget)
     .then((res) => {
       proxy.$notify({
-        type: "success",
+        customClass: "notify-success",
         message: "Successfully set",
         position: "bottom-left",
       });
@@ -122,7 +119,7 @@ const change = (item, val) => {
     .catch((err) => {
       item.status = item.status === "start" ? "stop" : "start";
       proxy.$notify({
-        type: "error",
+        customClass: "notify-error",
         message: "Setting failed",
         position: "bottom-left",
       });

@@ -1,6 +1,7 @@
 <template>
   <div>
     <el-dialog
+      append-to-body
       width="500px"
       :before-close="cancel"
       :model-value="visible"
@@ -8,6 +9,7 @@
       class="ip-dialog"
     >
       <el-form
+        @submit.native.prevent
         class="ip-form"
         ref="ipFormRef"
         :model="form"
@@ -67,23 +69,18 @@ function ping(ip, timeout, success, callback) {
   img.src = /^(http|https)/.test(ip)
     ? ip + "?t=" + start
     : "http://" + ip + "?t=" + start;
-  console.log(img.src);
-  var flag = false; //无法访问
+  var flag = false;
   img.onload = function () {
     flag = true;
     success();
-    console.log("ping ok");
   };
   img.onerror = function () {
     flag = true;
     callback();
-    console.log("ping error");
   };
   var timer = setTimeout(function () {
     if (!flag) {
-      //如果真的无法访问
       flag = false;
-      console.log("ping Timeout!");
       callback();
     }
   }, timeout);
@@ -94,11 +91,7 @@ const confirm = () => {
       let data = {
         url: `http://${form.ip}:9094/`,
       };
-      // getNetStatus(data).then((dd) => {
-      //   console.log("aaaaaaaaa", dd);
-      // });
       pingUrl(data).then((r) => {
-        console.log("~~~~~~", r);
         emit("getMax", r.result);
         cancel();
       });
@@ -109,7 +102,6 @@ const confirm = () => {
     //     form.ip,
     //     1000,
     //     () => {
-    //       // 成功
     //       proxy.$notify({
     //         type: "success",
     //         message: "Successfully added",

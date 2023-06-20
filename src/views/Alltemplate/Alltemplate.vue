@@ -1,194 +1,167 @@
 <template>
-  <div class="Alltemplate_boxs">
-    <div>
-      <el-container>
-        <el-aside :width="asideWidth">
-          <TemplateAside :isMobile="isMobile" />
-        </el-aside>
-        <el-container class="main_header" :class="isMobile ? 'shrinkHeader' : ''">
-          <el-header class="header" :class="isMobile ? 'shrinkHeader' : ''">
-            <TemplateHeader />
-          </el-header>
-          <el-main class="content_body" :class="isMobile ? 'shrinkHeader' : ''">
+  <div class="Alltemplate_boxs" id="Alltemplate_boxs">
+    <!-- isInsertBody="app-window" -->
 
-            <router-view></router-view>
-            <teleport to='body'>
-              <upload v-show="uploadIsShow"></upload>
-            </teleport>
-          </el-main>
-        </el-container>
-      </el-container>
-    </div>
+    <login
+      v-if="customDialogIsShow"
+      @closeDialog="closeDialog"
+      :userInfo="userInfo"
+    ></login>
+    <template v-else>
+      <div class="top-title">
+        <!-- <span>
+          {{ deviceData.peer_id }}
+        </span> -->
+        <span> RPC:{{ deviceData.rpc }} </span>
+      </div>
+      <orderList
+        @setState="setState"
+        @setTime="setTime"
+        @setMerkleState="setMerkleState"
+        :orderId="orderId"
+        :activeDeviceData="activeDeviceData"
+        :deviceData="deviceData"
+        :isLocal="isLocal"
+      ></orderList>
+      <!-- <myFiles
+        :state="state"
+        :orderId="orderId"
+        :createdTime="createdTime"
+        :deviceData="deviceData"
+        :merkleState="merkleState"
+        @getLocal="getLocal"
+      ></myFiles> -->
+      <FileComponent
+        :state="state"
+        :orderId="orderId"
+        :createdTime="createdTime"
+        :deviceData="deviceData"
+        :merkleState="merkleState"
+        @getLocal="getLocal"
+      ></FileComponent>
+    </template>
   </div>
 </template>
 
 <script setup>
+import FileComponent from "@/components/fileComponent";
+
 import {
   ref,
+  toRefs,
   reactive,
   onBeforeMount,
   onBeforeUnmount,
   onMounted,
   watch,
 } from "vue";
-import upload from "@/components/upload";
 
-import TemplateHeader from "@/components/layout/header.vue";
-import TemplateAside from "@/components/layout/aside.vue";
-import { getChain_id } from '@/api/common.js'
-import { provide, defineExpose, computed } from "vue";
+
+
+import orderList from "@/components/orders/orderList.vue";
+import myFiles from "@/views/Alltemplate/MyFiles/myFiles";
+// import customDialog from "@/components-V3/customDialog";
+import login from "@/components/login";
 import { useStore } from "vuex";
 
-let isMobile = ref(false);
-let asideWidth = ref("236px");
-
-
-const store = useStore()
-
-let uploadIsShow = computed(() => store.getters.uploadIsShow)
-
-
-
-
-
-/* 获取链ID */
-function loadChainId() {
-  getChain_id().then(res => {
-    if (res.code == 200) {
-      store.commit('global/SAVE_ChainId', res.data)
-    }
-  })
-}
-
-
-
-
-watch(
-  isMobile,
-  (newValue) => {
-    if (!newValue) {
-      asideWidth.value = "236px";
-    } else {
-      asideWidth.value = "60px";
-    }
+import { getChain_id } from "@/api/common.js";
+import { provide, defineExpose, computed, defineProps, readonly } from "vue";
+const store = useStore();
+const props = defineProps({
+  deviceData: {
+    type: Object,
+    default: {},
   },
-  { immediate: true }
-);
-
-const { body } = document;
-const WIDTH = 992; //
-
-onBeforeMount(() => {
-  window.addEventListener("resize", $_resizeHandler);
+  activeDeviceData: {
+    type: Object,
+    default: () => ({ data: {} }),
+  },
 });
+const deviceData = reactive(props.deviceData);
+provide("deviceData", deviceData);
+const { activeDeviceData } = toRefs(props);
+const orderId = readonly(props.deviceData.space_order_id);
+const userInfo = computed(() => store.getters.userInfo);
+let customDialogIsShow = ref(true);
+const clientPassword = computed(() => store.getters.clientPassword);
+const isLocal = ref(true);
+const merkleState = ref(0);
+const setMerkleState = (val) => {
+  merkleState.value = val;
+};
+const getLocal = (val) => {
+  isLocal.value = val;
+};
 
-onBeforeUnmount(() => {
-  window.removeEventListener("resize", $_resizeHandler);
-});
+store.commit("upload/setOrderId", orderId);
+
+store.commit("upload/setDeviceType", 3);
+store.commit("upload/setPeerId", deviceData.peer_id);
+store.commit("upload/setDeviceData", deviceData);
+const state = ref(0);
+const createdTime = ref("");
+const setState = (val) => {
+  state.value = val;
+};
+const setTime = (val) => {
+  createdTime.value = val;
+};
+function closeDialog() {
+  customDialogIsShow.value = false;
+}
+
+function loadChainId() {
+  getChain_id().then((res) => {
+    if (res.code == 200) {
+      store.commit("clientGlobal/SAVE_ChainId", res.data);
+    }
+  });
+}
+const orderListRef = ref(null);
 onMounted(() => {
-  isMobile.value = $_isMobile();
-  loadChainId()
+  loadChainId();
 });
-
-function $_isMobile() {
-  const rect = body.getBoundingClientRect();
-  return rect.width - 1 < WIDTH;
-}
-function $_resizeHandler() {
-  if (!document.hidden) {
-    isMobile.value = $_isMobile();
-  }
-}
 </script>
 
 <style lang="scss" scoped>
-// @import "../../static/style/variables.scss";
 @import "@/static/style/variables.scss";
 
-
-
 .Alltemplate_boxs {
+  position: relative;
   background-repeat: no-repeat;
-  width: 100vw;
   box-sizing: border-box;
   color: #fff;
   font-family: Lucida Fax-Italic, Lucida Fax;
-  height: 100%;
-  overflow-y: scroll;
+
   background-size: cover;
   background-position: 50%;
-  height: 100vh;
   border-radius: 0 0 0 0;
   z-index: 1;
-  min-height: 100vh;
-}
-
-.main_header {
+  width: 1120px;
   height: 100%;
-  min-height: 100vh;
-  width: calc(100vw - #{$sideBarWidth});
-  padding-top: 80px;
-  overflow: hidden;
-  z-index: 999;
-  transition: background 0.3s;
+  margin: 0 auto;
+  // position: relative;
 }
+.top-title {
+  display: flex;
+  justify-content: space-between;
+  // margin: 20px 0;
+  height: 60px;
+  font-size: 24px;
+  text-align: left;
+  font-weight: 700;
+  text-align: left;
 
-.shrinkHeader {
-  width: calc(100vw - #{$shrinkHeader}) !important;
-  transition: background 0.3s;
-  -webkit-tap-highlight-color: transparent;
+  span {
+    background: linear-gradient(to right, #3913b8 0%, #15a2aa 100%);
+    background-clip: text;
+    text-fill-color: transparent;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 }
-
 .Alltemplate_boxs::-webkit-scrollbar {
   display: none;
   /* Chrome Safari */
-}
-
-.header {
-  border-bottom: 2px solid #8c88a3;
-  height: 80px;
-  line-height: 80px;
-  position: fixed;
-  top: 0px;
-  width: calc(100vw - #{$sideBarWidth});
-  transition: background 0.3s;
-}
-
-.content_body {
-  width: 100%;
-  width: calc(100vw - #{$sideBarWidth});
-  transition: background 0.3s;
-
-  height: calc(100vh - 80px);
-  padding-bottom: 100px;
-  padding: 20px 20px 100px 20px;
-}
-
-.content_body::-webkit-scrollbar {
-  display: none;
-}
-
-.box_content {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 140%;
-  font-weight: bold;
-
-  color: rgb(255, 255, 255);
-  margin: 0px;
-}
-
-.extraTip {
-  font-size: 12px;
-  font-family: PingFangSC-Medium, PingFang SC;
-  font-weight: 500;
-  color: #ff6e6e;
-  line-height: 22px;
 }
 </style>

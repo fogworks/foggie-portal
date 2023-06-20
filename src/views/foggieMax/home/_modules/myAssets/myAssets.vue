@@ -2,22 +2,51 @@
   <div class="light-box">
     <div class="card-box">
       <div class="flex justify-between">
-        <div class="flex items-center">
-          <img class="title-img" src="@/assets/assets-title.png" alt="" />
-          <div class="title">Assets</div>
+        <div
+          class="flex items-center"
+          style="width: 100%; justify-content: space-between"
+        >
+          <div class="flex items-center">
+            <img class="title-img" src="@/assets/assets-title.png" alt="" />
+            <span class="title">Assets</span>
+          </div>
+          <el-tooltip content="Join the central mining pool" v-if="!isJoin">
+            <svg-icon
+              class="join-pool"
+              size="32"
+              @click="joinPool"
+              icon-class="joinPool"
+            ></svg-icon>
+          </el-tooltip>
+          <el-tooltip v-else content="Joined the central mining pool">
+            <svg-icon
+              class="join-pool"
+              size="32"
+              icon-class="isJoin"
+            ></svg-icon>
+          </el-tooltip>
         </div>
-        <a
+        <!-- <a
           class="flex items-center records"
           @click.prevent="recordsVisible = true"
         >
           <div>Records</div>
 
           <img class="list-img" src="@/assets/assets-more-list.png" alt="" />
-        </a>
+        </a> -->
       </div>
       <div class="today-grid" style="border: none; padding: 0">
-        <div class="sub-title">Toady's</div>
-        <div class="sub-title last-week">Last Week</div>
+        <div class="sub-title">
+          Rewards
+          <svg-icon
+            class="detail"
+            size="30"
+            icon-class="Details"
+            @click="assetsRewardsVisible = true"
+          >
+          </svg-icon>
+        </div>
+        <!-- <div class="sub-title last-week">Miner Records</div> -->
         <div></div>
       </div>
       <div class="today-grid">
@@ -27,414 +56,195 @@
             <el-tooltip
               class="plus-num-tips"
               effect="dark"
-              content="Already Earned"
+              content="Total Reward"
               placement="top"
               :append-to-body="false"
             >
-              {{ addNum }}
+              {{ totalNum }}
             </el-tooltip>
             /
-            <el-tooltip
-              class="plus-num-tips"
-              effect="dark"
-              content="Estimated Benefit"
-              placement="top"
-              :append-to-body="false"
-            >
-              {{ estimateNum }}
-            </el-tooltip>
-
-            <!-- <span title="Already Earned">{{ addNum }}</span>/<span title="Estimated Benefits">{{ estimateNum }}</span> -->
           </div>
           <div class="dmc">DMC</div>
         </div>
-        <div class="flex items-center">
+        <div
+          class="flex items-center"
+          style="cursor: pointer; justify-content: flex-end"
+        >
+          <div @click="minerRecordsVisible = true">Miner Records &nbsp;></div>
           <!-- <div class="plus-icon">+</div> -->
-          <MyEcharts
-            style="width: 100%; height: 50px"
-            :options="lastWeekOptions"
-          ></MyEcharts>
+
           <!-- {{  lastweekCount }} -->
           <!-- <div class="dmc">DMC</div> -->
         </div>
-        <div class="flex today-right">
+        <!-- <div class="flex today-right">
           <div @click="rewardsVisible = true">Earn More &nbsp;></div>
-        </div>
+        </div> -->
       </div>
-      <div class="sub-title">Balance</div>
+      <div class="sub-title">Expiration time</div>
       <div class="today-grid Balance-grid">
-        <div class="flex items-center">
-          <div class="plus-num">{{ balanceCount }}</div>
-          <div class="dmc">DMC</div>
-        </div>
-        <div class="flex PST" @click="NftDialogVisible = true">
-          <div class="plus-num">{{ nftCount }}</div>
-          <div class="dmc nft">NFT</div>
-        </div>
-        <div class="flex today-right">
-          <div class="color-box">
-            <el-button @click="WithdrawVisible = true">
-              <RippleInk></RippleInk>
-              Withdraw</el-button
-            >
+        <template v-if="!deviceData.device_type">
+          <div class="flex items-center">
+            <div class="plus-num">{{ handleTimeStamp(deviceData.expire) }}</div>
           </div>
-        </div>
-      </div>
-      <Rewards
-        :currentOODItem="currentOODItem"
-        v-model:visible="rewardsVisible"
-      >
-      </Rewards>
 
-      <Withdraw
-        v-if="WithdrawVisible"
-        v-model:visible="WithdrawVisible"
-        :walletUser="walletUser"
-        :walletType="walletType"
-        :withDrawMoney="withDrawMoney"
-        :noOrderShow="noOrderShow"
-        @reload="reload"
-      ></Withdraw>
-      <AssetsRecords
-        v-model:visible="recordsVisible"
-        :currentOODItem="currentOODItem"
-      ></AssetsRecords>
-      <NftDialog
-        v-model:visible="NftDialogVisible"
-        :nft-link="nftLink"
-      ></NftDialog>
+          <!-- <div class="flex today-right">
+            <div class="color-box">
+              <el-button @click="rechargeOrder">
+                <RippleInk></RippleInk>
+                Renew</el-button
+              >
+            </div>
+          </div> -->
+        </template>
+        <template v-else>
+          <div class="flex items-center">
+            <div class="plus-num">
+              {{ getfilesize(deviceData.used_space) || 0 }}/{{
+                getfilesize(deviceData.total_space) || 0
+              }}
+            </div>
+          </div>
+        </template>
+      </div>
+      <MinerRecords
+        v-model:isJoin="isJoin"
+        v-model:visible="minerRecordsVisible"
+        @setPoolSpace="setPoolSpace"
+      >
+      </MinerRecords>
+      <AssetsRewards
+        v-if="assetsRewardsVisible"
+        v-model:visible="assetsRewardsVisible"
+      >
+      </AssetsRewards>
+      <ReNew ref="reNewRef"></ReNew>
+      <AddPoolDialog
+        v-if="PoolDialogVisible"
+        v-model:visible="PoolDialogVisible"
+        :expire="deviceData.expire"
+      ></AddPoolDialog>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, reactive, onMounted, watchEffect, toRefs } from "vue";
-import NftDialog from "./nftDialog";
-import Rewards from "./rewards";
-import Withdraw from "./withDraw";
-import AssetsRecords from "./assetsRecords";
+import {
+  ref,
+  reactive,
+  onMounted,
+  watchEffect,
+  toRefs,
+  inject,
+  nextTick,
+  watch,
+  computed,
+} from "vue";
+import ReNew from "./reNew";
+import AddPoolDialog from "./addPoolDialog";
+import MinerRecords from "./minerRecords";
 import BigNumber from "bignumber.js";
-import MyEcharts from "@/components/echarts/myEcharts";
+import AssetsRewards from "./assetsRewards";
+import { handleTimeStamp, getfilesize } from "@/utils/util";
+import { ElMessageBox, ElNotification } from "element-plus";
 import {
   user,
   ydaReward,
-  getAssets,
-  totalReward,
-  lastweekReward,
   dmcSwap,
   OwnerBills,
+  get_miner_reward,
+  check_join_mp,
+  updateUser,
 } from "@/utils/api.js";
-import * as echarts from "echarts";
 import RippleInk from "@/components/rippleInk";
+import usePrivateKey from "@/views/portal/user/_modules/hooks/usePrivateKey.js";
+import { useStore } from "vuex";
+
 export default {
   components: {
-    Rewards,
-    Withdraw,
-    AssetsRecords,
-    MyEcharts,
     RippleInk,
-    NftDialog,
+    ReNew,
+    AddPoolDialog,
+    MinerRecords,
+    AssetsRewards,
   },
   props: {
     currentOODItem: {
       type: Object,
       default: false,
     },
+    poolSpace: {
+      type: [String, Number],
+      default: 0,
+    },
   },
   setup(props, { emit }) {
-    const { currentOODItem } = toRefs(props);
-    const addNum = ref(0);
-    const estimateNum = ref(0);
-    const balanceCount = ref(0);
-    const withDrawMoney = ref(0);
-    const nftCount = ref(0);
+    const store = useStore();
+    const deviceData = inject("deviceData");
+    const { currentOODItem, poolSpace } = toRefs(props);
+    const { PoolDialogVisible, joinPool } = usePrivateKey();
+    const totalNum = ref(0);
     // const visible = ref(false);
-    const recordsVisible = ref(false);
-    const rewardsVisible = ref(false);
-    const WithdrawVisible = ref(false);
-    const NftDialogVisible = ref(false);
-    const lastweekCount = ref(0);
-    const lastWeekOptions = reactive({
-      color: "#fff",
-      grid: {
-        top: 5,
-        left: 5,
-        right: 5,
-        bottom: 5,
-      },
-      tooltip: {
-        show: true,
-        trigger: "axis",
-        axisPointer: {
-          type: "none",
-        },
-      },
-      xAxis: {
-        type: "category",
-        data: [],
-        show: false,
-      },
-      yAxis: {
-        show: false,
-        type: "value",
-      },
-      series: [
-        {
-          symbol: "none",
-          data: [],
-          type: "line",
-          smooth: 0.6,
-          itemStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 1, 1, [
-              {
-                offset: 0,
-                color: "#188df0",
-              },
-              {
-                offset: 0,
-                color: "#7165dd",
-              },
-            ]),
-          },
-          lineStyle: {
-            color: "#67d8dd",
-            width: 2,
-          },
-        },
-      ],
-    });
+    const minerRecordsVisible = ref(false);
+    const assetsRewardsVisible = ref(false);
+    const isJoin = ref(false);
+    const reNewRef = ref(null);
+    const dmc = computed(() => store.getters.userInfo.dmc);
+    const userId = computed(() => store.getters.userInfo?.id || "");
+
+    const rechargeOrder = () => {
+      reNewRef.value.rechargeOrder();
+    };
     // const estimateDMC = ref(0);
     const adminCategoriesListInit = async () => {
-      getDMC();
-      initYesterdayScore();
-      initBills();
+      // initYesterdayScore();
+      // initBills();
+      checkJoinMp();
+      getMinerReward();
     };
-    const getDMC = () => {
-      let owner_id = sessionStorage.getItem("walletUser")
-        ? sessionStorage.getItem("walletUser")
-        : "foggiezzzzz2";
-      getAssets(owner_id).then((r) => {
-        balanceCount.value = r.amount;
-        nftCount.value = r.nft;
-      });
-
-      lastweekReward(owner_id).then((rr) => {
-        lastWeekOptions.xAxis.data = rr?.map((el) => el.day);
-        lastWeekOptions.series[0].data = rr?.map((el) => el.score);
-        // if (rr && rr.length > 0) {
-        //   let num = 0;
-        //   for (let i = 0; i < rr.length; i++) {
-        //     num += rr[i].score;
-        //   }
-        //   lastweekCount.value = num;
-        // }
+    const checkJoinMp = () => {
+      check_join_mp(deviceData).then((res) => {
+        isJoin.value = res?.result?.join_miner_pool;
       });
     };
-    const initYesterdayScore = async () => {
-      let account = sessionStorage.getItem("walletUser")
-        ? sessionStorage.getItem("walletUser")
-        : "foggiezzzzz2";
-      let data = await ydaReward(account, "account");
-      if (!data) {
-        return;
-      }
-      // source1 代表自己的，source2 代表分享的
-      let owner_total = data.owner_total;
-      let rewardDMC = 0.0;
-      if (owner_total) {
-        for (let i = 0; i < owner_total.length; i++) {
-          if (owner_total[i].source === "1") {
-            rewardDMC = (owner_total && owner_total[i].total) || "0.0000";
-          } else if (owner_total[i].source === "2") {
-            // let codeReward =
-            //   owner_total && owner_total.length > 1
-            //     ? owner_total[i].total
-            //     : 0.0;
-            //   codeReward = (owner_total && owner_total[i].total) || "0.0000";
-          }
-        }
-      }
-      addNum.value = Number(rewardDMC).toFixed(4);
+    const setPoolSpace = (val) => {
+      emit("update:poolSpace", val);
     };
-    const initBills = async () => {
-      let ratedata = await dmcSwap();
-      let dmcRate = 1;
-      if (ratedata && ratedata[0]) {
-        ratedata = ratedata[0];
-        let rsi = ratedata.tokenx && ratedata.tokenx.quantity;
-        let dmc = ratedata.tokeny && ratedata.tokeny.quantity;
-        rsi = rsi.split("RSI")[0];
-        dmc = dmc.split("DMC")[0];
-        dmcRate = Number(dmc) / Number(rsi); //1 RSI = x DMC
-      }
-      let account = sessionStorage.getItem("walletUser")
-        ? sessionStorage.getItem("walletUser")
-        : "foggiezzzzz2";
-      let data = await OwnerBills(account);
-      if (!data) {
-        return;
-      }
-      let dataList = data.bills;
-      initAmount(dataList, dmcRate);
-    };
-    const initAmount = (data, dmcRate) => {
-      const sellClearCycle = 7 * 60 * 24;
-      const RSIPrecision = 8;
-      const m = 4;
-      const x = 0.1;
-      let unmatchedAmont = 0;
-      let estimateDMC = 0;
-      for (let i = 0; i < data.length; i++) {
-        let sunBill = data[i].bills;
-        for (let s = 0; s < sunBill.length; s++) {
-          unmatchedAmont = unmatchedAmont + sunBill[s].amount;
-        }
-        let createdAt = data[i].create_ts;
-        let updateAt = data[i].update_ts;
-        const couldReceiveTimeStamp =
-          (Date.now() - new Date(createdAt).getTime()) / (60 * 1000);
-        const isOverTimeStamp =
-          (new Date(updateAt).getTime() - new Date(createdAt).getTime()) /
-          (60 * 1000);
-        const overTime = new Date(
-          sellClearCycle * (60 * 1000) + new Date(createdAt).getTime()
-        );
-        let timeStamp = Date.now() - new Date(updateAt).getTime();
-        let overTimeStamp = overTime.getTime() - new Date(updateAt).getTime();
-
-        const getRsiPerSecond = new BigNumber((m * x) / (sellClearCycle * 60));
-        var amount = 0;
-        if (
-          (isOverTimeStamp === 0 && couldReceiveTimeStamp < sellClearCycle) ||
-          (isOverTimeStamp !== 0 && couldReceiveTimeStamp < sellClearCycle)
-        ) {
-          timeStamp = timeStamp > 0 ? timeStamp : 0;
-          amount = new BigNumber(
-            (unmatchedAmont * timeStamp * getRsiPerSecond) / 1000
-          ).toFixed(RSIPrecision, 1);
-        } else if (
-          (isOverTimeStamp === 0 && couldReceiveTimeStamp > sellClearCycle) ||
-          (isOverTimeStamp !== 0 && couldReceiveTimeStamp > sellClearCycle)
-        ) {
-          overTimeStamp = overTimeStamp > 0 ? overTimeStamp : 0;
-          amount = new BigNumber(
-            (unmatchedAmont * overTimeStamp * getRsiPerSecond) / 1000
-          ).toFixed(RSIPrecision, 1);
-        } else {
-          amount = "xx";
-        }
-        estimateDMC = new BigNumber(amount * dmcRate * 0.75).toFixed(4, 1);
-        estimateDMC = Number(estimateDMC) + Number(addNum.value);
-        estimateDMC = Number(estimateDMC).toFixed(4);
-        // setTimeout(() => {
-        //   initAmount(data, dmcRate);
-        // }, 100);
-      }
-      estimateNum.value = Number(estimateDMC).toFixed(4);
-      // addNum.value = estimateDMC;
-    };
-    const walletUser = ref("");
-    const walletType = ref("");
-    const myQrcode = ref("");
-    const currentDmc = ref(0.0);
-    const noOrderShow = ref(false);
-    const closeNoBoxShow = ref(false);
-    function openNoVoodDialog() {
-      closeNoBoxShow.value = true;
-    }
-    function getUserInfo() {
-      user().then((res) => {
-        if (res.data) {
-          window.sessionStorage.setItem("myQrcode", res.data.referral_code);
-          myQrcode.value = res.data.referral_code || "";
-          if (res.data.dmc && res.data.dmc !== "null") {
-            window.sessionStorage.setItem("walletUser", res.data.dmc);
-            walletUser.value = res.data.dmc;
-            walletType.value = res.data.wallet_type;
-          } else {
-            window.sessionStorage.removeItem("walletUser");
-            // this.$confirm(
-            //   this.$t("vood.needwalletUser"),
-            //   this.$t("vood.Notice"),
-            //   {
-            //     confirmButtonText: this.$t("vood.CLICK_LOGIN"),
-            //     cancelButtonText: this.$t("index.cancel"),
-            //     type: "warning",
-            //   }
-            // )
-            //   .then(() => {
-            //     that.openVood();
-            //   })
-            //   .catch(() => {});
-          }
-          const lead_mark = document.getElementById("lead_mark");
-          if (lead_mark && res.data && !res.data.vood_next) {
-            lead_mark.style.display = "block";
-            document.body.style.overflow = "hidden";
-            // that.initTest();
-          }
-        }
+    const getMinerReward = () => {
+      get_miner_reward({
+        peer_id: deviceData.peer_id,
+      }).then((res) => {
+        totalNum.value = res.result.reward_total;
       });
-    }
-    const nftLink = ref("");
-    async function initAccountMoney() {
-      let DMCUser = window.sessionStorage.getItem("walletUser") || "";
-      let user_info = await user();
-      if (user_info && user_info.data && user_info.data.dmc) {
-        DMCUser = user_info.data.dmc;
-      }
-      if (DMCUser) {
-        let data = await getAssets(DMCUser);
-        if (data && data.amount) {
-          currentDmc.value = Number(data.amount).toFixed(4);
-          // let item = {
-          //   key: "dmcAssets",
-          //   value: currentDmc.value,
-          // };
-          withDrawMoney.value = currentDmc.value;
-          // this.$emit("handleCollectTopData", item.key, item.value);
-          // this.$emit("handleCollectTopData", "nft_link", nft_link);
-          window.sessionStorage.setItem("myAssets", data.amount);
-        }
-        if (data?.nft_link) {
-          nftLink.value = data.nft_link;
-        }
-      }
-    }
+    };
     const reload = () => {
       setTimeout(() => {
         adminCategoriesListInit();
       }, 3000);
     };
-    watchEffect(() => {
-      getUserInfo();
-      initAccountMoney();
+    watch(PoolDialogVisible, (val) => {
+      if (!val) {
+        nextTick(() => {
+          checkJoinMp();
+        });
+      }
     });
     onMounted(adminCategoriesListInit);
     return {
-      addNum,
-      estimateNum,
-      withDrawMoney,
-      noOrderShow,
-      walletUser,
-      walletType,
-      balanceCount,
-      nftCount,
+      totalNum,
+      isJoin,
       // visible,
-      recordsVisible,
-      rewardsVisible,
-      WithdrawVisible,
-      NftDialogVisible,
-      lastweekCount,
-      lastWeekOptions,
-      nftLink,
-      openNoVoodDialog,
+      currentOODItem,
+      deviceData,
+      reNewRef,
+      PoolDialogVisible,
+      minerRecordsVisible,
+      assetsRewardsVisible,
       adminCategoriesListInit,
-      getDMC,
-      initYesterdayScore,
-      initBills,
-      initAmount,
       reload,
+      handleTimeStamp,
+      rechargeOrder,
+      setPoolSpace,
+      joinPool,
     };
   },
 };
@@ -486,7 +296,19 @@ export default {
   box-shadow: 0px 2px 5px 0px rgb(0 0 0 / 20%),
     rgb(0 0 0 / 10%) 0px 0px 0px 0.5px inset;
   @include card-box;
-
+  .join-pool {
+    cursor: pointer;
+    &:hover {
+      color: $light_blue;
+    }
+  }
+  .detail {
+    color: #fff;
+    cursor: pointer;
+    &:hover {
+      color: $light_blue;
+    }
+  }
   .records {
     cursor: pointer;
   }
@@ -517,7 +339,7 @@ export default {
   .today-grid {
     display: grid;
     align-items: center;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 3fr 2fr;
     padding-bottom: 15px;
     border-bottom: 1px solid #fff3;
 
@@ -571,6 +393,8 @@ export default {
     }
   }
   .Balance-grid {
+    grid-template-columns: 450px 1fr;
+
     border-bottom: none;
   }
 }

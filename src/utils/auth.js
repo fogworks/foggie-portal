@@ -10,7 +10,7 @@ const errorKey = "error";
 
 
 export function getToken() {
-  window.localStorage.getItem(TokenKey);
+  return window.localStorage.getItem(TokenKey);
   // return Cookies.get(TokenKey);
 }
 

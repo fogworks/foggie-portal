@@ -1,20 +1,20 @@
 <template>
   <div class="container" v-loading="loading">
-    <!-- <header>
-      <LayoutHeader></LayoutHeader>
-    </header> -->
-    <main>
+    <template v-if="hasToken">
       <Access
         v-if="!accessible"
         v-model:accessible="accessible"
         @accessCallback="accessCallback"
       ></Access>
       <template v-else>
-        <Welcome v-if="!hasReady" :haveNet="haveNet"></Welcome>
-        <div v-else>
+        <Welcome v-if="hasReady == 1" :haveNet="haveNet"></Welcome>
+        <div v-else-if="hasReady == 2">
           <div class="top-title">
             <span @click="isInSetup = false">
               {{ deviceData.device_name }}
+            </span>
+            <span @click="isInSetup = false">
+              IP:{{ deviceData.dedicatedip }}
             </span>
             <svg-icon
               icon-class="setup"
@@ -22,34 +22,27 @@
               @click="toSet"
             ></svg-icon>
           </div>
-          <MaxHome v-if="!isInSetup" :haveNet="haveNet" :deviceData="deviceData"></MaxHome>
+          <MaxHome
+            v-if="!isInSetup"
+            :haveNet="haveNet"
+            :deviceData="deviceData"
+          ></MaxHome>
           <Setting v-else></Setting>
         </div>
       </template>
-    </main>
-    <!-- <footer>
-      <LayoutFooter></LayoutFooter>
-    </footer> -->
+    </template>
   </div>
 </template>
 
 <script>
-// import LayoutHeader from "./layoutHeader";
-// import LayoutFooter from "./layoutFooter";
 import MaxHome from "../home";
 import Access from "./access";
 import Welcome from "../welcome";
 import Setting from "../setting";
 import { useStore } from "vuex";
-// import mainVue from './views/main/main.vue'
-import {
-  shareLink,
-  pIN,
-  getActivationVood,
-  get_service_info,
-  detected_net,
-} from "@/utils/api.js";
-import { ref, onMounted, reactive, watch, provide, toRefs, inject } from "vue";
+import { sync_device } from "@/api/order/orderList";
+import { get_service_info, detected_net, get_vood_token } from "@/utils/api.js";
+import { ref, onMounted, reactive, provide, onActivated } from "vue";
 export default {
   name: "FoggieMax",
   components: {
@@ -57,8 +50,6 @@ export default {
     Access,
     Setting,
     Welcome,
-    // LayoutHeader,
-    // LayoutFooter,
   },
   props: {
     deviceData: {
@@ -68,9 +59,12 @@ export default {
   },
 
   setup(props) {
+    const hasToken = ref(false);
     const deviceData = reactive(props.deviceData);
-    provide("deviceData", deviceData);
     const store = useStore();
+    provide("deviceData", deviceData);
+    provide("requestTarget", deviceData);
+
     const accessible = ref(false);
     const loading = ref(false);
     const currentOODItem = ref({
@@ -80,12 +74,19 @@ export default {
     });
 
     const haveNet = ref(false);
-    const hasReady = ref(false);
+    const hasReady = ref(0); //1false  2true
     const isInSetup = ref(false);
     const initFoggieDate = async () => {
+      if (!deviceData.device_type) {
+        accessible.value = true;
+        haveNet.value = true;
+        getServiceInfo();
+        // hasReady.value = 2;
+        return;
+      }
       loading.value = true;
-      detected_net().then((res) => {
-        if (res.result.detected_net) {
+      detected_net(deviceData).then((res) => {
+        if (res.result && res.result.detected_net) {
           haveNet.value = true;
         } else {
           haveNet.value = false;
@@ -102,32 +103,44 @@ export default {
       //   currentOODItem.value.data = oodData.data[0];
       // }
     };
-    onMounted(() => {
-      initFoggieDate();
+    const getVoodToken = async (data) => {
+      let res = await get_vood_token({ vood_id: data.device_id });
+      if (res) {
+        store.dispatch("token/setTokenMap", {
+          id: data.device_id,
+          token: res.data.token_type + " " + res.data.access_token,
+        });
+        hasToken.value = true;
+        initFoggieDate();
+      }
+    };
+    onActivated(() => {
+      getVoodToken(deviceData);
+    });
+    onMounted(async () => {
+      await getVoodToken(deviceData);
     });
     const toSet = () => {
       isInSetup.value = !isInSetup.value;
     };
     const getServiceInfo = () => {
       loading.value = true;
-      get_service_info()
+      get_service_info(deviceData)
         .then(async ({ result }) => {
           if (haveNet.value) {
-            // 有外网
             if (
-              result.cbs_state === "finish" &&
-              result.ipfs_state === "finish" &&
+              result.svc_state === "finish" &&
               result.cyfs_state === "finish"
             ) {
-              hasReady.value = true;
+              hasReady.value = 2;
+            } else {
+              hasReady.value = 1;
             }
           } else {
-            // 无外网
-            if (
-              result.cbs_state === "finish" &&
-              result.ipfs_state === "finish"
-            ) {
-              hasReady.value = true;
+            if (result.svc_state === "finish") {
+              hasReady.value = 2;
+            } else {
+              hasReady.value = 1;
             }
           }
           accessible.value = true;
@@ -137,27 +150,15 @@ export default {
           loading.value = false;
         });
     };
-    // watch(
-    //   accessible,
-    //   (val) => {
-    //     if (val) {
-    //       loading.value = true;
-    //       getServiceInfo();
-    //     }
-    //   },
-    //   {
-    //     immediate: true,
-    //   }
-    // );
     const accessCallback = () => {
       getServiceInfo();
     };
     const reset = () => {
-      hasReady.value = false;
+      hasReady.value = 1;
       isInSetup.value = false;
     };
     const goHome = () => {
-      hasReady.value = true;
+      hasReady.value = 2;
       isInSetup.value = false;
     };
     provide("reset", reset);
@@ -171,6 +172,7 @@ export default {
       deviceData,
       isInSetup,
       hasReady,
+      hasToken,
       toSet,
       accessCallback,
     };
@@ -180,45 +182,59 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  width: 1200px;
-  padding: 0 40px;
+  position: relative;
+  width: 1120px;
+  // padding: 0 40px;
+  min-height: 100%;
   margin: 0 auto;
   box-sizing: border-box;
+  z-index: 0;
+
   :deep {
     .el-loading-mask {
       background: transparent;
     }
+
+    .access-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
   }
-  main {
-    z-index: 1;
-  }
+
   .top-title {
     display: flex;
     justify-content: space-between;
     // margin: 20px 0;
     height: 60px;
-    font-size: 30px;
+    font-size: 24px;
     text-align: left;
     font-weight: 700;
     text-align: left;
+
     span {
-      background: linear-gradient(to right, #3913b8 0%, #75e0e6 100%);
+      background: linear-gradient(to right, #3913b8 0%, #15a2aa 100%);
       background-clip: text;
       text-fill-color: transparent;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       cursor: pointer;
     }
+
     .setup {
+      font-size: 30px;
       color: #29abff;
       cursor: pointer;
       transition: all 0.5s;
+
       &:hover {
         transform: rotate(90deg);
       }
     }
   }
 }
+
 .top-between {
   display: flex;
   justify-content: space-between;

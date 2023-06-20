@@ -11,7 +11,6 @@ module.exports = defineConfig({
     resolve: {
       alias: {},
       fallback: {
-        //其他的如果不启用可以用 keyname :false，例如：crypto:false,
         crypto: require.resolve("crypto-browserify"),
         stream: require.resolve("stream-browserify"),
       },
@@ -23,7 +22,6 @@ module.exports = defineConfig({
       .rule("svg")
       .exclude.add(path.resolve(__dirname, "src/svg-icons"))
       .end();
-    // 配置svg图标的加载器
     config.module
       .rule("svg-icons")
       .test(/.svg$/)
@@ -40,35 +38,64 @@ module.exports = defineConfig({
       preProcessor: "scss",
       patterns: [path.resolve(__dirname, "./src/static/style/index.scss")],
     },
+    electronBuilder: {
+      builderOptions: {
+        appId: "contact@vofocorp.com",
+        asar: false,
+        mac: {
+          icon: "public/f1.icns",
+        },
+        win: {
+          icon: "public/f1.ico",
+          target: "nsis",
+          requestedExecutionLevel: "requireAdministrator",
+        },
+        extraResources: [
+          {
+            from: "public/foggie-node",
+            to: "app/foggie-node",
+          },
+        ],
+        nsis: {
+          oneClick: false,
+          allowToChangeInstallationDirectory: true,
+        },
+      },
+      customFileProtocol: "./",
+    },
   },
   lintOnSave: true,
   devServer: {
     port: port,
     open: true,
-    // overlay: {
-    //   warnings: false,
-    //   errors: true,
-    // },
+    client: {
+      overlay: false,
+    },
     proxy: {
       "/api/paynode": {
         target: `http://154.31.0.29:8088`,
-        changeOrigin: true, //是否跨域
-        secure: false, // 设置支持https协议的代理
+        changeOrigin: true,
+        secure: false,
       },
       "/api/payments": {
         target: "http://154.31.0.29:8088",
-        changeOrigin: true, //是否跨域
-        secure: false, // 设置支持https协议的代理
+        changeOrigin: true,
+        secure: false,
       },
       "/api/checkpayment": {
         target: "http://154.31.0.29:8088",
-        changeOrigin: true, //是否跨域
-        secure: false, // 设置支持https协议的代理
+        changeOrigin: true,
+        secure: false,
       },
       "/api/completepayment": {
         target: "http://154.31.0.29:8088",
-        changeOrigin: true, //是否跨域
-        secure: false, // 设置支持https协议的代理
+        changeOrigin: true,
+        secure: false,
+      },
+      "/api/v1": {
+        target: "http://218.2.96.99:9010",
+        changeOrigin: true,
+        secure: false,
       },
       "/v2/payments": {
         // target: 'https://connect.squareupsandbox.com',//http://10.8.90.252:7000//http://10.8.90.145:8001，http://154.31.0.29:8001
@@ -112,7 +139,7 @@ module.exports = defineConfig({
         changeOrigin: true,
         secure: false,
         pathRewrite: {
-          "^/upload": "", //代理的路径
+          "^/upload": "",
         },
       },
       "^/x": {
@@ -154,6 +181,58 @@ module.exports = defineConfig({
       "^/ipfsops": {
         // target: "http://154.31.41.36:880",
         target: "http://218.2.96.99:9010",
+        // target: "http://127.0.0.1:3000",
+        changeOrigin: true,
+        secure: false,
+      },
+      "^/publish": {
+        // target: "http://154.31.41.36:880",
+        // target: "http://218.2.96.99:9010",
+        target: "http://127.0.0.1:3000",
+        changeOrigin: true,
+        secure: false,
+      },
+      "^/file_delete": {
+        // target: "http://154.31.41.36:880",
+        // target: "http://218.2.96.99:9010",
+        target: "http://127.0.0.1:3000",
+        changeOrigin: true,
+        secure: false,
+      },
+      "^/list_files": {
+        // target: "http://154.31.41.36:880",
+        // target: "http://218.2.96.99:9010",
+        target: "http://127.0.0.1:3000",
+        changeOrigin: true,
+        secure: false,
+      },
+      "^/find_objects": {
+        // target: "http://154.31.41.36:880",
+        // target: "http://218.2.96.99:9010",
+        target: "http://127.0.0.1:3000",
+        changeOrigin: true,
+        secure: false,
+      },
+
+      "^/search_object": {
+        // target: "http://154.31.41.36:880",
+        // target: "http://218.2.96.99:9010",
+        target: "http://127.0.0.1:3000",
+        changeOrigin: true,
+        secure: false,
+      },
+
+      "^/file_download": {
+        // target: "http://154.31.41.36:880",
+        // target: "http://218.2.96.99:9010",
+        target: "http://127.0.0.1:3000",
+        changeOrigin: true,
+        secure: false,
+      },
+      "^/s_ipfsops/pin": {
+        // target: "http://154.31.41.36:880",
+        // target: "http://218.2.96.99:9010",
+        target: "http://127.0.0.1:3000",
         changeOrigin: true,
         secure: false,
       },
@@ -193,6 +272,7 @@ module.exports = defineConfig({
       },
       "^/nixls": {
         target: "https://218.2.96.99:8443",
+        // target: "https://154.37.16.163:8443",
         changeOrigin: true,
         secure: false,
       },
@@ -229,6 +309,7 @@ module.exports = defineConfig({
       },
       "^/v1": {
         target: "http://154.37.16.163:9094",
+        // target: "http://154.37.17.172:9094",
         changeOrigin: true,
         secure: false,
       },
@@ -257,20 +338,18 @@ module.exports = defineConfig({
         changeOrigin: true,
         secure: false,
       },
-      '/client_api': {
-        // target: 'http://192.168.1.119:3000', // 需要代理的域名
+      "/client_api": {
+        // target: 'http://192.168.1.104:3000',
 
-        target: 'http://127.0.0.1:3000', // 需要代理的域名
-        changeOrigin: true, //开启代理：在本地会创建一个虚拟服务端，然后发送请求的数据，并同时接收请求	的数据，这样服务端和服务端进行数据的交互就不会有跨域问题
-        // ws: false, // 是否启用websockets
+        target: "http://127.0.0.1:3000",
+        changeOrigin: true,
+        // ws: false, //
         // logLevel: 'debug',
-        // onProxyReq: (proxyReq, req) => {     //利用回调查看请求的真实地址
-        //   // http请求
+        // onProxyReq: (proxyReq, req) => {
         //   console.log('[HPM] %s %s %s %s', req.method, req.originalUrl, '->', req.url);
         // },
         pathRewrite: {
-          //重写匹配的字段，如果不需要在请求路径上，重写为""
-          '^/client_api': '',
+          "^/client_api": "",
         },
       },
     },
@@ -278,16 +357,12 @@ module.exports = defineConfig({
   },
 });
 
-// module.exports = { //多页面打包
+// module.exports = {
 //   pages: {
 //     main: {
-//       // 入口js
 //       entry: 'src/views/main/main.js',
-//       // 模板来源
 //       template: 'public/main.html',
-//       // 在 dist 中生成的html文件名字
 //       filename: 'main.html',
-//       // template html 中的 title 标签需要是 <title><%= htmlWebpackPlugin.options.title %></title>
 //       title: 'Main Page'
 //     }
 //   }

@@ -1,10 +1,15 @@
-
 const getters = {
   uploadIsShow: state => state.upload.uploadIsShow,
   orderId: state => state.upload.orderId,
-  activeIndex:state => state.global.activeIndex,
-  theme:state => state.global.theme,
-  ChainId:state => state.global.ChainId, //链ID
-  Password:state => state.global.Password  // 用户加密密码
+  deviceData: state => state.upload.deviceData,
+  deviceType: state => state.upload.deviceType,
+  theme: state => state.global.theme,
+  userInfo: state => state.global.userInfo,
+  ChainId: state => state.clientGlobal.ChainId, //
+  email: state => state.token.currentUser,
+  clientPassword: state => state.clientGlobal.clientPassword,  // 
+  uploadFileList: state => state.upload.uploadFileList,
+  hasReady: state => state.global.hasReady,
+  tokenMap: state => state.token.tokenMap,
 }
 export default getters

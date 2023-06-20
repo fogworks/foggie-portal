@@ -115,31 +115,25 @@ import { getfilesize, transferTime } from "@/utils/util.js";
 export default {
   components: { RippleInk },
   props: {
-    // 是否打开
     display: {
       type: Boolean,
     },
-    // 是否显示关闭按钮
     closable: {
       type: Boolean,
       default: true,
     },
-    // 是否显示遮罩
     mask: {
       type: Boolean,
       default: true,
     },
-    // 是否点击遮罩关闭
     maskClosable: {
       type: Boolean,
       default: true,
     },
-    // 宽度(支持百分比)
     // width: {
     //   type: String,
     //   default: "1000px",
     // },
-    // 是否在父级元素中打开
     inner: {
       type: Boolean,
       default: false,
@@ -250,7 +244,6 @@ export default {
         this.initData(item);
       }
     },
-    //点击头部面包屑
     changeTabSon(item, index) {
       console.log(
         this.pathList[index],
@@ -300,7 +293,6 @@ export default {
         }
         console.log(that.sonList, that.pathList);
       }
-      //回到根目录
       if (!tree && !_prefix) {
         that.sonList = [];
         that.sonListStr = "";

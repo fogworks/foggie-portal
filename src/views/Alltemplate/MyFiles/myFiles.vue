@@ -1,6 +1,16 @@
 <template>
   <div class="card-box formBox">
     <el-breadcrumb :separator-icon="ArrowRight">
+      <el-switch
+        class="file-source"
+        v-model="fileSource"
+        size="large"
+        active-text="Remote Files"
+        :active-value="remote"
+        inactive-text="Local upload record"
+        :inactive-value="local"
+        :before-change="switchReceiveStatus"
+      />
       <el-breadcrumb-item @click="setPrefix(item, true)">
         <div class="flex items-center">
           <svg-icon icon-class="my-files" class="title-img"></svg-icon>
@@ -17,6 +27,7 @@
     <div class="flex justify-between items-center">
       <el-button
         class="top-btn"
+        :disabled="[4, 5].includes(state) || !merkleState"
         @click="openUpload"
         key="plain"
         type="primary"
@@ -59,7 +70,7 @@
         <el-input
           class="search-input"
           v-model="keyWord"
-          placeholder="Name Or ID"
+          placeholder="Name"
           @keyup.enter.native="doSearch"
         >
           <template #prefix>
@@ -68,143 +79,340 @@
         </el-input>
       </div>
     </div>
-    <div
-      v-infinite-scroll="fileListsInfinite"
-      :infinite-scroll-immediate="false"
-      :infinite-scroll-distance="150"
-      :infinite-scroll-disabled="false"
-    >
+    <div style="height: 100%">
       <el-table
         class="table-box"
-        :data="data"
+        row-key="key"
+        :data="tableData.data"
         :header-cell-style="setNameCell"
-        style="width: 100%; margin-top: 10px"
+        style="width: 100%; margin-top: 10px; height: 1000px"
         ref="fileTable"
         @sort-change="sortChange"
+        v-el-table-infinite-scroll="fileListsInfinite"
+        :infinite-scroll-immediate="false"
+        infinite-scroll-distance="'150px'"
+        :infinite-scroll-disabled="false"
+        :row-style="rowState"
       >
         <el-table-column
           label="Name"
           show-overflow-tooltip
-          min-width="340"
-          prop="file_path"
+          min-width="490"
+          class-name="action-btn-column"
+          prop="name"
         >
-          <template #default="{ row }">
-            <router-link
-              class="name-link"
-              to="detail"
-              style="display: flex; align-items: center; padding-left: 15px"
-              @click.prevent="toDetail(row)"
-            >
-              <div class="name-img">
-                <img
-                  v-if="row.type === 'application/x-directory'"
-                  src="@/assets/folder.png"
-                  alt=""
-                />
+          <template #default="scope">
+            <div class="name-box">
+              <div
+                class="name-link"
+                to="detail"
+                style="display: flex; align-items: center; padding-left: 15px"
+                @click.prevent="toDetail(scope.row)"
+              >
+                <div
+                  class="name-img"
+                  v-if="scope.row.type === 'application/x-directory'"
+                >
+                  <img src="@/assets/folder.png" alt="" />
 
-                <!-- <template v-else-if="row.isSystemImg">
+                  <!-- <template v-else-if="row.isSystemImg">
                   <img v-show="theme" src="@/assets/logo-dog-black.svg" alt="" />
                   <img v-show="!theme" src="@/assets/logo-dog.svg" alt="" />
                 </template> -->
-                <img v-else :src="row.icon" alt="" />
-              </div>
-              <div>
-                {{ row.file_path }}
-              </div>
-            </router-link>
-          </template>
-        </el-table-column>
-        <el-table-column label="Content / File ID" min-width="250">
-          <template #default="{ row }">
-            <template v-for="item in row.idList">
-              <div v-if="item.code" class="id-box">
-                <div class="copy" v-if="item.code">
-                  <span class="id-name">{{ item.name }}</span>
-                  <span class="code">{{ item.code }}</span>
-                  <svg-icon
-                    icon-class="copy"
-                    class="copy-icon"
-                    @click="copyLink(item.code)"
-                  ></svg-icon>
+                  <!-- <img v-else :src="row.imgUrl" alt="" /> -->
+                </div>
+                <!-- 
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                content="File needs to be re-uploaded"
+                placement="top-start"
+              >
+                <div v-if="!row.is_local">
+                  {{ row.name }}
+                </div>
+              </el-tooltip> -->
+
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  content="Not Persisted"
+                  placement="top-start"
+                  v-if="
+                    !scope.row.isPersistent &&
+                    scope.row.type !== 'application/x-directory'
+                  "
+                >
+                  <div>
+                    <i class="i-ersistent">*</i> 111{{ scope.row.name }}
+                  </div>
+                </el-tooltip>
+                <div
+                  v-if="
+                    scope.row.isPersistent ||
+                    scope.row.type === 'application/x-directory'
+                  "
+                >
+                  {{ scope.row.name }}
                 </div>
               </div>
-            </template>
+              <!-- <ActionDrop class="action-popover">
+                <div class="color-box table-action">
+                  <svg-icon icon-class="more"></svg-icon>
+                </div>
+                <template #reference>
+                  <ul class="more-dropdown">
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'share', command: scope.row })
+                        "
+                        :disabled="!scope.row.canShare"
+                      >
+                        share</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'ipfs', command: scope.row })
+                        "
+                        :disabled="true"
+                      >
+                        IPFS PIN</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'cyfs', command: scope.row })
+                        "
+                        :disabled="true"
+                      >
+                        CYFS PIN</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({
+                            flag: 'download',
+                            command: scope.row,
+                          })
+                        "
+                        :disabled="scope.row.isDir"
+                      >
+                        Download</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'rename', command: scope.row })
+                        "
+                      >
+                        Rename</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'move', command: scope.row })
+                        "
+                      >
+                        Move</el-button
+                      >
+                    </li>
+                  </ul>
+                </template>
+              </ActionDrop> -->
+              <el-popover
+                popper-class="action-popover"
+                :offset="-3"
+                :hide-after="0"
+                placement="bottom"
+                :width="150"
+                trigger="hover"
+              >
+                <template #reference>
+                  <div class="color-box table-action">
+                    <svg-icon icon-class="more"></svg-icon>
+                  </div>
+                </template>
+                <ul class="more-dropdown">
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'share', command: scope.row })
+                      "
+                      :disabled="!scope.row.canShare"
+                    >
+                      share</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'ipfs', command: scope.row })
+                      "
+                      :disabled="true"
+                    >
+                      IPFS PIN</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'cyfs', command: scope.row })
+                      "
+                      :disabled="true"
+                    >
+                      CYFS PIN</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'download', command: scope.row })
+                      "
+                      :disabled="scope.row.isDir"
+                    >
+                      Download</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'rename', command: scope.row })
+                      "
+                      :disabled="scope.row.isDir"
+                    >
+                      Rename</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'move', command: scope.row })
+                      "
+                      :disabled="scope.row.isDir"
+                    >
+                      Move</el-button
+                    >
+                  </li>
+                </ul>
+              </el-popover>
+              <!-- <el-dropdown
+                class="table-action"
+                trigger="click"
+                @command="handleCommand"
+              >
+                <div class="color-box">
+                  <svg-icon icon-class="more"></svg-icon>
+                </div>
+                <template #dropdown>
+                  <el-dropdown-menu class="more-dropdown" slot="dropdown">
+                    <el-dropdown-item
+                      :command="{ flag: 'share', command: scope.row }"
+                      :disabled="!scope.row.canShare"
+                      >share</el-dropdown-item
+                    >
+                    <el-dropdown-item
+                      :command="{ flag: 'ipfs', command: scope.row }"
+                      :disabled="true"
+                      >IPFS PIN</el-dropdown-item
+                    >
+                    <el-dropdown-item
+                      :command="{ flag: 'cyfs', command: scope.row }"
+                      :disabled="true"
+                      >CYFS PIN</el-dropdown-item
+                    >
+                    <el-dropdown-item
+                      :command="{ flag: 'download', command: scope.row }"
+                      :disabled="scope.row.isDir"
+                      >Download</el-dropdown-item
+                    >
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown> -->
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="Content / File ID" min-width="180">
+          <template #default="{ row }">
+            <div v-if="row.cid" class="id-box">
+              <div class="copy" v-if="row.cid">
+                <!-- <span class="id-name">{{ item.name }}</span> -->
+                <span class="code">{{ handleID(row.cid) }}</span>
+                <svg-icon
+                  icon-class="copy"
+                  class="copy-icon"
+                  @click="copyLink(row.cid)"
+                ></svg-icon>
+              </div>
+            </div>
           </template>
         </el-table-column>
         <el-table-column
-          prop="create_time"
+          prop="date"
           label="Date"
-          min-width="150"
+          min-width="195"
           show-overflow-tooltip
           align="center"
         />
         <el-table-column
           prop="size"
           label="Size"
-          min-width="100"
+          min-width="125"
           show-overflow-tooltip
           align="center"
         />
-        <el-table-column label="Share" min-width="100" header-align="center">
+        <!-- <el-table-column label="Share" min-width="100" header-align="center">
           <template #default="{ row }">
             <div>
-              <!-- <MyEcharts style="width: 40px; height: 40px" :options="row.share"></MyEcharts> -->
+              <MyEcharts style="width: 40px; height: 40px" :options="row.share"></MyEcharts>
             </div>
           </template>
-        </el-table-column>
+        </el-table-column> -->
 
-        <el-table-column
+        <!-- <el-table-column
           label="Actions"
           class-name="action-btn-column"
           min-width="150"
           align="center"
         >
           <template #default="scope">
-            <el-dropdown
-              trigger="click"
-              @command="handleCommand"
-              popper-class="custom_dropdown"
-            >
+            <el-dropdown trigger="click" @command="handleCommand">
               <div class="color-box">
-                <img src="@/assets/more.svg" alt="" />
+                <svg-icon icon-class="more"></svg-icon>
               </div>
               <template #dropdown>
-                <!-- <el-dropdown-menu class="more-dropdown" slot="dropdown">
-                  <el-dropdown-item :command="{ flag: 'share', command: scope.row }"
-                    :disabled="!scope.row.canShare">share</el-dropdown-item>
-                  <el-dropdown-item :command="{ flag: 'ipfs', command: scope.row }" :disabled="
-                    !(
-                      !scope.row.isDir &&
-                      (currentOODItem.deploy_vood_gateway_state ===
-                        'finish' ||
-                        currentOODItem.deploy_vood_gateway_state ===
-                        'upgrade_finish' ||
-                        currentOODItem.deploy_ipfs_gateway_state ===
-                        'finish') &&
-                      currentOODItem.ipfs_service_state === 'start'
-                    )
-                  ">IPFS PIN</el-dropdown-item>
-                  <el-dropdown-item :command="{ flag: 'cyfs', command: scope.row }" :disabled="
-                    !(
-                      !scope.row.isDir &&
-                      (currentOODItem.deploy_vood_gateway_state ===
-                        'finish' ||
-                        currentOODItem.deploy_vood_gateway_state ===
-                        'upgrade_finish' ||
-                        currentOODItem.deploy_cyfs_gateway_state ===
-                        'finish') &&
-                      currentOODItem.cyfs_service_state === 'start'
-                    )
-                  ">CYFS PIN</el-dropdown-item>
-                  <el-dropdown-item :command="{ flag: 'download', command: scope.row }"
-                    :disabled="scope.row.isDir">Download</el-dropdown-item>
-                  <el-dropdown-item class="delete-item"
-                    :command="{ flag: 'delete', command: scope.row }">Delete</el-dropdown-item>
-                </el-dropdown-menu> -->
+                <el-dropdown-menu class="more-dropdown" slot="dropdown">
+                  <el-dropdown-item
+                    :command="{ flag: 'share', command: scope.row }"
+                    :disabled="!scope.row.canShare"
+                    >share</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    :command="{ flag: 'ipfs', command: scope.row }"
+                    :disabled="true"
+                    >IPFS PIN</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    :command="{ flag: 'cyfs', command: scope.row }"
+                    :disabled="true"
+                    >CYFS PIN</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    :command="{ flag: 'download', command: scope.row }"
+                    :disabled="scope.row.isDir"
+                    >Download</el-dropdown-item
+                  >
+                </el-dropdown-menu>
               </template>
             </el-dropdown>
           </template>
-        </el-table-column>
+        </el-table-column> -->
       </el-table>
     </div>
   </div>
@@ -217,9 +425,26 @@
   <PinDialog v-model:visible="ipfsDialogShow" type="ipfs" :currentFileItem="pinData" :currentOODItems="currentOODItem"
     @confirm="ipfsPin"></PinDialog>
   <PinFormDialog v-model:visible="syncDialog" :currentOODItem="currentOODItem"></PinFormDialog> -->
+  <ShareDialog
+    :shareRefContent="shareRefContent"
+    :copyContent="copyContent"
+    v-model:visible="showShareDialog"
+  >
+  </ShareDialog>
+  <DetailDialog
+    v-if="detailShow"
+    v-model:visible="detailShow"
+    :orderId="orderId"
+    :detailData="detailData"
+    :deviceData="deviceData"
+    :email="email"
+  ></DetailDialog>
 </template>
 
 <script setup>
+import ActionDrop from "@/components/actionDrop";
+import { default as vElTableInfiniteScroll } from "el-table-infinite-scroll";
+
 import { ArrowRight } from "@element-plus/icons-vue";
 import {
   reactive,
@@ -233,43 +458,66 @@ import {
   computed,
   onMounted,
 } from "vue";
-import { GetFileList } from "@/api/myFiles/myfiles";
-
+import { ElMessageBox, ElNotification } from "element-plus";
+import DetailDialog from "./detailDialog";
+import {
+  GetFileList,
+  GetFileListAll,
+  InitiateChallenge,
+  fileQuery,
+} from "@/api/myFiles/myfiles";
 import {
   oodFileList,
-  pIN,
-  IPFSPublish,
-  cyfsPINList,
-  oodFileDel,
   CidShare,
-  oodFileSearch,
-  shareLink,
-  getIPFSLocalList,
+  find_objects,
+  publishPin,
 } from "@/utils/api.js";
+import _ from "lodash";
 
 // import MyEcharts from "@/components/echarts/myEcharts";
-// import ShareDialog from "./_modules/shareDialog";
+import ShareDialog from "@/views/foggieMax/home/_modules/myFiles/shareDialog";
 // import PinDialog from "./_modules/pinDialog";
 // import PinTaskList from "./_modules/pinTaskList";
 // import PinFormDialog from "./_modules/pinFormDialog";
-import { getfilesize } from "@/utils/util.js";
-import { transferTime } from "@/utils/util.js";
-
-import { getFileType } from "@/utils/getFileType";
-
-import router from "@/router";
+import { transferTime, transferUTCTime, getfilesize } from "@/utils/util.js";
+import { getSecondTime } from "@/utils/ChinaStandardTime";
+// import { getFileType } from "@/utils/getFileType";
+import { useRoute } from "vue-router";
 import { useStore } from "vuex";
+import setting from "@/setting";
+const { baseUrl } = setting;
+// import { fa } from "element-plus/es/locale";
 const store = useStore();
-
+const route = useRoute();
 const { proxy } = getCurrentInstance();
-const emits = defineEmits(["currentPrefix"]);
-const orderId = computed(() => store.getters.orderId);
+const emits = defineEmits(["currentPrefix", "getLocal"]);
+
+const fileSource = ref(false);
+// const orderId = computed(() => store.getters.orderId);
+
+const chainId = computed(() => store.getters.ChainId);
+const email = computed(() => store.getters.userInfo?.email);
+const deviceType = computed(() => store.getters.deviceType);
+const order_Id = computed(() => store.getters.orderId);
+const { ipcRenderer } = window.require("electron");
+
+const rowState = ({ row }) => {
+  let style = {};
+  if (!row.is_local) {
+    style = {
+      // backgroundColor: "#e17f7f",
+    };
+  }
+  return style;
+};
 
 watch(
   () => store.getters.uploadIsShow,
   (newVal, oldVal) => {
-    if (!newVal) {
-      loadFileList();
+    if (!newVal && order_Id.value == props.orderId) {
+      tableData.data = [];
+      tableData.pageNum = 1;
+      getFileList();
     }
   }
 );
@@ -277,38 +525,56 @@ watch(
 const keyWord = ref("");
 const tableLoading = ref(false);
 const showShareDialog = ref(false);
+const canMerkle = ref(true);
 
 const props = defineProps({
   currentOODItem: Object,
+  orderId: {
+    type: String,
+    default: "",
+  },
+  deviceData: Object,
+  state: {
+    type: [String, Number],
+  },
+  merkleState: {
+    type: [String, Number],
+    default: 0,
+  },
+  createdTime: {
+    type: String,
+    default: "",
+  },
 });
 const syncDialog = ref(false);
 const taskDisplay = ref(false);
+const continuationToken = ref("");
 const closeRightUpload = () => {
   taskDisplay.value = false;
 };
-const { currentOODItem } = toRefs(props);
-
+const { currentOODItem, orderId, deviceData, state, createdTime, merkleState } =
+  toRefs(props);
 const sortList = [
   {
-    prop: "create_time",
+    prop: "date",
     label: "Newest Upload",
     key: 1,
     order: 1,
   },
   {
-    prop: "create_time",
+    prop: "date",
     label: "Oldest Upload",
     key: 2,
     order: 0,
   },
   {
-    prop: "file_path",
+    prop: "name",
     label: "Alphabetical A-Z",
     key: 3,
     order: 0,
   },
   {
-    prop: "file_path",
+    prop: "name",
     label: "Alphabetical Z-A",
     key: 4,
     order: 1,
@@ -316,34 +582,60 @@ const sortList = [
 ];
 // const device_id = computed(() => currentOODItem.value.device_id);
 // const device_id_real = computed(() => currentOODItem.value.device_id_real);
+const device_id = "";
+const device_id_real = "";
 let shareCopyContent = "";
 let tableData = reactive({
   data: [],
+  total: 0,
+  pageSize: 50,
+  pageNum: 1,
 });
-const { data } = toRefs(tableData);
+const { data, total, pageSize, pageNum } = toRefs(tableData);
+const handleID = (str) => {
+  return (
+    str.substring(0, 6) + "..." + str.substring(str.length - 6, str.length)
+  );
+};
+function countDownRun(timestamp) {
+  let nowTime = new Date().getTime();
+  let endTime = new Date(createdTime.value).getTime() + 1000 * 60 * 3;
+  let time = ((+endTime - +nowTime) / 1000).toFixed(0);
+  if (time > 4 * 60) {
+    time = time - 60 * 60;
+  }
+  if (time > 0) {
+    let content = "Upload files after " + getSecondTime(+time);
+    proxy.$notify({
+      customClass: "notify-warning",
+      message: content,
+      position: "bottom-left",
+    });
+  } else {
+    store.commit("upload/setUploadOptions", deviceData.value);
+    // store.commit("upload/openUpload", orderId.value);
+  }
+}
 function openUpload() {
-  store.commit("upload/openUpload", orderId.value);
+  countDownRun();
 }
 
-function loadFileList() {
-  let params = {
-    username: "tianbao12345",
-    orderId: orderId.value,
-    pageSize: 100,
-    pageNo: 1,
-  };
-  GetFileList(params).then((res) => {
-    for (const item of res.data) {
-      item.file_path = decodeURIComponent(item.file_path);
-      // item.type = item.file_path.substring(item.file_path.lastIndexOf(".") + 1);
-      item.icon = getFileType(item.file_path);
-    }
-    tableData.data = res.data;
-    tableSort({ prop: "create_time", order: 1, key: 1 });
-  });
-}
-
-function fileListsInfinite() {}
+/* */
+const fileListsInfinite = _.debounce(() => {
+  // if (tableData.total > tableData.data.length) {
+  //   tableData.pageNum += 1;
+  //   getFileList();
+  // } else {
+  //   return;
+  // }
+  if (
+    fileSource.value &&
+    continuationToken.value &&
+    tableData.data.length < 5000
+  ) {
+    getReomteData(continuationToken.value, breadcrumbList.prefix);
+  }
+}, 300);
 
 const activeSort = ref("1");
 let breadcrumbList = reactive({
@@ -354,176 +646,158 @@ const fileTable = ref(null);
 const tableSort = ({ prop = "", order = 2, key = "" }) => {
   const sortOrders = ["ascending", "descending", null];
   activeSort.value = key;
-  // fileTable.value.clearSort();
+
   if (fileTable?.value) fileTable.value.sort(prop, sortOrders[order]);
 };
 const refresh = () => {
   tableData.data = [];
-  loadFileList();
-
+  getFileList("", breadcrumbList.prefix);
   tableSort({ prop: "create_time", order: 1, key: 1 });
 };
 
 const initFileData = async (data) => {
+  if (!data) {
+    return;
+  }
+  if (data.err) {
+    proxy.$notify({
+      customClass: "notify-warning",
+      message: "Failed to fetch data, please try again later",
+      position: "bottom-left",
+    });
+  }
+  let params = {
+    email: email.value,
+    orderId: orderId.value,
+    pageSize: tableData.pageSize,
+    pageNo: tableData.pageNum,
+    deviceType: deviceType.value,
+  };
+  let localFiles = [];
+  let r = await GetFileList(params);
+  localFiles = r.data.list;
+
   tableData.data = [];
-  let fileList = await getIPFSLocalList();
-  for (let i = 0; i < data.length; i++) {
-    let date = "-";
-    if (data[i].created_at > 0) {
-      let created_at = new Date(data[i].created_at);
-      let year = created_at.getUTCFullYear();
-      let month = created_at.getUTCMonth() + 1;
-      month = month < 10 ? `0${month}` : month;
-      let day = created_at.getUTCDate();
-      day = day < 10 ? `0${day}` : day;
-      let hour = created_at.getUTCHours();
-      hour = hour < 10 ? `0${hour}` : hour;
-      let minute = created_at.getUTCMinutes();
-      minute = minute < 10 ? `0${minute}` : minute;
-      let second = created_at.getUTCSeconds();
-      second = second < 10 ? `0${second}` : second;
-      date = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
-      date = `${year}-${month}-${day}`;
-    }
-    let isDir =
-      data[i].content_type === "application/x-directory" ||
-      data[i].file_type === 2;
-    const type = data[i].key.substring(data[i].key.lastIndexOf(".") + 1);
-    let { imgHttpLink: url, isSystemImg } = handleImg(
-      type,
-      device_id.value,
-      data[i].pubkey,
-      isDir
-    );
-    let { imgHttpLink: url_large } = handleImg(
-      type,
-      device_id.value,
-      data[i].pubkey,
-      isDir,
-      400
-    );
-    // let _url = require(`@/svg-icons/logo-dog-black.svg`);
-    let cid = "";
-
-    if (fileList && fileList.length > 0) {
-      for (let j = 0; j < fileList.length; j++) {
-        if (fileList[j].cid === data[i].cid) {
-          cid = fileList[j].cid;
-          break;
-        }
-      }
-    }
-
+  for (let i = 0; i < data.commonPrefixes?.length; i++) {
     let item = {
-      isDir: isDir,
-      name: decodeURIComponent(data[i].key),
-      key: data[i].key,
+      isDir: true,
+      name: decodeURIComponent(data.commonPrefixes[i]),
+      key: data.commonPrefixes[i],
       idList: [
         {
           name: "IPFS",
-          code: cid,
+          code: "",
         },
         {
           name: "CYFS",
-          code: data[i].file_id,
+          code: "",
+        },
+      ],
+      date: "-",
+      size: "",
+      status: "-",
+      type: "application/x-directory",
+      file_id: "",
+      pubkey: "",
+      cid: "",
+      imgUrl: "",
+      imgUrlLarge: "",
+      share: {},
+      isSystemImg: false,
+      canShare: false,
+    };
+    tableData.data.push(item);
+  }
+
+  for (let j = 0; j < data?.content?.length; j++) {
+    let date = transferTime(data.content[j].lastModified);
+    let isDir = false;
+    const type = data.content[j].key.substring(
+      data.content[j].key.lastIndexOf(".") + 1
+    );
+    let { imgHttpLink: url, isSystemImg } = handleImg(
+      data.content[j],
+      type,
+      isDir
+    );
+    let { imgHttpLink: url_large } = handleImg(data.content[j], type, isDir);
+    // let _url = require(`@/svg-icons/logo-dog-black.svg`);
+    let cid = data.content[j].cid;
+    let file_id = data.content[j].fileId;
+
+    let is_local = false;
+    for (let k = 0; k < localFiles.length; k++) {
+      if (localFiles[k].cid === data.content[j].cid) {
+        is_local = true;
+        break;
+      }
+    }
+    // test
+    // is_local = false;
+    if (!is_local) {
+      canMerkle.value = false;
+      emits("getLocal", false);
+    }
+    let name = decodeURIComponent(data.content[j].key);
+    if (data.prefix) {
+      name = name.split(data.prefix)[1];
+    }
+
+    let isPersistent = data.content[j].isPersistent;
+
+    let item = {
+      isDir: isDir,
+      name,
+      key: data.content[j].key,
+      idList: [
+        {
+          name: "IPFS",
+          code: data.content[j].isPin ? cid : "",
+        },
+        {
+          name: "CYFS",
+          code: data.content[j].isPinCyfs ? file_id : "",
         },
       ],
       date,
-      size: getfilesize(data[i].content_length),
+      size: getfilesize(data.content[j].size),
       // status: "Published",
-      status: data[i].pubkey || data[i].file_id ? "Published" : "-",
-      type: data[i].content_type,
-      file_id: data[i].file_id,
-      pubkey: data[i].pubkey,
+      status: cid || file_id ? "Published" : "-",
+      type: data.content[j].contentType,
+      file_id: file_id,
+      pubkey: cid,
       cid,
       imgUrl: url,
       imgUrlLarge: url_large,
       // share: getShareOptions(),
       share: {},
       isSystemImg,
-      canShare: data[i].pubkey ? true : false,
+      canShare: cid ? true : false,
+      is_local,
+      isPersistent,
     };
-    getCidShare(device_id.value, data[i].cid);
+    // data[i] = item;
+    // getCidShare(device_id.value, data[i].cid);
     tableData.data.push(item);
-    tableLoading.value = false;
-    if (activeSort.value) {
-      const target = sortList.find((el) => el.key == activeSort.value);
-      const { prop, order, key } = target;
-      nextTick(() => {
-        tableSort({ prop, order, key });
-      });
-    }
   }
-};
-const sortChange = ({ column, prop, order }) => {
-  // console.log(
-  //   { column, prop, order },
-  //   "{ column, prop, order }{ column, prop, order }{ column, prop, order }"
-  // );
-};
-const getCidShare = async (ood_id, cid) => {
-  if (ood_id && cid) {
-    let data = await CidShare(ood_id, cid);
-    if (data && data.bucket) {
-      let chartData =
-        data && data.bucket && data.bucket["date_histogram_share.ts"];
-      let xdata = [];
-      let ydata = [];
-      for (let i = 0; i < chartData.length; i++) {
-        let item = {
-          key_as_string: transferTime(chartData[i].key_as_string),
-          value: chartData[i].doc_count,
-        };
-        xdata.push(item.key_as_string.split(" ")[0]);
-        ydata.push(item.value);
-      }
-      initMyOption(xdata, ydata);
-    }
-    // test
-    // initMyOption(
-    //   ["1", "2", "3", "4", "5", "6", "7"],
-    //   [7, 6, 5, 4, 3, 2, 1],
-    //   cid
-    // );
-  }
-};
-const initMyOption = (xdata, ydata, cid) => {
-  let options = {
-    color: "#29abff",
-    grid: {
-      top: 2,
-      left: 2,
-      right: 2,
-      bottom: 2,
-    },
-    yAxis: {
-      show: false,
-      type: "value",
-    },
-    xAxis: {
-      type: "category",
-      data: xdata,
-      show: false,
-    },
-    series: [
-      {
-        data: ydata,
-        type: "bar",
-      },
-    ],
-  };
+  // tableData.data = data;
 
-  for (let i = 0; i < tableData.data.length; i++) {
-    if (tableData.data[i].cid === cid) {
-      tableData.data[i].share = options;
-      break;
-    }
+  tableLoading.value = false;
+  if (activeSort.value) {
+    const target = sortList.find((el) => el.key == activeSort.value);
+    const { prop, order, key } = target;
+    nextTick(() => {
+      tableSort({ prop, order, key });
+    });
   }
-};
 
-const handleImg = (type, ID, pubkey, isDir, size) => {
-  size = size || 20;
-  let location = window.location.origin;
+  // tableData.total += data.commonPrefixes.length + data.content.length;
+  // tableData.data = tableData.data.concat(res.data.list);
+  tableSort({ prop: "date", order: 1, key: 1 });
+};
+const handleImg = (item, type, isDir) => {
+  // size = size || 20;
+  // let location = window.location.origin;
   let imgHttpLink = "";
   type = type.toLowerCase();
   let isSystemImg = false;
@@ -538,7 +812,20 @@ const handleImg = (type, ID, pubkey, isDir, size) => {
   ) {
     type = "img";
 
-    imgHttpLink = `${location}/object?pubkey=${pubkey}&new_w=${size}`;
+    // imgHttpLink = `${location}/object?pubkey=${pubkey}&new_w=${size}`;
+    let cid = item.cid;
+    let key = item.key;
+
+    let ip = deviceData.value.rpc.split(":")[0];
+    let port = deviceData.value.rpc.split(":")[1];
+    let Id = deviceData.value.foggie_id;
+    let peerId = deviceData.value.peer_id;
+
+    // ip = "218.2.96.99";
+    // port = 8007;
+    // let Id = orderId.value;
+    // let peerId = "12D3KooWEJTLsHbP6Q1ybC1u49jFi77tQ8hYtraqGtKTHCXFzLnA";
+    imgHttpLink = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&token=${deviceData.value.upload_file_token}`;
   } else {
     isSystemImg = true;
   }
@@ -558,15 +845,15 @@ const handleCommand = async (val) => {
     case "share":
       await doShare(item);
       proxy.$notify({
-        type: "success",
+        customClass: "notify-success",
         message: "Share succeeded",
         position: "bottom-left",
       });
       break;
     case "ipfs":
       ipfsDialogShow.value = true;
-      // ipfsPin(item);
       pinData.item = item;
+      // ipfsPin(item);
       break;
     case "cyfs":
       cyfsDialogShow.value = true;
@@ -576,17 +863,6 @@ const handleCommand = async (val) => {
     case "download":
       downloadItem(item);
       break;
-    case "delete":
-      proxy
-        .$confirm("Are you sure to delete it?", "Warning", {
-          confirmButtonText: "YES",
-          cancelButtonText: "NO",
-        })
-        .then(() => {
-          deleteItem(item);
-        });
-      // deleteItem(item);
-      break;
     default:
       break;
   }
@@ -594,29 +870,28 @@ const handleCommand = async (val) => {
 const shareRefContent = reactive({});
 const copyContent = ref("");
 const doShare = async (item) => {
-  let key = "";
+  let key = item.key;
   if (item) {
-    key = item.name;
-    let data = {
-      key: item.pubkey,
-      is_pin: false,
-      new_path: item.key,
-    };
-    await pIN(data);
+    ipfsPin(item);
+    // await pIN(data);
   }
 
   const isFolder = item.type === "application/x-directory";
   if (key) {
-    let user = window.sessionStorage.getItem("walletUser");
+    // let user = window.sessionStorage.getItem("walletUser");
+    let user = store.getters["global/userInfo"].dmc;
     let ood_id_cyfs = device_id_real ? device_id_real : device_id;
     let _key = encodeURIComponent(key);
-    let data = await shareLink(device_id.value, _key);
-    let meta = data.meta;
-    let httpStr = `${location.origin}/#/detailFog?pubkey=${meta.pubkey}&name=${item.key}&isFolder=${isFolder}`;
-    let cyfsStr = item.file_id
-      ? `cyfs://o/${ood_id_cyfs.value}/${meta.file_id}`
-      : "";
-    let ipfsStr = item.cid ? `ipfs://${meta.cid}` : "";
+    // let data = await shareLink(device_id.value, _key);
+    // let meta = data.meta;
+    let peer_id = deviceData.value.peer_id;
+    // let httpStr = `${location.origin}/#/detailFog?pubkey=${meta.pubkey}&name=${item.key}&isFolder=${isFolder}`;
+    let httpStr = `foggie://${peer_id}/${orderId.value}/${item.cid}`;
+    let cyfsStr = item.file_id ? `cyfs://o/${ood_id_cyfs}/${item.file_id}` : "";
+    let ipfsStr = item.cid ? `ipfs://${item.cid}` : "";
+
+    // this.shareTitle = this.$t("vood.uploadShareTitle");
+    // this.shareContent = this.$t("vood.uploadShareContent");
     shareCopyContent = `${user} publish ${key} to Web3` + "\n";
     shareRefContent.user = `${user} publish ${key} to Web3`;
     let myQrcode = window.sessionStorage.getItem("myQrcode");
@@ -626,50 +901,45 @@ const doShare = async (item) => {
     shareCopyContent = shareCopyContent + httpStr + " \n";
     shareCopyContent = shareCopyContent + " " + " \n ";
     shareRefContent.httpStr = httpStr;
-    if (
-      (currentOODItem.value.deploy_vood_gateway_state === "finish" ||
-        currentOODItem.value.deploy_vood_gateway_state === "upgrade_finish" ||
-        currentOODItem.value.deploy_ipfs_gateway_state === "finish") &&
-      currentOODItem.value.ipfs_service_state === "start" &&
-      meta.cid
-    ) {
-      shareCopyContent = shareCopyContent + ipfsStr + " \n";
-      shareCopyContent = shareCopyContent + " " + " \n ";
-      shareRefContent.ipfsStr = ipfsStr;
-      shareRefContent.httpStr = shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
-    }
+    shareCopyContent = shareCopyContent + ipfsStr + " \n";
+    shareCopyContent = shareCopyContent + " " + " \n ";
+    shareRefContent.ipfsStr = ipfsStr;
+    // shareRefContent.httpStr = shareRefContent.httpStr + `&ipfsStr=${ipfsStr}`;
 
-    if (
-      (currentOODItem.value.deploy_vood_gateway_state === "finish" ||
-        currentOODItem.value.deploy_vood_gateway_state === "upgrade_finish" ||
-        currentOODItem.value.deploy_cyfs_gateway_state === "finish") &&
-      currentOODItem.value.cyfs_service_state === "start" &&
-      meta.file_id
-    ) {
-      shareCopyContent = shareCopyContent + cyfsStr + " \n";
-      shareCopyContent = shareCopyContent + " " + " \n ";
-      shareRefContent.cyfsStr = cyfsStr;
-      shareRefContent.httpStr = shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
-    }
+    shareCopyContent = shareCopyContent + cyfsStr + " \n";
+    shareCopyContent = shareCopyContent + " " + " \n ";
+    shareRefContent.cyfsStr = cyfsStr;
+    // shareRefContent.httpStr = shareRefContent.httpStr + `&cyfsStr=${cyfsStr}`;
+
     shareCopyContent = shareCopyContent + shareStr + " \n";
     shareRefContent.shareStr = shareStr;
     copyContent.value = shareCopyContent;
+    // shareRefContent.value=shareCopyContent
     showShareDialog.value = true;
-    console.log(
-      "shareCopyContentshareCopyContentshareCopyContent",
-      shareCopyContent
-    );
+    // this.shareBoxShow = true;
   } else {
+    // this.closeRewardBox();
   }
 };
-const ipfsPin = (checked) => {
+const ipfsPin = () => {
   const item = pinData.item;
+  let ip_address = deviceData.value.rpc.split(":")[0];
+  let port = deviceData.value.rpc.split(":")[1];
+  let peerId = deviceData.value.peer_id;
+  let Id = deviceData.value.foggie_id;
   let data = {
+    ip_address,
+    port,
+    token: "11111",
+    peerId,
+    Id,
+    exp: 3 * 24 * 3600,
+    stype: "ipfs",
+    pin: true,
     key: item.pubkey,
-    is_pin: false,
-    new_path: item.key,
+    isDir: item.isDir,
   };
-  pIN(data).then((res) => {
+  publishPin(data).then((res) => {
     if (res) {
       ipfsDialogShow.value = false;
     }
@@ -677,97 +947,372 @@ const ipfsPin = (checked) => {
 };
 const cyfsPin = () => {
   const item = pinData.item;
-  let key = item.key;
-  var form = new FormData();
-  form.append(
-    "dir",
-    new Blob([key], {
-      type: "application/x-directory",
-    }),
-    key
-  );
-  let pubkey = item.pubkey
-    ? item.pubkey
-    : "QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn";
-
-  cyfsPINList(device_id.value, item.name, pubkey).then((res) => {
-    cyfsDialogShow.value = false;
-    // proxy.$message({
-    //   type: "success",
-    //   message: "CYFS Join queue!",
-    //   position: "bottom left",
-    // });
-  });
-};
-const downloadItem = (item) => {
-  // let ID = device_id.value;
-  let pubkey = item.pubkey;
-  let downloadUrl = `/fog/${pubkey}?dl=true`;
-
-  var oA = document.createElement("a");
-  oA.download = item.name; // 设置下载的文件名，默认是'下载'
-  oA.href = downloadUrl;
-  document.body.appendChild(oA);
-  oA.click();
-  oA.remove(); // 下载之后把创建的元素删除
-  proxy.$notify({
-    type: "success",
-    message: "Download succeeded",
-    position: "bottom-left",
-  });
-};
-const deleteItem = (item) => {
-  tableLoading.value = true;
-  oodFileDel(device_id.value, item).then((res) => {
-    if (res && res[0]) {
-      proxy.$notify({
-        type: "success",
-        message: "Delete succeeded",
-        position: "bottom-left",
-      });
-      doSearch();
-    } else {
-      proxy.$notify({
-        type: "error",
-        message: "Delete Error",
-        position: "bottom-left",
-      });
+  let ip_address = deviceData.value.rpc.split(":")[0];
+  let port = deviceData.value.rpc.split(":")[1];
+  let peerId = deviceData.value.peer_id;
+  let Id = deviceData.value.foggie_id;
+  let data = {
+    ip_address,
+    port,
+    token: "11111",
+    peerId,
+    Id,
+    exp: 3 * 24 * 3600,
+    stype: "cyfs",
+    pin: true,
+    key: item.pubkey,
+    isDir: item.isDir,
+  };
+  publishPin(data).then((res) => {
+    if (res) {
+      cyfsDialogShow.value = false;
     }
   });
 };
 
+const downloadItem = (item) => {
+  // let ID = device_id.value;
+  // let pubkey = item.pubkey;
+  // let downloadUrl = `/fog/${pubkey}?dl=true`;
+  // let cid = "QmNf82AtemgaHu2Sg3wpiaEFmoy6ym6Sv1Ma9eLJg6dHm3";
+  let cid = item.cid;
+  let key = item.key;
+
+  // let ip = "218.2.96.99";
+  let ip = deviceData.value.rpc.split(":")[0];
+  // let ip = "154.31.34.194";
+  // let port = 8007;
+  let port = deviceData.value.rpc.split(":")[1];
+  // let Id = orderId.value;
+  let Id = deviceData.value.foggie_id;
+  let peerId = deviceData.value.peer_id;
+  let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&token=${deviceData.value.upload_file_token}`;
+  // downloadUrl = 'foggie://12D3KooWC2mwaY7P1u9bvqE2JEvPRKdjUjQdVL7nie18Kdvjvgrf/2142/QmX3bmf4Mbs2nfTYVF5CJw3CGR9eogfGaCUcRWbd9R4WHs'
+
+  console.log("-------------------ipcrenderer----download");
+
+  ipcRenderer.send("download", {
+    downloadPath: downloadUrl,
+    fileName: item.name,
+  });
+
+  // let downloadUrl = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=space&token=${deviceData.value.upload_file_token}`;
+  // var oA = document.createElement("a");
+  // oA.download = item.name;
+  // oA.href = downloadUrl;
+  // document.body.appendChild(oA);
+  // oA.click();
+  // oA.remove();
+};
+
 const copyLink = (text) => {
-  var input = document.createElement("input"); // 创建input对象
-  input.value = text; // 设置复制内容
-  document.body.appendChild(input); // 添加临时实例
-  input.select(); // 选择实例内容
-  document.execCommand("Copy"); // 执行复制
-  document.body.removeChild(input); // 删除临时实例
+  var input = document.createElement("input");
+  input.value = text;
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand("Copy");
+  document.body.removeChild(input);
   // let str = `Copying  ${type} successful!`;
   // this.$message.success(str);
   proxy.$notify({
+    customClass: "notify-success",
     message: "Copy succeeded",
-    type: "success",
     position: "bottom-left",
   });
 };
+const detailShow = ref(false);
+const detailData = reactive({ data: {} });
 const toDetail = (item) => {
   localStorage.setItem("currentOODItem", JSON.stringify(currentOODItem.value));
   if (item.type === "application/x-directory") {
-    // 文件夹类型
-    breadcrumbList.prefix = item.name.split("/");
+    let long_name = breadcrumbList.prefix.join("/") + item.name;
+    breadcrumbList.prefix = long_name.split("/");
     emits("currentPrefix", breadcrumbList.prefix);
   } else {
-    localStorage.setItem("detail", JSON.stringify(item));
-    router.push("/detail");
+    detailData.data = item;
+    detailShow.value = true;
+    // localStorage.setItem("detail", JSON.stringify(item));
+    // router.push("/detail");
   }
 };
+const getFileList = function (scroll, prefix) {
+  if (fileSource.value) {
+    getReomteData(scroll, prefix);
+  } else {
+    getLocalData();
+  }
+};
+const getReomteData = (scroll, prefix) => {
+  let list_prefix = "";
+  tableLoading.value = true;
+  let token = deviceData.value.upload_file_token;
+  let type = "space";
+  if (prefix?.length) {
+    list_prefix = prefix.join("/");
+  }
+  oodFileList(email.value, type, token, deviceData.value, list_prefix, scroll)
+    .then((res) => {
+      if (res && res.content) {
+        initRemoteData(res);
+      } else {
+        tableLoading.value = true;
+      }
+    })
+    .catch(() => {
+      tableLoading.value = false;
+    });
+};
+
+const getLocalData = () => {
+  let params = {
+    email: email.value,
+    orderId: orderId.value,
+    deviceType: deviceType.value,
+  };
+  GetFileListAll(params).then((res) => {
+    initLocalData(res);
+  });
+};
+const initRemoteData = (data) => {
+  if (!data) {
+    return;
+  }
+  if (data.err) {
+    proxy.$notify({
+      customClass: "notify-warning",
+      message: "Failed to fetch data, please try again later",
+      position: "bottom-left",
+    });
+  }
+  let dir = breadcrumbList.prefix.join("/");
+
+  // tableData.data = [];
+  for (let i = 0; i < data.commonPrefixes?.length; i++) {
+    let name = decodeURIComponent(data.commonPrefixes[i]);
+    if (data.prefix) {
+      name = name.split(data.prefix)[1];
+    }
+    let item = {
+      isDir: true,
+      name,
+      key: data.commonPrefixes[i],
+      idList: [
+        {
+          name: "IPFS",
+          code: "",
+        },
+        {
+          name: "CYFS",
+          code: "",
+        },
+      ],
+      date: "-",
+      size: "",
+      status: "-",
+      type: "application/x-directory",
+      file_id: "",
+      pubkey: "",
+      cid: "",
+      imgUrl: "",
+      imgUrlLarge: "",
+      share: {},
+      isSystemImg: false,
+      canShare: false,
+    };
+    tableData.data.push(item);
+  }
+
+  for (let j = 0; j < data?.content?.length; j++) {
+    let date = transferTime(data.content[j].lastModified);
+    let isDir = false;
+    const type = data.content[j].key.substring(
+      data.content[j].key.lastIndexOf(".") + 1
+    );
+    let { imgHttpLink: url, isSystemImg } = handleImg(
+      data.content[j],
+      type,
+      isDir
+    );
+    let { imgHttpLink: url_large } = handleImg(data.content[j], type, isDir);
+    let cid = data.content[j].cid;
+    let file_id = data.content[j].fileId;
+
+    let name = decodeURIComponent(data.content[j].key);
+    if (data.prefix) {
+      name = name.split(data.prefix)[1];
+    }
+    let isPersistent = data.content[j].isPersistent;
+
+    let item = {
+      isDir: isDir,
+      name,
+      key: data.content[j].key,
+      idList: [
+        {
+          name: "IPFS",
+          code: data.content[j].isPin ? cid : "",
+        },
+        {
+          name: "CYFS",
+          code: data.content[j].isPinCyfs ? file_id : "",
+        },
+      ],
+      date,
+      size: getfilesize(data.content[j].size),
+      status: cid || file_id ? "Published" : "-",
+      type: data.content[j].contentType,
+      file_id: file_id,
+      pubkey: cid,
+      cid,
+      imgUrl: url,
+      imgUrlLarge: url_large,
+      share: {},
+      isSystemImg,
+      canShare: cid ? true : false,
+      isPersistent,
+    };
+    tableData.data.push(item);
+  }
+
+  if (data.isTruncated) {
+    continuationToken.value = data.continuationToken;
+  } else {
+    continuationToken.value = "";
+  }
+
+  tableLoading.value = false;
+  if (activeSort.value) {
+    const target = sortList.find((el) => el.key == activeSort.value);
+    const { prop, order, key } = target;
+    nextTick(() => {
+      tableSort({ prop, order, key });
+    });
+  }
+
+  tableSort({ prop: "date", order: 1, key: 1 });
+};
+const initLocalData = (data) => {
+  if (!data) {
+    return;
+  }
+  if (data.err) {
+    proxy.$notify({
+      customClass: "notify-warning",
+      message: "Failed to fetch data, please try again later",
+      position: "bottom-left",
+    });
+  }
+
+  tableData.data = [];
+  for (let j = 0; j < data?.data?.length; j++) {
+    let date = data.data[j].update_time;
+    let isDir = false;
+
+    let cid = data.data[j].cid;
+    let file_id = data.data[j].fileId;
+
+    let name = decodeURIComponent(data.data[j].dest_path);
+
+    const type = data.data[j].dest_path.substring(
+      data.data[j].dest_path.lastIndexOf(".") + 1
+    );
+    let { isSystemImg } = handleImg(data.data[j], type, isDir);
+
+    let item = {
+      isDir: isDir,
+      name,
+      key: data.data[j].dest_path,
+      idList: [
+        {
+          name: "IPFS",
+          code: data.data[j].isPin ? cid : "",
+        },
+        {
+          name: "CYFS",
+          code: data.data[j].isPinCyfs ? file_id : "",
+        },
+      ],
+      date,
+      size: getfilesize(data.data[j].file_size),
+      status: cid || file_id ? "Published" : "-",
+      type: data.data[j].contentType || "",
+      file_id: file_id | "",
+      pubkey: cid,
+      cid,
+      imgUrl: "",
+      imgUrlLarge: "",
+      share: {},
+      isSystemImg,
+      canShare: cid ? true : false,
+      isPersistent: true,
+    };
+    tableData.data.push(item);
+  }
+
+  tableLoading.value = false;
+  if (activeSort.value) {
+    const target = sortList.find((el) => el.key == activeSort.value);
+    const { prop, order, key } = target;
+    nextTick(() => {
+      tableSort({ prop, order, key });
+    });
+  }
+
+  tableSort({ prop: "date", order: 1, key: 1 });
+};
+const isSearch = ref(false);
 const doSearch = async () => {
   if (keyWord.value === "") {
-    getFileList("", breadcrumbList.prefix);
+    getFileList();
   } else {
-    let data = await oodFileSearch(keyWord.value);
-    initFileData(data.data);
+    tableLoading.value = true;
+    // let orderId = deviceData.value.space_order_id;
+    breadcrumbList.prefix = [];
+    let token = deviceData.value.upload_file_token;
+    let type = "space";
+    isSearch.value = true;
+    if (fileSource.value) {
+      let data = await find_objects(
+        email.value,
+        type,
+        token,
+        deviceData.value,
+        encodeURIComponent(keyWord.value)
+      );
+      isSearch.value = false;
+      tableData.data = [];
+      if (data.contents) {
+        data.content = data.contents;
+      }
+      initRemoteData(data);
+    } else {
+      fileQuery({
+        email: email.value,
+        orderId: orderId.value,
+        deviceType: 3,
+        key: encodeURIComponent(keyWord.value),
+      })
+        .then((res) => {
+          isSearch.value = false;
+          if (res.data[0]?.cid) {
+            initLocalData(res);
+          } else {
+            ElNotification({
+              customClass: "notify-error",
+              message: "Failed to obtain file information",
+              position: "bottom-left",
+            });
+          }
+        })
+        .catch(() => {
+          isSearch.value = false;
+          ElNotification({
+            customClass: "notify-error",
+            message: "Failed to obtain file information",
+            position: "bottom-left",
+          });
+        });
+    }
   }
 };
 const setPrefix = (item, isTop = false) => {
@@ -779,15 +1324,23 @@ const setPrefix = (item, isTop = false) => {
       if (el === item) targetIndex = index;
       return index <= targetIndex;
     });
+    let len = breadcrumbList.prefix.length;
+    if (len > 0 && breadcrumbList.prefix[len - 1] !== "") {
+      breadcrumbList.prefix.push("");
+    }
   }
   emits("currentPrefix", breadcrumbList.prefix);
 };
 watch(breadcrumbList, (val) => {
-  getFileList("", val.prefix);
+  if (!isSearch.value) {
+    tableData.data = [];
+    getFileList("", val.prefix);
+  }
 });
 watch(
   () => currentOODItem,
   () => {
+    tableData.data = [];
     getFileList("", breadcrumbList.prefix);
   },
   {
@@ -805,13 +1358,58 @@ function setNameCell({ row, column, rowIndex, columnIndex }) {
 }
 defineExpose({ doSearch });
 
+const switchReceiveStatus = () => {
+  return new Promise((resolve, reject) => {
+    try {
+      if (fileSource.value) {
+        console.log("------------remote");
+        ElMessageBox.confirm(
+          "Are you sure to get local upload record?",
+          "Warning",
+          {
+            confirmButtonText: "OK",
+            cancelButtonText: "Cancel",
+          }
+        )
+          .then(() => {
+            // get remote data
+            fileSource.value = !fileSource.value;
+            breadcrumbList.prefix = [];
+            tableData.data = [];
+            // getLocalData();
+          })
+          .catch(() => {
+            reject(false);
+          });
+      } else {
+        console.log("------------local");
+        ElMessageBox.confirm("Are you sure to get remote data?", "Warning", {
+          confirmButtonText: "OK",
+          cancelButtonText: "Cancel",
+        })
+          .then(() => {
+            // get remote data
+            fileSource.value = !fileSource.value;
+            breadcrumbList.prefix = [];
+            tableData.data = [];
+            // getReomteData();
+          })
+          .catch(() => {
+            reject(false);
+          });
+      }
+    } catch (err) {
+      reject(false);
+    }
+  });
+};
+
 onMounted(() => {
-  loadFileList();
+  getFileList();
 });
 </script>
 
 <style lang="scss" scoped>
-$light_blue: #29abff;
 .flex {
   display: flex;
 }
@@ -826,21 +1424,16 @@ $light_blue: #29abff;
 
 .card-box {
   width: 100%;
-  margin: 24px auto 100px;
-  padding: 20px 40px;
-  box-sizing: border-box;
-
-  box-shadow: var(--box-shadow);
-  border: var(--theme-border);
-  border-radius: 20px;
-  color: var(--text-color);
+  margin: 24px auto 50px;
+  @include card-box;
   color: #000;
-  background: rgba(50, 61, 109, 0.5);
-  box-shadow: rgb(255 255 255 / 20%) 0px 0px 0px 0.5px inset;
+  // background: rgba(50, 61, 109, 0.5);
+  // box-shadow: rgb(255 255 255 / 20%) 0px 0px 0px 0.5px inset;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 0px 0.5px inset;
   max-width: 1960px;
   border: var(--theme-border);
   min-height: calc(100vh - 200px);
-  @include card-box;
+  background: var(--bg-color);
 
   ::v-deep {
     .el-breadcrumb {
@@ -885,9 +1478,9 @@ $light_blue: #29abff;
       &:hover {
         color: #{$light_blue};
 
-        .refresh-icon {
-          transform: rotate(90deg);
-        }
+        // .refresh-icon {
+        //   transform: rotate(90deg);
+        // }
 
         .el-icon--right {
           transform: translateY(2px);
@@ -944,7 +1537,11 @@ $light_blue: #29abff;
     margin-bottom: 40px;
     background: transparent;
     font-size: 16px;
-
+    :deep {
+      .dropdown {
+        left: 0;
+      }
+    }
     .name-img {
       display: inline-block;
       width: 25px;
@@ -957,6 +1554,21 @@ $light_blue: #29abff;
         max-height: 25px;
       }
     }
+    .table-action {
+      z-index: 99;
+      padding: 0;
+      // position: relative;
+      display: none;
+      // &:hover {
+      //   .more-dropdown {
+      //     display: block;
+      //     position: absolute;
+      //     top: 30px;
+      //     left: -55px;
+      //     background: #fff;
+      //   }
+      // }
+    }
 
     ::v-deep {
       .el-table__header {
@@ -967,20 +1579,27 @@ $light_blue: #29abff;
         }
       }
 
-      --el-table-row-hover-bg-color: rgba(48, 86, 134, 0.4);
+      --el-table-row-hover-bg-color: transparent;
       // --el-table-tr-bg-color:rgba(50, 61, 109, 0.75);
       --el-table-border-color: rgba(50, 61, 109, 0.75);
 
       .el-table__row {
+        height: 55.2px;
+        content-visibility: auto;
+        contain-intrinsic-size: 55.2px;
         &:hover {
-          background: rgba(50, 61, 109, 0.75);
+          // background: rgba(50, 61, 109, 0.75);
+          .table-action {
+            display: inline-block;
+          }
         }
       }
 
       .el-table__cell {
         color: var(--text-color);
         // background: rgba(50, 61, 109, 0.75);
-        background-color: #656e92;
+        // background-color: #656e92;
+        background: transparent;
 
         .cell {
           color: var(--text-color);
@@ -990,13 +1609,18 @@ $light_blue: #29abff;
       }
 
       .action-btn-column {
+        position: static;
         .cell {
           text-align: center;
           overflow: visible;
         }
       }
     }
-
+    .name-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
     .name-link {
       font-weight: 700;
       font-size: 16px;
@@ -1050,12 +1674,17 @@ $light_blue: #29abff;
     .color-box {
       // .color-box();
       @include color-box;
-      img {
+      padding: 0;
+
+      svg {
+        font-size: 28px;
+        color: $light_blue;
         transition: all 0.8s cubic-bezier(0.075, 0.82, 0.165, 1) 0s;
       }
 
       &:hover {
-        img {
+        svg {
+          color: #fff;
           transform: scale(1.1);
           cursor: pointer;
         }
@@ -1080,5 +1709,17 @@ $light_blue: #29abff;
       color: #{$light_blue};
     }
   }
+}
+.i-ersistent {
+  color: #e6a23c;
+  font-size: 12px;
+  width: 10px;
+  height: 26px;
+  display: inline-block;
+  text-align: center;
+  cursor: pointer;
+}
+.file-source {
+  margin-left: 50px;
 }
 </style>

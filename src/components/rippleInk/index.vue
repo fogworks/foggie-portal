@@ -54,7 +54,6 @@ export default {
           isDone: false,
         });
       }
-      // 添加完队列数据后，在下一个事件周期开始动画
       setTimeout(() => {
         this.inkQueue[this.inkQueue.length - 1].isHolding = true;
       });

@@ -1,0 +1,29 @@
+{
+  "server": {
+    "repoPath": "/Library/Application Support/foggie/repo",
+    "apiAddr": "/ip4/0.0.0.0/tcp/8007",
+    "apiProxyAddr": "/ip4/0.0.0.0/tcp/9007",
+    "verfiyToken": false
+  },
+  "p2p": {
+  "announceAddr":"",
+  "httpProxyAddr": "/ip4/0.0.0.0/tcp/8080",
+  "autoNatService": true,
+    "autoRelay": true,
+    "staticRelayClients": [  "/ip4/154.31.34.194/tcp/4001/p2p/12D3KooWKP5oaEakDzNN7ipDNpNoRCPH4AqxQWuWxgGfNBm2F9fi",
+      "/ip4/112.86.235.55/tcp/4001/p2p/12D3KooWBh13mef5L8bxtpGLCN1WUHwYnLi4r6QqL36Nqk8WTTqy",
+      "/ip4/154.37.17.179/tcp/4001/p2p/12D3KooWCGx1mrEBhjvUFktFbu11y5bu8c5DrjrH8b9P1o3wSihk",
+      "/ip4/154.37.18.162/tcp/4001/p2p/12D3KooWQf8rhagF7CoYZiTokmNCqghgvMsEnMVHMbvfJXF73ito"],
+    "lowWater": 300,
+  "highWater": 600,
+  "gracePeriod": 20
+},
+  "db":{
+  "path": "/Library/Application Support/foggie/db"
+  },
+  "apps": [{
+   "app_name": "client",
+   "addr": "http://127.0.0.1:3000"}
+  ]
+}
+

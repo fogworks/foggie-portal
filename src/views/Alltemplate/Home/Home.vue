@@ -92,14 +92,16 @@
     <el-row :gutter="20">
       <el-col :span="12">
         <div class="bodyBox Rewards">
-          <div style="
-                    font-weight: 600;
-                    font-size: 36px;
-                    margin-top: 40px;
-                    margin-left: 20px;
-                  ">
+          <div
+            style="
+              font-weight: 600;
+              font-size: 36px;
+              margin-top: 40px;
+              margin-left: 20px;
+            "
+          >
             Storage
-            <el-button type="primary">扩容</el-button>
+            <el-button type="primary">Expansion</el-button>
           </div>
           <div class="RewardsBox">
             <div>
@@ -113,9 +115,7 @@
                   <div>eaming</div>
                 </div>
               </div>
-              <div>
-                <!-- 曲线图 -->
-              </div>
+              <div></div>
             </div>
             <div>
               <div class="RewardsBox_div">
@@ -128,9 +128,7 @@
                   <div>eaming</div>
                 </div>
               </div>
-              <div>
-                <!-- 曲线图 -->
-              </div>
+              <div></div>
             </div>
           </div>
         </div>
@@ -142,20 +140,24 @@
               <el-row>
                 <el-col :span="8">
                   <div style="font-size: 32px; font-weight: 600">Orders</div>
-                  <div style="
-                            font-weight: 600;
-                            font-size: 28px;
-                            margin: 15px 0px 0px 15px;
-                          ">
+                  <div
+                    style="
+                      font-weight: 600;
+                      font-size: 28px;
+                      margin: 15px 0px 0px 15px;
+                    "
+                  >
                     15PST
                   </div>
                 </el-col>
                 <el-col :span="16" class="Summery_col">
-                  <div style="
-                            text-align: center;
-                            line-height: 25px;
-                            font-weight: 600;
-                          ">
+                  <div
+                    style="
+                      text-align: center;
+                      line-height: 25px;
+                      font-weight: 600;
+                    "
+                  >
                     Order Summery
                   </div>
                   <el-row class="Summery">
@@ -192,54 +194,66 @@
           <div class="bodyBox_botoom">
             <el-row class="bodyBox_botoom_row">
               <el-col :span="7">
-                <div style="
-                          display: flex;
-                          align-items: center;
-                          height: 50px;
-                          justify-content: center;
-                        ">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    height: 50px;
+                    justify-content: center;
+                  "
+                >
                   <span class="circle"></span>
                   <span style="color: #696a6d">order failed</span>
                 </div>
-                <div style="
-                          color: red;
-                          font-size: 20px;
-                          line-height: 25px;
-                          text-align: center;
-                        ">
+                <div
+                  style="
+                    color: red;
+                    font-size: 20px;
+                    line-height: 25px;
+                    text-align: center;
+                  "
+                >
                   2
                 </div>
               </el-col>
               <el-col :span="7">
-                <div style="
-                          display: flex;
-                          align-items: center;
-                          height: 50px;
-                          justify-content: center;
-                        ">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    height: 50px;
+                    justify-content: center;
+                  "
+                >
                   <span class="circle" style="background-color: #3afefe"></span>
                   <span style="color: #696a6d">order failed</span>
                 </div>
-                <div style="
-                          color: #3afefe;
-                          font-size: 20px;
-                          line-height: 25px;
-                          text-align: center;
-                        ">
+                <div
+                  style="
+                    color: #3afefe;
+                    font-size: 20px;
+                    line-height: 25px;
+                    text-align: center;
+                  "
+                >
                   12
                 </div>
               </el-col>
               <el-col :span="10">
-                <div style="
-                          display: flex;
-                          align-items: center;
-                          height: 50px;
-                          justify-content: center;
-                        ">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    height: 50px;
+                    justify-content: center;
+                  "
+                >
                   <span class="circle" style="background-color: #14e648"></span>
                   <span style="color: #696a6d">Successfulled</span>
                 </div>
-                <div style="font-size: 20px; line-height: 25px; text-align: center">
+                <div
+                  style="font-size: 20px; line-height: 25px; text-align: center"
+                >
                   100
                 </div>
               </el-col>
@@ -248,7 +262,10 @@
             <el-row class="bodyBox_botoom_row" style="margin-top: 20px">
               <el-col :span="7">
                 <div class="changeTitle">Order challenge</div>
-                <div class="changeBox" style="display: flex; justify-content: space-around">
+                <div
+                  class="changeBox"
+                  style="display: flex; justify-content: space-around"
+                >
                   <div>
                     <div>Failed</div>
                     <div style="color: red; font-size: 20px">2</div>
@@ -261,7 +278,10 @@
               </el-col>
               <el-col :span="7">
                 <div class="changeTitle">Chain challenge</div>
-                <div class="changeBox" style="display: flex; justify-content: space-around">
+                <div
+                  class="changeBox"
+                  style="display: flex; justify-content: space-around"
+                >
                   <div>
                     <div>Failed</div>
                     <div style="color: #fff; font-size: 20px">2</div>
@@ -274,7 +294,10 @@
               </el-col>
               <el-col :span="10">
                 <div class="changeTitle">Pool challenge</div>
-                <div class="changeBox" style="display: flex; justify-content: space-around">
+                <div
+                  class="changeBox"
+                  style="display: flex; justify-content: space-around"
+                >
                   <div>
                     <div>Failed</div>
                     <div style="color: #fff; font-size: 20px">2</div>
@@ -630,10 +653,7 @@
   </div>
 </template>
 
-<script setup>
-
-</script>
-
+<script setup></script>
 
 <style lang="scss" scoped>
 .topBox {
@@ -666,7 +686,7 @@
   display: flex;
   align-items: center;
 
-  &>div {
+  & > div {
     flex: 1 0 auto;
     text-align: center;
   }
@@ -686,23 +706,23 @@
 .three {
   display: flex;
 
-  &>div {
+  & > div {
     position: relative;
     height: 80px;
     box-sizing: border-box;
   }
 
-  &>div:first-child {
+  & > div:first-child {
     flex: 2 0;
     overflow: hidden;
   }
 
-  &>div:not(:first-child) {
+  & > div:not(:first-child) {
     flex: 3 0;
     overflow: hidden;
   }
 
-  &>div:not(:last-child)::after {
+  & > div:not(:last-child)::after {
     content: "";
     position: absolute;
     height: 70%;
@@ -719,7 +739,7 @@
   display: flex;
   justify-content: space-between;
 
-  &>div:last-child {
+  & > div:last-child {
     margin-right: 30px;
     line-height: 30px;
     font-size: 18px;
@@ -732,19 +752,19 @@
   display: flex;
   align-items: center;
 
-  &>div {
+  & > div {
     flex: 2 0;
     height: 100%;
     text-align: center;
 
-    &>div:first-child {
+    & > div:first-child {
       line-height: 40px;
       color: #1e6fa0;
       font-weight: 600;
       font-size: 22px;
     }
 
-    &>div:last-child {
+    & > div:last-child {
       line-height: 30px;
       color: #ffffff;
       font-weight: 600;
@@ -752,7 +772,7 @@
     }
   }
 
-  &>div:first-child {
+  & > div:first-child {
     flex: 1 0;
   }
 }
@@ -761,19 +781,19 @@
   display: flex;
   align-items: center;
 
-  &>div {
+  & > div {
     flex: 1 0;
     height: 100%;
     text-align: center;
 
-    &>div:first-child {
+    & > div:first-child {
       line-height: 40px;
       color: #1e6fa0;
       font-weight: 600;
       font-size: 22px;
     }
 
-    &>div:last-child {
+    & > div:last-child {
       line-height: 30px;
       color: #ffffff;
       font-weight: 600;
@@ -781,7 +801,7 @@
     }
   }
 
-  &>div:nth-of-type(2) {
+  & > div:nth-of-type(2) {
     flex: 4 0;
   }
 }
@@ -801,7 +821,7 @@
     margin-top: 15px;
     display: flex;
 
-    &>div {
+    & > div {
       width: 50%;
       flex: 0 0 auto;
       position: relative;
@@ -815,7 +835,7 @@
       overflow: hidden;
     }
 
-    &>div:first-child::after {
+    & > div:first-child::after {
       content: "";
       position: absolute;
       right: 1px;
@@ -833,11 +853,11 @@
     align-items: center;
     flex-wrap: nowrap;
 
-    &>div:first-child {
+    & > div:first-child {
       font-weight: bold;
     }
 
-    &>div:last-child {
+    & > div:last-child {
       margin-left: 15px;
       font-size: 16px;
       color: #5b56a2;
@@ -847,14 +867,14 @@
     }
   }
 
-  .bodyBox_right>div {
+  .bodyBox_right > div {
     height: 140px;
     position: relative;
     box-sizing: border-box;
     padding: 15px;
   }
 
-  .bodyBox_right>div:not(:last-child)::after {
+  .bodyBox_right > div:not(:last-child)::after {
     content: "";
     position: absolute;
     right: 1px;
@@ -885,11 +905,11 @@
     height: 80px;
     border-radius: 15px;
 
-    &>div:not(:last-child) {
+    & > div:not(:last-child) {
       position: relative;
     }
 
-    &>div:not(:last-child)::after {
+    & > div:not(:last-child)::after {
       content: "";
       position: absolute;
       right: 1px;
@@ -920,11 +940,10 @@
   }
 
   .changeBox {
-    &>div {
+    & > div {
       text-align: center;
       line-height: 25px;
       color: rgb(105, 106, 109);
-
     }
   }
 
@@ -948,7 +967,7 @@
   .worksList {
     margin-top: 20px;
 
-    &>div {
+    & > div {
       text-align: center;
     }
 
@@ -978,10 +997,12 @@
 }
 
 .Rewards {
-  background: radial-gradient(218.51% 281.09% at 100% 100%,
-      rgba(253, 63, 51, 0.6) 0%,
-      rgba(76, 0, 200, 0.6) 45.83%,
-      rgba(76, 0, 200, 0.6) 100%);
+  background: radial-gradient(
+    218.51% 281.09% at 100% 100%,
+    rgba(253, 63, 51, 0.6) 0%,
+    rgba(76, 0, 200, 0.6) 45.83%,
+    rgba(76, 0, 200, 0.6) 100%
+  );
   box-shadow: rgb(39 77 153 / 20%) 0px 30px 60px,
     rgb(255 255 255 / 30%) 0px 0px 0px 0.5px inset;
   cursor: pointer;
@@ -993,24 +1014,30 @@
 }
 
 .bodyBox.Orders {
-  background: radial-gradient(100% 128.38% at 100% 100%,
-      rgba(51, 168, 253, 0.9) 0%,
-      rgba(76, 0, 200, 0.2) 100%);
+  background: radial-gradient(
+    100% 128.38% at 100% 100%,
+    rgba(51, 168, 253, 0.9) 0%,
+    rgba(76, 0, 200, 0.2) 100%
+  );
   box-shadow: rgb(39 77 153 / 20%) 0px 30px 60px,
     rgb(0 0 0 / 20%) 0px 0px 0px 0.5px inset;
 }
 
 .bodyBox.Storage {
-  background: radial-gradient(180% 154.37% at 100% 90%,
-      rgba(62, 101, 99, 0.7) 0%,
-      rgba(224, 157, 81, 0.75) 160%);
+  background: radial-gradient(
+    180% 154.37% at 100% 90%,
+    rgba(62, 101, 99, 0.7) 0%,
+    rgba(224, 157, 81, 0.75) 160%
+  );
   box-shadow: rgb(39 77 153 / 20%) 0px 30px 60px,
     rgb(0 0 0 / 20%) 0px 0px 0px 0.5px inset;
 }
 
 .bodyBox.Miner_Works {
-  background: linear-gradient(rgb(117, 224, 230, 0.4) 0%,
-      rgb(57, 19, 184, 0.7) 100%);
+  background: linear-gradient(
+    rgb(117, 224, 230, 0.4) 0%,
+    rgb(57, 19, 184, 0.7) 100%
+  );
   box-shadow: rgb(39 77 153 / 20%) 0px 30px 60px,
     rgb(0 0 0 / 20%) 0px 0px 0px 0.5px inset;
 }

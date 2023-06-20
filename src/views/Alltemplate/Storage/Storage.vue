@@ -1,25 +1,44 @@
 <template>
-  <customDialog v-model="isShow" width="calc(100% - 400px)" :closeClickModal="false">
+  <customDialog
+    v-model="isShow"
+    width="calc(100% - 400px)"
+    :closeClickModal="false"
+  >
     <div class="viewContainer">
       <div class="homeBox">
-        <div class="homeBoxTitile">订单筛选列表</div>
+        <div class="homeBoxTitile">Order Filter List</div>
         <div class="homeBoxHeader">
           <div class="homeBoxHeader-left">
             <div>
-              <span style="font-size: 16px; margin-right: 5px">*請輸入購買週期</span>
-              <el-input-number v-model.number="formLine.week" :min="24" placeholder="請輸入購買週期" />
-              <span style="font-size: 16px; margin-left: 5px">周</span>
+              <span style="font-size: 16px; margin-right: 5px"
+                >*Please enter the purchase cycle</span
+              >
+              <el-input-number
+                v-model.number="formLine.week"
+                :min="24"
+                placeholder="Please enter the purchase cycle"
+              />
+              <span style="font-size: 16px; margin-left: 5px">Weeks</span>
             </div>
             <div>
-              <div style="
-                            margin-top: -20px;
-                            color: #ff6e6e;
-                            font-size: 12px;
-                            margin-left: 20px;
-                          ">
-                當前基準價:{{ Number(curReferenceRate).toFixed(4) }} DMC
+              <div
+                style="
+                  margin-top: -20px;
+                  color: #ff6e6e;
+                  font-size: 12px;
+                  margin-left: 20px;
+                "
+              >
+                Current benchmark price:{{
+                  Number(curReferenceRate).toFixed(4)
+                }}
+                DMC
               </div>
-              <el-input v-model="formLine.quantity" placeholder="請輸入购买数量" style="width: 220px">
+              <el-input
+                v-model="formLine.quantity"
+                placeholder="Please enter the purchase quantity"
+                style="width: 220px"
+              >
                 <template #prefix>
                   <svg-icon icon-class="search" size="25"></svg-icon>
                 </template>
@@ -28,38 +47,55 @@
                 </template>
               </el-input>
             </div>
-            <el-button style="margin-top: 23px" type="primary" round @click="filterOrder"
-              :loading="loading">筛选</el-button>
+            <el-button
+              style="margin-top: 23px"
+              type="primary"
+              round
+              @click="filterOrder"
+              :loading="loading"
+              >Filter</el-button
+            >
           </div>
         </div>
         <div class="hr"></div>
-        <div style="
-                      width: 600px;
-                      margin: 0px auto;
-                      display: flex;
-                      flex-direction: column;
-                      justify-content: space-around;
-                      align-items: center;
-                      height: 300px;
-                    ">
+        <div
+          style="
+            width: 600px;
+            margin: 0px auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            height: 300px;
+          "
+        >
           <div style="text-align: center">
-            <div style="margin-bottom: 10px">拥有DMC: {{ userDMC }} DMC</div>
+            <div style="margin-bottom: 10px">Own DMC:{{ userDMC }} DMC</div>
             <span>
-              總計:
+              Total:
               {{
                 totalPrice
-                ? `${totalPrice.MinPrice} -- ${totalPrice.MaxPrice}`
-                : "- -"
+                  ? `${totalPrice.MinPrice} -- ${totalPrice.MaxPrice}`
+                  : "- -"
               }}
-              DMC</span>
-            <div class="exceedMaxUserDMC" v-if="totalPrice && totalPrice.MaxPrice > userDMC">
-              当前购买PST价格可能超过钱包DMC数量
+              DMC</span
+            >
+            <div
+              class="exceedMaxUserDMC"
+              v-if="totalPrice && totalPrice.MaxPrice > userDMC"
+            >
+              The current purchase price of PST may exceed the number of wallet
+              DMC
             </div>
           </div>
         </div>
 
         <div class="destroyBox">
-          <div class="Img_box" v-for="(item, index) in filterOrderList" :key="index">
+          <div
+            class="Img_box"
+            v-for="(item, index) in filterOrderList"
+            :key="index"
+          >
             <div class="detailImg">
               <div class="detailImg_box" :class="returnBG(index)">
                 <!-- <div class="detailImg_box_Img">
@@ -67,53 +103,72 @@
               </div> -->
                 <div class="detailImg_box_text">
                   <p>
-                    单价：<span>{{ item.price / 10000 }}DMC</span>
+                    Unit Price:<span>{{ item.price / 10000 }}DMC</span>
                   </p>
                   <p>
-                    押金：<span>{{ (item.price / 10000) * item.deposit_ratio }}DMC</span>
+                    Deposit:<span
+                      >{{ (item.price / 10000) * item.deposit_ratio }}DMC</span
+                    >
                   </p>
                   <p>
-                    购买数量：<span>{{ formLine.quantity }}PST</span>
+                    Purchase Quantity:<span>{{ formLine.quantity }}PST</span>
                   </p>
                   <p>
-                    购买周期：<span>{{ formLine.week }}</span>
+                    Purchase Cycle:<span>{{ formLine.week }}</span>
                   </p>
                   <p>
-                    押金倍數：<span>{{ item.deposit_ratio }}</span>
+                    Deposit Multiple:<span>{{ item.deposit_ratio }}</span>
                   </p>
                   <p>
-                    訂單總價：<span>{{ computeTotalPrices(item) }}DMC</span>
+                    Total Order Price:<span
+                      >{{ computeTotalPrices(item) }}DMC</span
+                    >
                   </p>
                   <p>
-                    自定義質押率：<span>{{
+                    Custom Pledge Rate:<span>{{
                       Number(item.maker.benchmark_stake_rate) / 100
                     }}</span>
                   </p>
                   <p>{{ item.created_time }}</p>
                 </div>
-                <el-button type="primary" round style="margin-top: 40px; opacity: 0"
-                  @click="purchasePST(item)">购买</el-button>
+                <el-button
+                  type="primary"
+                  round
+                  style="margin-top: 40px; opacity: 0"
+                  @click="purchasePST(item)"
+                  >Buy</el-button
+                >
               </div>
             </div>
           </div>
         </div>
 
         <customDialog v-model="dialogIsShow">
-          <div class="dialogTitle">訂單確認</div>
+          <div class="dialogTitle">Order Confirmation</div>
           <div class="dialogBody">
             <div>
-              <label>订单详情</label>
+              <label>Order Details</label>
               <div class="detail_box">
-                <div>單價：{{ orderDetail.price }}DMC</div>
-                <div>購買數量：{{ formLine.quantity }}PST</div>
-                <div>購買周期：{{ formLine.week }}週</div>
-                <div>訂單總價：{{ orderDetail.total }} DMC</div>
+                <div>Unit Price:{{ orderDetail.price }}DMC</div>
+                <div>Purchase Quantity:{{ formLine.quantity }}PST</div>
+                <div>Purchase Cycle:{{ formLine.week }}Weeks</div>
+                <div>Total Order Price:{{ orderDetail.total }} DMC</div>
               </div>
-              <label>预存金额:</label>
-              <div class="formBox clearfix" style="margin-left: 20px; margin-top: 15px">
-                <el-input v-model="formLine.prestoreDMC" maxlength="6" :placeholder="`最少预存${(
-                  orderDetail.total - orderDetail.deposit
-                ).toFixed(4)}`" style="width: 270px" @input="inputPrestoreDMC" @blur="blurPrestoreDMC">
+              <label>Deposit Amount:</label>
+              <div
+                class="formBox clearfix"
+                style="margin-left: 20px; margin-top: 15px"
+              >
+                <el-input
+                  v-model="formLine.prestoreDMC"
+                  maxlength="6"
+                  :placeholder="`Minimum pre-stored${(
+                    orderDetail.total - orderDetail.deposit
+                  ).toFixed(4)}`"
+                  style="width: 270px"
+                  @input="inputPrestoreDMC"
+                  @blur="blurPrestoreDMC"
+                >
                   <template #prefix>
                     <svg-icon icon-class="search" size="25"></svg-icon>
                   </template>
@@ -121,26 +176,33 @@
                     <span style="font-size: 16px">DMC</span>
                   </template>
                 </el-input>
-                <div style="
-                              margin-left: 15px;
-                              font-size: 14px;
-                              color: #ff6e6e;
-                              margin-top: 5px;
-                            ">
-                  預計服務時間至
+                <div
+                  style="
+                    margin-left: 15px;
+                    font-size: 14px;
+                    color: #ff6e6e;
+                    margin-top: 5px;
+                  "
+                >
+                  Estimated service time to
                   {{
                     orderDetail.serverTime ? orderDetail.serverTime : "--"
-                  }}，約 {{ orderDetail.week ? orderDetail.week : "--" }} 週
+                  }}，about
+                  {{ orderDetail.week ? orderDetail.week : "--" }} Weeks
                 </div>
               </div>
-              <label style="margin-top: 15px; display: inline-block">押金:{{ orderDetail.deposit }}DMC</label>
+              <label style="margin-top: 15px; display: inline-block"
+                >Deposit:{{ orderDetail.deposit }}DMC</label
+              >
               <div class="total">
-                總計:
+                Total:
                 {{ orderDetail.aggregate ? orderDetail.aggregate : "--" }} DMC
               </div>
               <div class="button">
-                <el-button @click="dialogIsShow = false">取消</el-button>
-                <el-button type="primary" :loading="loading" @click="submit">购买</el-button>
+                <el-button @click="dialogIsShow = false">Cancel</el-button>
+                <el-button type="primary" :loading="loading" @click="submit"
+                  >Buy</el-button
+                >
               </div>
             </div>
           </div>
@@ -151,12 +213,11 @@
 
   <div class="viewContainer" v-if="!isShow">
     <div class="homeBox">
-      <div class="homeBoxTitile">订单筛选列表</div>
+      <div class="homeBoxTitile">Order Filter List</div>
 
       <div class="hr"></div>
 
       <div class="topThreeOrder">
-
         <div class="threeOrder">
           <div class="rightOrigin"></div>
           <div class="rightCard card">
@@ -263,11 +324,14 @@
             </div>
           </div>
         </div>
-
       </div>
 
       <div class="destroyBox">
-        <div class="Img_box" v-for="(item, index) in filterOrderList" :key="index">
+        <div
+          class="Img_box"
+          v-for="(item, index) in filterOrderList"
+          :key="index"
+        >
           <div class="detailImg">
             <div class="detailImg_box" :class="returnBG(index)">
               <!-- <div class="detailImg_box_Img">
@@ -275,53 +339,72 @@
               </div> -->
               <div class="detailImg_box_text">
                 <p>
-                  单价：<span>{{ item.price / 10000 }}DMC</span>
+                  Unit Price:<span>{{ item.price / 10000 }}DMC</span>
                 </p>
                 <p>
-                  押金：<span>{{ (item.price / 10000) * item.deposit_ratio }}DMC</span>
+                  Deposit:<span
+                    >{{ (item.price / 10000) * item.deposit_ratio }}DMC</span
+                  >
                 </p>
                 <p>
-                  购买数量：<span>{{ formLine.quantity }}PST</span>
+                  Purchase Quantity:<span>{{ formLine.quantity }}PST</span>
                 </p>
                 <p>
-                  购买周期：<span>{{ formLine.week }}</span>
+                  Purchase Cycle:<span>{{ formLine.week }}</span>
                 </p>
                 <p>
-                  押金倍數：<span>{{ item.deposit_ratio }}</span>
+                  Deposit Multiple:<span>{{ item.deposit_ratio }}</span>
                 </p>
                 <p>
-                  訂單總價：<span>{{ computeTotalPrices(item) }}DMC</span>
+                  Total Order Price:<span
+                    >{{ computeTotalPrices(item) }}DMC</span
+                  >
                 </p>
                 <p>
-                  自定義質押率：<span>{{
+                  Custom Pledge Rate:<span>{{
                     Number(item.maker.benchmark_stake_rate) / 100
                   }}</span>
                 </p>
                 <p>{{ item.created_time }}</p>
               </div>
-              <el-button type="primary" round style="margin-top: 40px; opacity: 0"
-                @click="purchasePST(item)">购买</el-button>
+              <el-button
+                type="primary"
+                round
+                style="margin-top: 40px; opacity: 0"
+                @click="purchasePST(item)"
+                >Buy</el-button
+              >
             </div>
           </div>
         </div>
       </div>
 
       <customDialog v-model="dialogIsShow">
-        <div class="dialogTitle">訂單確認</div>
+        <div class="dialogTitle">Order Confirmation</div>
         <div class="dialogBody">
           <div>
-            <label>订单详情</label>
+            <label>Order Details</label>
             <div class="detail_box">
-              <div>單價：{{ orderDetail.price }}DMC</div>
-              <div>購買數量：{{ formLine.quantity }}PST</div>
-              <div>購買周期：{{ formLine.week }}週</div>
-              <div>訂單總價：{{ orderDetail.total }} DMC</div>
+              <div>Unit Price:{{ orderDetail.price }}DMC</div>
+              <div>Purchase Quantity:{{ formLine.quantity }}PST</div>
+              <div>Purchase Cycle:{{ formLine.week }}Weeks</div>
+              <div>Total Order Price:{{ orderDetail.total }} DMC</div>
             </div>
-            <label>预存金额:</label>
-            <div class="formBox clearfix" style="margin-left: 20px; margin-top: 15px">
-              <el-input v-model="formLine.prestoreDMC" maxlength="6" :placeholder="`最少预存${(
-                orderDetail.total - orderDetail.deposit
-              ).toFixed(4)}`" style="width: 270px" @input="inputPrestoreDMC" @blur="blurPrestoreDMC">
+            <label>Deposit Amount:</label>
+            <div
+              class="formBox clearfix"
+              style="margin-left: 20px; margin-top: 15px"
+            >
+              <el-input
+                v-model="formLine.prestoreDMC"
+                maxlength="6"
+                :placeholder="`Minimum pre-stored${(
+                  orderDetail.total - orderDetail.deposit
+                ).toFixed(4)}`"
+                style="width: 270px"
+                @input="inputPrestoreDMC"
+                @blur="blurPrestoreDMC"
+              >
                 <template #prefix>
                   <svg-icon icon-class="search" size="25"></svg-icon>
                 </template>
@@ -329,25 +412,32 @@
                   <span style="font-size: 16px">DMC</span>
                 </template>
               </el-input>
-              <div style="
-                            margin-left: 15px;
-                            font-size: 14px;
-                            color: #ff6e6e;
-                            margin-top: 5px;
-                          ">
-                預計服務時間至
-                {{ orderDetail.serverTime ? orderDetail.serverTime : "--" }}，約
-                {{ orderDetail.week ? orderDetail.week : "--" }} 週
+              <div
+                style="
+                  margin-left: 15px;
+                  font-size: 14px;
+                  color: #ff6e6e;
+                  margin-top: 5px;
+                "
+              >
+                Estimated service time to
+                {{
+                  orderDetail.serverTime ? orderDetail.serverTime : "--"
+                }}，about {{ orderDetail.week ? orderDetail.week : "--" }} Weeks
               </div>
             </div>
-            <label style="margin-top: 15px; display: inline-block">押金:{{ orderDetail.deposit }}DMC</label>
+            <label style="margin-top: 15px; display: inline-block"
+              >Deposit:{{ orderDetail.deposit }}DMC</label
+            >
             <div class="total">
-              總計:
+              Total:
               {{ orderDetail.aggregate ? orderDetail.aggregate : "--" }} DMC
             </div>
             <div class="button">
-              <el-button @click="dialogIsShow = false">取消</el-button>
-              <el-button type="primary" :loading="loading" @click="submit">购买</el-button>
+              <el-button @click="dialogIsShow = false">Cancel</el-button>
+              <el-button type="primary" :loading="loading" @click="submit"
+                >Buy</el-button
+              >
             </div>
           </div>
         </div>
@@ -363,42 +453,39 @@ import {
   buyOrder,
 } from "@/api/order/filterOrder.js";
 
-
 import { transferTime, ChinaTime4 } from "@/utils/ChinaStandardTime.js";
 import customDialog from "@/components-V3/customDialog";
 import { ElMessage } from "element-plus";
 import { reactive, toRefs, ref, onMounted, watch, computed, inject } from "vue";
 import { useStore } from "vuex";
 
-const store = useStore()
+const store = useStore();
 
-const ChainId = computed(() => store.getters.ChainId)
+const ChainId = computed(() => store.getters.ChainId);
+const username = computed(() => store.getters.userInfo?.dmc);
 let loading = ref(false);
-let dialogIsShow = ref(false); // 弹窗是否展示
-let curReferenceRate = ref(0); //当前基准率
-
-
-
+let dialogIsShow = ref(false);
+let curReferenceRate = ref(0);
 
 let isShow = ref(true);
 let userDMC = ref(1);
 const state = reactive({
   formLine: {
-    week: "", //购买周期
-    quantity: "", //pst数量
-    prestoreDMC: "", // 预存DMC
+    week: "",
+    quantity: "",
+    prestoreDMC: "",
   },
 
-  filterOrderList: [], // 筛选出来的订单列表
+  filterOrderList: [],
   orderDetail: {
     orderID: "",
-    price: "", // 订单单价
-    total: "", //订单总价
-    deposit: "", //订单押金
-    aggregate: "", // 总计
-    week: "", //预计多少周
-    serverTime: "", //预计服务时间
-  }, //订单详情
+    price: "",
+    total: "",
+    deposit: "",
+    aggregate: "",
+    week: "",
+    serverTime: "",
+  },
 });
 const { formLine, filterOrderList, orderDetail } = toRefs(state);
 
@@ -428,16 +515,15 @@ const totalPrice = computed(() => {
 //   state.selectionOption["3"].min = Math.round(newVal * 1000 * 0.7) / 1000;
 //   state.selectionOption["3"].max = Math.round(newVal * 1000 * 1.3) / 1000;
 // });
-/* 筛选订单 */
 function filterOrder() {
   let params = {
-    username: "null", //测试时可以为空，空则取默认的用户名tianbao12345
-    unmatchedAmount: state.formLine.quantity, //pst数量
-    period: state.formLine.week, //购买周期
+    username: username.value,
+    unmatchedAmount: state.formLine.quantity,
+    period: state.formLine.week,
   };
   // if (state.formLine.priceSection) {
-  //   params.minPrice = state.selectionOption[state.formLine.priceSection].min; //最低价，单位DMC
-  //   params.maxPrice = state.selectionOption[state.formLine.priceSection].max; //最高价，单位DMC
+  //   params.minPrice = state.selectionOption[state.formLine.priceSection].min;
+  //   params.maxPrice = state.selectionOption[state.formLine.priceSection].max;
   // }
   loading.value = true;
   getOrderFilterList(params)
@@ -450,7 +536,6 @@ function filterOrder() {
         isShow.value = false;
         loading.value = false;
       }
-      console.log(res);
     })
     .catch((error) => {
       loading.value = false;
@@ -459,7 +544,7 @@ function filterOrder() {
 function blurPrestoreDMC() {
   if (state.formLine.prestoreDMC == "") {
     ElMessage({
-      message: `预存金额不能为空`,
+      message: `The deposit amount cannot be empty`,
       type: "warning",
       grouping: true,
     });
@@ -469,7 +554,7 @@ function blurPrestoreDMC() {
     state.orderDetail.total - state.orderDetail.deposit
   ) {
     ElMessage({
-      message: `预存金额不能小于${(
+      message: `The deposit amount cannot be less than ${(
         state.orderDetail.total - state.orderDetail.deposit
       ).toFixed(4)}`,
       type: "warning",
@@ -481,7 +566,6 @@ function blurPrestoreDMC() {
   }
 }
 
-/* 当预存金额改变时触发 处理总计 和预计服务时间 */
 function inputPrestoreDMC(text) {
   text = text.replace(/[^0-9\.]/g, "");
   state.formLine.prestoreDMC = text;
@@ -500,7 +584,6 @@ function inputPrestoreDMC(text) {
   ).toFixed(4);
 }
 
-/* 计算 总价 */
 function computeTotalPrices(item) {
   let total =
     (item.price / 10000) * state.formLine.week +
@@ -509,7 +592,6 @@ function computeTotalPrices(item) {
   return total.toFixed(4);
 }
 
-/* 获取基准率 */
 function loadCurReferenceRate() {
   getCurReferenceRate().then((res) => {
     if (res.code == 200) {
@@ -517,7 +599,6 @@ function loadCurReferenceRate() {
     }
   });
 }
-/* 购买PST */
 function purchasePST(item) {
   state.orderDetail.orderID = item.id;
   state.orderDetail.price = (item.price / 10000).toFixed(4);
@@ -542,16 +623,16 @@ async function submit() {
   if (flag) {
     loading.value = true;
     let params = {
-      username: "null", //测试时可以为空，空则取默认的用户名tianbao12345
+      username: username.value,
       chainId: ChainId.value, //chainId
-      billId: state.orderDetail.orderID, //挂单的id
-      period: state.formLine.week, //购买周期，大于等于24
-      benchmarkPrice: curReferenceRate.value, //基准价格，单位DMC
-      // priceRange: state.formLine.priceSection,      //1  基准价格正负浮动20% ； 2 基准价格正负浮动30%
-      unmatchedAmount: state.formLine.quantity, //购买PST数量
-      totalPrice: state.orderDetail.aggregate, //总价，单位 DMC
+      billId: state.orderDetail.orderID,
+      period: state.formLine.week,
+      benchmarkPrice: curReferenceRate.value,
+      // priceRange: state.formLine.priceSection,
+      unmatchedAmount: state.formLine.quantity,
+      totalPrice: state.orderDetail.aggregate,
     };
-    
+
     switch (state.formLine.priceSection) {
       case 0:
         params.priceRange = 3;
@@ -571,7 +652,7 @@ async function submit() {
           dialogIsShow.value = false;
           loading.value = false;
           ElMessage({
-            message: `购买成功！`,
+            message: `Successful Purchase!`,
             type: "success",
             grouping: true,
           });
@@ -585,7 +666,6 @@ async function submit() {
 
 onMounted(() => {
   loadCurReferenceRate();
-
 });
 </script>
 
@@ -646,7 +726,7 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 
-.homeBoxHeader-left>div {
+.homeBoxHeader-left > div {
   margin-right: 30px;
   margin-top: 15px;
 }
@@ -674,7 +754,8 @@ onMounted(() => {
   width: 100%;
   height: 6px;
   background: #ececec;
-  background: linear-gradient(120deg, rgb(224, 195, 252), rgb(142, 197, 252)) rgb(255, 255, 255);
+  background: linear-gradient(120deg, rgb(224, 195, 252), rgb(142, 197, 252))
+    rgb(255, 255, 255);
   margin-top: 30px;
 }
 
@@ -689,7 +770,6 @@ onMounted(() => {
   gap: 4px;
   max-width: 1440px;
   margin: 100px auto;
-
 
   .card {
     .title {
@@ -746,7 +826,7 @@ onMounted(() => {
           margin: auto 0px auto 16px;
           padding: 0px;
 
-          &>span {
+          & > span {
             font-weight: normal;
           }
         }
@@ -766,8 +846,10 @@ onMounted(() => {
       max-width: 360px;
       width: 100%;
       height: 426px;
-      background: linear-gradient(rgba(108, 207, 238, 0.5) 0%,
-          rgba(76, 127, 228, 0.5) 100%);
+      background: linear-gradient(
+        rgba(108, 207, 238, 0.5) 0%,
+        rgba(76, 127, 228, 0.5) 100%
+      );
       border-radius: 0px 60px 60px;
       transform: matrix(0.99, -0.14, 0.15, 0.99, 0, 0);
       transform-origin: left top;
@@ -814,8 +896,10 @@ onMounted(() => {
       width: 100%;
       max-width: 380px;
       height: 519px;
-      background: linear-gradient(rgb(47, 184, 255) 0%,
-          rgb(158, 236, 217) 100%);
+      background: linear-gradient(
+        rgb(47, 184, 255) 0%,
+        rgb(158, 236, 217) 100%
+      );
       border-radius: 60px 60px 60px 0px;
       transform: matrix(1, 0.14, 0, 0.99, 0, 0);
       transform-origin: left bottom;
@@ -862,8 +946,10 @@ onMounted(() => {
       max-width: 360px;
       width: 100%;
       height: 426px;
-      background: linear-gradient(rgb(115, 184, 249) 11.94%,
-          rgb(203, 216, 241) 80.98%);
+      background: linear-gradient(
+        rgb(115, 184, 249) 11.94%,
+        rgb(203, 216, 241) 80.98%
+      );
       border-radius: 60px 0px 60px 60px;
       transform: matrix(0.99, 0.14, -0.15, 0.99, 0, 0);
       transform-origin: right top;
@@ -965,7 +1051,7 @@ onMounted(() => {
     position: relative;
     padding-top: 10px;
 
-    &>p:not(:last-child) {
+    & > p:not(:last-child) {
       font-style: normal;
       font-size: 18px;
       line-height: 160%;
@@ -992,7 +1078,7 @@ onMounted(() => {
       white-space: pre-wrap;
     }
 
-    &>p:last-child {
+    & > p:last-child {
       font-style: normal;
       font-weight: normal;
       font-size: 15px;
@@ -1033,7 +1119,7 @@ onMounted(() => {
     flex-wrap: wrap;
     padding: 15px;
 
-    &>div {
+    & > div {
       min-width: 100%;
       flex: 1 0 auto;
       height: 25px;

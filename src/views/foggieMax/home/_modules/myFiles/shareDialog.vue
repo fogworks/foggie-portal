@@ -1,6 +1,7 @@
 <template>
   <div>
     <el-dialog
+      append-to-body
       :model-value="visible"
       title=" "
       width="600px"
@@ -33,6 +34,16 @@
             icon-class="copy"
             class="copy-icon"
             @click="copyLink(shareRefContent.cyfsStr)"
+          ></svg-icon>
+        </div>
+        <div class="user-info link-row" v-if="shareRefContent.foggieStr">
+          <a :href="shareRefContent.foggieStr || ''" target="_blank">
+            {{ handleID(shareRefContent.foggieStr) || "" }}
+          </a>
+          <svg-icon
+            icon-class="copy"
+            class="copy-icon"
+            @click="copyLink(shareRefContent.foggieStr)"
           ></svg-icon>
         </div>
         <div class="user-info link-row" v-if="shareRefContent.httpStr">
@@ -91,17 +102,17 @@ const handleID = (str) => {
   );
 };
 const copyLink = (text) => {
-  var input = document.createElement("input"); // 创建input对象
-  input.value = text; // 设置复制内容
-  document.body.appendChild(input); // 添加临时实例
-  input.select(); // 选择实例内容
-  document.execCommand("Copy"); // 执行复制
-  document.body.removeChild(input); // 删除临时实例
+  var input = document.createElement("input");
+  input.value = text;
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand("Copy");
+  document.body.removeChild(input);
   // let str = `Copying  ${type} successful!`;
   // this.$message.success(str);
   proxy.$notify({
+    customClass: "notify-success",
     message: "Copy succeeded",
-    type: "success",
     position: "bottom-left",
   });
 };

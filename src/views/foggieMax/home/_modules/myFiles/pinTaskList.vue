@@ -115,31 +115,25 @@ import RippleInk from "@/components/rippleInk";
 export default {
   components: { RippleInk },
   props: {
-    // 是否打开
     display: {
       type: Boolean,
     },
-    // 是否显示关闭按钮
     closable: {
       type: Boolean,
       default: true,
     },
-    // 是否显示遮罩
     mask: {
       type: Boolean,
       default: true,
     },
-    // 是否点击遮罩关闭
     maskClosable: {
       type: Boolean,
       default: true,
     },
-    // 宽度(支持百分比)
     // width: {
     //   type: String,
     //   default: "1000px",
     // },
-    // 是否在父级元素中打开
     inner: {
       type: Boolean,
       default: false,
@@ -250,14 +244,7 @@ export default {
         this.initData(item);
       }
     },
-    //点击头部面包屑
     changeTabSon(item, index) {
-      console.log(
-        this.pathList[index],
-        "changeTabSonchangeTabSonchangeTabSon",
-        this.pathList,
-        this.sonList
-      );
       this.isNextMarket = "";
       this.currentPrefix = "";
       if (this.pathList[index]) {
@@ -274,7 +261,6 @@ export default {
       this.initData("", this.currentPrefix, this.isNextMarket);
     },
     async initData(tree, _prefix, next_marker) {
-      console.log(tree, _prefix, next_marker, "initData");
       const that = this;
       if (!next_marker) {
         that.taskList = [];
@@ -298,9 +284,7 @@ export default {
         } else {
           prefix = tree.cid + "/";
         }
-        console.log(that.sonList, that.pathList);
       }
-      //回到根目录
       if (!tree && !_prefix) {
         that.sonList = [];
         that.sonListStr = "";
@@ -603,7 +587,6 @@ export default {
   }
 }
 .upload_drawer {
-  /* 遮罩 */
   .mask-show {
     position: fixed;
     top: 0;
@@ -623,7 +606,6 @@ export default {
     opacity: 0;
     transition: opacity 0.5s;
   }
-  /* 滑块 */
   .main {
     position: fixed;
     z-index: 10000;
@@ -662,12 +644,10 @@ export default {
     opacity: 0;
   }
 
-  /* 某个元素内部显示 */
   .inner {
     position: absolute;
   }
 }
-//文件右侧样式
 .task_drawer_wrap {
   padding: 40px 20px 120px 30px;
   overflow-y: auto;

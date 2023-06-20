@@ -35,7 +35,10 @@
       </template>
     </ul>
     <IpForm v-model:visible="visible" @getMax="getMax"></IpForm>
-    <AssociatedAccount v-model:visible="accountVisible"></AssociatedAccount>
+    <AssociatedAccount
+      v-model:visible="accountVisible"
+      :currentItem="currentItem"
+    ></AssociatedAccount>
     <el-dialog
       class="account-dialog"
       title="Associated account"
@@ -90,14 +93,7 @@ const refresh = () => {
       curAddress.value = res?.address;
       loading.value = false;
     });
-    // let data = {
-    //   url: "http://154.37.16.163:9094/",
-    // };
-    // pingUrl(data).then((r) => {
-    //   console.log("~~~~~~", r);
-    // });
     socketIP().then((res) => {
-      console.log("!!!!!!!!", res);
       let rrr = res.data;
       loading.value = false;
       for (let i = 0; i < rrr.length; i++) {
@@ -113,24 +109,17 @@ const refresh = () => {
       }
       // deviceList.list = rrr.data;
     });
-    // portalPing().then((res)=>{
-    //   console.log("res++++++", res)
-    // })
-    // let data1 = {
-    //   ip: "explorer.dmctech.io",
-    // };
-    // getNetStatus(data1).then((dd) => {
-    //   console.log("ddddddd", dd);
-    // });
   }, 3000);
 };
 const userInfo = computed(() => store.getters.userInfo);
 const detected_net = computed(() => store.getters.detected_net);
-let currentItem = {};
+let currentItem = reactive({
+  data: {},
+});
 const toGuide = (item) => {
-  currentItem = item;
+  currentItem.data = item;
   // if (userInfo.email) {
-  // 绑定且登录
+  //
   // const url = `http://${item.ipaddress}:8080/#/welcome`;
   // window.location.href = url;
   // } else {
@@ -138,9 +127,10 @@ const toGuide = (item) => {
   if (detected_net.value && !item.email && !item.bind) {
     chooseAssociated.value = true;
   } else {
+    store.dispatch("global/setDiscoverData", item);
     router.push({
       name: "AppWindow",
-      params: { ...item, isDiscover: true },
+      query: { isDiscover: true },
     });
     // const url = `http://${item.ipaddress}:9001/#/welcome`;
     // window.location.href = url;
@@ -150,26 +140,28 @@ const skip = () => {
   chooseAssociated.value = false;
   // const url = `http://${currentItem.ipadreess}:9001/#/welcome`;
   // window.location.href = url;
+  store.dispatch("global/setDiscoverData", currentItem.data);
+
   router.push({
     name: "AppWindow",
-    params: { ...currentItem, isDiscover: true },
+    query: { isDiscover: true },
   });
   // router.push({
   //   name: "Welcome",
   // });
 };
 const copyLink = (text) => {
-  var input = document.createElement("input"); // 创建input对象
-  input.value = text; // 设置复制内容
-  document.body.appendChild(input); // 添加临时实例
-  input.select(); // 选择实例内容
-  document.execCommand("Copy"); // 执行复制
-  document.body.removeChild(input); // 删除临时实例
+  var input = document.createElement("input");
+  input.value = text;
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand("Copy");
+  document.body.removeChild(input);
   // let str = `Copying  ${type} successful!`;
   // this.$message.success(str);
   proxy.$notify({
+    customClass: "notify-success",
     message: "Copy succeeded",
-    type: "success",
     position: "bottom-left",
   });
 };
@@ -201,14 +193,14 @@ const getMax = (data) => {
   if (flag) {
     deviceList.list.push(data);
     proxy.$notify({
+      customClass: "notify-success",
       message: "The device is added successfully",
-      type: "success",
       position: "bottom-left",
     });
   } else {
     proxy.$notify({
+      customClass: "notify-warning",
       message: "Device already exists",
-      type: "warning",
       position: "bottom-left",
     });
   }

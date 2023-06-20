@@ -4,7 +4,7 @@
       <header>
         <LayoutHeader></LayoutHeader>
       </header>
-      <main v-loading="loading">
+      <main>
         <svg-icon
           v-show="active > 0 && preShow"
           class="back"
@@ -27,11 +27,8 @@
 <script setup>
 import LayoutHeader from "@/components/layout/layoutHeader";
 import Welcome from "./_modules/welcome.vue";
-// import DeviceDiscovery from "./_modules/deviceDiscovery.vue";
 import ExternalMember from "./_modules/externalMember";
-// import AdvancedServices from "./_modules/advancedServices";
 import { ref, markRaw, reactive, toRefs } from "vue";
-import { get_service_info } from "@/utils/api";
 const active = ref(0);
 const preShow = ref(false);
 const stepList = reactive({
@@ -40,28 +37,15 @@ const stepList = reactive({
       name: "Welcome",
       com: markRaw(Welcome),
     },
-    // {
-    //   name: "DeviceDiscovery",
-    //   com: markRaw(DeviceDiscovery),
-    // },
-    // {
-    //   name: "AdminAccount",
-    //   com: markRaw(AdminAccount),
-    // },
     {
       name: "ExternalMember",
       com: markRaw(ExternalMember),
     },
-    // {
-    //   name: "AdvancedServices",
-    //   com: markRaw(AdvancedServices),
-    // },
   ],
 });
 const next = () => {
   active.value = ++active.value;
   preShow.value = true;
-  console.log(active.value);
 };
 const pre = () => {
   if (active.value === 1) {
@@ -76,7 +60,7 @@ const props = defineProps({
     default: false,
   },
 });
-const haveNet = toRefs(props);
+const { haveNet } = toRefs(props);
 </script>
 
 <style lang="scss" scoped>

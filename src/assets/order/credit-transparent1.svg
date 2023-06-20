@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="19px" viewBox="0 0 20 19" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>编组 4备份 3</title>
+    <defs>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-1">
+            <stop stop-color="#C6E8FF" offset="0%"></stop>
+            <stop stop-color="#694FC8" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="画板" transform="translate(-273.000000, -136.000000)">
+            <rect id="矩形备份-6" stroke="#979797" fill="#D8D8D8" x="152.5" y="76.5" width="393" height="198"></rect>
+            <circle id="椭圆形备份-7" fill="url(#linearGradient-1)" cx="283" cy="145" r="17"></circle>
+            <g id="编组-4备份-2" transform="translate(274.000000, 136.619076)" stroke="#FFFFFF">
+                <g id="编组-3" stroke-width="1.5">
+                    <path d="M0,0.519076272 C5.66460296,0.519076272 11.664603,0.506358757 18,0.480923728" id="路径-62" stroke-linecap="round"></path>
+                    <path d="M0,0.5 C0,7.18901276 0,12.8094166 0,17.3612116 L9,14.4421656 L18,17.3612116 L18,0.5" id="路径-63" stroke-linejoin="round"></path>
+                </g>
+                <path d="M9,4.51069946 L10.1374304,6.81538513 L12.680802,7.18495866 L10.840401,8.97890626 L11.2748607,11.5120009 L9,10.3160359 L6.72513925,11.5120009 L7.15959899,8.97890626 L5.31919799,7.18495866 L7.86256963,6.81538513 L9,4.51069946 Z" id="星形"></path>
+            </g>
+        </g>
+    </g>
+</svg>

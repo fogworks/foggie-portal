@@ -10,8 +10,12 @@ import router from "@/router";
 //   removeToken,
 //   removeAccessToken,
 // } from "@/utils/auth";
-import { refreshToken } from "@/utils/api";
+import { refreshToken, get_vood_refresh_token } from "@/utils/api";
+import { getTokenMap, getTokenTotalMap } from "@/utils/tokenMap";
 import Qs from "qs";
+import { getToken, setToken, removeToken, } from "./auth";
+import { ElNotification } from 'element-plus'
+// import { el } from "element-plus/es/locale";
 // import { hmac } from "./util.js";
 
 const service = axios.create({
@@ -63,7 +67,7 @@ service.interceptors.request.use(
       config.headers = header;
     } else {
       if (
-        config.url === "/api/accounts/login" &&
+        config.url.indexOf("/api/accounts/login") > -1 &&
         config["Content-Type"] === "application/x-www-form-urlencoded"
       ) {
         config.headers["Content-Type"] = "application/x-www-form-urlencoded";
@@ -93,16 +97,26 @@ service.interceptors.request.use(
         config.headers["Content-Type"] = "multipart/form-data";
         config.headers["Content-Md5"] = config.MD5;
       }
-      if (config.url.indexOf("/v1") > -1) {
-        let access_token = window.localStorage.getItem("access_token");
-        config.headers["Authorization"] = access_token;
+      if (config.url.indexOf("/proxy/http") > -1) {
+        let token = getTokenMap(config.target?.device_id);
+        config.headers["ip"] = config.target.dedicatedip
+        // config.headers["port"] = config.target.rpc.split(':')[1] || ''
+        config.headers["Authorization"] = token || "";
+        config.headers["port"] = config.port;
 
+
+        config.data["body"] = JSON.stringify(config.data);
+        config.data["ip"] = config.target.dedicatedip;
+        // config.data["port"] = config.target.rpc.split(':')[1] || '';
+        config.data["Authorization"] = token || "";
+        config.data["type"] = config.type || "POST";
+        config.data["path"] = config.path || "";
+        config.data["port"] = config.port;
       }
     }
     return config;
   },
   (error) => {
-    console.log(error); // for debug
     return Promise.reject(error);
   }
 );
@@ -110,6 +124,7 @@ service.interceptors.request.use(
 // response interceptor
 service.interceptors.response.use(
   async (response) => {
+
     const res = response.data;
     if (
       response.config.url.indexOf("/api/paynode") > -1 ||
@@ -134,10 +149,19 @@ service.interceptors.response.use(
       return res;
     }
     if (code && code !== 200) {
+      ElNotification({
+        customClass: "notify-error",
+        message: res.error || res.mag || 'error',
+        position: 'bottom-left'
+      })
       if (code === 401 || code === 403) {
-        // removeToken();
+        removeToken();
         // removeAccessToken();
         // router.push("/login");
+        store.dispatch("global/setUserInfo", {});
+        store.dispatch("global/setHasReady", false);
+        window.localStorage.removeItem("tokenMap");
+
         router.push("/user");
         // Message({
         //   message: res.error || "Error",
@@ -146,7 +170,11 @@ service.interceptors.response.use(
         // });
         return;
       } else if (code === 420) {
-
+        // store.dispatch("global/setUserInfo", {});
+        // store.dispatch("global/setHasReady", false);
+        // window.localStorage.removeItem("tokenMap");
+        // removeToken();
+        // router.push("/user");
         let res = await refreshToken();
 
         if (res && res.data && res.data.access_token) {
@@ -159,41 +187,28 @@ service.interceptors.response.use(
             user_id: "",
           };
           store.dispatch("token/login", userInfo);
+          store.dispatch("global/setUserInfo", res.data);
           window.localStorage.setItem("last_refresh_token", token);
-          //   setToken(token);
+          Object.keys(getTokenTotalMap()).forEach(id => {
+            get_vood_refresh_token().then(res => {
+              store.dispatch("token/setTokenMap", {
+                id,
+                token: res.data.token_type + " " + res.data.access_token,
+              });
+            })
+          })
+          // setToken(token);
           return service(response.config);
         } else {
-          //   Message({
-          //     message: res.data.error || "Error",
-          //     type: "error",
-          //     duration: 5 * 1000,
-          //   });
+          store.dispatch("global/setUserInfo", {});
+          store.dispatch("global/setHasReady", false);
+          window.localStorage.removeItem("tokenMap");
+          removeToken();
+          router.push("/user");
           return;
         }
-        // refreshToken().then(res => {
-        //   // console.log('getrefreshToken', res, response);
-        //   if (res && res.data) {
-        //     let token = res.data.access_token;
-        //     let type = res.data.token_type;
-        //     token = type + ' ' + token;
-        //     let userInfo = {
-        //       username: "",
-        //       token: token, //res.token
-        //       user_id: "",
-        //     };
-        //     store.dispatch("login", userInfo);
-        //     setToken(token);
-        //     return service(response.config);
-        //   }
-        // })
       } else {
-        // Message({
-        //   message: res.error || "Error",
-        //   type: "error",
-        //   duration: 5 * 1000,
-        // });
         return Promise.reject(res);
-        // return;
       }
     }
     if (response.status === 401 || response.status === 403) {
@@ -225,12 +240,37 @@ service.interceptors.response.use(
       //   });
       return Promise.reject(new Error(res.message || "Error"));
     } else if (response.status === 200) {
-      return res;
+      if (response.config.url.indexOf('proxy/http') > -1) {
+        if (res.data.code == 200) {
+          if (res.data && res.data.data) {
+            if (res.data.data.code == 200) {
+              return res.data.data;
+            } else {
+              ElNotification({
+                customClass: "notify-error",
+                message: res.data.data.message || 'error',
+                position: 'bottom-left'
+              })
+              return Promise.reject(new Error(res.data.data.message || "Error"));
+            }
+          } else {
+            return res.data;
+          }
+        } else {
+          ElNotification({
+            customClass: "notify-error",
+            message: res.data.msg || 'error',
+            position: 'bottom-left'
+          })
+          return Promise.reject(new Error(res.data.msg || "Error"));
+        }
+      } else {
+        return res;
+      }
     }
   },
   (error) => {
-    console.log("err" + error); // for debug
-    if (!error.config.url.indexOf("ping")) {
+    if (!(error.config && error.config.url.indexOf("ping"))) {
       //   Message({
       //     message: error.message,
       //     type: "error",
@@ -242,7 +282,6 @@ service.interceptors.response.use(
   }
 );
 
-//base64，js原生方法btoa()实现
 function b64EncodeUnicode(str) {
   return btoa(
     encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {

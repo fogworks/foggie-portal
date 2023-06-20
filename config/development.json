@@ -1,0 +1,60 @@
+{
+    "serverConfig": {
+        "port": 3000
+    },
+    "chainConfig":{
+        "browserAddress":"http://156.242.10.10:8632",
+        "transactionAddress":"http://156.242.10.10:8361",
+        "getOutstandingOrders":"/1.1",
+        "getBill":"/1.1",
+        "getDividend":"/1.1",
+        "getTransaction":"/1.1",
+        "getOrders":"/1.1",
+        "getAssets":"/1.1",
+        "getChallengeList":"/1.1",
+        "httpEndpoint":"http://156.242.10.10:5802",
+        "getChainInfo":"/v1/chain/get_info",
+        "getTableRows":"/v1/chain/get_table_rows",
+        "getAccounts":"/v1/chain/get_accounts_by_authorizers",
+        "getAccount":"/v1/chain/get_account",
+        "createTime":"2023-03-23T01:50:00Z"
+    },
+    "dbConfig":{
+        "fileTableName":"foggieV/db/fc_file.db",
+        "orderTableName":"foggieV/db/fc_order.db",
+        "userTableName":"foggieV/db/fc_user.db",
+        "codebookTableName":"foggieV/db/fc_codebook.db",
+        "codebookOffsetTableName":"foggieV/db/fc_codebook_offset.db",
+        "fileUploadRecordTableName":"foggieV/db/fc_file_upload_record.db",
+        "pushMerkleRecordTableName":"foggieV/db/fc_push_merkle_record.db",
+        "challengeRecordTableName":"foggieV/db/fc_challenge_record.db",
+        "tradeRecordTableName":"foggieV/db/fc_trade_record.db",
+        "tradeValidTableName":"foggieV/db/fc_trade_valid.db"
+    },
+    "logConfig":{
+        "dbPath":"",
+        "logFileName":"foggieV/logs/foggiv-client.log"
+    },
+    "grpcConfig":{
+        "ip":"127.0.0.1",
+        "port":"8007"
+    },
+    "fileConfig":{
+        "merkleBufferSize": 4096,
+        "uploadFileBufferSize": 32768,
+        "pushMerkleUsedSpaceRate":0.05
+    },
+    "registerCenterConfig":{
+        "url":"http://154.31.41.36:8001",
+        "syncOrder":"/api/accounts/bind_space_order",
+        "getFoggieInfo":"/api/accounts/get_foggie_info"
+    },
+    "challengeConfig":{
+        "payChallengeTimeout": 300000,
+        "payChallengeTimer": 120000,
+        "userDoEvil": 0
+    },
+    "orderConfig":{
+        "outstandinglimit": 3
+    }
+}

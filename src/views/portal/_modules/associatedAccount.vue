@@ -1,6 +1,7 @@
 <template>
   <div>
     <el-dialog
+      append-to-body
       :before-close="cancel"
       :title="'Associated Account'"
       width="700px"
@@ -12,6 +13,7 @@
         }}</el-button>
       </div>
       <el-form
+        @submit.native.prevent
         class="account-form"
         :model="form"
         label-position="top"
@@ -80,33 +82,29 @@ import {
   computed,
   toRefs,
 } from "vue";
-import NextButton from "@/components/nextButton";
-import {
-  adminRegister,
-  adminLogin,
-  login,
-  get_foggie_dmc,
-  bind_foggie,
-  detected_net,
-} from "@/utils/api";
+import { login, bind_foggie } from "@/utils/api";
 import { useStore } from "vuex";
 import axios from "axios";
 const bcryptjs = require("bcryptjs");
 const emit = defineEmits(["next", "update:visible", "update:preShow"]);
 const props = defineProps({
   visible: Boolean,
+  currentItem: {
+    type: Object,
+    default: { data: {} },
+  },
 });
 const store = useStore();
-const isNew = ref(false); //是否是新用户
+const isNew = ref(false);
 const tipTitle = computed(() => {
   if (isNew.value) {
-    return "Already have an account? Disassociation";
+    return "Do you already have an account? Start Association";
   } else {
     return "No account? Go to register";
   }
 });
 // const form = reactive(props.form);
-const { visible } = toRefs(props);
+const { visible, currentItem } = toRefs(props);
 const { proxy } = getCurrentInstance();
 const form = reactive({
   password: "",
@@ -188,11 +186,14 @@ const submit = () => {
         bind: true,
       };
       if (isNew.value || form.dmc_account) {
-        bind_foggie(postData)
+        bind_foggie(postData, {
+          ip: currentItem.data.ipaddress,
+          device_id: currentItem.data.device_id,
+        })
           .then((res) => {
             proxy.$notify({
-              type: "success",
-              message: "Successfully associated",
+              customClass: "notify-success",
+              message: "Successfully Associated",
               position: "bottom-left",
             });
             login(postData).then((res) => {
@@ -216,7 +217,7 @@ const submit = () => {
                 formRef.value.resetFields();
                 emit("update:visible", false);
                 proxy.$notify({
-                  type: "success",
+                  customClass: "notify-success",
                   message: "Login succeeded",
                   position: "bottom-left",
                 });
@@ -225,7 +226,7 @@ const submit = () => {
           })
           .catch(() => {
             proxy.$notify({
-              type: "error",
+              customClass: "notify-error",
               message: "Association failed",
               position: "bottom-left",
             });
@@ -262,8 +263,7 @@ const submit = () => {
                 },
               })
                 .then((res) => {
-                  console.log(res, "resresresres");
-                  // 获取钱包信息
+                  //
                   if (!res.data.data.dmc_account) {
                     proxy.$notify({
                       type: "info",
@@ -276,12 +276,11 @@ const submit = () => {
                     form.dmc_account = res.data.data.dmc_account;
                     loading.value = false;
                     showDMC.value = true;
-                    // 绑定
                   }
                 })
                 .catch((err) => {
                   proxy.$notify({
-                    type: "error",
+                    customClass: "notify-error",
                     message: "Information acquisition failed",
                     position: "bottom-left",
                   });

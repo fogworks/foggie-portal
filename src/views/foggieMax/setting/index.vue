@@ -4,7 +4,7 @@
       <el-tab-pane label="Change Password" name="Password">
         <changePassword></changePassword>
       </el-tab-pane>
-      <el-tab-pane label="Set Up" name="Setup">
+      <el-tab-pane label="Set" name="Setup">
         <Setting></Setting>
       </el-tab-pane>
     </el-tabs>

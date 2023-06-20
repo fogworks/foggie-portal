@@ -1,8 +1,9 @@
 export const pieOption = {
   tooltip: {
     trigger: "item",
+    formatter: '{b}:{d}%',
   },
-  color: ["#777", "#29ABFF"],
+  color: ["#777", "#ccc", "#29ABFF"],
   series: [
     {
       type: "pie",
@@ -38,7 +39,7 @@ export const pieOption = {
       labelLine: {
         show: false,
       },
-      data: [{ value: 0 }, { value: 1 }],
+      data: [{ value: 0 }, { value: 0 }, { value: 1 }],
     },
   ],
 };

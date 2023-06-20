@@ -1,249 +1,315 @@
 <template>
-  <div class="upload_dialog" @click="closeUploadBox">
-    <!-- my_top_upload -->
-    <div class="upload_dialog_wrap vood_dialog_wrap" @click.stop="innerClick">
-      <div>
-        <!-- my_top_uploadText my_top_uploadTitle -->
-        <div class="upload_dialog_title">Publish</div>
-        <div class="my_top_uploadText">
-          Support single file and directory upload. The maximum upload size of a
-          single file is 2GB. If there are large files, you can choose to slice
-          them with tools before uploading
+  <div>
+    <div class="upload_dialog" @click="closeUploadBox" v-show="uploadIsShow">
+      <!-- my_top_upload -->
+      <div class="upload_dialog_wrap vood_dialog_wrap" @click.stop="">
+        <div>
+          <!-- my_top_uploadText my_top_uploadTitle -->
+          <div class="upload_dialog_title">Publish</div>
+          <div class="my_top_uploadText">
+            Support single file and directory upload. The maximum upload size of
+            a single file is 2GB. If there are large files, you can choose to
+            slice them with tools before uploading
+          </div>
+          <!-- <div class="my_top_uploadText">The OOD you have chosen is: 456</div> -->
+          <div class="today-right">
+            <div class="color-box">
+              <el-button @click="allFileListDrawer = true">
+                File List
+              </el-button>
+            </div>
+          </div>
         </div>
-        <div class="my_top_uploadText">
-          The OOD you have chosen is:
-          <!-- {{ currentOODItem.data.device_id }} ({{
-            currentOODItem.data.dedicatedip
-          }}) -->
+        <uploader
+          style="position: relative"
+          ref="uploader"
+          class="uploader-app"
+          :multiple="true"
+          :options="options"
+          :auto-start="false"
+          :file-status-text="fileStatusText"
+          @files-added="onFilesAdded"
+          @file-added="onFileAdded"
+        >
+          <uploader-unsupport />
+          <uploader-drop>
+            <uploader-btn class="uploader-btn" :single="false"
+              >Select File</uploader-btn
+            >
+            <uploader-btn class="uploader-btn" :directory="true" :single="false"
+              >Select a folder</uploader-btn
+            >
+          </uploader-drop>
+        </uploader>
+
+        <template
+          v-for="(uploadList, key) in uploadFileList"
+          :key="key"
+          style="height: 100%"
+        >
+          <fileList
+            @fileShare="fileShare"
+            @newQueueID="newQueueID"
+            :orderID="key"
+            :ref="`fileListRef_${key}`"
+            v-model:uploadLists="uploadFileList[key]"
+            v-show="key == orderId"
+            :deviceType="deviceType"
+          >
+          </fileList>
+        </template>
+      </div>
+    </div>
+
+    <el-drawer
+      v-model="allFileListDrawer"
+      title="To be completed File list"
+      direction="rtl"
+      size="50%"
+    >
+      <template #header="{ close, titleId, titleClass }">
+        <p  :class="titleClass">
+          <span>To be completed File list</span>
+        <div class="fs20"> List length # {{(allFileList[orderId] ?? []).length}}</div>
+
+        </p>
+      </template>
+
+      <div class="uploader-list">
+        <div class="uploader-file-info head-info">
+          <div class="uploader-file-name" style="width: 30%">File Name</div>
+          <div class="uploader-file-prefix" style="width: 35%">Upload Path</div>
+          <div class="uploader-file-size" style="width: 25%">File Size</div>
+          <div class="uploader-file-actions">Operate</div>
+        </div>
+
+        <div class="TobeCompletedBox">
+          <template
+            v-for="(curFile, index) in (allFileList[orderId] ?? []).slice(0, 800)"
+            :key="curFile.id"
+          >
+            <TobeCompleted
+              @deleteAllFileList="deleteAllFileList"
+              :curFile="curFile"
+              :orderID="orderId"
+            >
+            </TobeCompleted>
+          </template>
         </div>
       </div>
-      <uploader
-        style="position: relative"
-        v-loading="loading"
-        element-loading-text="loading..."
-        element-loading-spinner="el-icon-loading"
-        element-loading-background="rgba(0,0,0, 0.25)"
-        ref="uploader"
-        class="uploader-app"
-        :options="options"
-        :auto-start="false"
-        :file-status-text="fileStatusText"
-        @files-added="onFilesAdded"
-        @file-added="onFileAdded"
-      >
-        <uploader-unsupport />
-        <uploader-drop>
-          <div style="width: 100%">
-            Drop file here or click on the button below
-          </div>
-          <uploader-btn :single="true">
-            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-            Select File
-          </uploader-btn>
-          <uploader-btn :directory="true" :single="true">
-            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-            Select a folder
-          </uploader-btn>
-        </uploader-drop>
-      </uploader>
-      <fileList
-        :isPin="isPin"
-        @fileShare="fileShare"
-        @fileDetail="fileDetail"
-      ></fileList>
-    </div>
+    </el-drawer>
   </div>
 </template>
 
-<script>
-import { ref, reactive, onMounted, toRefs } from "vue";
+<script setup>
+import {
+  ref,
+  reactive,
+  onMounted,
+  toRefs,
+  readonly,
+  provide,
+  computed,
+  getCurrentInstance,
+} from "vue";
 import fileList from "../upload/fileList.vue";
-import uploader from "vue-simple-uploader";
 import { useStore } from "vuex";
-import { UploadLookVersion } from "@/utils/api.js";
-import { ElNotification } from "element-plus";
-export default {
-  name: "UploadIndex",
-  components: { fileList },
-  props: {
-    currentOODItem: {
-      type: Object,
-      default: () => {},
-    },
-    oodId: {
-      type: String,
-      default: "",
-    },
-    currentPath: {
-      type: String,
-      default: "",
-    },
-  },
-  setup(props, { emit }) {
-    const store = useStore();
-    const options = ref({
-      simultaneousUploads: 5,
-    });
-    const { currentOODItem, oodId, currentPath } = toRefs(props);
-    const alertTitle = ref("");
-    const fileStatusText = ref({
-      success: () => "Upload Success",
-      error: () => "Upload Error",
-      uploading: () => "Uploading...",
-      paused: () => "Paused...",
-      waiting: () => "Waiting...",
-      md5: () => "Calculating hash...",
-      CID: () => "Calculate CID...",
-    });
-    const fileList = ref([]);
-    const isChunk = ref(true);
-    const isGateway = ref(true);
-    const loading = ref(false);
-    const isIPFS = ref(true);
-    const isCYFS = ref(true);
-    const loadNumber = ref(0);
-    const isPin = ref(false);
-    const loadPing = (device_id, isTrue) => {
-      if (loadNumber.value > 3) {
-        return;
-      } else {
-        loadNumber.value++;
-      }
-      if (!isTrue) {
-        isGateway.value = false;
-      }
-      UploadLookVersion(device_id, isTrue)
-        .then((res) => {
-          if (res.version && res.version.split(".")[0] >= 1) {
-            isChunk.value = true;
-          } else {
-            isChunk.value = false;
-          }
-          isCYFS.value = res.cyfs;
-          isIPFS.value = res.ipfs;
-          loading.value = false;
-          alertTitle.value = `Total capacity ${
-            currentOODItem.value.data.total_disk_size <= 50 ? 50 : 100
-          }GB,The maximum recommended upload space is ${
-            currentOODItem.value.data.total_disk_size
-          }GB。`;
-          //   this.$message({
-          //     message: this.alertTitle,
-          //     showClose: true,
-          //     duration: 3000,
-          //     type: "success",
-          //   });
-        })
-        .catch(() => {
-          if (loadNumber.value >= 3) {
-            loadPing(device_id, false);
-          } else {
-            loadPing(device_id, true);
-          }
-        });
-    };
-    const FILE_SIZE = ref(1024 * 1024 * 1024 * 2);
-    const onFileAdded = (file) => {
-      if (file.size === 0) return;
-      if (file.size > FILE_SIZE) {
-        // this.$message({
-        //   message: "The maximum upload size of a single file should not exceed 2GB.",
-        //   type: "warning",
-        //   duration: 3000,
-        // });
-        ElNotification({
-          type: "info",
-          message:
-            "he maximum upload size of a single file should not exceed 2GB.",
-          position: "bottom-left",
-        });
-        return;
-      }
+import { ElMessage, ElMessageBox } from "element-plus";
+import TobeCompleted from "@/components/upload/TobeCompleted.vue";
+import _ from "lodash";
+const _this = getCurrentInstance();
+const emit = defineEmits(["fileShare"]);
+const currentPath = ref("");
+const allFileListDrawer = ref(false);
+const options = ref({
+  simultaneousUploads: 5,
+  singleFile: false,
+  chunkSize: 1024 * 1024 * 8, 
+  forceChunkSize: true, 
+  allowDuplicateUploads: true,
+  generateUniqueIdentifier: generateUniqueIdentifier,
+  initFileFn: initFileFn,
+});
 
-      let directory = file.file.webkitRelativePath;
-      let directoryPath = directory.substr(0, directory.lastIndexOf("/") + 1);
+const fileStatusText = ref({
+  success: () => "Upload Success",
+  error: () => "Upload Error",
+  uploading: () => "Uploading...",
+  paused: () => "Paused...",
+  waiting: () => "Waiting...",
+  md5: () => "Calculating file hash value...",
+  CID: () => "Calculate CID...",
+});
 
-      let target = "";
-      let device_id = currentOODItem.value.data.device_id;
-      target = `/object`;
-      file.isGateway = isGateway.value;
-      file.isChunk = isChunk;
+let uploadIsShow = computed(() => store.getters.uploadIsShow);
+const FILE_SIZE = readonly(1024 * 1024 * 1024 * 2);
+const store = useStore();
+const orderId = computed(() => store.getters.orderId);
+const deviceData = computed(() => store.getters.deviceData);
+const deviceType = computed(() => store.getters.deviceType);
 
-      file.dedicatedip = currentOODItem.value.data.dedicatedip;
-      file.device_id = device_id;
+const uploadFileList = computed(() => store.state.upload.uploadFileList);
+const allFileList = reactive({});
 
-      file.isCYFS = isCYFS.value;
-      file.isIPFS = isIPFS.value;
-      file.paused = false;
-      file.rootPath = currentPath.value;
-      file.urlPath = target;
-      file.urlPrefix = directoryPath
-        ? currentPath.value + directoryPath
-        : currentPath.value || "/";
-      file.urlFileName = directoryPath
-        ? currentPath.value + directoryPath + file.name
-        : currentPath.value + file.name;
+// const allFileList = computed(() => {
+//   let fileListArray = _this.refs[`fileListRef_${orderId.value}`] || [];
+//   let executeLsit =
+//     fileListArray.filter((item) => item.orderID == orderId.value)[0]
+//       ?.curFileList || [];
+//   let list = [];
+//   for (const item of store.state.upload.uploadFileList[orderId.value] || []) {
+//     if (!executeLsit.some((element) => element.id == item.id)) {
+//       list.push(item);
+//     }
+//   }
+//   return list;
+// });
 
-      let list = store.state.upload.uploadFileList;
-      let arr = [];
-      arr = list.slice(0);
-      arr.unshift(file);
-      store.dispatch("upload/setFileList", arr);
-    };
-    const onFileProgress = (rootFile, file, chunk) => {
-      console.log(rootFile, file, chunk, "aaa");
-    };
-    const onFilesAdded = (files, fileList) => {
-      console.log(files);
-      console.log(fileList);
-    };
-    const onFileSuccess = () => {
-      console.log("onFileSuccess");
-    };
-    const fileShare = (item) => {
-      emit("fileShare", item);
-    };
-    const fileDetail = (file) => {
-      window.localStorage.setItem(
-        "voodItem",
-        JSON.stringify(currentOODItem.value.data)
-      );
-      // emit("closeUploadBox");
-    };
-    const initUploadData = () => {
-      // loadPing(currentOODItem.value.data.device_id, true);
-    };
-    const closeUploadBox = () => {
-      emit("closeUploadBox");
-    };
-    const innerClick = () => {};
-    onMounted(initUploadData);
-    return {
-      FILE_SIZE,
-      alertTitle,
-      fileStatusText,
-      fileList,
-      isChunk,
-      isGateway,
-      loading,
-      isIPFS,
-      isCYFS,
-      loadNumber,
-      isPin,
-      currentOODItem,
-      loadPing,
-      onFileAdded,
-      onFileProgress,
-      onFilesAdded,
-      onFileSuccess,
-      fileShare,
-      fileDetail,
-      initUploadData,
-      closeUploadBox,
-      innerClick,
-    };
-  },
+const tokenMap = computed(() => store.getters.tokenMap);
+
+let fileCache = [];
+const onFileAdded = (file) => {
+  // if (file.size === 0) return;
+  // if (file.size > FILE_SIZE) {
+  //   ElMessage({
+  //     message:
+  //       "The maximum upload size of a single file should not exceed 2GB.",
+  //     type: "warning",
+  //     duration: 3000,
+  //   });
+  //   return;
+  // }
+  // let list = store.state.upload.uploadFileList[orderId.value] ?? [];
+  // if (list.length > 1000) {
+  //   fileCache.push(file);
+  //   if (fileCache.length % 1000 == 0) {
+  //     list = list.concat(fileCache);
+  //     allFileList[orderId.value] = allFileList[orderId.value].concat(fileCache);
+  //     store.commit("upload/setFileList", list);
+  //     fileCache = [];
+  //   }
+  // } else {
+  //   list.push(file);
+  //   store.commit("upload/setFileList", list);
+  //   if (allFileList[orderId.value]) {
+  //     allFileList[orderId.value].push(file);
+  //   } else {
+  //     allFileList[orderId.value] = [];
+  //     allFileList[orderId.value].push(file);
+  //   }
+  // }
 };
+
+const onFilesAdded = (files, fileList) => {
+
+  let timer = null;
+  
+  if (files.length > 500) {
+    ElMessageBox.alert(
+      `The folder you are currently uploading contains ${files.length} small files. The number of files is too large, which may cause severe page lag during the upload process. Are you sure you want to upload it`,
+      "warning",
+      {
+        confirmButtonText: "OK",
+        callback: (type) => {
+          if (type == "confirm") {
+            for (const file of files) {
+              inituploadList(file);
+            }
+          }
+        },
+      }
+    );
+  } else {
+    for (const file of files) {
+      inituploadList(file);
+    }
+  }
+
+  function inituploadList(file) {
+    if (file.size === 0) return;
+    if (file.size > FILE_SIZE) {
+      ElMessage({
+        message:
+          "The maximum upload size of a single file should not exceed 2GB.",
+        type: "warning",
+        duration: 3000,
+      });
+      return;
+    }
+
+    let list = store.state.upload.uploadFileList[orderId.value] ?? [];
+
+    if (list.length > 200) {
+ 
+      fileCache.push(file);
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      timer = setTimeout(() => {
+        list = list.concat(fileCache);
+        allFileList[orderId.value] =
+          allFileList[orderId.value].concat(fileCache);
+        store.commit("upload/setFileList", list);
+        fileCache = [];
+      }, 10);
+    } else {
+      list.push(file);
+      store.commit("upload/setFileList", list);
+
+      if (allFileList[orderId.value]) {
+        allFileList[orderId.value].push(file);
+      } else {
+        allFileList[orderId.value] = [];
+        allFileList[orderId.value].push(file);
+      }
+    }
+  }
+};
+
+const fileShare = (item) => {
+  emit("fileShare", item);
+};
+
+const newQueueID = (id, fileOrderID) => {
+  let index = allFileList[fileOrderID].findIndex((file) => file.id == id);
+  allFileList[fileOrderID].splice(index, 1);
+};
+
+function deleteAllFileList(id) {
+  let index = allFileList[orderId.value].findIndex((file) => file.id == id);
+  index > -1 ? allFileList[orderId.value].splice(index, 1) : "";
+}
+function generateUniqueIdentifier(file) {
+  return file.path;
+}
+function initFileFn(file) {
+  file.paused = false;
+  file.deviceType = deviceType.value;
+  file.fileUploading = false;
+
+  file.rootPath = currentPath.value;
+  let directory = file.file.webkitRelativePath;
+  let directoryPath = directory.substr(0, directory.lastIndexOf("/") + 1);
+
+  // file.urlPrefix = directoryPath ? currentPath.value + directoryPath : currentPath.value || "/";
+  file.urlPrefix = file.file.path.substr(0, file.file.path.lastIndexOf("\\"));
+
+  file.urlFileName = directoryPath
+    ? currentPath.value + directoryPath + file.name
+    : currentPath.value + file.name;
+
+  file.orderId = orderId.value;
+  if (deviceType.value == 1 || deviceType.value == 2) {
+    file.foggieToken = tokenMap.value[orderId.value] || "";
+  }
+  file.deviceData = deviceData.value;
+}
+
+const closeUploadBox = () => {
+  store.commit("upload/closeUpload");
+};
+onMounted(() => {});
 </script>
 
 <style lang="scss" scoped>
@@ -280,18 +346,21 @@ export default {
     color: #000;
     backdrop-filter: blur(40px);
     background: rgba(255, 255, 255, 0.6);
+
     .upload_dialog_title {
       text-align: center;
       font-size: 26px;
       height: 60px;
       line-height: 60px;
     }
+
     .upload_dialog_tips {
       font-size: 12px;
       // transform: scale(0.8);
       text-align: left;
       // text-indent: 20px;
     }
+
     .upload_dialog_currentood {
       font-size: 14px;
       height: 50px;
@@ -301,6 +370,7 @@ export default {
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
     .upload_dialog_content {
       padding: 1.875rem 0;
       background: rgba(255, 255, 255, 0.1);
@@ -311,8 +381,10 @@ export default {
       text-align: center;
       margin-top: 20px;
     }
+
     .dialog_close_wrap {
       position: relative;
+
       .dialog_close_icon {
         position: absolute;
         top: -36px;
@@ -336,36 +408,38 @@ export default {
         display: flex;
         justify-content: center;
         align-items: center;
+
         &:hover {
           transform: scale(1.1);
         }
       }
+
       .dialog_close {
         position: absolute;
       }
     }
   }
+
   .vood_dialog_wrap {
-    min-width: 700px;
-    // min-width: 1200px;
+    // min-width: 700px;
+    min-width: 900px;
     width: 60%;
     height: 80%;
     top: 10%;
     left: 20%;
     padding: 20px;
     overflow-y: auto;
+
     :deep {
       .uploader-list {
-        // max-height: 440px;
-        // overflow: auto;
-        // overflow-x: hidden;
-        // overflow-y: auto;
         .head-info {
           font-size: 18px;
+
           > div {
             color: #000;
           }
         }
+
         .uploader-file-name,
         .uploader-file-size {
           text-align: left;
@@ -373,6 +447,7 @@ export default {
       }
     }
   }
+
   .uploader-drop {
     display: flex;
     justify-content: center;
@@ -383,9 +458,11 @@ export default {
     padding: 10px 0;
     border-radius: 16px;
     text-align: center;
+
     .drop-title {
     }
   }
+
   .uploader-btn {
     min-width: 90px;
     height: 30px;
@@ -396,26 +473,32 @@ export default {
     color: #004aff;
     border: none;
     transition: all 1s;
+
     &:hover {
       transform: scale(1.1);
     }
   }
+
   .uploader-file-progress {
     // background: #7378e24f;
   }
+
   .el-table,
   .el-table tr,
   .el-table th.el-table__cell {
     background: transparent;
   }
+
   .el-table--border::after,
   .el-table--group::after,
   .el-table::before {
     background: transparent;
   }
+
   .el-table td.el-table__cell {
     border-color: #494646;
   }
+
   .el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
     background-color: #4b525c;
     background-color: #4b525c;
@@ -425,6 +508,7 @@ export default {
     cursor: pointer;
     color: #000;
   }
+
   .el-table--enable-row-hover
     .el-table__body
     tr:hover
@@ -432,16 +516,19 @@ export default {
     .cell {
     color: #000;
   }
+
   .el-table th.el-table__cell > .cell,
   .el-table__body-wrapper .cell {
     color: #03040a;
     color: #fff;
     white-space: nowrap;
   }
+
   .el-table {
     margin-bottom: 30px;
   }
 }
+
 .uploader-app {
   /* width: 780px; */
   box-sizing: border-box;
@@ -573,5 +660,89 @@ export default {
   position: relative;
   display: inline-block;
   width: 16px;
+}
+
+.today-right {
+  cursor: pointer;
+  position: absolute;
+  right: 30px;
+  top: 20px;
+
+  .color-box {
+    @include color-box;
+
+    .ripple-ink {
+      border-radius: 45px;
+    }
+  }
+
+  .el-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    width: auto;
+    height: auto;
+
+    color: #fff;
+    border: none;
+    border-radius: 45px;
+    box-shadow: 0px 2px 5px 0px rgb(0 0 0 / 20%);
+    background: var(--btn-gradient);
+  }
+}
+
+.el-drawer {
+  .head-info:hover {
+    background-color: transparent !important;
+  }
+
+  .uploader-list {
+    height: 100% !important;
+
+    overflow: hidden;
+
+    position: relative;
+
+    padding: 20px 0px;
+    margin-left: 20px;
+    margin-right: 20px;
+
+    & > div {
+      margin: 0;
+      padding: 0;
+    }
+
+    .head-info {
+      font-size: 18px;
+      position: relative;
+      height: 49px;
+      line-height: 49px;
+      overflow: hidden;
+      border-bottom: 1px solid #7e7e7e;
+      text-align: left;
+
+      & > div {
+        color: #000;
+      }
+    }
+
+    .uploader-file-name,
+    .uploader-file-size {
+      text-align: left;
+    }
+
+    .TobeCompletedBox {
+      height: calc(100% - 50px);
+      overflow-y: auto;
+      overflow-x: hidden;
+
+      & > .uploader-file {
+        content-visibility: auto;
+        contain-intrinsic-size: 50px;
+      }
+    }
+  }
 }
 </style>
