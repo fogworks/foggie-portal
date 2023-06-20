@@ -82,7 +82,7 @@ watch(
 
 watch(() => props.uploadLists, (newVal) => {
   fileList.uploadLists = newVal
-  console.log(fileList.uploadLists);
+  // console.log(fileList.uploadLists);
 }, { immediate: true, deep: true })
 
 
@@ -112,9 +112,6 @@ const chanStatus = (item) => {
     let deleteIndex = findLastIndex(curFileList.value, (lastItem) => lastItem.fileUploading == false);
     curFileList.value.splice(deleteIndex, 1);
   }
-  // if (item) {
-
-  // }
 
 };
 

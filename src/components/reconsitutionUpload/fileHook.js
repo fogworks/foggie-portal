@@ -5,9 +5,8 @@ import { secondsToStr, formatSize } from "./utils";
 
 export default function (params) {
   const { file, progress, timeRemaining, completed, error, fileUploading, paused, ISCIDING, averageSpeed } = toRefs(params)
-  const tid = ref(null)
   const progressingClass = ref("");
-
+  const statusText = ref('')
 
 
   const fileIconArr = ref({
@@ -104,7 +103,7 @@ export default function (params) {
       return "uploading";
     } else if (paused.value) {
       return "paused";
-    } else if (ISCIDING.value) {
+    }else if(ISCIDING.value){
       return "md5ing";
     } else {
       return "waiting";
@@ -120,15 +119,8 @@ export default function (params) {
     md5ing: () => "Calculating file hash value...",
   })
 
-  let statusText = computed(() => {
-    let txt = status.value;
-    txt = fileStatusText[status.value]();
-    if (ISCIDING.value && status.value == "paused") {
-      txt = fileStatusText["md5ing"]();
-    }
 
-    return txt || status.value;
-  });
+
 
   let formatedTimeRemaining = computed(() => {
     if (
@@ -144,26 +136,13 @@ export default function (params) {
 
 
 
-  // watch(
-  //   () => status.value,
-  //   (newVal, oldVal) => {
-  //     if (oldVal && newVal === "uploading" && oldVal !== "uploading") {
-  //       if (tid.value) {
-  //         clearTimeout(tid.value);
-  //         tid.value = null
-  //       }
-  //       tid.value = setTimeout(() => {
-  //         progressingClass.value = "uploader-file-progressing";
-  //       }, 200);
-  //     } else {
-  //       if (tid.value) {
-  //         clearTimeout(tid.value);
-  //         tid.value = null
-  //       }
-  //       progressingClass.value = "";
-  //     }
-  //   }
-  // );
+  watch(
+    () => status.value,
+    (newVal, oldVal) => {
+      statusText.value = fileStatusText[newVal]();
+
+    }
+  );
 
 
 

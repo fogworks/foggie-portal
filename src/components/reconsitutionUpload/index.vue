@@ -11,7 +11,7 @@
           </div>
           <div class="today-right">
             <div class="color-box">
-              <el-button @click="[allFileListDrawer = true, loadFileListByState(3)]">
+              <el-button @click="allFileListDrawer = true, loadFileListByState(3)">
                 File List
               </el-button>
             </div>
@@ -47,12 +47,12 @@
 
         </p>
         <div class="color-box">
-          <el-button @click="[requestFileList[orderId].isErrorOrWaiting = 'Waiting', loadFileListByState(3)]">
+          <el-button @click="requestFileList[orderId].isErrorOrWaiting = 'Waiting', loadFileListByState(3)">
             Waiting
           </el-button>
         </div>
         <div class="color-box">
-          <el-button @click="[requestFileList[orderId].isErrorOrWaiting = 'error', loadFileListByState(2)]"
+          <el-button @click="requestFileList[orderId].isErrorOrWaiting = 'error', loadFileListByState(2)"
             style="background: #EF6666;">
             Error
           </el-button>
@@ -112,7 +112,7 @@
           </el-table-column>
         </el-table>
         <el-pagination v-if="total > 0" @size-change="handleSizeChange" prev-icon="DArrowLeft" next-icon="DArrowRight"
-          @current-change="handleCurrentChange" :page-sizes="[20, 50, 100]" background :page-size="pageSize"
+          @current-change="handleCurrentChange" :page-sizes="[10, 30, 50]" background :page-size="pageSize"
           :current-page="pageNo" :pager-count="5" layout="prev, pager, next,sizes,jumper," :total="total"
           style="margin: 40px 60px 20px 0px; justify-content: end">
         </el-pagination>
@@ -162,7 +162,7 @@ const email = computed(() => store.getters.userInfo?.email);
 const orderId = computed(() => store.getters.orderId);
 const deviceData = computed(() => store.getters.deviceData);
 const deviceType = computed(() => store.getters.deviceType);
-const uploadFileList = reactive({});  
+const uploadFileList = reactive({});
 // const selectFilelist = reactive({})
 
 
@@ -175,13 +175,13 @@ watch(() => orderId.value, (newVal, oldVal) => {
       error: {
         fileList: [],
         pageNo: 1,
-        pageSize: 50,
+        pageSize: 30,
         total: 0
       },
       Waiting: {
         fileList: [],
         pageNo: 1,
-        pageSize: 50,
+        pageSize: 30,
         total: 0
       }
     }
@@ -384,15 +384,15 @@ function initDirectoryItem(item, type) {
 
 const newQueueID = (id, fileOrderID) => {
   if (orderId.value == fileOrderID) {
-    requestFileList[fileOrderID].Waiting.fileList = requestFileList[fileOrderID].Waiting.fileList.filter(item => item.id != id)
     if (requestFileList[fileOrderID].Waiting.fileList.length == 0) {
       loadFileListByState(3)
     }
-
-    let row = uploadFileList[fileOrderID].filter(item => item.id == id)[0]
+    let row = requestFileList[fileOrderID].Waiting.fileList.filter(item => item.id == id)[0]
     if (multipleTable.value && row) {
       multipleTable.value.toggleRowSelection(row, false)
     }
+    requestFileList[fileOrderID].Waiting.fileList = requestFileList[fileOrderID].Waiting.fileList.filter(item => item.id != id)
+
   }
 };
 
@@ -479,7 +479,7 @@ function updateFileState(destPath) {
   }
 
   changeFileState(params).then(res => {
-    if(res.code == 200){
+    if (res.code == 200) {
       loadFileListByState(2)
     }
   })

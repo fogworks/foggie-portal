@@ -9,6 +9,9 @@ export function secondsToStr(seconds) {
   remainingSeconds = remainingSeconds < 10 ? "0" + remainingSeconds : remainingSeconds;
 
 
+  // console.log(hours,'hours');
+  // console.log(minutes,'minutes');
+  // console.log(remainingSeconds,'remainingSeconds');
 
   if (hours >= 24) {
     return "- -";
