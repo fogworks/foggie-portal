@@ -70,11 +70,9 @@ watch(
   (newVal, oldVal) => {
     let oldLength = oldVal ?? 0;
     // if (newVal == 0) {
-    //   // 删除当前设备下上传列表中所有文件 当前上传列表也需要清除
     //   curFileList.value = [];
     // }
     if (newVal >= oldLength) {
-      // 新增文件
       let pushNumber = JSON.parse(JSON.stringify(MAX_UPLOAD_NUM));
 
       for (const item of curFileList.value) {
@@ -88,10 +86,8 @@ watch(
         chanStatus();
       }
     } else {
-      // 删除文件
       // for (let index = 0; index < curFileList.value.length; index++) {
       //   if (!fileList.uploadLists.some((item) => item.id == curFileList.value[index].id)) {
-      //     //删除的是已经上传成功的文件
       //     curFileList.value.splice(index, 1);
       //     break;
       //   }

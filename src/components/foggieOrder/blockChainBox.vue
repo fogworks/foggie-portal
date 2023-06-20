@@ -10,8 +10,7 @@
     >
       <!-- SubOrder -->
       <div class="bc-step1" v-if="blockChainStep === 1">
-        <!-- step1 -->
-        <!-- 价格 -->
+        <!-- -->
         <p class="product-info">{{ $t("blockChainBox.product_info") }}</p>
         <p class="payment-info">
           {{ $t("index.orderPrice") }}$
@@ -23,7 +22,6 @@
         >
           {{ $t("index.orderId") }} {{ blockChainData.pay_item.order_sn }}
         </p>
-        <!-- 支付方式 -->
         <div class="block-chain-model">
           <div class="block-chain-model-price">
             {{
@@ -97,12 +95,10 @@
             </div>
           </div>
         </div>
-        <!-- 汇率 -->
         <p class="block-chain-rate">
           1 {{ accountTypesData[blockChainModel].label }} =
           {{ accountTypesData[blockChainModel].rate }} USD
         </p>
-        <!-- 付款地址 -->
         <div class="bc-step1-pay-address">
           <div class="div1" @click="payAddressVisible = true">
             {{ $t("blockChainBox.link_wallet") }}
@@ -150,7 +146,6 @@
         >
           {{ $t("blockChainBox.eth_gas_tips") }}
         </p>
-        <!-- 确定、取消 -->
         <div class="step1-foot">
           <el-button @click="cancelStep1">{{
             $t("blockChainBox.cancel")
@@ -162,7 +157,6 @@
       </div>
       <div class="bc-step2" v-if="blockChainStep === 2">
         <!-- step2 -->
-        <!-- 价格 -->
         <p class="product-info">{{ $t("blockChainBox.product_info") }}</p>
         <!-- <p class="payment-info">{{ blockChainData.price_text }}</p> -->
         <p class="payment-info">
@@ -233,7 +227,6 @@
             </div>
           </div> -->
         </div>
-        <!-- 倒计时 -->
         <div class="count-down" v-if="count_down > 0">
           <span class="count-down-text">{{
             $t("blockChainBox.count_down")
@@ -248,12 +241,9 @@
         <!-- <p class="payment-methods">{{ $t('blockChainBox.payment_method_metamask') }}</p>
         <div class="payment-metamask" @click="payByMetamask">{{ $t('blockChainBox.payment_by_metamask') }}</div>
         <p class="payment-methods">{{ $t('blockChainBox.payment_method_other') }}</p> -->
-        <!-- 二维码 -->
-        <!-- <div class="account-qr-tips">扫码支付</div> -->
         <div class="account-qr" ref="qrCodeUrl" id="account-qr"></div>
         <!-- OR -->
         <div class="address-div">
-          <!-- <div>手动支付</div> -->
           <div class="receiving-address">
             <span>{{ $t("blockChainBox.receiving_address") }}</span>
             <span>{{ receiving_address }}</span>
@@ -279,9 +269,6 @@
             {{ $t("blockChainBox.payment_withdrawal_tips") }}
           </p>
         </div>
-        <!-- 付款地址 -->
-        <!-- 收款地址 -->
-        <!-- 我已付款、取消支付、超时 -->
         <div slot="footer" class="step2-foot">
           <el-button @click="cancelStep2" v-if="count_down > 0">{{
             $t("blockChainBox.cancel_payment")
@@ -302,7 +289,6 @@
       </div>
       <div class="bc-step3" v-if="blockChainStep === 3">
         <!-- step3 -->
-        <!-- 价格 -->
         <p class="product-info">{{ $t("blockChainBox.product_info") }}</p>
         <!-- <p class="payment-info">{{ blockChainData.price_text }}</p> -->
         <p class="payment-info">
@@ -358,7 +344,6 @@
             {{ count_down % 60 }} {{ $t("blockChainBox.second") }}
           </span>
         </div>
-        <!-- 交易ID -->
 
         <el-input
           class="transaction-hash"
@@ -393,7 +378,6 @@
           }}</span>
           <i class="el-icon-check" v-if="!check_info"></i>
         </p>
-        <!-- <p>?支付失败，异常，请找客服。。。。</p> -->
         <el-checkbox
           v-if="!isUseMetaMask"
           class="confirm-info"
@@ -651,11 +635,9 @@ export default {
             //   // Time to reload your interface with the new networkId
             //   console.log('networkId', networkId);
             //   if ((that.blockChainModel === 'usdc' || that.blockChainModel === 'usdt') && networkId !== '1') {
-            //     // 您的metamask网络没有处于Ethereum上，请先切换网络
             //     that.metamask_network_eth_error = true;
             //     that.metamask_network_bsc_error = false;
             //   } else if ((that.blockChainModel === 'busd' || that.blockChainModel === 'bsc_usd') && networkId !== '56') {
-            //     // 您的metamask网络没有处于BNB Smart Chain上，请先切换网络
             //     that.metamask_network_eth_error = false;
             //     that.metamask_network_bsc_error = true;
             //   } else {
@@ -675,11 +657,9 @@ export default {
         // Time to reload your interface with the new networkId
         console.log("networkId", networkId);
         // if ((that.blockChainModel === 'usdc' || that.blockChainModel === 'usdt') && networkId !== '1') {
-        //   // 您的metamask网络没有处于Ethereum上，请先切换网络
         //   that.metamask_network_eth_error = true;
         //   that.metamask_network_bsc_error = false;
         // } else if ((that.blockChainModel === 'busd' || that.blockChainModel === 'bsc_usd') && networkId !== '56') {
-        //   // 您的metamask网络没有处于BNB Smart Chain上，请先切换网络
         //   that.metamask_network_eth_error = false;
         //   that.metamask_network_bsc_error = true;
         // } else {
@@ -700,7 +680,6 @@ export default {
             that.blockChainModel === "usdt") &&
           networkId !== "1"
         ) {
-          // 您的metamask网络没有处于Ethereum上，请先切换网络
           that.metamask_network_eth_error = true;
           that.metamask_network_bsc_error = false;
         } else if (
@@ -708,7 +687,6 @@ export default {
             that.blockChainModel === "bsc_usd") &&
           networkId !== "56"
         ) {
-          // 您的metamask网络没有处于BNB Smart Chain上，请先切换网络
           that.metamask_network_eth_error = false;
           that.metamask_network_bsc_error = true;
         } else {
@@ -735,7 +713,6 @@ export default {
         });
         console.log("chainId", chainId);
         if ((type === "usdc" || type === "usdt") && chainId !== "0x1") {
-          // 您的metamask网络没有处于Ethereum上，请先切换网络
           this.metamask_network_eth_error = true;
           this.metamask_network_bsc_error = false;
           this.payAddressVisible = false;
@@ -744,7 +721,6 @@ export default {
           (type === "busd" || type === "bsc_usd") &&
           chainId !== "0x38"
         ) {
-          // 您的metamask网络没有处于BNB Smart Chain上，请先切换网络
           this.metamask_network_eth_error = false;
           this.metamask_network_bsc_error = true;
           this.payAddressVisible = false;
@@ -781,14 +757,12 @@ export default {
         }
       }
     },
-    // 新支付订单
     initNoPayment() {
       this.blockChainStep = 1;
       this.payment_address = "";
       // this.receiving_address = '';
       this.blockChainModel = "busd";
     },
-    // 已经创建支付订单
     initHavePayment(newValue) {
       this.blockChainStep = 2;
       this.payment_address = newValue.user_sender;
@@ -799,11 +773,8 @@ export default {
 
       // TODO
       let created_at = new Date(newValue.created_at).getTime();
-      // //算出时差,并转换为毫秒：
       // let offset = new Date().getTimezoneOffset()* 60 * 1000;
-      //算出现在的时间：
       let nowDate = new Date().getTime();
-      //算出对应的格林位置时间
       // let GMTDate = new Date(nowDate + offset);   //Wed Apr 20 2016 22:27:02 GMT+0800 (CST)
 
       // TEST
@@ -848,7 +819,6 @@ export default {
         (this.blockChainModel === "usdc" || this.blockChainModel === "usdt") &&
         chainId !== "0x1"
       ) {
-        // 您的metamask网络没有处于Ethereum上，请先切换网络
         this.metamask_network_eth_error = true;
         this.metamask_network_bsc_error = false;
         this.payAddressVisible = false;
@@ -858,7 +828,6 @@ export default {
           this.blockChainModel === "bsc_usd") &&
         chainId !== "0x38"
       ) {
-        // 您的metamask网络没有处于BNB Smart Chain上，请先切换网络
         this.metamask_network_eth_error = false;
         this.metamask_network_bsc_error = true;
         this.payAddressVisible = false;
@@ -870,20 +839,17 @@ export default {
       // if (window.ethereum) {
       //   web3Provider = window.ethereum;
       //   try {
-      //     // 请求用户授权
       //     await window.ethereum.enable();
       //     // this.initMetaMask(web3Provider);
       //   } catch (error) {
-      //     // 用户不授权时，提示用户授权
       //     console.error("User denied account access");
       //     this.isLinkMetaMask = false;
       //   }
-      // } else if (window.web3) {   // 老版 MetaMask Legacy dapp browsers...
+      // } else if (window.web3) {  
       //   web3Provider = window.web3.currentProvider;
       //   // this.initMetaMask(web3Provider);
       // } else {
       //   web3Provider = new this.Web3.providers.HttpProvider('http://localhost:8545');
-      //   // 提示用户安装metamask
       //   this.isHaveMetaMask = false;
       // }
       // let web3js = new this.Web3(web3Provider);
@@ -894,45 +860,36 @@ export default {
       // this.payAddressVisible = false;
       // this.payment_address_error = false;
 
-      // 检查是否是新的MetaMask 或 DApp浏览器
       // let web3Provider;
       // if (window.ethereum) {
       //   // web3Provider = window.ethereum;
       //   try {
-      //     // 请求用户授权
       //     await window.ethereum.enable();
       //     // this.initMetaMask(web3Provider);
       //     this.payAddressVisible = false;
       //   } catch (error) {
-      //     // 用户不授权时，提示用户授权
       //     console.error("User denied account access");
       //     this.isLinkMetaMask = false;
       //   }
-      // } else if (window.web3) {   // 老版 MetaMask Legacy dapp browsers...
+      // } else if (window.web3) {
       //   // web3Provider = window.web3.currentProvider;
       //   // this.initMetaMask(web3Provider);
       //   this.payAddressVisible = false;
       // } else {
       //   // web3Provider = new this.Web3.providers.HttpProvider('http://localhost:8545');
-      //   // 提示用户安装metamask
       //   this.isHaveMetaMask = false;
       // }
 
-      // 定义合约abi
       // let contract_abi = contractABI[this.blockChainModel];
-      // // 合约地址 usdt
       // let contract_address = contractAddress[this.blockChainModel];
 
-      // 定义合约
       // let myContract = new web3js.eth.Contract(contract_abi, contract_address, {
       //     from: this.payment_address, // default from address
       //     gasPrice: '10000000000' // default gas price in wei, 10 gwei in this case
       // });
 
-      // 查询以太币余额
       // web3js.eth.getBalance(this.payment_address).then((res)=>console.log('11111', res));
 
-      // // 查看某个账号的代币余额
       // myContract.methods.balanceOf(this.payment_address).call({from: this.payment_address}, function(error, result){
       //     if(!error) {
       //         console.log(result);
@@ -943,7 +900,6 @@ export default {
 
       // web3js.eth.getBalance("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48").then((res)=>console.log('usdc', res));
 
-      // 代币转账
       // myContract.methods.transfer(this.receiving_address, 10000).send({from: this.payment_address}, (error, transactionHash) =>{
       //   if (!error) {
       //     console.log('transactionHash is ' + transactionHash);
@@ -978,23 +934,19 @@ export default {
       if (window.ethereum) {
         web3Provider = window.ethereum;
         try {
-          // 请求用户授权
           await window.ethereum.enable();
           // this.initMetaMask(web3Provider);
         } catch (error) {
-          // 用户不授权时，提示用户授权
           console.error("User denied account access");
           // this.isLinkMetaMask = false;
         }
       } else if (window.web3) {
-        // 老版 MetaMask Legacy dapp browsers...
         web3Provider = window.web3.currentProvider;
         // this.initMetaMask(web3Provider);
       } else {
         web3Provider = new this.Web3.providers.HttpProvider(
           "http://localhost:8545"
         );
-        // 提示用户安装metamask
         // this.isHaveMetaMask = false;
       }
       let web3js = new this.Web3(web3Provider);
@@ -1005,12 +957,8 @@ export default {
       // this.payAddressVisible = false;
       this.payment_address_error = false;
 
-      // 定义合约abi
       let contract_abi = contractABI[this.blockChainModel];
-      // 合约地址 usdt
       let contract_address = contractAddress[this.blockChainModel];
-
-      // 定义合约
 
       let myContract = new web3js.eth.Contract(contract_abi, contract_address, {
         from: this.payment_address, // default from address
@@ -1049,23 +997,19 @@ export default {
       if (window.ethereum) {
         web3Provider = window.ethereum;
         try {
-          // 请求用户授权
           await window.ethereum.enable();
           // this.initMetaMask(web3Provider);
         } catch (error) {
-          // 用户不授权时，提示用户授权
           console.error("User denied account access");
           // this.isLinkMetaMask = false;
         }
       } else if (window.web3) {
-        // 老版 MetaMask Legacy dapp browsers...
         web3Provider = window.web3.currentProvider;
         // this.initMetaMask(web3Provider);
       } else {
         web3Provider = new this.Web3.providers.HttpProvider(
           "http://localhost:8545"
         );
-        // 提示用户安装metamask
         // this.isHaveMetaMask = false;
       }
       let web3js = new this.Web3(web3Provider);
@@ -1076,12 +1020,8 @@ export default {
       // this.payAddressVisible = false;
       // this.payment_address_error = false;
 
-      // 定义合约abi
       let contract_abi = contractABI[this.blockChainModel];
-      // 合约地址 usdt
       let contract_address = contractAddress[this.blockChainModel];
-
-      // 定义合约
 
       let myContract = new web3js.eth.Contract(contract_abi, contract_address, {
         from: this.payment_address, // default from address
@@ -1090,7 +1030,6 @@ export default {
         // gas: 21000,
       });
 
-      // 代币转账
       // this.blockChainStep = 3;
       // this.confirmStep1(3);
       this.transaction_hash = "";
@@ -1172,7 +1111,6 @@ export default {
             } else {
               console.log(error);
               this.transaction_hash_status = "error";
-              // 取消订单
               // this.is_cancel_step2 = true;
               // this.cancelOrder();
             }
@@ -1186,7 +1124,6 @@ export default {
       //   } else {
       //     console.log(error);
       //     this.transaction_hash_status = 'error';
-      //     // 取消订单
       //     this.is_cancel_step2 = true;
       //     this.cancelOrder();
       //   }
@@ -1198,14 +1135,11 @@ export default {
         if (window.ethereum) {
           web3Provider = window.ethereum;
           try {
-            // 请求用户授权
             await window.ethereum.enable();
           } catch (error) {
-            // 用户不授权时
             console.error("User denied account access");
           }
         } else if (window.web3) {
-          // 老版 MetaMask Legacy dapp browsers...
           web3Provider = window.web3.currentProvider;
         } else {
           web3Provider = new this.Web3.providers.HttpProvider(
@@ -1215,12 +1149,9 @@ export default {
 
         let web3js = new this.Web3(web3Provider);
 
-        // 定义合约abi
         let contract_abi = contractABI[this.blockChainModel];
-        // 合约地址 usdt
         let contract_address = contractAddress[this.blockChainModel];
 
-        // 定义合约
         let myContract = new web3js.eth.Contract(
           contract_abi,
           contract_address,
@@ -1230,10 +1161,8 @@ export default {
           }
         );
 
-        // 查询以太币余额
         // web3js.eth.getBalance(this.payment_address).then((res)=>console.log('11111', res));
 
-        // // 查看某个账号的代币余额
         // myContract.methods.balanceOf(this.payment_address).call({from: this.payment_address}, function(error, result){
         //     if(!error) {
         //         console.log(result);
@@ -1244,7 +1173,6 @@ export default {
 
         // web3js.eth.getBalance("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48").then((res)=>console.log('usdc', res));
 
-        // 代币转账
         myContract.methods
           .transfer(this.receiving_address, 10000)
           .send({ from: this.payment_address }, (error, transactionHash) => {
@@ -1275,7 +1203,6 @@ export default {
       //   return;
       // }
       if (this.is_show_pay_address) {
-        // 提示付款地址不能为空
         let reg1 = /^[0-9A-Za-z]{25,50}$/;
         if (!reg1.test(this.payment_address)) {
           this.payment_address_error = true;
@@ -1288,7 +1215,6 @@ export default {
         this.is_click_step1 = true;
         return;
       }
-      // 余额不能少于支付金额
       let cur_price =
         this.blockChainData.price /
         this.accountTypesData[this.blockChainModel].rate;
@@ -1305,7 +1231,6 @@ export default {
         this.amount_balance_error = true;
         return;
       }
-      // 支付系统生成交易
       let data = {
         transaction_id: this.blockChainData.trans_id,
         order_id: this.blockChainData.pay_item.id,
@@ -1359,7 +1284,6 @@ export default {
               };
             }
             let created_at = new Date(res.data.created_at).getTime();
-            // 订单系统生成交易
             transactions(order_data)
               .then((res) => {
                 this.is_click_step1 = true;
@@ -1384,7 +1308,6 @@ export default {
                   } else {
                     this.count_down = 0;
                   }
-                  // 二维码
                   this.getBlockChain();
                 }
               })
@@ -1422,7 +1345,6 @@ export default {
         return;
       }
       this.is_cancel_step2 = false;
-      // TODO  取消支付订单
       let pay_data = {
         uuid: this.uuid,
       };
@@ -1453,7 +1375,6 @@ export default {
         });
     },
     cancelOrder() {
-      // TODO  取消支付订单
       let pay_data = {
         uuid: this.uuid,
       };
@@ -1481,16 +1402,13 @@ export default {
       if (!this.is_click_step3) {
         return;
       }
-      // TODO  匹配交易ID
       let reg2 = /^[0-9A-Za-z]{40,90}$/;
       if (!this.isUseMetaMask) {
         if (!reg2.test(this.transaction_hash)) {
-          // 不合规
           this.is_show_step3_tips = true;
           return;
         }
         if (!this.confirm_info) {
-          // 我已确定交易信息
           this.is_show_step3_tips = true;
           return;
         }
@@ -1584,7 +1502,7 @@ export default {
         // let str = `ethereum:${this.receiving_address}?contractAddress=${contractAddress[this.blockChainModel]}&decimal=6&value=0&network=ethereum`;
         const str = this.receiving_address;
         this.qrCode = new QRCode("account-qr", {
-          text: JSON.stringify(str), // 需要转换为二维码的内容
+          text: JSON.stringify(str),
           width: 150,
           height: 150,
           colorDark: "#000000",
@@ -1592,7 +1510,7 @@ export default {
           correctLevel: QRCode.CorrectLevel.L,
         });
 
-        // let canvas = this.qrCode._el.querySelector("canvas"); //获取生成二维码中的canvas，并将canvas转换成base64
+        // let canvas = this.qrCode._el.querySelector("canvas"); 
         // this.base64Text = canvas.toDataURL("image/png");
       } else {
         setTimeout(() => {
@@ -1601,12 +1519,12 @@ export default {
       }
     },
     copyID(text) {
-      let input = document.createElement("input"); // 创建input对象
-      input.value = text; // 设置复制内容
-      document.body.appendChild(input); // 添加临时实例
-      input.select(); // 选择实例内容
-      document.execCommand("Copy"); // 执行复制
-      document.body.removeChild(input); // 删除临时实例
+      let input = document.createElement("input");
+      input.value = text;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("Copy");
+      document.body.removeChild(input);
       let msg = "Copying  Success!";
       this.$message.success(msg);
     },

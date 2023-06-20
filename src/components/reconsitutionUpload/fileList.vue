@@ -65,7 +65,6 @@ watch(
   (newVal, oldVal) => {
     let oldLength = oldVal ?? 0;
     if (newVal >= oldLength) {
-      // 新增文件
       let pushNumber = JSON.parse(JSON.stringify(MAX_UPLOAD_NUM));
       for (const item of curFileList.value) {
         if (item.fileUploading) {

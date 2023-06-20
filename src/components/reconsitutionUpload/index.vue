@@ -149,23 +149,6 @@ const path = require('path');
 const fs = window.require('fs');
 const { dialog } = window.require("electron").remote;
 
-/* dialog.showOpenDialog 的配置项包括：
-title：对话框的标题。
-defaultPath：默认打开的路径。
-buttonLabel：按钮的文本标签。
-filters：可选择的文件类型，可以是一个数组，每个元素包含一个名称和一个文件扩展名的对象。
-
-properties：对话框的属性，可以是一个数组，包含以下选项：
-openFile：允许选择文件。
-openDirectory：允许选择文件夹。
-multiSelections：允许选择多个文件。
-showHiddenFiles：显示隐藏文件。
-createDirectory：允许创建新文件夹。
-promptToCreate：提示用户是否创建新文件夹。
-message：对话框的消息文本。  
-securityScopedBookmarks：是否启用安全范围书签。 */
-
-
 import { useStore } from "vuex";
 const _this = getCurrentInstance();
 const multipleTable = ref()
@@ -179,11 +162,11 @@ const email = computed(() => store.getters.userInfo?.email);
 const orderId = computed(() => store.getters.orderId);
 const deviceData = computed(() => store.getters.deviceData);
 const deviceType = computed(() => store.getters.deviceType);
-const uploadFileList = reactive({});  // 当前队列中的文件
-// const selectFilelist = reactive({})  // 当前选择上传的文件
+const uploadFileList = reactive({});  
+// const selectFilelist = reactive({})
 
 
-const requestFileList = reactive({})  // 接收数据库中的文件列表信息
+const requestFileList = reactive({})
 
 watch(() => orderId.value, (newVal, oldVal) => {
   if (!requestFileList[newVal]) {
@@ -235,8 +218,6 @@ const allFileList = computed({
 })
 const tokenMap = computed(() => store.getters.tokenMap);
 
-
-// 选择文件的对话框Dialog
 const openDialog = debounce(async function (type) {
   dialog.showOpenDialog({
     properties: [type],
@@ -250,10 +231,8 @@ const openDialog = debounce(async function (type) {
     if (!result.canceled) {
       for (const filePath of result.filePaths) {
         if (type == 'openDirectory') {
-          // 文件夹
           initDirectory(filePath)
         } else {
-          // 文件
           initFile(filePath)
         }
       }
@@ -403,7 +382,6 @@ function initDirectoryItem(item, type) {
 
 
 
-/* 在上传过程中 每当有新的文件进行上传操作待上传列表中就删除对应的文件 */
 const newQueueID = (id, fileOrderID) => {
   if (orderId.value == fileOrderID) {
     requestFileList[fileOrderID].Waiting.fileList = requestFileList[fileOrderID].Waiting.fileList.filter(item => item.id != id)
@@ -418,12 +396,10 @@ const newQueueID = (id, fileOrderID) => {
   }
 };
 
-/* 在待上传列表中删除指定文件 */
 function remove(row) {
   const { id, orderId, urlFileName, deviceType } = row
   let deleteType = requestFileList[orderId].isErrorOrWaiting == 'Waiting' ? 3 : 2
 
-  //数据库文件
   let params = {
     email: email.value,
     orderId: orderId,
@@ -516,7 +492,6 @@ function selectEnable(row) {
   return true
 }
 
-/* 每页多少条 */
 function handleSizeChange(val) {
   let type = requestFileList[orderId.value].isErrorOrWaiting
   requestFileList[orderId.value][type].pageSize = val
@@ -527,7 +502,7 @@ function handleSizeChange(val) {
   }
 
 }
-/* 当前页 */
+
 function handleCurrentChange(val) {
   let type = requestFileList[orderId.value].isErrorOrWaiting
   requestFileList[orderId.value][type].pageNo = val

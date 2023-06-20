@@ -105,14 +105,14 @@ const paused = ref(false);
 const error = ref(false);
 const completed = ref(false);
 const fileUploading = ref(false);
-const ISCIDING = ref(false); // 计算md5
-const averageSpeed = ref(0); // 上传速度
-const formatedSize = ref(""); // 文件大小
+const ISCIDING = ref(false);
+const averageSpeed = ref(0);
+const formatedSize = ref("");
 
-const progress = ref(0); // 上传进度
-const timeRemaining = ref(0); // 剩余大小
+const progress = ref(0);
+const timeRemaining = ref(0);
 const StateType = ref("");
-const is_created_succeed = ref(false); // 文件是否创建成功  true 成功 false 失败
+const is_created_succeed = ref(false);
 const isBigFile = ref(true);
 const fileMd5 = ref(null);
 const fileErrorMesage = ref('- -')
@@ -285,7 +285,6 @@ const fileShare = () => {
 const toPath = () => {
   // console.log(file.value);
   // const folderPath = "/path/to/folder";
-  // // 使用remote模块调用操作系统的文件管理器打开文件夹
   // remote.shell.openItem(folderPath);
 };
 
@@ -314,7 +313,6 @@ const resume = debounce(async function () {
   file_completed(false);
   loading.value = true;
   fileErrorMesage.value = '- -'
-  // 文件创建成功 调用重传
   if (is_created_succeed.value && isBigFile.value) {
     let params = {
       email: email.value,
@@ -338,7 +336,6 @@ const resume = debounce(async function () {
         fileError();
       });
   } else {
-    //创建失败重新上传
     let params = initParams();
     uploadFile(params);
   }

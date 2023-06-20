@@ -12,12 +12,10 @@ export default {
     };
   },
   props: {
-    //接收父组件的数据
     endTime: { type: Number, default: "" },
     endText: { type: String, default: "" },
   },
   watch: {
-    //监听时间的变化
     endTime(time) {
       this.countdowm(this.endTime);
     },
@@ -42,7 +40,7 @@ export default {
           sec = sec < 10 ? "0" + sec : sec;
           let format = "";
           if (day > 0) {
-            format = `${day}天${hour}:${min}:${sec}`;
+            format = `${day}Day${hour}:${min}:${sec}`;
           }
           if (day <= 0 && hour > 0) {
             format = `${hour}:${min}:${sec}`;

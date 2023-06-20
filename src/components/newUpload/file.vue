@@ -110,8 +110,7 @@ const completed = ref(file.value.completed);
 const ISCIDING = ref(false);
 const isPause = ref(false);
 
-const is_created_succeed = ref(false); // 文件是否创建成功  true 成功 false 失败
-const isBigFile = ref(true);
+const is_created_succeed = ref(false);
 const fileMd5 = ref(null);
 const loading = ref(false)
 
@@ -138,7 +137,6 @@ const resume = debounce(async function () {
     }
   }
 
-  // 文件创建成功 调用重传
   if (is_created_succeed.value && isBigFile.value) {
     let params = {
       email: email.value,
@@ -160,7 +158,6 @@ const resume = debounce(async function () {
         fileError();
       });
   } else {
-    //创建失败重新上传
     let params = await initParams();
     uploadFile(params, "big");
   }
@@ -474,7 +471,6 @@ const initFile = async () => {
 
   if (res.code == 200 && res.data) {
     beginUpload();
-    // 可以上传
   } else if (res.code == 30039) {
     ElMessageBox.confirm(
       "duplicate file name, are you sure to overwrite?",
@@ -510,7 +506,6 @@ const fileShare = () => {
 const toPath = () => {
   // console.log(file.value);
   // const folderPath = "/path/to/folder";
-  // // 使用remote模块调用操作系统的文件管理器打开文件夹
   // remote.shell.openItem(folderPath);
 };
 
