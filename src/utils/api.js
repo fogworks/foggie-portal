@@ -94,7 +94,7 @@ export const refreshToken = () => {
 };
 
 //File LIST
-export const oodFileList = (email, type, token, deviceData, prefix, scroll) => {
+export const oodFileList = (email, type, token, deviceData, prefix, scroll, category = 0, date = '') => {
   let url = `${baseUrl}/list_files`,
     // prefix = "",
     delimiter = "/",
@@ -102,7 +102,13 @@ export const oodFileList = (email, type, token, deviceData, prefix, scroll) => {
     start_after = "",
     continuation_token = scroll || "",
     version_id_marker = "",
-    key_marker = "";
+    key_marker = "",
+    orderby = 'lastmodifiedtime desc',
+    tags = ''
+  if (category == 1) {
+    // imglist
+    delimiter = ''
+  }
   let data = {
     prefix,
     delimiter,
@@ -114,7 +120,11 @@ export const oodFileList = (email, type, token, deviceData, prefix, scroll) => {
     deviceData,
     type,
     token,
-    email
+    email,
+    category,
+    orderby,
+    tags,
+    date
   };
 
   return request({
@@ -198,18 +208,28 @@ export const oodFileStatus = (ID, type) => {
 };
 
 export const file_delete = (token, item, deviceData) => {
-  let objects = [
-    { pubkey: item.pubkey ? item.pubkey : encodeURIComponent(item.key) },
-  ];
-  let cids = [item.cid];
-  let object_type = item.type;
+  let objects = [];
+  let prefixes = [];
+  let cids = [];
+  for (let i = 0; i < item.length; i++) {
+    if (item[i].type == "application/x-directory") {
+      prefixes.push(item[i].key);
+    } else {
+      objects.push({
+        pubkey: item[i].pubkey ? item[i].pubkey : encodeURIComponent(item[i].key),
+      });
+      cids.push(item[i].cid);
+    }
+  }
+  let object_type = 'normal';
   let url = `${baseUrl}/file_delete`;
   let data = {
     deviceData,
     cids,
     objects,
     object_type,
-    token
+    token,
+    prefixes
   };
   return request({
     url: url,
@@ -838,6 +858,7 @@ export const get_vood_refresh_token = (params) => {
     params,
   });
 };
+//todo
 export const get_miner_reward = (data, pageSize = 10, pageNumber = 1) => {
   let url = `${centerPoolUrl}/api/v1/minerManage/get_miner_reward?pageSize=${pageSize}&pageNumber=${pageNumber}`;
   return request({
@@ -846,6 +867,37 @@ export const get_miner_reward = (data, pageSize = 10, pageNumber = 1) => {
     data,
   });
 };
+export const get_mp = (ps = 100, pn = 1) => {
+  let url = `${apiUrl}/api/miner_pool/get_mp?ps=${ps}&pn=${pn}`;
+  return request({
+    url: url,
+    method: "get",
+  });
+};
+export const files_download = (params) => {
+  let url = `${baseUrl}/files_download`;
+  return request({
+    url: url,
+    method: "GET",
+    params,
+  });
+}
+export const rename_objects = (data) => {
+  let url = `${baseUrl}/rename_objects`;
+  return request({
+    url: url,
+    method: "POST",
+    data,
+  });
+}
+export const get_timeline = (data) => {
+  let url = `${baseUrl}/get_timeline`;
+  return request({
+    url: url,
+    method: "POST",
+    data,
+  });
+}
 
 
 

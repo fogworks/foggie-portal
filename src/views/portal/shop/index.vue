@@ -3,8 +3,8 @@
     <div class="card">
       <div class="content">
         <!-- <div class="title">Foggie</div> -->
-        <div>
-          <svg-icon icon-class="logo-dog"></svg-icon>
+        <div style="height: 50px">
+          <!-- <svg-icon icon-class="logo-dog"></svg-icon> -->
         </div>
         <div class="price">$19.9</div>
         <div class="description">

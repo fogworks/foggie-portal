@@ -26,7 +26,15 @@
           <!-- <img src="@/assets/copy.png" alt="" /> -->
         </template>
       </div>
-      <div class="preview-box">
+      <VideoPlay
+        style="width: 100%; margin-top: 20px"
+        v-if="
+          detailData.data.type == 'video/mp4' ||
+          detailData.data.type == 'audio/mpeg'
+        "
+        :srcData="detailData.data"
+      ></VideoPlay>
+      <div v-else class="preview-box">
         <div class="logo-box" v-if="!detailData.data.isSystemImg">
           <svg-icon
             v-if="theme === 'dark'"
@@ -76,13 +84,14 @@ import {
   toRefs,
   getCurrentInstance,
 } from "vue";
+import VideoPlay from "@/components/fileComponent/videoPlay";
 import ShareDialog from "./shareDialog";
 import { pIN, shareLink } from "@/utils/api.js";
 import { ElNotification } from "element-plus";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 export default {
-  components: { ShareDialog },
+  components: { ShareDialog, VideoPlay },
   props: {
     visible: {
       type: Boolean,
@@ -109,18 +118,15 @@ export default {
     const store = useStore();
     const router = useRouter();
     const theme = computed(() => store.getters.theme);
-    // const currentOODItem = JSON.parse(localStorage.getItem("currentOODItem"));
-    const currentOODItem = inject("currentOODItem");
-    // const currentOODItem = computed(() => store.getters.currentOODItem);
     const documentInfo = reactive({
       title: detailData.data.name,
       idList: detailData.data.idList,
-      url: detailData.data.imgUrlLarge,
+      url: detailData.data.imgUrl,
     });
     const shareRefContent = reactive({});
     const showShareDialog = ref(false);
-    const device_id = currentOODItem.value.data.device_id;
-    const device_id_real = currentOODItem.value.data.device_id_real;
+    const device_id = detailData.device_id;
+    const device_id_real = detailData.device_id_real;
     const initDetail = () => {};
     onMounted(initDetail);
     const beforeClose = () => {
@@ -155,7 +161,9 @@ export default {
         let _key = encodeURIComponent(key);
         let peer_id = deviceData.peer_id;
         let foggieStr = `foggie://${peer_id}/${orderId}/${item.cid}`;
-        let httpStr = `http://${deviceData.rpc.split(':')[0]}/fog/${deviceData.foggie_id}/${item.cid}`;
+        let httpStr = `http://${deviceData.rpc.split(":")[0]}/fog/${
+          deviceData.foggie_id
+        }/${item.cid}`;
         let cyfsStr = item.file_id
           ? `cyfs://o/${ood_id_cyfs}/${item.file_id}`
           : "";
@@ -178,8 +186,8 @@ export default {
         // shareRefContent.value=shareCopyContent
         showShareDialog.value = true;
         // this.shareBoxShow = true;
-      } 
-    }
+      }
+    };
     const downloadItem = () => {
       // let ID = device_id.value;
       // let pubkey = item.pubkey;
@@ -231,7 +239,6 @@ export default {
       documentInfo,
       detailData,
       device_id,
-      currentOODItem,
       orderId,
       initDetail,
       doShare,

@@ -101,7 +101,7 @@
                 </div>
               </button>
               <!-- <div class="product-action-pay" @click="toPay(item, 'notfree', item.isHaveStock)">{{ $t('index.adoptBtn') }}</div> -->
-              <el-tooltip
+              <!-- <el-tooltip
                 class="item"
                 effect="dark"
                 content="Data acquisition in progress..."
@@ -150,7 +150,7 @@
                 @click="toFree(item, item.isHaveStock)"
               >
                 Free trial
-              </div>
+              </div> -->
             </div>
           </div>
           <div class="product-bg-info2">
@@ -671,24 +671,24 @@ async function toPay(item, isTrial, isHaveStock) {
       "activeProduct",
       JSON.stringify(activeProduct.value)
     );
-    if (isTrial === "notfree" && !everOrder.value) {
-      ElMessageBox.confirm(
-        `<p>You can choose to free trial for 7 days first,</p>Are you sure to continue to pay for adoption?</p>`,
-        "Tips",
-        {
-          confirmButtonText: "Yes",
-          cancelButtonText: "No",
-          dangerouslyUseHTMLString: true,
-          type: "warning",
-        }
-      )
-        .then(() => {
-          createOrder(isTrial);
-        })
-        .catch(() => {});
-    } else {
-      createOrder(isTrial);
-    }
+    // if (isTrial === "notfree" && !everOrder.value) {
+    //   ElMessageBox.confirm(
+    //     `<p>You can choose to free trial for 7 days first,</p>Are you sure to continue to pay for adoption?</p>`,
+    //     "Tips",
+    //     {
+    //       confirmButtonText: "Yes",
+    //       cancelButtonText: "No",
+    //       dangerouslyUseHTMLString: true,
+    //       type: "warning",
+    //     }
+    //   )
+    //     .then(() => {
+    //       createOrder(isTrial);
+    //     })
+    //     .catch(() => {});
+    // } else {
+    createOrder(isTrial);
+    // }
   }
 }
 async function createOrder(type) {
@@ -1612,9 +1612,8 @@ onMounted(() => {
 .product-actions2 {
   display: flex;
   margin-top: 30px;
-  flex-direction: column;
-  align-items: center;
   justify-content: space-between;
+  flex-direction: row;
 }
 .product-actions2 > div {
   display: flex;

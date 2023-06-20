@@ -48,9 +48,17 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  isJoin: {
+    type: Boolean,
+    default: false,
+  },
+  poolSpace: {
+    type: [String, Number],
+    default: 0,
+  },
 });
-const emit = defineEmits(["update:visible"]);
-const { visible } = toRefs(props);
+const emit = defineEmits(["update:visible", "setPoolSpace"]);
+const { visible, isJoin, poolSpace } = toRefs(props);
 const deviceData = inject("deviceData");
 const tableData = ref([]);
 const close = () => {
@@ -59,15 +67,26 @@ const close = () => {
 const currentPage = ref(1);
 const total = ref(0);
 const initRecords = () => {
-  get_miner(deviceData).then((res) => {
-    total.value = res.result.total;
-    tableData.value = res.result.data;
-  });
+  get_miner(deviceData)
+    .then((res) => {
+      total.value = res.result.total;
+      tableData.value = res.result.data;
+      emit("setPoolSpace", +res.result.data[0]?.space || 0);
+    })
+    .catch(() => {});
 };
+watch(
+  isJoin,
+  (val) => {
+    emit("setPoolSpace", +tableData.value[0]?.space || 0);
+  },
+  {
+    deep: true,
+  }
+);
 const handleCurrentChange = () => {
   initRecords();
 };
-
 onMounted(initRecords);
 </script>
 

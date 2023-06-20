@@ -138,18 +138,176 @@
                   effect="dark"
                   content="Not Persisted"
                   placement="top-start"
-                  v-if="!scope.row.isPersistent && scope.row.type !== 'application/x-directory'"
+                  v-if="
+                    !scope.row.isPersistent &&
+                    scope.row.type !== 'application/x-directory'
+                  "
                 >
-                  <div >
+                  <div>
                     <i class="i-ersistent">*</i> 111{{ scope.row.name }}
                   </div>
                 </el-tooltip>
-                <div v-if="scope.row.isPersistent || scope.row.type === 'application/x-directory'">
+                <div
+                  v-if="
+                    scope.row.isPersistent ||
+                    scope.row.type === 'application/x-directory'
+                  "
+                >
                   {{ scope.row.name }}
                 </div>
               </div>
-              <el-dropdown trigger="click" @command="handleCommand">
+              <!-- <ActionDrop class="action-popover">
                 <div class="color-box table-action">
+                  <svg-icon icon-class="more"></svg-icon>
+                </div>
+                <template #reference>
+                  <ul class="more-dropdown">
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'share', command: scope.row })
+                        "
+                        :disabled="!scope.row.canShare"
+                      >
+                        share</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'ipfs', command: scope.row })
+                        "
+                        :disabled="true"
+                      >
+                        IPFS PIN</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'cyfs', command: scope.row })
+                        "
+                        :disabled="true"
+                      >
+                        CYFS PIN</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({
+                            flag: 'download',
+                            command: scope.row,
+                          })
+                        "
+                        :disabled="scope.row.isDir"
+                      >
+                        Download</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'rename', command: scope.row })
+                        "
+                      >
+                        Rename</el-button
+                      >
+                    </li>
+                    <li>
+                      <el-button
+                        @click="
+                          handleCommand({ flag: 'move', command: scope.row })
+                        "
+                      >
+                        Move</el-button
+                      >
+                    </li>
+                  </ul>
+                </template>
+              </ActionDrop> -->
+              <el-popover
+                popper-class="action-popover"
+                :offset="-3"
+                :hide-after="0"
+                placement="bottom"
+                :width="150"
+                trigger="hover"
+              >
+                <template #reference>
+                  <div class="color-box table-action">
+                    <svg-icon icon-class="more"></svg-icon>
+                  </div>
+                </template>
+                <ul class="more-dropdown">
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'share', command: scope.row })
+                      "
+                      :disabled="!scope.row.canShare"
+                    >
+                      share</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'ipfs', command: scope.row })
+                      "
+                      :disabled="true"
+                    >
+                      IPFS PIN</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'cyfs', command: scope.row })
+                      "
+                      :disabled="true"
+                    >
+                      CYFS PIN</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'download', command: scope.row })
+                      "
+                      :disabled="scope.row.isDir"
+                    >
+                      Download</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'rename', command: scope.row })
+                      "
+                      :disabled="scope.row.isDir"
+                    >
+                      Rename</el-button
+                    >
+                  </li>
+                  <li>
+                    <el-button
+                      @click="
+                        handleCommand({ flag: 'move', command: scope.row })
+                      "
+                      :disabled="scope.row.isDir"
+                    >
+                      Move</el-button
+                    >
+                  </li>
+                </ul>
+              </el-popover>
+              <!-- <el-dropdown
+                class="table-action"
+                trigger="click"
+                @command="handleCommand"
+              >
+                <div class="color-box">
                   <svg-icon icon-class="more"></svg-icon>
                 </div>
                 <template #dropdown>
@@ -176,7 +334,7 @@
                     >
                   </el-dropdown-menu>
                 </template>
-              </el-dropdown>
+              </el-dropdown> -->
             </div>
           </template>
         </el-table-column>
@@ -284,6 +442,7 @@
 </template>
 
 <script setup>
+import ActionDrop from "@/components/actionDrop";
 import { default as vElTableInfiniteScroll } from "el-table-infinite-scroll";
 
 import { ArrowRight } from "@element-plus/icons-vue";
@@ -469,7 +628,11 @@ const fileListsInfinite = _.debounce(() => {
   // } else {
   //   return;
   // }
-  if (fileSource.value && continuationToken.value && tableData.data.length < 5000) {
+  if (
+    fileSource.value &&
+    continuationToken.value &&
+    tableData.data.length < 5000
+  ) {
     getReomteData(continuationToken.value, breadcrumbList.prefix);
   }
 }, 300);
@@ -862,7 +1025,7 @@ const detailData = reactive({ data: {} });
 const toDetail = (item) => {
   localStorage.setItem("currentOODItem", JSON.stringify(currentOODItem.value));
   if (item.type === "application/x-directory") {
-    let long_name = breadcrumbList.prefix.join('/') + item.name;
+    let long_name = breadcrumbList.prefix.join("/") + item.name;
     breadcrumbList.prefix = long_name.split("/");
     emits("currentPrefix", breadcrumbList.prefix);
   } else {
@@ -891,6 +1054,8 @@ const getReomteData = (scroll, prefix) => {
     .then((res) => {
       if (res && res.content) {
         initRemoteData(res);
+      } else {
+        tableLoading.value = true;
       }
     })
     .catch(() => {
@@ -919,7 +1084,7 @@ const initRemoteData = (data) => {
       position: "bottom-left",
     });
   }
-  let dir = breadcrumbList.prefix.join('/');
+  let dir = breadcrumbList.prefix.join("/");
 
   // tableData.data = [];
   for (let i = 0; i < data.commonPrefixes?.length; i++) {
@@ -956,8 +1121,6 @@ const initRemoteData = (data) => {
     };
     tableData.data.push(item);
   }
-
-  
 
   for (let j = 0; j < data?.content?.length; j++) {
     let date = transferTime(data.content[j].lastModified);
@@ -1014,7 +1177,7 @@ const initRemoteData = (data) => {
   if (data.isTruncated) {
     continuationToken.value = data.continuationToken;
   } else {
-    continuationToken.value = '';
+    continuationToken.value = "";
   }
 
   tableLoading.value = false;
@@ -1370,7 +1533,11 @@ onMounted(() => {
     margin-bottom: 40px;
     background: transparent;
     font-size: 16px;
-
+    :deep {
+      .dropdown {
+        left: 0;
+      }
+    }
     .name-img {
       display: inline-block;
       width: 25px;
@@ -1382,6 +1549,21 @@ onMounted(() => {
         max-width: 25px;
         max-height: 25px;
       }
+    }
+    .table-action {
+      z-index: 99;
+      padding: 0;
+      // position: relative;
+      display: none;
+      // &:hover {
+      //   .more-dropdown {
+      //     display: block;
+      //     position: absolute;
+      //     top: 30px;
+      //     left: -55px;
+      //     background: #fff;
+      //   }
+      // }
     }
 
     ::v-deep {
@@ -1423,6 +1605,7 @@ onMounted(() => {
       }
 
       .action-btn-column {
+        position: static;
         .cell {
           text-align: center;
           overflow: visible;
@@ -1440,9 +1623,7 @@ onMounted(() => {
       color: #{$light_blue};
       cursor: pointer;
     }
-    .table-action {
-      display: none;
-    }
+
     .id-box {
       .copy {
         display: flex;
@@ -1489,6 +1670,7 @@ onMounted(() => {
     .color-box {
       // .color-box();
       @include color-box;
+      padding: 0;
 
       svg {
         font-size: 28px;

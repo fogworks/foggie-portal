@@ -99,11 +99,10 @@
           </div>
         </template>
       </div>
-
       <MinerRecords
-        v-if="minerRecordsVisible"
         v-model:isJoin="isJoin"
         v-model:visible="minerRecordsVisible"
+        @setPoolSpace="setPoolSpace"
       >
       </MinerRecords>
       <AssetsRewards
@@ -160,10 +159,14 @@ export default {
       type: Object,
       default: false,
     },
+    poolSpace: {
+      type: [String, Number],
+      default: 0,
+    },
   },
   setup(props, { emit }) {
     const deviceData = inject("deviceData");
-    const { currentOODItem } = toRefs(props);
+    const { currentOODItem, poolSpace } = toRefs(props);
     const totalNum = ref(0);
     // const visible = ref(false);
     const PoolDialogVisible = ref(false);
@@ -186,6 +189,10 @@ export default {
       check_join_mp(deviceData).then((res) => {
         isJoin.value = res?.result?.join_miner_pool;
       });
+    };
+    const setPoolSpace = (val) => {
+      console.log(val, "valllllllllllllllllllllllllllllllllll");
+      emit("update:poolSpace", val);
     };
     const getMinerReward = () => {
       get_miner_reward({
@@ -222,6 +229,7 @@ export default {
       reload,
       handleTimeStamp,
       rechargeOrder,
+      setPoolSpace,
     };
   },
 };

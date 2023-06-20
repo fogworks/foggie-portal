@@ -23,21 +23,29 @@
         :deviceData="deviceData"
         :isLocal="isLocal"
       ></orderList>
-      <myFiles
+      <!-- <myFiles
         :state="state"
         :orderId="orderId"
         :createdTime="createdTime"
         :deviceData="deviceData"
         :merkleState="merkleState"
         @getLocal="getLocal"
-      ></myFiles>
-      
-
+      ></myFiles> -->
+      <FileComponent
+        :state="state"
+        :orderId="orderId"
+        :createdTime="createdTime"
+        :deviceData="deviceData"
+        :merkleState="merkleState"
+        @getLocal="getLocal"
+      ></FileComponent>
     </template>
   </div>
 </template>
 
 <script setup>
+import FileComponent from "@/components/fileComponent";
+
 import {
   ref,
   toRefs,
@@ -69,7 +77,9 @@ const props = defineProps({
     default: () => ({ data: {} }),
   },
 });
-const { deviceData, activeDeviceData } = toRefs(props);
+const deviceData = reactive(props.deviceData);
+provide("deviceData", deviceData);
+const { activeDeviceData } = toRefs(props);
 const orderId = readonly(props.deviceData.space_order_id);
 const userInfo = computed(() => store.getters.userInfo);
 let customDialogIsShow = ref(true);
@@ -86,15 +96,10 @@ const getLocal = (val) => {
 store.commit("upload/setOrderId", orderId);
 
 store.commit("upload/setDeviceType", 3);
-store.commit("upload/setPeerId", deviceData.value.peer_id);
-store.commit("upload/setDeviceData", deviceData.value);
+store.commit("upload/setPeerId", deviceData.peer_id);
+store.commit("upload/setDeviceData", deviceData);
 const state = ref(0);
 const createdTime = ref("");
-watch(
-  () => props.deviceData,
-  (newValue) => {},
-  { immediate: true, deep: true }
-);
 const setState = (val) => {
   state.value = val;
 };
