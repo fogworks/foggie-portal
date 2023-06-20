@@ -1,12 +1,23 @@
 <template>
   <div>
-    <h1><svg-icon icon-class="LINK"></svg-icon> Foggie</h1>
+    <h1 class="title">
+      <img style="width: 45px" src="@/assets/logo-dog-black.svg" alt="" />
+      Foggie
+    </h1>
+    <div style="margin: 0 auto">
+      <img style="height: 50px" src="@/assets/foggie.jpg" alt="" />
+    </div>
     <h2 style="margin-bottom: 20px">
-      Lightning fast reads from the IPFS/CYFS network
+      Lightning fast reads from the IPFS network
     </h2>
     <p style="width: 900px; margin: 0 auto; font-size: 20px">
-      Read data available on the public IPFS/CYFS network with Foggie (at
-      https://foggie.fogworks.io),Add your content ID (CID) below to try it out.
+      Read data available on the public IPFS network with Foggie (at
+      <a
+        target="_blank"
+        style="color: #2419d3"
+        href="https://foggie.fogworks.io"
+        >https://foggie.fogworks.io</a
+      >),Add your content ID (CID) below to try it out.
     </p>
     <el-input
       :disabled="!hasLink"
@@ -23,7 +34,6 @@
         >
           <el-option label="ipfs://" value="ipfs" />
           <el-option label="foggie://" value="foggie" />
-          <el-option label="cyfs://" value="cyfs" disabled />
         </el-select>
       </template>
       <template #suffix>
@@ -65,8 +75,8 @@ const hasLink = computed(() => {
   );
 });
 
-const foggieList = computed(()=>{
-  let list = store.getters['global/deviceList'];
+const foggieList = computed(() => {
+  let list = store.getters["global/deviceList"];
   // return list
 });
 let pin_arr = reactive({
@@ -74,8 +84,6 @@ let pin_arr = reactive({
 });
 const isShow = false;
 const downloadItem = () => {
-
-
   if (!isShow) {
     return;
   }
@@ -180,6 +188,8 @@ onMounted(search);
 </script>
 
 <style lang="scss" scoped>
+.title {
+}
 .search-input {
   width: 900px;
   margin-top: 50px;

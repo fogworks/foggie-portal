@@ -252,7 +252,13 @@
     }
   }
 }
-
+.el-form-item {
+  margin-bottom: 30px;
+}
+.el-form-item__error {
+  font-size: 13px;
+  padding-top: 5px;
+}
 .el-input__wrapper {
   height: 48px;
   font-size: 22px;

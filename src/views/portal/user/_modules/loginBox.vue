@@ -427,6 +427,7 @@ export default {
             email: that.loginForm.email,
             password: hashPwd,
             is_client: true,
+            login_type: "password",
             // recaptcha_token: reCaptchaV3Token,
           };
           login(postData).then((res) => {

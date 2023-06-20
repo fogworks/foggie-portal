@@ -340,7 +340,9 @@ function getChainId() {
 
 <style lang="scss" scoped>
 .box {
-  padding-top: 50px;
+  position: relative;
+  width: 100%;
+  height: 100%;
   :deep {
     .el-loading-mask {
       background: transparent;
@@ -354,6 +356,10 @@ function getChainId() {
   text-align: center;
 }
 .login-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -70%);
   display: flex;
   justify-content: space-around;
   align-items: center;
