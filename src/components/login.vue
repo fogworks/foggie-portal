@@ -2,7 +2,7 @@
   <div class="logincontent">
     <el-card class="box-card">
       <template #header>
-        <div class="card-header">Sign In</div>
+        <div class="card-header">Login</div>
       </template>
       <div class="text item my_login_box">
         <el-form

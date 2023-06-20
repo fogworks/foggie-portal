@@ -2,10 +2,10 @@
 import enLocale from 'element-plus/dist/locale/en.mjs'
 export default {
   login: {
-    loginTitle: "Sign In",
-    loginWith: "Sign in with",
+    loginTitle: "Login",
+    loginWith: "Login with",
     RegisterTitle: "Register",
-    login: "Sign In / Register",
+    login: "Login / Register",
     registerTitle: "Create a new account? ",
     Register: "Register",
     passwordTitle: "Forget Password?",
@@ -21,12 +21,12 @@ export default {
     mobilelRequired: "Please enter phone number", //请填写邮件！
     mobileVaildate: "Please enter a correct phone number!", //请输入正确的邮件地址！
     haveAccount: "Existing account?",
-    gotoLogin: "Sign In",
+    gotoLogin: "Login",
     emailInput: "Please enter email address",
-    emailLogin: "Sign in with Email",
-    passwordLogin: "Sign in with Password",
+    emailLogin: "Login with Email",
+    passwordLogin: "Login with Password",
     emailLoginTips:
-      "A verification link has been sent to your email address, please check your email to verify and sign in your account.",
+      "A verification link has been sent to your email address, please check your email to verify and Login your account.",
     haveseedEmail: "A signin link has been sent to your email address.",
     logout: "Log Out",
   },
