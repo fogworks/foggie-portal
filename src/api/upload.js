@@ -137,3 +137,11 @@ export function getfileListByState(data) {
     data,
   });
 }
+
+export function changeFileState(data) {
+  return request({
+    url: baseUrl + "/file/update_state",
+    method: "post",
+    data,
+  });
+}

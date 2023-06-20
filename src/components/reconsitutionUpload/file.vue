@@ -236,9 +236,10 @@ function loadUploadProgress() {
           } else if (response.state == 2) {
             if (response.error_msg) {
               fileErrorMesage.value = response.error_msg
-              let type = StateType.value == "error" ? 2 : 3;
 
+              let type = StateType.value == "error" ? 2 : 3;
               emits("updaLoadFileListByState", type);
+              
               fileError();
               // remove();
             } else {
@@ -306,7 +307,8 @@ const resume = debounce(async function () {
       }
     }
   }
-
+  error.value = false
+  file.value.error = false
   file_paused(false);
   file_fileUploading(true);
   file_completed(false);
@@ -389,7 +391,6 @@ const remove = () => {
   });
 };
 const retry = () => {
-  error.value = false;
   resume();
 };
 const fileError = () => {
@@ -597,7 +598,7 @@ onUnmounted(() => {
 }
 
 .uploader-file-size {
-  width: 15%;
+  width: 10%;
   text-indent: 10px;
 }
 
@@ -616,7 +617,7 @@ onUnmounted(() => {
 }
 
 .uploader-file-status {
-  width: 20%;
+  width: 25%;
 
   /* text-indent: 20px; */
 }

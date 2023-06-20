@@ -100,9 +100,9 @@
           </el-table-column>
           <el-table-column label="Operate" width="120" align="center">
             <template #default="{ row }">
-              <el-link class="link" :underline="false" v-if="requestFileList[orderId].isErrorOrWaiting == 'error'">
+              <!-- <el-link class="link" :underline="false" v-if="requestFileList[orderId].isErrorOrWaiting == 'error'">
                 <svg-icon icon-class="refresh"></svg-icon>
-              </el-link>
+              </el-link> -->
               <el-link class="link" :underline="false" @click="remove(row)">
                 <el-icon size="25">
                   <CloseBold />
@@ -136,7 +136,7 @@ import {
 } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 
-import { getfileListByState, uploadFolder, isCanUpload_Api } from "@/api/upload";
+import { getfileListByState, uploadFolder, isCanUpload_Api, changeFileState } from "@/api/upload";
 import { getFileType } from "@/utils/getFileType";
 import {
   deleteUploadFile_Api,
@@ -219,7 +219,10 @@ const total = computed(() => {
   let type = requestFileList[orderId.value].isErrorOrWaiting
   return requestFileList[orderId.value][type].total
 })
-
+const requestFileListType = computed(() => {
+  let type = requestFileList[orderId.value].isErrorOrWaiting
+  return type
+})
 
 
 const allFileList = computed({
@@ -344,6 +347,17 @@ function loadFileListByState(type = 3, isPaging = true) {
       if (!isPaging && type == 3) {
         uploadFileList[orderId.value] = requestFileList[orderId.value].Waiting.fileList
       }
+      if (type == 3) {
+        if (multipleTable.value) {
+          multipleTable.value.clearSelection()
+        }
+        for (const item of uploadFileList[orderId.value] || []) {
+          if (multipleTable.value && item) {
+            multipleTable.value.toggleRowSelection(item, true)
+          }
+        }
+      }
+
 
 
       if (type == 3 && _this.refs[`fileListRef_${orderId.value}`]) {
@@ -353,11 +367,13 @@ function loadFileListByState(type = 3, isPaging = true) {
           requestFileList[orderId.value].Waiting.fileList = requestFileList[orderId.value].Waiting.fileList.filter(element => element.id != item.id)
         }
       }
-
-
-
-
-
+      if (type == 2 && _this.refs[`fileListRef_${orderId.value}`]) {
+        let fileListArray = _this.refs[`fileListRef_${orderId.value}`][0]?.curFileList || [];
+        let executeLsit = fileListArray.filter((item) => item.fileUploading || item.paused)
+        for (const item of executeLsit) {
+          requestFileList[orderId.value].error.fileList = requestFileList[orderId.value].error.fileList.filter(element => element.id != item.id)
+        }
+      }
 
     }
   })
@@ -400,19 +416,6 @@ const newQueueID = (id, fileOrderID) => {
       multipleTable.value.toggleRowSelection(row, false)
     }
   }
-
-
-  // let requestFileListIndex = requestFileList[fileOrderID].Waiting.fileList.findIndex((file) => file.id == id);
-  // if (selectFilelist[fileOrderID]) {
-  //   let row = selectFilelist[fileOrderID].filter(item => item.id)[0]
-  //   if (row && multipleTable.value) {
-  //     multipleTable.value.toggleRowSelection(row, false)
-  //   }
-  // }
-
-  // if (requestFileListIndex > -1) {
-  //   requestFileList[fileOrderID].Waiting.fileList.splice(requestFileListIndex, 1);
-  // }
 };
 
 /* 在待上传列表中删除指定文件 */
@@ -442,43 +445,70 @@ function remove(row) {
 }
 
 function handleSelectionRowChange(selection, row) {
-  if (uploadFileList[orderId.value]) {
-    if (uploadFileList[orderId.value].some(item => item.id == row.id)) {
-      uploadFileList[orderId.value] = uploadFileList[orderId.value].filter(item => item.id != row.id)
+  if (requestFileListType.value == 'Waiting') {
+    if (uploadFileList[orderId.value]) {
+      if (uploadFileList[orderId.value].some(item => item.id == row.id)) {
+        uploadFileList[orderId.value] = uploadFileList[orderId.value].filter(item => item.id != row.id)
+      } else {
+        uploadFileList[orderId.value].push(row)
+      }
     } else {
+      uploadFileList[orderId.value] = []
       uploadFileList[orderId.value].push(row)
     }
   } else {
-    uploadFileList[orderId.value] = []
-    uploadFileList[orderId.value].push(row)
+    updateFileState(row.urlFileName)
   }
+
 }
 
 
 
 
 const SelectionAllChange = debounce((selection) => {
-  if (uploadFileList[orderId.value]) {
-    if (selection.length == 0) {
-      for (const item of uploadFileList[orderId.value]) {
-        if (requestFileList[orderId.value].Waiting.fileList.some(element => element.id == item.id)) {
-          uploadFileList[orderId.value] = uploadFileList[orderId.value].filter(element => element.id != item.id)
+  if (requestFileListType.value == 'Waiting') {
+    if (uploadFileList[orderId.value]) {
+      if (selection.length == 0) {
+        for (const item of uploadFileList[orderId.value]) {
+          if (requestFileList[orderId.value].Waiting.fileList.some(element => element.id == item.id)) {
+            uploadFileList[orderId.value] = uploadFileList[orderId.value].filter(element => element.id != item.id)
+          }
+        }
+      } else {
+        for (const selectionItem of selection) {
+          if (!uploadFileList[orderId.value].some(item => item.id == selectionItem.id)) {
+            uploadFileList[orderId.value].push(selectionItem)
+          }
         }
       }
-    } else {
-      for (const selectionItem of selection) {
-        if (!uploadFileList[orderId.value].some(item => item.id == selectionItem.id)) {
-          uploadFileList[orderId.value].push(selectionItem)
-        }
-      }
-    }
 
+    } else {
+      uploadFileList[orderId.value] = []
+      uploadFileList[orderId.value] = uploadFileList[orderId.value].concat(selection)
+    }
   } else {
-    uploadFileList[orderId.value] = []
-    uploadFileList[orderId.value] = uploadFileList[orderId.value].concat(selection)
+    updateFileState()
+  }
+}, 500)
+function updateFileState(destPath) {
+  let params = {
+    email: email.value,
+    orderId: orderId.value,
+    deviceType: deviceType.value,
+    sourceState: 2,
+    targetState: 3,
+  }
+  if (destPath) {
+    params.destPath = destPath
   }
 
-}, 500)
+  changeFileState(params).then(res => {
+    if(res.code == 200){
+      loadFileListByState(2)
+    }
+  })
+}
+
 
 
 
