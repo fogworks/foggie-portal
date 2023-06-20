@@ -71,7 +71,7 @@
     "stream-browserify": "^3.0.0",
     "svg-icons": "^1.0.13",
     "sync-request": "^6.1.0",
-    "vue": "^3.2.13",
+    "vue": "^3.2.47",
     "vue-i18n": "next",
     "vue-simple-uploader": "^1.0.1",
     "vuex-persistedstate": "^4.1.0",

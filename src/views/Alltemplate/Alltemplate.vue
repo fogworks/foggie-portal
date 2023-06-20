@@ -55,6 +55,9 @@ import {
   onMounted,
   watch,
 } from "vue";
+
+
+
 import orderList from "@/components/orders/orderList.vue";
 import myFiles from "@/views/Alltemplate/MyFiles/myFiles";
 // import customDialog from "@/components-V3/customDialog";
@@ -90,19 +93,8 @@ const getLocal = (val) => {
   isLocal.value = val;
 };
 
-// if (clientPassword.value) {
-//   customDialogIsShow.value = false;
-// } else {
-//   customDialogIsShow.value = true;
-// }
 store.commit("upload/setOrderId", orderId);
-// if (deviceData.device_type == 'foggie_max' || deviceData.device_type == 'foggie' || deviceData.device_type == '') {
-//   const orderId = readonly(deviceData.device_id)
-//   store.commit('upload/setOrderId', orderId)
-// } else {
-//   const orderId = readonly(deviceData.order_id)
-//   store.commit('upload/setOrderId', orderId)
-// }
+
 store.commit("upload/setDeviceType", 3);
 store.commit("upload/setPeerId", deviceData.peer_id);
 store.commit("upload/setDeviceData", deviceData);

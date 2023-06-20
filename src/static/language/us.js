@@ -121,9 +121,11 @@ export default {
     footer_line5_3: " to get help！ ",
     month: "Month", //月
     year: "Year", //年
+    semiannual: "Half Year", //半年
     discounts: "You can save {total} in one year ", //About one year saving
     monthrent: "Monthly Rent", //月租
-    yearrent: "Annual Rent", //年租
+    semiannualrent: "Semi-annual Rent",
+    yearrent: "Annual Rent",
     monthly: "Monthly",
     annual: "Annual",
     freeBtn: "Free trial",

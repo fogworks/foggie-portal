@@ -78,11 +78,9 @@ export function fileUploadApi(data) {
     data,
   });
 }
-
-
 export function byMd5GetUploadProgress(data) {
   return request({
-    url: baseUrl + "/file/get_by_md5",
+    url: baseUrl + "/file/get_by_name",
     method: "post",
     timeout: 10000,
     data,
@@ -135,6 +133,14 @@ export function uploadFolder(data) {
 export function getfileListByState(data) {
   return request({
     url: baseUrl + "/file/list_by_state",
+    method: "post",
+    data,
+  });
+}
+
+export function changeFileState(data) {
+  return request({
+    url: baseUrl + "/file/update_state",
     method: "post",
     data,
   });

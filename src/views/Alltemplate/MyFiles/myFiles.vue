@@ -7,7 +7,7 @@
         size="large"
         active-text="Remote Files"
         :active-value="remote"
-        inactive-text="Local Files"
+        inactive-text="Local upload record"
         :inactive-value="local"
         :before-change="switchReceiveStatus"
       />
@@ -1363,7 +1363,7 @@ const switchReceiveStatus = () => {
     try {
       if (fileSource.value) {
         console.log("------------remote");
-        ElMessageBox.confirm("Are you sure to get local data?", "Warning", {
+        ElMessageBox.confirm("Are you sure to get local upload record?", "Warning", {
           confirmButtonText: "OK",
           cancelButtonText: "Cancel",
         })

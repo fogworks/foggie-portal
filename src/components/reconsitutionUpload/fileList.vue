@@ -4,22 +4,15 @@
       <li>
         <div class="uploader-file-info head-info">
           <div class="uploader-file-name">File Name</div>
-          <div class="uploader-file-prefix">Upload Path</div>
+          <div class="uploader-file-prefix">Error Message</div>
           <div class="uploader-file-size">File Size</div>
           <div class="uploader-file-status">Upload Status</div>
           <div class="uploader-file-actions">Operate</div>
         </div>
       </li>
       <li v-for="file in curFileList" :key="file.id">
-        <upFile
-          :file="file"
-          :curFileList="curFileList"
-          :MAX_UPLOAD_NUM="MAX_UPLOAD_NUM"
-          @chanStatus="chanStatus"
-          @remove="remove"
-          @fileShare="fileShare"
-          @updaLoadFileListByState="updaLoadFileListByState"
-        />
+        <upFile :file="file" :curFileList="curFileList" :MAX_UPLOAD_NUM="MAX_UPLOAD_NUM" @chanStatus="chanStatus"
+          @remove="remove" @fileShare="fileShare" @updaLoadFileListByState="updaLoadFileListByState" />
       </li>
     </ul>
   </div>
@@ -40,25 +33,23 @@ import {
   computed,
 } from "vue";
 import { useStore } from "vuex";
-
+import { cloneDeep } from "lodash";
 const store = useStore();
-const deviceType = computed(() => store.getters.deviceType);
-const MAX_UPLOAD_NUM = deviceType.value == 3 ? 1 : 4;
 const props = defineProps({
-  orderID: {
-    type: [String, Number],
-    default: "",
-  },
+  // orderID: {
+  //   type: [String, Number],
+  //   default: "",
+  // },
   uploadLists: {
     type: Array,
     default: () => [],
   },
-  // deviceType: {
-  //   type: [String , Number],
-  //   default: "",
-  // },
+  deviceType: {
+    type: [String, Number],
+    default: "",
+  },
 });
-
+const MAX_UPLOAD_NUM = props.deviceType == 3 ? 1 : 4;
 const Max_CurFileListLength = 20;
 
 const emits = defineEmits(["fileShare", "newQueueID", "updaFileListByState"]);
@@ -90,9 +81,11 @@ watch(
   { deep: true }
 );
 
-watchEffect(() => {
-  fileList.uploadLists = props.uploadLists;
-});
+watch(() => props.uploadLists, (newVal) => {
+  fileList.uploadLists = newVal
+  console.log(fileList.uploadLists);
+}, { immediate: true, deep: true })
+
 
 const chanStatus = (item) => {
   let curFileListLength = curFileList.value.length;
@@ -105,43 +98,45 @@ const chanStatus = (item) => {
       }
     }
   }
-
   if (fileList.uploadLists.length == 0) {
+    if (item) {
+      emits("newQueueID", item.id, item.orderId);
+    }
     return;
   }
-  let pushItem = fileList.uploadLists[0];
+  let pushItem = cloneDeep(fileList.uploadLists[0]);
   pushItem.fileUploading = true;
   curFileList.value.unshift(pushItem);
+  emits("newQueueID", pushItem.id, pushItem.orderId);
   fileList.uploadLists.shift();
   if (curFileListLength >= Max_CurFileListLength) {
-    let deleteIndex = findLastIndex(
-      curFileList.value,
-      (lastItem) => lastItem.fileUploading == false
-    );
+    let deleteIndex = findLastIndex(curFileList.value, (lastItem) => lastItem.fileUploading == false);
     curFileList.value.splice(deleteIndex, 1);
   }
-  emits("newQueueID", pushItem.id, pushItem.orderId);
+  // if (item) {
+
+  // }
+
 };
 
 const remove = (id, fileOrderId) => {
   curFileList.value = curFileList.value.filter((item) => item.id !== id);
-  fileList.uploadLists = fileList.uploadLists.filter((item) => item.id !== id);
   chanStatus();
 };
 
 function updaLoadFileListByState(type) {
-  emits("updaFileListByState", type);
+  // emits("updaFileListByState", type);
 }
 const fileShare = (file) => {
   emits("fileShare", file);
 };
 
-onMounted(() => {});
+onMounted(() => { });
 
-// defineExpose({
-//   curFileList,
-//   orderID: props.orderID,
-// });
+defineExpose({
+  curFileList,
+  orderID: props.orderID,
+});
 </script>
 
 <style scoped>
@@ -157,7 +152,7 @@ onMounted(() => {});
   margin-right: 20px;
 }
 
-.uploader-list > ul {
+.uploader-list>ul {
   list-style: none;
   margin: 0;
   padding: 0;
