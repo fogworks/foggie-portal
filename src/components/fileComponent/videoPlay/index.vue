@@ -47,6 +47,8 @@ const init = () => {
   const url = `${baseUrl}/file_download/?cid=${cid}&key=${key}&ip=${ip}&port=${port}&Id=${Id}&peerId=${peerId}&type=${
     deviceType.value == "space" ? "space" : "foggie"
   }&token=${token.value}`;
+  // const url =
+  //   "blob:https://baike.baidu.com/ef30a7da-0a4f-4e93-a090-cbd1c51ae91b";
   player.value = videojs(
     document.getElementById("myVideo"),
     {
@@ -59,7 +61,7 @@ const init = () => {
       autoplay: false,
 
       fluid: true,
-      techOrder: ["html5"],
+      techOrder: ["html5", "m3u8"],
 
       language: "en",
 

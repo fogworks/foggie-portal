@@ -5,7 +5,7 @@ import {
     setImportPrivateKey,
     getDmcUsername
 } from "@/api/common";
-import { updateUser } from '@/utils/api'
+import { user, updateUser } from '@/utils/api'
 import { ElMessageBox, ElNotification } from 'element-plus'
 export default function usePrivateKey() {
     const store = useStore()
@@ -13,6 +13,7 @@ export default function usePrivateKey() {
     const dmc = computed(() => store.getters.userInfo.dmc)
     const userId = computed(() => store.getters.userInfo?.id || "")
     const passwordIsExist = ref(false)
+    const PoolDialogVisible = ref(false)
     function loadUserLoginStatus() {
         return new Promise((resolve, reject) => {
             let params = {
@@ -112,9 +113,61 @@ export default function usePrivateKey() {
             .then(({ value }) => { })
             .catch(() => { });
     }
+    const initFoggieDate = async () => {
+        let data = await user();
+        if (data) {
+            store.dispatch("global/setUserInfo", {
+                ...data.data,
+            });
+        }
+    };
+    async function joinPool() {
+        if (!dmc.value) {
+            ElMessageBox.prompt("Please enter the DMC Account", "Tip", {
+                "show-close": false,
+                confirmButtonText: "OK",
+                cancelButtonText: "Cancel",
+                inputPlaceholder: "Please enter the DMC Account",
+                inputType: "text",
+                beforeClose: (action, instance, done) => {
+                    if (action == "confirm") {
+                        let postData = {
+                            dmc: instance.inputValue,
+                            wallet_type: "wallet",
+                        };
+                        updateUser(userId.value, postData).then(async (res) => {
+                            if (res && res.data && res.data.dmc) {
+                                await initFoggieDate();
+                                ElNotification({
+                                    type: 'success',
+                                    message: 'Successfully bound DMC account',
+                                    position: 'bottom-left'
+                                })
+                                PoolDialogVisible.value = true;
+                                done();
+                            } else {
+                                ElNotification({
+                                    type: 'error',
+                                    message: 'Binding failed, please try again',
+                                    position: 'bottom-left'
+                                })
+                            }
+                        });
+                    } else {
+                        done();
+                    }
+                },
+            });
+        } else {
+            PoolDialogVisible.value = true;
+        }
+    };
     return {
+        dmc,
         passwordIsExist,
-        loadUserLoginStatus
+        PoolDialogVisible,
+        loadUserLoginStatus,
+        joinPool
     }
 
 }

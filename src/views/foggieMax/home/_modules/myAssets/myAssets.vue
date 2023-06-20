@@ -15,7 +15,7 @@
             v-if="!isJoin"
             class="join-pool"
             size="32"
-            @click="PoolDialogVisible = true"
+            @click="joinPool"
             icon-class="joinPool"
           ></svg-icon>
         </div>
@@ -130,6 +130,7 @@ import {
   inject,
   nextTick,
   watch,
+  computed,
 } from "vue";
 import ReNew from "./reNew";
 import AddPoolDialog from "./addPoolDialog";
@@ -137,6 +138,7 @@ import MinerRecords from "./minerRecords";
 import BigNumber from "bignumber.js";
 import AssetsRewards from "./assetsRewards";
 import { handleTimeStamp, getfilesize } from "@/utils/util";
+import { ElMessageBox, ElNotification } from "element-plus";
 import {
   user,
   ydaReward,
@@ -144,8 +146,12 @@ import {
   OwnerBills,
   get_miner_reward,
   check_join_mp,
+  updateUser,
 } from "@/utils/api.js";
 import RippleInk from "@/components/rippleInk";
+import usePrivateKey from "@/views/portal/user/_modules/hooks/usePrivateKey.js";
+import { useStore } from "vuex";
+
 export default {
   components: {
     RippleInk,
@@ -165,15 +171,18 @@ export default {
     },
   },
   setup(props, { emit }) {
+    const store = useStore();
     const deviceData = inject("deviceData");
     const { currentOODItem, poolSpace } = toRefs(props);
+    const { PoolDialogVisible, joinPool } = usePrivateKey();
     const totalNum = ref(0);
     // const visible = ref(false);
-    const PoolDialogVisible = ref(false);
     const minerRecordsVisible = ref(false);
     const assetsRewardsVisible = ref(false);
     const isJoin = ref(false);
     const reNewRef = ref(null);
+    const dmc = computed(() => store.getters.userInfo.dmc);
+    const userId = computed(() => store.getters.userInfo?.id || "");
 
     const rechargeOrder = () => {
       reNewRef.value.rechargeOrder();
@@ -191,7 +200,6 @@ export default {
       });
     };
     const setPoolSpace = (val) => {
-      console.log(val, "valllllllllllllllllllllllllllllllllll");
       emit("update:poolSpace", val);
     };
     const getMinerReward = () => {
@@ -201,7 +209,6 @@ export default {
         totalNum.value = res.result.reward_total;
       });
     };
-
     const reload = () => {
       setTimeout(() => {
         adminCategoriesListInit();
@@ -230,6 +237,7 @@ export default {
       handleTimeStamp,
       rechargeOrder,
       setPoolSpace,
+      joinPool,
     };
   },
 };

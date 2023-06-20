@@ -1693,7 +1693,7 @@ onMounted(() => {
 .product-actions2 {
   display: flex;
   margin-top: 30px;
-  justify-content: space-between;
+  justify-content: center;
   flex-direction: row;
 }
 .product-actions2 > div {

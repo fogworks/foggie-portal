@@ -773,7 +773,7 @@ export default {
     GoogleTitle1: "google雙重驗證",
     googltTips1:
       "您已開啟雙重認證，請查看您手機上的谷歌身份驗證器(Google Authenticator)的動態驗證碼，並輸入",
-    GoogltInput: "請輸入6位Google Authorator",
+    GoogltInput: "請輸入6位Google Authenticatorator",
     withdrawSuccess: "提現成功",
     inner_account: "接收賬戶",
     receiver: "接收人",

@@ -112,11 +112,11 @@
             :model="authorForm"
           >
             <el-form-item
-              label="Please enter Google Author"
+              label="Please enter Google Authenticator"
               prop="validateToken"
             >
               <!-- <el-input
-                :placeholder="'Google Author'"
+                :placeholder="'Google Authenticator'"
                 v-model="authorForm.validateToken"
                 class="my_auth_input"
               /> -->
@@ -187,7 +187,7 @@
       >
         <el-form-item
           v-if="withDrawBtn"
-          label="Google Author"
+          label="Google Authenticator"
           prop="my_auth_input"
         >
           <VerificationCode
@@ -197,7 +197,7 @@
 
           <!-- <el-input
             clearable
-            placeholder="Please enter Google Author"
+            placeholder="Please enter Google Authenticator"
             v-model="withdrawForm.my_auth_input"
           ></el-input> -->
         </el-form-item>
@@ -606,7 +606,7 @@ export default {
       showErrorTips.value = false;
       if (!value) {
         showErrorTips.value = true;
-        googleErrorTip.value = "Please enter Google Author";
+        googleErrorTip.value = "Please enter Google Authenticator";
         return;
       } else if (!numReg.test(value)) {
         showErrorTips.value = true;
