@@ -73,7 +73,7 @@
       v-model="fileSource"
       size="large"
       active-text="Remote Files"
-      inactive-text="Local Files"
+      inactive-text="Local upload record"
       :before-change="switchReceiveStatus"
     />
     <ShareDialog
