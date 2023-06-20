@@ -188,7 +188,7 @@ export default {
   min-height: 100%;
   margin: 0 auto;
   box-sizing: border-box;
-  z-index: 1;
+  z-index: 0;
 
   :deep {
     .el-loading-mask {

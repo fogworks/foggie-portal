@@ -74,7 +74,7 @@
             style="width: 100%"
             :controls="false"
             :precision="0"
-            :min="25"
+            :min="1"
             v-model="poolForm.expire_on_week"
             autocomplete="off"
           ></el-input-number>
@@ -95,6 +95,21 @@
             v-model.trim="poolForm.dmc_account"
             placeholder="Please enter your username in the DMC wallet"
           ></el-input>
+        </el-form-item>
+        <el-form-item label="Mine Pool Address" prop="miner_pool_addr">
+          <el-select
+            style="width: 100%"
+            v-model="poolForm.miner_pool_addr"
+            placeholder="Select"
+            size="large"
+          >
+            <el-option
+              v-for="item in options"
+              :key="item.address"
+              :label="item.name"
+              :value="item.address"
+            />
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -120,9 +135,10 @@ import {
   reactive,
   watch,
   inject,
+  onMounted,
 } from "vue";
 import RippleInk from "@/components/rippleInk";
-import { minerRegister } from "@/utils/api";
+import { minerRegister, get_mp } from "@/utils/api";
 import { check_account } from "@/api/common.js";
 
 const { proxy } = getCurrentInstance();
@@ -146,8 +162,9 @@ const poolForm = reactive({
   expire_on_week: 25,
   stake_asset: "",
   dmc_account: "",
+  miner_pool_addr: "",
 });
-
+const options = ref([]);
 const validateDmcAccount = (rule, value, cb) => {
   if (!value) {
     cb(new Error("Please enter the account address to withdraw"));
@@ -183,7 +200,8 @@ const validateWeeks = (rule, value, cb) => {
   if (+expire.value - nowTimeStamp >= oneWeekTimeStamp * value) {
     cb();
   } else {
-    cb(new Error(`You have less than ${value} weeks left`));
+    // cb(new Error(`You have less than ${value} weeks left`));
+    cb();
   }
 };
 const poolrules = {
@@ -212,6 +230,13 @@ const poolrules = {
   dmc_account: [
     { required: true, validator: validateDmcAccount, trigger: "blur" },
   ],
+  miner_pool_addr: [
+    {
+      required: true,
+      message: "Please select the central mining pool to join",
+      trigger: "blur",
+    },
+  ],
 };
 const deviceData = inject("deviceData");
 const poolFormRef = ref(null);
@@ -222,6 +247,14 @@ const isPinChange = (data) => {
   if (!data) {
     poolForm.pin_size = 0;
   }
+};
+const getMp = () => {
+  get_mp().then((res) => {
+    console.log(res);
+    if (res?.data?.length) {
+      options.value = res.data;
+    }
+  });
 };
 const handleRegister = () => {
   poolFormRef.value.validate((valid) => {
@@ -262,6 +295,9 @@ const handleRegister = () => {
 const beforeClose = () => {
   emits("update:visible", false);
 };
+onMounted(() => {
+  getMp();
+});
 </script>
 
 <style lang="scss" scoped>

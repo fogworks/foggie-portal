@@ -1,6 +1,6 @@
 import { getOrderList, getOrderNum } from "@/api/order/orderList";
 import { search_foggie, search_foggie_count } from "@/utils/api";
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, getCurrentInstance } from 'vue'
 import { useStore } from 'vuex'
 export default function useOrderList() {
     const store = useStore()
@@ -10,6 +10,7 @@ export default function useOrderList() {
     const spaceList = ref([])
     const loading = ref(false)
     const deviceList = ref([])
+    const { proxy } = getCurrentInstance()
     const email = computed(() => store.getters.userInfo?.email)
     const getAssetsOrderNum = () => {
         getOrderNum({ email: email.value }).then(res => {

@@ -323,6 +323,14 @@ function filterOrder() {
     });
 }
 function blurPrestoreDMC() {
+  console.log(
+    state.formLine.prestoreDMC,
+    state.orderDetail.total,
+    state.orderDetail.deposit,
+    state.orderDetail.total - state.orderDetail.deposit,
+    Number(state.formLine.prestoreDMC) <
+      Number(state.orderDetail.total - state.orderDetail.deposit)
+  );
   if (state.formLine.prestoreDMC == "") {
     ElMessage({
       message: `The deposit amount cannot be empty`,

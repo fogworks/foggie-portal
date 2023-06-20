@@ -60,11 +60,20 @@ export default {
       type: Number,
       default: 0,
     },
+    poolSpace: {
+      type: [Number, String],
+      default: 0,
+    },
   },
   setup(props, { emit }) {
     const deviceData = inject("deviceData");
-    const { currentOODItem, spaceUseRate, spaceTotal, spaceUseSize } =
-      toRefs(props);
+    const {
+      currentOODItem,
+      spaceUseRate,
+      spaceTotal,
+      spaceUseSize,
+      poolSpace,
+    } = toRefs(props);
     const spaceAvailable = ref(0);
     const bandwidthAvailable = ref(0);
     const bandwidthUseRate = ref(0);
@@ -79,11 +88,21 @@ export default {
 
     const initDashboaard = async (newVal) => {
       spaceAvailable.value =
-        (+spaceTotal.value - +spaceUseSize.value).toFixed(2) || 0;
+        (+spaceTotal.value - +spaceUseSize.value - poolSpace.value).toFixed(
+          2
+        ) || 0;
       let pipData = JSON.parse(JSON.stringify(pieOption));
+      console.log(poolSpace.value, "poolSpace.valuepoolSpace.value");
       pipData.series[0].data = [
-        { value: +spaceUseRate.value.toFixed(4) || 0 },
-        { value: 1 - (+spaceUseRate.value).toFixed(4) || 1 },
+        {
+          name: "Used proportion",
+          value: +(+spaceUseSize.value / +spaceTotal.value).toFixed(4) || 0,
+        },
+        {
+          name: "Proportion of mining pool",
+          value: (+poolSpace.value / spaceTotal.value).toFixed(4) || 0,
+        },
+        { name: "Available proportion", value: (1 - spaceUseRate.value).toFixed(4) || 1 },
       ];
       spacePieOption.data = pipData;
       // }
