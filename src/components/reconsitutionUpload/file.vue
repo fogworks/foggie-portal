@@ -1,11 +1,7 @@
 <template>
   <div class="uploader-file" :status="status">
     <div>
-      <div
-        class="uploader-file-progress"
-        :class="progressingClass"
-        :style="progressStyle"
-      />
+      <div class="uploader-file-progress" :class="progressingClass" :style="progressStyle" />
       <div class="uploader-file-info">
         <div class="uploader-file-name" :title="file.fileName">
           <img class="iconfont-uploadType" :src="fileIcon" />
@@ -22,46 +18,24 @@
         </div>
         <div class="uploader-file-size">{{ formatedSize }}</div>
         <div class="uploader-file-status">
-          <span class="uploader-file-status1" v-show="status !== 'uploading'">
+          <span class="uploader-file-status1" v-if="status != 'uploading' || ISCIDING">
             <span>{{ statusText }}</span>
             <span :class="ISCIDING ? 'fileLoader' : ''"></span>
           </span>
-
-          <span v-show="status === 'uploading'">
+          <span v-else>
             <span>{{ progressStyle.progress }}</span>
             <em style="margin-left: 10px">{{ formatedAverageSpeed }}</em>
             <i class="ml-15">{{ formatedTimeRemaining }}</i>
           </span>
         </div>
-        <div
-          class="uploader-file-actions"
-          v-if="status !== 'success' && !loading"
-        >
-          <span
-            class="uploader-file-pause"
-            v-show="isBigFile"
-            @click="pause()"
-          />
-          <span
-            class="uploader-file-resume"
-            v-show="!ISCIDING"
-            @click="resume()"
-          />️
+        <div class="uploader-file-actions" v-if="status !== 'success' && !loading">
+          <span class="uploader-file-pause" v-show="isBigFile" @click="pause()" />
+          <span class="uploader-file-resume" v-show="!ISCIDING" @click="resume()" />️
           <span class="uploader-file-retry" @click="retry()" />
-          <span
-            class="uploader-file-remove"
-            v-if="!fileUploading"
-            @click="remove()"
-          />
+          <span class="uploader-file-remove" v-if="!fileUploading" @click="remove()" />
         </div>
-        <div
-          class="uploader-file-actions"
-          v-if="status === 'success'"
-          @click="fileShare"
-        >
-          <div
-            style="color: #3f2dec; text-decoration: underline; cursor: pointer"
-          >
+        <div class="uploader-file-actions" v-if="status === 'success'" @click="fileShare">
+          <div style="color: #3f2dec; text-decoration: underline; cursor: pointer">
             Share
           </div>
         </div>
@@ -82,6 +56,7 @@ import {
   toRefs,
   computed,
   inject,
+  nextTick,
 } from "vue";
 import { debounce } from "lodash";
 import fileHook from "./fileHook.js";
@@ -173,7 +148,6 @@ function initParams() {
 function uploadFile(params) {
   loading.value = true;
   ISCIDING.value = true;
-  file_paused(true);
   fileUploadApi(params)
     .then((res) => {
       loading.value = false;
@@ -181,7 +155,6 @@ function uploadFile(params) {
         fileMd5.value = res.data;
         is_created_succeed.value = true;
         ISCIDING.value = false;
-        file_paused(false);
         file_fileUploading(true);
         loadUploadProgress();
       } else if (res.code == 30032) {
@@ -202,7 +175,6 @@ function loadUploadProgress() {
     orderId: file.value.orderId,
     destPath: file.value.urlFileName,
     deviceType: file.value.deviceType,
-    // md5: fileMd5.value,
   };
   file_paused(false);
   file_fileUploading(true);
@@ -230,30 +202,23 @@ function loadUploadProgress() {
               startUploadSize = response.uploaded_size;
             }
             isFirst = false;
-            file_fileUploading(true);
-
             let time = (endTime - startUploadTime.value) / 1000;
-
-            progress.value =
-              (response.uploaded_size / file.value.size).toFixed(4) * 100;
+            progress.value = (response.uploaded_size / file.value.size).toFixed(4) * 100;
             if (progress.value > 100) {
               progress.value = 100;
             }
             averageSpeed.value = uploaded_size / time;
-            timeRemaining.value =
-              (file.value.size - response.uploaded_size) /
-              (averageSpeed.value == 0 ? 1 : averageSpeed.value);
+            timeRemaining.value = (file.value.size - response.uploaded_size) / (averageSpeed.value == 0 ? 1 : averageSpeed.value);
             if (response.uploaded_size == file.value.size) {
-              ISCIDING.value == true;
-              file_paused(true);
+              ISCIDING.value = true;
               file_fileUploading(false);
+              loading.value = true
             }
           } else if (response.state == 1) {
             progress.value = 100;
-            ISCIDING.value == false;
-            file_paused(true);
-            file_completed(true);
+            ISCIDING.value = false;
             file_fileUploading(false);
+            file_completed(true);
 
             clearInterval(progressTimer.value);
             progressTimer.value = null;
@@ -272,12 +237,9 @@ function loadUploadProgress() {
           } else if (response.state == 2) {
             if (response.error_msg) {
               fileErrorMesage.value = response.error_msg;
-
               // let type = StateType.value == "error" ? 2 : 3;
               // emits("updaLoadFileListByState", type);
-
               fileError();
-              // remove();
             } else {
               fileError();
             }
@@ -536,12 +498,10 @@ onUnmounted(() => {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    171deg,
-    #8388fe 0%,
-    #519ff4 42%,
-    #b783c9 100%
-  ) !important;
+  background: linear-gradient(171deg,
+      #8388fe 0%,
+      #519ff4 42%,
+      #b783c9 100%) !important;
   transform: translateX(-100%);
   overflow: hidden;
 }
@@ -673,7 +633,7 @@ onUnmounted(() => {
   width: 10%;
 }
 
-.uploader-file-actions > span {
+.uploader-file-actions>span {
   display: none;
   float: left;
   width: 16px;
@@ -685,7 +645,7 @@ onUnmounted(() => {
   background-position: 0 0;
 }
 
-.uploader-file-actions > span:hover {
+.uploader-file-actions>span:hover {
   background-position-x: -21px;
 }
 
