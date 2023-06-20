@@ -5,12 +5,20 @@
       <div class="box-title">
         <label
           :class="
-            buyType === 'year' ? 'title-label title-label-check' : 'title-label'
+            buyType === 'year'
+              ? 'title-label title-label-check'
+              : buyType === 'semiannual'
+              ? 'title-label title-label-check-semiannual'
+              : 'title-label'
           "
         >
           <p class="check-p check-month" @click="typeChoose('monthly')">
             Monthly
           </p>
+          <p class="check-p check-semiannual" @click="typeChoose('semiannual')">
+            Semiannual
+          </p>
+
           <p class="check-p check-year" @click="typeChoose('annual')">Annual</p>
           <span class="white-span"></span>
         </label>
@@ -37,10 +45,20 @@
                 <span class="price">
                   {{ item.unitSymbol }}
                   {{
-                    buyType === "month" ? item.last_monthly : item.last_annually
+                    buyType === "month"
+                      ? item.last_monthly
+                      : buyType === "semiannual"
+                      ? item.last_semiannual
+                      : item.last_annually
                   }}
                 </span>
-                /{{ buyType === "month" ? " month" : " year" }}
+                /{{
+                  buyType === "month"
+                    ? " month"
+                    : buyType === "semiannual"
+                    ? " semiannual "
+                    : " year"
+                }}
               </div>
             </div>
             <div class="product-actions2">
@@ -196,10 +214,10 @@
             {{ activeProduct.unit === "dollar" ? "$" : "￥"
             }}{{ activeProduct.last_monthly }}
           </div>
-          <!-- <div class="order_value" v-if="buyType === 'year'">
+          <div class="order_value" v-if="buyType === 'semiannual'">
             {{ activeProduct.unit === "dollar" ? "$" : "￥"
-            }}{{ activeProduct.last_annually }} (Foggie NFT + 1 year Foggie rent fee)
-          </div> -->
+            }}{{ activeProduct.last_semiannual }}
+          </div>
           <div class="order_value" v-if="buyType === 'year'">
             {{ activeProduct.unit === "dollar" ? "$" : "￥"
             }}{{ activeProduct.last_annually }}
@@ -422,6 +440,8 @@ function typeChoose(type) {
     buyType.value = "month";
   } else if (type === "annual") {
     buyType.value = "year";
+  } else if (type === "semiannual") {
+    buyType.value = "semiannual";
   }
 }
 function couponChange(text) {
@@ -470,10 +490,14 @@ function toOrderTransaction() {
   let price_text =
     buyType.value === "month"
       ? `$ ${activeProduct.value.last_monthly}`
+      : buyType.value === "semiannual"
+      ? `${activeProduct.value.last_semiannual}`
       : `${activeProduct.value.last_annually}`;
   let price =
     buyType === "month"
       ? activeProduct.value.last_monthly
+      : buyType === "semiannual"
+      ? activeProduct.value.last_semiannual
       : activeProduct.value.last_annually;
   blockChainData.value = {
     pay_item,
@@ -526,6 +550,10 @@ async function handleData(data) {
     // last_monthly = (Math.floor(last_monthly * 100) / 100).toFixed(2);
     last_monthly = (numMulti(last_monthly, 100) / 100).toFixed(2);
 
+    let last_semiannual =
+      Number(pricing.semiannual) - Number(pricing.semiannual_discounted);
+    last_semiannual = (numMulti(last_semiannual, 100) / 100).toFixed(2);
+
     let discounnt = Number(last_monthly) * 12 - Number(last_annually);
 
     let item = {
@@ -534,9 +562,12 @@ async function handleData(data) {
       unitSymbol: data[i].piece_unit === "dollar" ? "$" : "￥",
       monthPrice: pricing.monthly,
       yeaPrice: pricing.annually,
+      semiannualPrice: pricing.semiannual,
       monthly_discounted: pricing.monthly_discounted,
+      semiannual_discounted: pricing.semiannual_discounted,
       last_monthly: last_monthly,
       last_annually: last_annually,
+      last_semiannual,
       annually_discounted: pricing.annually_discounted,
       eth_monthly: pricing.eth_monthly,
       eth_annually: pricing.eth_annually,
@@ -544,14 +575,19 @@ async function handleData(data) {
       bnb_monthly: pricing.bnb_monthly,
       usdc_annually: (last_annually / usdcRate).toFixed(4),
       usdc_monthly: (last_monthly / usdcRate).toFixed(4),
+      usdc_semiannual: (last_semiannual / usdcRate).toFixed(4),
       usdt_annually: (last_annually / usdtRate).toFixed(4),
       usdt_monthly: (last_monthly / usdtRate).toFixed(4),
+      usdt_semiannual: (last_semiannual / usdtRate).toFixed(4),
       busd_annually: (last_annually / busdRate).toFixed(4),
       busd_monthly: (last_monthly / busdRate).toFixed(4),
+      busd_semiannual: (last_semiannual / busdRate).toFixed(4),
       bsc_usd_annually: (last_annually / bsc_usdRate).toFixed(4),
       bsc_usd_monthly: (last_monthly / bsc_usdRate).toFixed(4),
+      bsc_usd_semiannual: (last_semiannual / bsc_usdRate).toFixed(4),
       vofo_monthly: (last_monthly / vofoRate.value).toFixed(4),
       vofo_annually: (last_annually / vofoRate.value).toFixed(4),
+      vofo_semiannual: (last_semiannual / vofoRate.value).toFixed(4),
       number:
         data[i].product_category && data[i].product_category.product_count,
       params: str.join(" + "),
@@ -618,13 +654,20 @@ async function getExchange(type) {
 }
 function upDateList(type) {
   for (let i = 0; i < dataList.value.length; i++) {
-    if (dataList.value[i].last_monthly && dataList.value[i].last_annually) {
+    if (
+      dataList.value[i].last_monthly &&
+      dataList.value[i].last_annually &&
+      dataList.value[i].last_semiannual
+    ) {
       if (type === "USDC") {
         dataList.value[i].usdc_monthly = (
           dataList.value[i].last_monthly / usdcRate.value
         ).toFixed(4);
         dataList.value[i].usdc_annually = (
           dataList.value[i].last_annually / usdcRate.value
+        ).toFixed(4);
+        dataList.value[i].usdc_semiannual = (
+          dataList.value[i].last_semiannual / usdcRate.value
         ).toFixed(4);
       } else if (type === "BUSD") {
         dataList.value[i].busd_monthly = (
@@ -633,6 +676,9 @@ function upDateList(type) {
         dataList.value[i].busd_annually = (
           dataList.value[i].last_annually / busdRate.value
         ).toFixed(4);
+        dataList.value[i].busd_semiannual = (
+          dataList.value[i].last_semiannual / busdRate.value
+        ).toFixed(4);
       } else if (type === "USDT") {
         dataList.value[i].usdt_monthly = (
           dataList.value[i].last_monthly / usdtRate.value
@@ -640,12 +686,18 @@ function upDateList(type) {
         dataList.value[i].usdt_annually = (
           dataList.value[i].last_annually / usdtRate.value
         ).toFixed(4);
+        dataList.value[i].usdt_semiannual = (
+          dataList.value[i].last_semiannual / usdtRate.value
+        ).toFixed(4);
       } else if (type === "BSC_USD") {
         dataList.value[i].bsc_usd_monthly = (
           dataList.value[i].last_monthly / bsc_usdRate.value
         ).toFixed(4);
         dataList.value[i].bsc_usd_annually = (
           dataList.value[i].last_annually / bsc_usdRate.value
+        ).toFixed(4);
+        dataList.value[i].bsc_usd_semiannual = (
+          dataList.value[i].last_semiannual / bsc_usdRate.value
         ).toFixed(4);
       }
     }
@@ -710,6 +762,11 @@ async function createOrder(type) {
         Number(activeProduct.value.yeaPrice) -
         Number(activeProduct.value.annually_discounted);
       rent = "annually";
+    } else if (buyType.value === "semiannual") {
+      total_price =
+        Number(activeProduct.value.semiannualPrice) -
+        Number(activeProduct.value.semiannual_discounted);
+      rent = "semiannual";
     }
   }
 
@@ -920,7 +977,7 @@ onMounted(() => {
       -webkit-box-pack: justify;
       justify-content: space-between;
       cursor: pointer;
-      width: 213px;
+      width: 323px;
       height: 43px;
       background: linear-gradient(
         rgba(24, 32, 79, 0.4) 0%,
@@ -972,6 +1029,10 @@ onMounted(() => {
       .check-year {
         color: #fff;
       }
+      .check-semiannual {
+        color: #fff;
+      }
+
       .white-span {
         position: absolute;
         left: 4px;
@@ -996,7 +1057,27 @@ onMounted(() => {
       .check-year {
         color: #000;
       }
+      .check-semiannual {
+        color: #fff;
+      }
     }
+    .title-label-check-semiannual {
+      .white-span {
+        left: calc(100% - 2px);
+        transform: translateX(-210%);
+        transition: all 0.5s ease-in-out 0s;
+      }
+      .check-month {
+        color: #fff;
+      }
+      .check-semiannual {
+        color: #000;
+      }
+      .check-year {
+        color: #fff;
+      }
+    }
+
     .box-content,
     .box-content * {
       transition: all 0.8s cubic-bezier(0.075, 0.82, 0.165, 1) 0s;

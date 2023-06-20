@@ -698,6 +698,10 @@
             {{ activeProduct.unit === "dollar" ? "$" : "￥"
             }}{{ activeProduct.last_monthly }}
           </div>
+          <div class="order_value" v-if="payItems.sellType === 'semiannual'">
+            {{ activeProduct.unit === "dollar" ? "$" : "￥"
+            }}{{ activeProduct.last_semiannual }}
+          </div>
           <div class="order_value" v-if="payItems.sellType === 'annually'">
             {{ activeProduct.unit === "dollar" ? "$" : "￥"
             }}{{ activeProduct.last_annually }}
@@ -862,6 +866,10 @@
             {{ activeProduct.unit === "dollar" ? "$" : "￥"
             }}{{ activeProduct.last_monthly }}
           </div>
+          <div class="order_value" v-if="payItems.sellType === 'semiannual'">
+            {{ activeProduct.unit === "dollar" ? "$" : "￥"
+            }}{{ activeProduct.last_semiannual }}
+          </div>
           <div class="order_value" v-if="payItems.sellType === 'annually'">
             {{ activeProduct.unit === "dollar" ? "$" : "￥"
             }}{{ activeProduct.last_annually }}
@@ -947,6 +955,10 @@
             {{ activeProduct.unit === "dollar" ? "$" : "￥"
             }}{{ activeProduct.last_monthly }}
           </div>
+          <div class="order_value" v-if="buyType === 'semiannual'">
+            {{ activeProduct.unit === "dollar" ? "$" : "￥"
+            }}{{ activeProduct.last_semiannual }}
+          </div>
           <div class="order_value" v-if="buyType === 'year'">
             {{ activeProduct.unit === "dollar" ? "$" : "￥"
             }}{{ activeProduct.last_annually }}
@@ -975,6 +987,7 @@
       <div class="p_choose">
         <el-radio-group v-model="buyType" size="large">
           <el-radio label="month">{{ $t("index.monthrent") }}</el-radio>
+          <el-radio label="month">{{ $t("index.semiannualrent") }}</el-radio>
           <el-radio label="year">{{ $t("index.yearrent") }}</el-radio>
         </el-radio-group>
       </div>
@@ -1666,6 +1679,38 @@ export default {
           total_price = this.activeProduct.vofo_annually;
         }
         rent = "annually";
+      } else if (this.buyType === "semiannual") {
+        if (this.buyModel === "card") {
+          total_price =
+            Number(this.activeProduct.semiannualPrice) -
+            Number(this.activeProduct.semiannual_discounted);
+        } else if (
+          this.buyModel === "blockchain" &&
+          this.buyBlockChainModel === "usdc"
+        ) {
+          total_price = this.activeProduct.usdc_semiannual;
+        } else if (
+          this.buyModel === "blockchain" &&
+          this.buyBlockChainModel === "busd"
+        ) {
+          total_price = this.activeProduct.busd_semiannual;
+        } else if (
+          this.buyModel === "blockchain" &&
+          this.buyBlockChainModel === "usdt"
+        ) {
+          total_price = this.activeProduct.usdt_semiannual;
+        } else if (
+          this.buyModel === "blockchain" &&
+          this.buyBlockChainModel === "bsc_usd"
+        ) {
+          total_price = this.activeProduct.bsc_usd_semiannual;
+        } else if (
+          this.buyModel === "blockchain" &&
+          this.buyBlockChainModel === "vofo"
+        ) {
+          total_price = this.activeProduct.vofo_semiannual;
+        }
+        rent = "semiannual";
       }
       let data = {
         rent: rent,
@@ -1780,6 +1825,8 @@ export default {
         let price =
           this.buyType === "month"
             ? this.activeProduct.last_monthly
+            : this.buyType === "semiannual"
+            ? this.activeProduct.last_semiannual
             : this.activeProduct.last_annually;
         // let price_text = this.buyType === 'month' ?
         //   `$ ${this.activeProduct.last_monthly} (Foggie NFT + 1 month Foggie rent fee)`
@@ -1787,6 +1834,8 @@ export default {
         let price_text =
           this.buyType === "month"
             ? `$ ${this.activeProduct.last_monthly}`
+            : this.buyType === "semiannual"
+            ? `$ ${this.activeProduct.last_semiannual}`
             : `$ ${this.activeProduct.last_annually}`;
         let coupon_number = this.coupon_number_recharge;
         this.blockChainData = {
@@ -1854,6 +1903,8 @@ export default {
             let price =
               pay_item.sellType === "monthly"
                 ? this.activeProduct.last_monthly
+                : pay_item.sellType === "semiannual"
+                ? this.activeProduct.last_semiannual
                 : this.activeProduct.last_annually;
 
             // let price_text = pay_item.sellType === 'monthly' ?
@@ -1862,6 +1913,8 @@ export default {
             let price_text =
               pay_item.sellType === "monthly"
                 ? `$ ${this.activeProduct.last_monthly}`
+                : pay_item.sellType === "semiannual"
+                ? `$ ${this.activeProduct.last_semiannual}}`
                 : `$ ${this.activeProduct.last_annually}`;
             let user_sender = res.data[res.data.length - 1].user_sender;
             let user_receiver = res.data[res.data.length - 1].user_receiver;
@@ -1922,6 +1975,8 @@ export default {
       let price =
         pay_item.sellType === "monthly"
           ? this.activeProduct.last_monthly
+          : pay_item.sellType === "semiannual"
+          ? this.activeProduct.last_semiannual
           : this.activeProduct.last_annually;
       // let price_text = pay_item.sellType === 'monthly' ?
       //         `$ ${this.activeProduct.last_monthly} (Foggie NFT + 1 month Foggie rent fee)`
@@ -1929,6 +1984,8 @@ export default {
       let price_text =
         pay_item.sellType === "monthly"
           ? `$ ${this.activeProduct.last_monthly}`
+          : pay_item.sellType === "semiannual"
+          ? `$ ${this.activeProduct.last_semiannual}`
           : `$ ${this.activeProduct.last_annually}`;
       let coupon_number = this.coupon_number_pay;
       this.blockChainData = {
@@ -2241,29 +2298,42 @@ export default {
           Number(pricing.monthly) - Number(pricing.monthly_discounted);
         // last_monthly = Math.floor(last_monthly * 100) / 100;
         last_monthly = this.numMulti(last_monthly, 100) / 100;
+        let last_semiannual =
+          Number(pricing.semiannual) - Number(pricing.semiannual_discounted);
+        last_semiannual = this.numMulti(last_semiannual, 100) / 100;
 
         let item = {
           name: data[i].name,
           unit: data[i].piece_unit,
           monthPrice: pricing.monthly,
           yeaPrice: pricing.annually,
+          semiannualPrice: pricing.semiannual,
           monthly_discounted: pricing.monthly_discounted,
+          semiannual_discounted: pricing.semiannual_discounted,
           last_monthly: last_monthly,
           last_annually: last_annually,
+          last_semiannual: last_semiannual,
           eth_monthly: pricing.eth_monthly,
           eth_annually: pricing.eth_annually,
+          eth_semiannual: pricing.eth_semiannual,
           bnb_annually: pricing.bnb_annually,
           bnb_monthly: pricing.bnb_monthly,
+          bnb_semiannual: pricing.bnb_semiannual,
           usdc_annually: (last_annually / this.usdcRate).toFixed(4),
           usdc_monthly: (last_monthly / this.usdcRate).toFixed(4),
+          usdc_semiannual: (last_semiannual / this.usdcRate).toFixed(4),
           usdt_annually: (last_annually / this.usdtRate).toFixed(4),
           usdt_monthly: (last_monthly / this.usdtRate).toFixed(4),
+          usdt_semiannual: (last_semiannual / this.usdtRate).toFixed(4),
           busd_annually: (last_annually / this.busdRate).toFixed(4),
           busd_monthly: (last_monthly / this.busdRate).toFixed(4),
+          busd_semiannual: (last_semiannual / this.busdRate).toFixed(4),
           bsc_usd_annually: (last_annually / this.bsc_usdRate).toFixed(4),
           bsc_usd_monthly: (last_monthly / this.bsc_usdRate).toFixed(4),
+          bsc_usd_semiannual: (last_semiannual / this.bsc_usdRate).toFixed(4),
           vofo_annually: (last_annually / this.vofoRate).toFixed(4),
           vofo_monthly: (last_monthly / this.vofoRate).toFixed(4),
+          vofo_semiannual: (last_semiannual / this.vofoRate).toFixed(4),
           annually_discounted: pricing.annually_discounted,
           number:
             data[i].product_category && data[i].product_category.product_count,
@@ -2441,6 +2511,8 @@ export default {
             let rent_detail =
               rent === "monthly"
                 ? this.$t("index.month")
+                : rent === "semiannual"
+                ? this.$t("index.semiannual")
                 : this.$t("index.year");
 
             if (order_transaction_data.payment_method === "card") {
@@ -2469,6 +2541,11 @@ export default {
                 ) {
                   total_Prices = pricing.eth_annually;
                 } else if (
+                  order_transaction_data.payment_method === "eth" &&
+                  rent === "semiannual"
+                ) {
+                  total_Prices = pricing.eth_semiannual;
+                } else if (
                   order_transaction_data.payment_method === "bnb" &&
                   rent === "monthly"
                 ) {
@@ -2478,6 +2555,11 @@ export default {
                   rent === "annually"
                 ) {
                   total_Prices = pricing.bnb_annually;
+                } else if (
+                  order_transaction_data.payment_method === "bnb" &&
+                  rent === "semiannual"
+                ) {
+                  total_Prices = pricing.bnb_semiannual;
                 } else if (
                   order_transaction_data.payment_method === "usdc" &&
                   rent === "monthly"
@@ -2489,6 +2571,11 @@ export default {
                 ) {
                   total_Prices = pricing.usdc_annually;
                 } else if (
+                  order_transaction_data.payment_method === "usdc" &&
+                  rent === "semiannual"
+                ) {
+                  total_Prices = pricing.usdc_semiannual;
+                } else if (
                   order_transaction_data.payment_method === "usdt" &&
                   rent === "monthly"
                 ) {
@@ -2498,6 +2585,11 @@ export default {
                   rent === "annually"
                 ) {
                   total_Prices = pricing.usdt_annually;
+                } else if (
+                  order_transaction_data.payment_method === "usdt" &&
+                  rent === "semiannual"
+                ) {
+                  total_Prices = pricing.usdt_semiannual;
                 } else if (
                   order_transaction_data.payment_method === "busd" &&
                   rent === "monthly"
@@ -2509,6 +2601,11 @@ export default {
                 ) {
                   total_Prices = pricing.busd_annually;
                 } else if (
+                  order_transaction_data.payment_method === "busd" &&
+                  rent === "semiannual"
+                ) {
+                  total_Prices = pricing.busd_semiannual;
+                } else if (
                   order_transaction_data.payment_method === "bsc_usd" &&
                   rent === "monthly"
                 ) {
@@ -2519,6 +2616,11 @@ export default {
                 ) {
                   total_Prices = pricing.bsc_usd_annually;
                 } else if (
+                  order_transaction_data.payment_method === "bsc_usd" &&
+                  rent === "semiannual"
+                ) {
+                  total_Prices = pricing.bsc_usd_semiannual;
+                } else if (
                   order_transaction_data.payment_method === "vofo" &&
                   rent === "monthly"
                 ) {
@@ -2528,6 +2630,11 @@ export default {
                   rent === "annually"
                 ) {
                   total_Prices = pricing.vofo_annually;
+                } else if (
+                  order_transaction_data.payment_method === "vofo" &&
+                  rent === "semiannual"
+                ) {
+                  total_Prices = pricing.vofo_semiannual;
                 }
               }
               total_price_detail =
@@ -2596,6 +2703,7 @@ export default {
             product: product,
             monthly_discounted: product.monthly_discounted,
             annually_discounted: product.annually_discounted,
+            semiannual_discounted: product.semiannual_discounted,
             name: product.name,
             sellType: order.new_rent,
             dueDate: exprire,
@@ -3287,7 +3395,8 @@ export default {
       for (let i = 0; i < this.orderList.length; i++) {
         if (
           this.orderList[i].product.last_monthly &&
-          this.orderList[i].product.last_annually
+          this.orderList[i].product.last_annually &&
+          this.orderList[i].product.last_semiannual
         ) {
           if (type === "USDC") {
             this.orderList[i].product.usdc_monthly = (
@@ -3296,12 +3405,18 @@ export default {
             this.orderList[i].product.usdc_annually = (
               this.orderList[i].product.last_annually / this.usdcRate
             ).toFixed(4);
+            this.orderList[i].product.usdc_semiannual = (
+              this.orderList[i].product.last_semiannual / this.usdcRate
+            ).toFixed(4);
           } else if (type === "USDT") {
             this.orderList[i].product.usdt_monthly = (
               this.orderList[i].product.last_monthly / this.usdtRate
             ).toFixed(4);
             this.orderList[i].product.usdt_annually = (
               this.orderList[i].product.last_annually / this.usdtRate
+            ).toFixed(4);
+            this.orderList[i].product.usdt_semiannual = (
+              this.orderList[i].product.last_semiannual / this.usdtRate
             ).toFixed(4);
           } else if (type === "BUSD") {
             this.orderList[i].product.busd_monthly = (
@@ -3310,12 +3425,18 @@ export default {
             this.orderList[i].product.busd_annually = (
               this.orderList[i].product.last_annually / this.busdRate
             ).toFixed(4);
+            this.orderList[i].product.busd_semiannual = (
+              this.orderList[i].product.last_semiannual / this.busdRate
+            ).toFixed(4);
           } else if (type === "BSC_USD") {
             this.orderList[i].product.bsc_usd_monthly = (
               this.orderList[i].product.last_monthly / this.bsc_usdRate
             ).toFixed(4);
             this.orderList[i].product.bsc_usd_annually = (
               this.orderList[i].product.last_annually / this.bsc_usdRate
+            ).toFixed(4);
+            this.orderList[i].product.bsc_usd_semiannual = (
+              this.orderList[i].product.last_semiannual / this.bsc_usdRate
             ).toFixed(4);
           }
         }
