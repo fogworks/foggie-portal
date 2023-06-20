@@ -85,31 +85,11 @@ import {
 } from "vue";
 const fs = window.require('fs');
 const { dialog } = window.require("electron").remote;
-/* dialog.showOpenDialog 的配置项包括：
 
-title：对话框的标题。
-defaultPath：默认打开的路径。
-buttonLabel：按钮的文本标签。
-filters：可选择的文件类型，可以是一个数组，每个元素包含一个名称和一个文件扩展名的对象。
-
-properties：对话框的属性，可以是一个数组，包含以下选项：
-openFile：允许选择文件。
-openDirectory：允许选择文件夹。
-multiSelections：允许选择多个文件。
-showHiddenFiles：显示隐藏文件。
-createDirectory：允许创建新文件夹。
-promptToCreate：提示用户是否创建新文件夹。
-message：对话框的消息文本。
-securityScopedBookmarks：是否启用安全范围书签。 */
-
-
-
-
-// 选择文件的对话框Dialog
 function select() {
   dialog.showOpenDialog({
-    // properties: ["openFile"], // 选择文件
-    properties: ["openDirectory"], // 选择目录
+    // properties: ["openFile"], 
+    properties: ["openDirectory"], 
     filters: [
       { name: 'Images', extensions: ['jpg', 'png', 'gif'] },
       { name: 'Movies', extensions: ['mkv', 'avi', 'mp4'] },
@@ -142,11 +122,11 @@ const allFileListDrawer = ref(false);
 const options = ref({
   simultaneousUploads: 5,
   singleFile: false,
-  chunkSize: 1024 * 1024 * 8, // 分片大小
-  forceChunkSize: true, // 每块分片大小是否 一定要小于 chunkSize
-  allowDuplicateUploads: true, // 是否可以 重复上传
-  generateUniqueIdentifier: generateUniqueIdentifier, //自定义生成文件唯一标识
-  initFileFn: initFileFn, //初始化文件对象
+  chunkSize: 1024 * 1024 * 8, 
+  forceChunkSize: true, 
+  allowDuplicateUploads: true, 
+  generateUniqueIdentifier: generateUniqueIdentifier, 
+  initFileFn: initFileFn,
 });
 
 const fileStatusText = ref({
@@ -269,26 +249,22 @@ const fileShare = (item) => {
   emit("fileShare", item);
 };
 
-/* 在上传过程中 每当有新的文件进行上传操作待上传列表中就删除对应的文件 */
 const newQueueID = (id, fileOrderID) => {
   let index = allFileList[fileOrderID].findIndex((file) => file.id == id);
   allFileList[fileOrderID].splice(index, 1);
 };
 
-/* 在待上传列表中删除指定文件 */
 function deleteAllFileList(id) {
   let index = allFileList[orderId.value].findIndex((file) => file.id == id);
   index > -1 ? allFileList[orderId.value].splice(index, 1) : "";
 }
-/* 生成文件唯一标识 */
 function generateUniqueIdentifier(file) {
   return file.path;
 }
-/*  初始化文件对象 */
 function initFileFn(file) {
   file.paused = false;
   file.deviceType = deviceType.value;
-  file.fileUploading = false; // 代表文件是否正在上传
+  file.fileUploading = false;
   file.urlPrefix = file.file.path
   // let directory = file.file.webkitRelativePath;
   // let directoryPath = directory.substr(0, directory.lastIndexOf("/") + 1);

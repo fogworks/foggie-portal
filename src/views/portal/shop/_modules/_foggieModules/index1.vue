@@ -1201,10 +1201,10 @@ export default {
       activeVisible: false,
       activeCreateAndActivateVisible: false,
       isDIDCreating: true,
-      activatedVoodSucccess: false, // 自动创建did成功后，点击激活vood成功
-      // count: 3, // 激活vood成功后倒计时3秒
+      activatedVoodSucccess: false, 
+      // count: 3,
       count: 30,
-      timmer: null, // 倒计时定时器
+      timmer: null,
       oodToken: {},
       base64Text: "",
       cyberVisible: false,
@@ -1352,13 +1352,13 @@ export default {
       console.log("verify coupon", text);
       const reg = /^[a-zA-Z\d]{12}$/;
       if (!reg.test(text)) {
-        // 提示不匹配
+        //
         this.is_coupon_error_pay = true;
         return;
       } else {
         this.is_coupon_error_pay = false;
       }
-      // ajax 匹配是否被使用
+      // ajax
       check_coupon_number(text).then((res) => {
         console.log("verify coupon", res);
         if (res.code !== 200) {
@@ -1370,13 +1370,11 @@ export default {
       console.log("verify coupon", text);
       const reg = /^[a-zA-Z\d]{12}$/;
       if (!reg.test(text)) {
-        // 提示不匹配
         this.is_coupon_error_recharge = true;
         return;
       } else {
         this.is_coupon_error_recharge = false;
       }
-      // ajax 匹配是否被使用
       check_coupon_number(text).then((res) => {
         console.log("verify coupon", res);
         if (res.code !== 200) {
@@ -1487,7 +1485,6 @@ export default {
       } else if (type === "cancel") {
         that.CancelOrder(row);
       } else if (type === "pay") {
-        // click购买
         // gtag("event", "buy_clicked");
         that.toPay(row);
       } else if (type === "progress") {
@@ -1496,8 +1493,6 @@ export default {
         that.rechargeOrder(row);
       }
     },
-    //ood激活操作
-
     getActiveData() {
       user().then((res) => {
         if (res.data && res.data.dmc) {
@@ -1529,26 +1524,26 @@ export default {
       setTimeout(() => {
         that.$refs.qrCodeUrl.innerHTML = "";
         var qrcode = new QRCode(that.$refs.qrCodeUrl, {
-          text: JSON.stringify(that.oodToken), // 需要转换为二维码的内容
+          text: JSON.stringify(that.oodToken),
           width: 150,
           height: 150,
           colorDark: "#000000",
           colorLight: "#ffffff",
           correctLevel: QRCode.CorrectLevel.L,
         });
-        let canvas = qrcode._el.querySelector("canvas"); //获取生成二维码中的canvas，并将canvas转换成base64
+        let canvas = qrcode._el.querySelector("canvas");
         this.base64Text = canvas.toDataURL("image/png");
 
         // that.$refs.qrCodeUrl1.innerHTML = "";
         // var qrcode1 = new QRCode(that.$refs.qrCodeUrl1, {
-        //   text: JSON.stringify(that.oodToken), // 需要转换为二维码的内容
+        //   text: JSON.stringify(that.oodToken), 
         //   width: 150,
         //   height: 150,
         //   colorDark: "#000000",
         //   colorLight: "#ffffff",
         //   correctLevel: QRCode.CorrectLevel.L,
         // });
-        // let canvas1 = qrcode1._el.querySelector("canvas"); //获取生成二维码中的canvas，并将canvas转换成base64
+        // let canvas1 = qrcode1._el.querySelector("canvas");
         // this.base64Text = canvas1.toDataURL("image/png");
 
         // console.log(this.base64Text, "this.base64Text");
@@ -1557,11 +1552,11 @@ export default {
 
     downldImg() {
       var oA = document.createElement("a");
-      oA.download = "ActivationCode"; // 设置下载的文件名，默认是'下载'
+      oA.download = "ActivationCode";
       oA.href = this.base64Text;
       document.body.appendChild(oA);
       oA.click();
-      oA.remove(); // 下载之后把创建的元素删除
+      oA.remove();
     },
 
     handleBindWalletClose() {
@@ -2424,7 +2419,6 @@ export default {
       }
     },
     async initOrderItem(data) {
-      // 创建过的订单的id
       let create_order_trans_id = localStorage.getItem("create-order");
 
       let arr = [];
@@ -2648,7 +2642,7 @@ export default {
             total_price_detail = `$${order_transaction_data.total_price}`;
           }
 
-          // 从 localStorage 拿出标记的订单, 如果匹配到这个订单已经paid, 就上报事件
+          // localStorage 
           let order_paid =
             status == "paid" ||
             status == "pending_start" ||
@@ -2664,7 +2658,6 @@ export default {
               //   payment_method: data[i]["order_transaction"][0].payment_method,
               //   type: type,
               // });
-              // 上报完之后， 删除掉标记
               localStorage.removeItem("create-order");
             }
           }
@@ -2878,22 +2871,22 @@ export default {
       }
     },
     copyID(text, type) {
-      var input = document.createElement("input"); // 创建input对象
-      input.value = text; // 设置复制内容
-      document.body.appendChild(input); // 添加临时实例
-      input.select(); // 选择实例内容
-      document.execCommand("Copy"); // 执行复制
-      document.body.removeChild(input); // 删除临时实例
+      var input = document.createElement("input");
+      input.value = text;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("Copy");
+      document.body.removeChild(input);
       let msg = type === "vood" ? "Copying  Foggie ID!" : "Copying  Order ID!";
       this.$message.success(msg);
     },
     copyPayingAddress(address) {
-      var input = document.createElement("input"); // 创建input对象
-      input.value = address; // 设置复制内容
-      document.body.appendChild(input); // 添加临时实例
-      input.select(); // 选择实例内容
-      document.execCommand("Copy"); // 执行复制
-      document.body.removeChild(input); // 删除临时实例
+      var input = document.createElement("input");
+      input.value = address;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("Copy");
+      document.body.removeChild(input);
       let msg = "Copying  Paying Address!";
       this.$message.success(msg);
     },
@@ -2929,8 +2922,7 @@ export default {
         offsetx = 0,
         offsety = 0,
         an;
-      var angle = scale * 360; //当前角度值
-      //IE矩阵角度值计算
+      var angle = scale * 360;
       var m11 = Math.cos(((Math.PI * 2) / 360) * angle);
       var m21 = Math.sin(((Math.PI * 2) / 360) * angle);
       if (angle > 90) {
@@ -2973,7 +2965,6 @@ export default {
           l.style.transform =
             angleV.trans;
         r.style.display = "none";
-        //ie 旋转非居中旋转的修复
         if (document.all) {
           l.style.left = angleV.offset.x + "px";
           l.style.top = angleV.offset.y + "px";
@@ -3187,7 +3178,6 @@ export default {
       //   });
       // }
     },
-    // 创建DMC账户
     async createDMCAccount() {
       const currentToken = getToken();
       console.log(`currentToken is: ${currentToken}`);
@@ -3215,14 +3205,12 @@ export default {
         return false;
       }
     },
-    // 绑定DMC账户
     async bindDMCAccount() {
       const that = this;
-      //vood 绑定账户
       const postData = {
         account: this.dmcAccount,
         ood_id: this.bindInfo.device_id,
-        owner_id: this.dmcAccount, //⼀定和account ⼀致，后期考虑分开
+        owner_id: this.dmcAccount,
         signature: "xxx",
       };
       try {
@@ -3233,7 +3221,7 @@ export default {
                 device_id: that.bindInfo.device_id,
                 bind_dmc: true,
               };
-              that.updateVoodList(voodData, postData, that.vpsId); //更新vood列表接口
+              that.updateVoodList(voodData, postData, that.vpsId);
             },
             (err) => {
               let error =
@@ -3249,7 +3237,7 @@ export default {
               let _postData = {
                 account: "",
                 ood_id: that.bindInfo.device_id,
-                owner_id: "", //⼀定和account ⼀致，后期考虑分开
+                owner_id: "",
                 signature: "",
               };
               dmcFreeRegister(_postData);
@@ -3265,7 +3253,7 @@ export default {
                   device_id: that.bindInfo.device_id,
                   bind_dmc: true,
                 };
-                that.updateVoodList(voodData, postData, that.vpsId); //更新vood列表接口
+                that.updateVoodList(voodData, postData, that.vpsId);
               },
               (err) => {
                 let error =
@@ -3281,7 +3269,7 @@ export default {
                 let _postData = {
                   account: "",
                   ood_id: that.bindInfo.device_id,
-                  owner_id: "", //⼀定和account ⼀致，后期考虑分开
+                  owner_id: "",
                   signature: "",
                 };
                 dmcFreeRegister(_postData).then(() => {});
@@ -3303,14 +3291,13 @@ export default {
         let _postData = {
           account: "",
           ood_id: that.bindInfo.device_id,
-          owner_id: "", //⼀定和account ⼀致，后期考虑分开
+          owner_id: "",
           signature: "",
         };
         dmcFreeRegister(_postData);
         // return false;
       }
     },
-    //更新用户信息
     async updateUserInfo() {
       let postdata = {
         dmc: this.dmcAccount,
@@ -3319,7 +3306,6 @@ export default {
       await updateUser(this.userId, postdata);
       return true;
     },
-    //更新vood列表信息
     async updateVoodList(voodData, postData, vps_id) {
       const that = this;
       updateVoodDmc(voodData).then((res) => {
@@ -3337,7 +3323,6 @@ export default {
         };
     },
 
-    //开始部署网关
     async updateVoodGateway(vpsData, postData) {
       const that = this;
       updateVoodGateway(vpsData).then(
@@ -3370,10 +3355,9 @@ export default {
         () => {
           that.freeRegister(postData);
         }
-      ); //调用部署接口
+      );
     },
 
-    //绑定激活后完成用户首次任务，可领取积分
     async getAward() {
       let data = {
         ood_id: this.bindInfo.device_id,
@@ -3381,12 +3365,11 @@ export default {
       };
       bindtask(data);
     },
-    //若失败，则解绑账户
     async freeRegister(postData) {
       let _postData = {
         account: "",
         ood_id: postData.ood_id,
-        owner_id: "", //⼀定和account ⼀致，后期考虑分开
+        owner_id: "",
         signature: "",
       };
       await dmcFreeRegister(_postData);
@@ -4659,12 +4642,10 @@ $fontColor: #03040a;
       color: #fff;
       color: var(--text-color);
     }
-    /* 火狐 Mozilla Firefox 4 to 18 */
     input:-moz-placeholder {
       color: #fff;
       color: var(--text-color);
     }
-    /* 火狐 Mozilla Firefox 19+ */
     input::-moz-placeholder {
       color: #fff;
       color: var(--text-color);
@@ -5233,7 +5214,7 @@ $fontColor: #03040a;
   }
 }
 .order-boxs-no-order .order_box {
-  margin-top: 150px;
+  margin-top: 0px;
   height: 800px;
 }
 .renewal-footer {

@@ -4,7 +4,7 @@
       <div class="my_login_div">
         <div class="my_login_right">
           <h1 class="my_login_right_title stagger1">
-            {{ haveUser ? "Sign In" : "Register" }}
+            {{ haveUser ? "Login" : "Register" }}
             <!-- <el-tooltip
               class="item"
               content="A new account will be registered during the first login, please enter the verification code to log in your account."
@@ -121,7 +121,7 @@
               @click.native.prevent="handlepasswordLogin"
               v-if="haveUser"
               class="ejUnNt"
-              >{{ "Sign in with Password" }}</el-button
+              >{{ "Login" }}</el-button
             >
             <div class="Register_btn" v-if="!haveUser">
               <!-- <el-checkbox
@@ -130,7 +130,7 @@
                 >{{ "Invitation code" }}</el-checkbox
               > -->
               <span @click="passwordLogin" class="password_login">
-                {{ "Sign in with Password" }}</span
+                {{ "Login" }}</span
               >
             </div>
             <div class="Register_btn" v-if="haveUser">
@@ -144,7 +144,7 @@
     </div>
     <el-dialog
       append-to-body
-      :title="'Sign in with Email'"
+      :title="'Login'"
       :visible.sync="showInvitationTips"
       width="30%"
       class="invitationTips-dialog"
@@ -365,8 +365,8 @@ export default {
       const that = this;
       this.haveUser = false;
       this.$alert(
-        "A verification link has been sent to your email address, please check your email to verify and sign in your account.",
-        "Sign in with Email",
+        "A verification link has been sent to your email address, please check your email to verify and Login your account.",
+        "Login",
         {
           confirmButtonText: "OK",
           callback: () => {
@@ -567,7 +567,7 @@ export default {
               });
             } else if (res && res.data) {
               this.$alert(
-                "A verification link has been sent to your email address, please check your email to verify and sign in your account.",
+                "A verification link has been sent to your email address, please check your email to verify and Login your account.",
                 "Activate your account",
                 {
                   confirmButtonText: "OK",
@@ -594,8 +594,8 @@ export default {
     //       this.emailLogin();
     //     } else if (res && res.data) {
     //       this.$alert(
-    //         "A verification link has been sent to your email address, please check your email to verify and sign in your account.",
-    //         "Sign in with Email",
+    //         "A verification link has been sent to your email address, please check your email to verify and Login your account.",
+    //         "Login with Email",
     //         {
     //           confirmButtonText: "OK",
     //           callback: () => {},

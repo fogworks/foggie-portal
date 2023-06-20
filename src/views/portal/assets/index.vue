@@ -122,6 +122,7 @@ import {
   toRefs,
   inject,
   nextTick,
+  watch,
 } from "vue";
 import NftDialog from "./nftDialog";
 import Rewards from "./rewards";
@@ -206,11 +207,10 @@ export default {
     const myQrcode = ref("");
     const noOrderShow = ref(false);
     const closeNoBoxShow = ref(false);
-    const { passwordIsExist, loadUserLoginStatus } = usePrivateKey();
+    const { dmc, joinPool } = usePrivateKey();
     const openWithdraw = async () => {
-      if (!passwordIsExist.value) {
-        let bool = await loadUserLoginStatus();
-        if (bool) WithdrawVisible.value = true;
+      if (!dmc.value) {
+        joinPool();
       } else {
         WithdrawVisible.value = true;
       }
@@ -251,9 +251,19 @@ export default {
       // search();
       getAssetsOrderNum();
     });
+    watch(
+      dmc,
+      (val) => {
+        if (val) {
+          getUserInfo();
+          getUserAssets();
+        }
+      },
+      {
+        deep: true,
+      }
+    );
     onMounted(() => {
-      // loadUserLoginStatus();
-      // getUserAssets();
       adminCategoriesListInit();
     });
     return {
