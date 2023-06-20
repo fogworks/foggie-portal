@@ -8,12 +8,14 @@
           {{ file.fileName }}
         </div>
         <div class="uploader-file-prefix">
-          <el-tooltip placement="top">
+          <el-tooltip placement="top" v-if="fileErrorMesage !== '- -'">
             <template #content>
-              <div>{{ file.urlPrefix }}</div>
+              <div>{{ fileErrorMesage }}</div>
             </template>
-            <a href="javascript:;" @click="toPath">{{ file.urlPrefix }} </a>
+            <a href="javascript:;">{{ fileErrorMesage }} </a>
           </el-tooltip>
+          <a href="javascript:;" v-else>{{ fileErrorMesage }} </a>
+
         </div>
         <div class="uploader-file-size">{{ formatedSize }}</div>
         <div class="uploader-file-status">
@@ -113,6 +115,7 @@ const StateType = ref("");
 const is_created_succeed = ref(false); // 文件是否创建成功  true 成功 false 失败
 const isBigFile = ref(true);
 const fileMd5 = ref(null);
+const fileErrorMesage = ref('- -')
 const loading = ref(false);
 const startUploadTime = ref(0);
 const progressTimer = ref(null);
@@ -174,7 +177,7 @@ function loadUploadProgress() {
     orderId: file.value.orderId,
     destPath: file.value.urlFileName,
     deviceType: file.value.deviceType,
-    md5: fileMd5.value,
+    // md5: fileMd5.value,
   };
   file_paused(false);
   file_fileUploading(true);
@@ -194,7 +197,7 @@ function loadUploadProgress() {
         let endTime = new Date().getTime();
 
         if (res.code == 200) {
-          let response = res.data[0];
+          let response = res.data;
           if (response.state == 0) {
             let uploaded_size = response.uploaded_size - startUploadSize;
 
@@ -232,11 +235,12 @@ function loadUploadProgress() {
             emits("chanStatus", data);
           } else if (response.state == 2) {
             if (response.error_msg) {
+              fileErrorMesage.value = response.error_msg
               let type = StateType.value == "error" ? 2 : 3;
 
               emits("updaLoadFileListByState", type);
-
-              remove();
+              fileError();
+              // remove();
             } else {
               fileError();
             }
@@ -307,7 +311,7 @@ const resume = debounce(async function () {
   file_fileUploading(true);
   file_completed(false);
   loading.value = true;
-
+  fileErrorMesage.value = '- -'
   // 文件创建成功 调用重传
   if (is_created_succeed.value && isBigFile.value) {
     let params = {
@@ -396,11 +400,10 @@ const fileError = () => {
   progress.value = 0;
   let data = {
     id: file.value.id,
+    orderId:file.value.orderId,
     error: true,
     type: "error",
   };
-  // file.value.fileUploading = false;
-
   ISCIDING.value = false;
   file_paused(false);
   file_completed(false);

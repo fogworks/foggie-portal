@@ -4,7 +4,7 @@
       <li>
         <div class="uploader-file-info head-info">
           <div class="uploader-file-name">File Name</div>
-          <div class="uploader-file-prefix">Upload Path</div>
+          <div class="uploader-file-prefix">Error Message</div>
           <div class="uploader-file-size">File Size</div>
           <div class="uploader-file-status">Upload Status</div>
           <div class="uploader-file-actions">Operate</div>
@@ -35,24 +35,21 @@ import {
 import { useStore } from "vuex";
 import { cloneDeep } from "lodash";
 const store = useStore();
-const deviceType = computed(() => store.getters.deviceType);
-// const MAX_UPLOAD_NUM = deviceType.value == 3 ? 1 : 4;
-const MAX_UPLOAD_NUM = 1;
 const props = defineProps({
-  orderID: {
-    type: [String, Number],
-    default: "",
-  },
+  // orderID: {
+  //   type: [String, Number],
+  //   default: "",
+  // },
   uploadLists: {
     type: Array,
     default: () => [],
   },
-  // deviceType: {
-  //   type: [String , Number],
-  //   default: "",
-  // },
+  deviceType: {
+    type: [String, Number],
+    default: "",
+  },
 });
-
+const MAX_UPLOAD_NUM = props.deviceType == 3 ? 1 : 4;
 const Max_CurFileListLength = 20;
 
 const emits = defineEmits(["fileShare", "newQueueID", "updaFileListByState"]);
@@ -84,9 +81,11 @@ watch(
   { deep: true }
 );
 
-watchEffect(() => {
-  fileList.uploadLists = props.uploadLists;
-});
+watch(() => props.uploadLists, (newVal) => {
+  fileList.uploadLists = newVal
+  console.log(fileList.uploadLists);
+}, { immediate: true, deep: true })
+
 
 const chanStatus = (item) => {
   let curFileListLength = curFileList.value.length;
@@ -99,22 +98,24 @@ const chanStatus = (item) => {
       }
     }
   }
-
   if (fileList.uploadLists.length == 0) {
+    if (item) {
+      emits("newQueueID", item.id, item.orderId);
+    }
     return;
   }
   let pushItem = cloneDeep(fileList.uploadLists[0]);
   pushItem.fileUploading = true;
   curFileList.value.unshift(pushItem);
+  emits("newQueueID", pushItem.id, pushItem.orderId);
   fileList.uploadLists.shift();
   if (curFileListLength >= Max_CurFileListLength) {
     let deleteIndex = findLastIndex(curFileList.value, (lastItem) => lastItem.fileUploading == false);
     curFileList.value.splice(deleteIndex, 1);
   }
-  if (item) {
-    emits("newQueueID", pushItem.id, pushItem.orderId);
-  }
+  // if (item) {
 
+  // }
 
 };
 
@@ -132,10 +133,10 @@ const fileShare = (file) => {
 
 onMounted(() => { });
 
-// defineExpose({
-//   curFileList,
-//   orderID: props.orderID,
-// });
+defineExpose({
+  curFileList,
+  orderID: props.orderID,
+});
 </script>
 
 <style scoped>

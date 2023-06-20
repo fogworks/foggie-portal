@@ -23,9 +23,10 @@
             <label class="uploader-btn" @click="openDialog('openDirectory')">Select a folder</label>
           </div>
         </div>
-        <template v-for="(uploadList, key) in requestFileList" :key="key" style="height: 100%">
+        <template v-for="(uploadList, key) in uploadFileList" :key="key" style="height: 100%">
           <fileList @fileShare="fileShare" @newQueueID="newQueueID" @updaFileListByState="updaFileListByState"
-            :orderID="key" :ref="`fileListRef_${key}`" :uploadLists="requestFileList[key].Waiting.fileList" v-show="key == orderId">
+            :orderID="key" :ref="`fileListRef_${key}`" :deviceType="deviceType" :uploadLists="uploadFileList[key]"
+            v-show="key == orderId">
           </fileList>
         </template>
       </div>
@@ -62,17 +63,15 @@
 
 
 
-
-
       <div class="uploader-list">
 
         <el-table ref="multipleTable" class="TobeCompletedBox" :data="allFileList ?? []" :cell-style="{
           backgroundColor: 'transparent',
         }" :header-cell-style="{
   backgroundColor: 'transparent',
-}" style="width: 100%;--el-table-border-color: none;" :show-overflow-tooltip="true"
-          @selection-change="handleSelectionChange" :row-key="item => item.id">
-          <el-table-column type="selection" width="55" :reserve-selection="true" :selectable='selectEnable' />
+}" style="width: 100%;--el-table-border-color: none;" :show-overflow-tooltip="true" @select="handleSelectionRowChange"
+          @select-all="SelectionAllChange" :row-key="item => item.id">
+          <el-table-column type="selection" :reserve-selection="true" width="55" :selectable='selectEnable' />
           <el-table-column prop="fileName" label="File Name" min-width="160">
             <template #default="{ row }">
               <el-tooltip placement="top">
@@ -180,6 +179,8 @@ const email = computed(() => store.getters.userInfo?.email);
 const orderId = computed(() => store.getters.orderId);
 const deviceData = computed(() => store.getters.deviceData);
 const deviceType = computed(() => store.getters.deviceType);
+const uploadFileList = reactive({});  // 当前队列中的文件
+// const selectFilelist = reactive({})  // 当前选择上传的文件
 
 
 const requestFileList = reactive({})  // 接收数据库中的文件列表信息
@@ -202,10 +203,7 @@ watch(() => orderId.value, (newVal, oldVal) => {
       }
     }
   }
-
-
 }, { immediate: true })
-
 
 const pageNo = computed(() => {
   let type = requestFileList[orderId.value].isErrorOrWaiting
@@ -277,7 +275,7 @@ function initFile(filePath) {
 
     isCanUpload_Api(params).then(res => {
       if (res.code == 200 && res.data) {
-        loadFileListByState(3)
+        loadFileListByState(3, false)
       }
     })
 
@@ -310,7 +308,11 @@ function initDirectory(filePath) {
     }
     uploadFolder(params).then(res => {
       if (res.code == 200) {
-        loadFileListByState(3)
+        loadFileListByState(3, false)
+      } else {
+        nextTick(() => {
+          allFileListDrawer.value = true
+        })
       }
     })
   }
@@ -330,15 +332,33 @@ function loadFileListByState(type = 3, isPaging = true) {
     orderId: orderId.value,
     deviceType: deviceType.value,
     state: type,
-    pageNo:requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].pageNo,
-    pageSize:requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].pageSize
   }
-
+  if (isPaging) {
+    params.pageNo = requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].pageNo
+    params.pageSize = requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].pageSize
+  }
   getfileListByState(params).then(res => {
     if (res.code == 200) {
       requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].total = res.data.count
       requestFileList[orderId.value][type == 3 ? 'Waiting' : 'error'].fileList = res.data.list.map(item => initDirectoryItem(item, type))
-    
+      if (!isPaging && type == 3) {
+        uploadFileList[orderId.value] = requestFileList[orderId.value].Waiting.fileList
+      }
+
+
+      if (type == 3 && _this.refs[`fileListRef_${orderId.value}`]) {
+        let fileListArray = _this.refs[`fileListRef_${orderId.value}`][0]?.curFileList || [];
+        let executeLsit = fileListArray.filter((item) => item.fileUploading)
+        for (const item of executeLsit) {
+          requestFileList[orderId.value].Waiting.fileList = requestFileList[orderId.value].Waiting.fileList.filter(element => element.id != item.id)
+        }
+      }
+
+
+
+
+
+
     }
   })
 }
@@ -370,8 +390,29 @@ function initDirectoryItem(item, type) {
 /* 在上传过程中 每当有新的文件进行上传操作待上传列表中就删除对应的文件 */
 const newQueueID = (id, fileOrderID) => {
   if (orderId.value == fileOrderID) {
-    loadFileListByState(3)
+    requestFileList[fileOrderID].Waiting.fileList = requestFileList[fileOrderID].Waiting.fileList.filter(item => item.id != id)
+    if (requestFileList[fileOrderID].Waiting.fileList.length == 0) {
+      loadFileListByState(3)
+    }
+
+    let row = uploadFileList[fileOrderID].filter(item => item.id == id)[0]
+    if (multipleTable.value && row) {
+      multipleTable.value.toggleRowSelection(row, false)
+    }
   }
+
+
+  // let requestFileListIndex = requestFileList[fileOrderID].Waiting.fileList.findIndex((file) => file.id == id);
+  // if (selectFilelist[fileOrderID]) {
+  //   let row = selectFilelist[fileOrderID].filter(item => item.id)[0]
+  //   if (row && multipleTable.value) {
+  //     multipleTable.value.toggleRowSelection(row, false)
+  //   }
+  // }
+
+  // if (requestFileListIndex > -1) {
+  //   requestFileList[fileOrderID].Waiting.fileList.splice(requestFileListIndex, 1);
+  // }
 };
 
 /* 在待上传列表中删除指定文件 */
@@ -390,23 +431,59 @@ function remove(row) {
   deleteUploadFile_Api(params).then(res => {
     if (res.code == 200) {
       loadFileListByState(deleteType)
-      
+      if (uploadFileList[orderId]) {
+        let uploadFileListIndex = uploadFileList[orderId].findIndex((file) => file.id == id);
+        if (uploadFileListIndex > -1) {
+          uploadFileList[orderId].splice(uploadFileListIndex, 1);
+        }
+      }
     }
   })
 }
 
+function handleSelectionRowChange(selection, row) {
+  if (uploadFileList[orderId.value]) {
+    if (uploadFileList[orderId.value].some(item => item.id == row.id)) {
+      uploadFileList[orderId.value] = uploadFileList[orderId.value].filter(item => item.id != row.id)
+    } else {
+      uploadFileList[orderId.value].push(row)
+    }
+  } else {
+    uploadFileList[orderId.value] = []
+    uploadFileList[orderId.value].push(row)
+  }
+}
 
-// function handleSelectionChange(selection) {
-//   selectFilelist[orderId.value] = selection
-//   uploadFileList[orderId.value] = selectFilelist[orderId.value]
-// }
+
+
+
+const SelectionAllChange = debounce((selection) => {
+  if (uploadFileList[orderId.value]) {
+    if (selection.length == 0) {
+      for (const item of uploadFileList[orderId.value]) {
+        if (requestFileList[orderId.value].Waiting.fileList.some(element => element.id == item.id)) {
+          uploadFileList[orderId.value] = uploadFileList[orderId.value].filter(element => element.id != item.id)
+        }
+      }
+    } else {
+      for (const selectionItem of selection) {
+        if (!uploadFileList[orderId.value].some(item => item.id == selectionItem.id)) {
+          uploadFileList[orderId.value].push(selectionItem)
+        }
+      }
+    }
+
+  } else {
+    uploadFileList[orderId.value] = []
+    uploadFileList[orderId.value] = uploadFileList[orderId.value].concat(selection)
+  }
+
+}, 500)
+
+
 
 function selectEnable(row) {
-  if (!row.isFolder) {
-    return false
-  } else {
-    return true
-  }
+  return true
 }
 
 /* 每页多少条 */

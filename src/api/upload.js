@@ -78,11 +78,9 @@ export function fileUploadApi(data) {
     data,
   });
 }
-
-
 export function byMd5GetUploadProgress(data) {
   return request({
-    url: baseUrl + "/file/get_by_md5",
+    url: baseUrl + "/file/get_by_name",
     method: "post",
     timeout: 10000,
     data,
